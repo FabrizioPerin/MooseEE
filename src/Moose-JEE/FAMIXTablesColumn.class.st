@@ -25,7 +25,6 @@ FAMIXTablesColumn >> columnReference: aTablesColumnOrNil [
 
 { #category : #accessing }
 FAMIXTablesColumn >> isFK [
-	
 	^isFK
 ]
 
