@@ -16,6 +16,22 @@ FAMIXMethod >> allInvocationsBetweenHereTo: anotherMethod [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXMethod >> callsJavaSqlPackage [
+
+	| result invokedMethodsCollection |
+	
+	result := OrderedCollection new.
+	invokedMethodsCollection := self invokedCandidates.
+
+	invokedMethodsCollection isEmpty ifFalse: [ 
+		invokedMethodsCollection do: [:invokedMethod | 
+			(invokedMethod isNil not and: [ invokedMethod belongsTo belongsTo name = #sql and: [ invokedMethod belongsTo belongsTo belongsTo name = #java ]] ) ifTrue: [ 
+				result isEmpty ifTrue: [result add: self] ] ]].
+
+	^result
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXMethod >> couldBeAnEntryPoint [
 	^ self incomingInvocations isEmpty
 ]
@@ -142,6 +158,52 @@ FAMIXMethod >> hasEJBTransactionAttributeThatSupportTransactions [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXMethod >> isADataLayerMethod [
+	
+	^ self callsJavaSqlPackage notEmpty or: [ self doesExecuteAQuery ].
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> isADomainLayerMethod [
+	
+	^ ( self isADataLayerMethod or: [ self isAPresentationLayerMethod ] ) not
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> isAPresentationLayerMethod [
+	
+	^ self name = #doPost or: [ self name = #doGet ]
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> isInvokedFromAPathThatSupportTransaction [
+	^( self doesSupportTransaction and: [self deepCalleeMethods anySatisfy: [ :method | method ejbTransactionType = 'Supports' ] ] )
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> isInvokedFromATransactionMethod [
+
+	^( self doesSupportTransaction and: [self deepCalleeMethods anySatisfy: [ :method | method startATransaction ] ] )
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> isPartOfATransaction [
+
+	^ self isInvokedFromATransactionMethod or: [ self doesOverrideAMethodInvolveInATransaction or: [ self isInvokedFromAPathThatSupportTransaction ] ]
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> isPartOfAnUnsafeTransactionPath [
+
+	^ ( ( self doesSupportTransaction ) and: [self deepCalleeMethodsWithoutTransactionPath anySatisfy: [ :method | method couldBeAnEntryPoint ] ] )
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXMethod >> startATransaction [
 	^ self ejbTransactionType = 'RequiresNew' or: [  self ejbTransactionType = 'Required' ].
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> startAUselessTransaction [
+	^ ( ( self ejbTransactionType = 'RequiresNew' ) and: [ self isPartOfATransaction and: [ self couldBeAnEntryPoint not ] ] )
 ]

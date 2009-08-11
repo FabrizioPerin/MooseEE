@@ -2959,6 +2959,17 @@ JEETests >> sampleMooseModelWithTransaction [
 ]
 
 { #category : #testing }
+JEETests >> setUp [
+
+	| parser |
+	parser := OPOpaxDriver on: self minimalEjbJar readStream.
+	parser startDocument.
+	parser parseDocument.
+	
+	root := parser stack first.
+]
+
+{ #category : #testing }
 JEETests >> testAllInvocationsBetweenHereToAnotherMethod [
 
 	| mooseModel method anotherMethod |
@@ -3223,4 +3234,374 @@ JEETests >> testFAMIXMethodDeepCalleeMethodsWithoutTransactionPath [
 	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
 
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #executeBatch ] ) first deepCalleeMethodsWithoutTransactionPath ) size = 7.
+]
+
+{ #category : #testing }
+JEETests >> testHasImplementsABean [
+
+	| mooseModel allImplementingClasses |
+	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
+	
+	self assert: ( mooseModel allJEEBeans size = 8 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsABean ] ) size = 8 ).
+	allImplementingClasses := mooseModel allClasses select: [:each | each hasImplementsABean ].
+	self assert: ( ( mooseModel allJEEBeans select: [:bean | allImplementingClasses includes: bean implementationClass ] ) size = 8 ).
+
+
+	mooseModel := self sampleMooseModelWithTransaction.
+	
+	self assert: ( mooseModel allJEEBeans size = 0 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsABean ] ) size = 0 ).
+]
+
+{ #category : #testing }
+JEETests >> testHasImplementsAMessageDrivenBean [
+
+	| mooseModel allImplementingClasses |
+	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
+	
+	self assert: ( mooseModel allMessageDrivenBeans size = 2 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAMessageDrivenBean ] ) size = 2 ).
+	allImplementingClasses := mooseModel allClasses select: [:each | each hasImplementsAMessageDrivenBean ].
+	self assert: ( ( mooseModel allJEEBeans select: [:bean | allImplementingClasses includes: bean implementationClass ] ) size = 2 ).
+
+
+	mooseModel := self sampleMooseModelWithTransaction.
+	
+	self assert: ( mooseModel allMessageDrivenBeans size = 0 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAMessageDrivenBean ] ) size = 0 ).
+]
+
+{ #category : #testing }
+JEETests >> testHasImplementsASessionBean [
+
+	| mooseModel allImplementingClasses |
+	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
+	
+	self assert: ( mooseModel allSessionBeans size = 3 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsASessionBean ] ) size = 3 ).
+	allImplementingClasses := mooseModel allClasses select: [:each | each hasImplementsASessionBean ].
+	self assert: ( ( mooseModel allJEEBeans select: [:bean | allImplementingClasses includes: bean implementationClass ] ) size = 3 ).
+	self assert: ( ( allImplementingClasses flatCollect: [ :each | each completeHierarchyInWhichThisResides]) size = 4 ).
+
+	mooseModel := self sampleMooseModelWithTransaction.
+	
+	self assert: ( mooseModel allSessionBeans size = 0 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsASessionBean ] ) size = 0 ).
+]
+
+{ #category : #testing }
+JEETests >> testHasImplementsAnEntityBean [
+
+	| mooseModel allImplementingClasses |
+	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
+	
+	self assert: ( mooseModel allEntityBeans size = 3 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAnEntityBean ] ) size = 3 ).
+	allImplementingClasses := mooseModel allClasses select: [:each | each hasImplementsAnEntityBean ].
+	self assert: ( ( mooseModel allJEEBeans select: [:bean | allImplementingClasses includes: bean implementationClass ] ) size = 3 ).
+
+
+	mooseModel := self sampleMooseModelWithTransaction.
+	
+	self assert: ( mooseModel allEntityBeans size = 0 ).
+	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAnEntityBean ] ) size = 0 ).
+]
+
+{ #category : #testing }
+JEETests >> testInvocationCallChain [
+	
+	| mooseModel  invocation |
+	mooseModel := self sampleMooseModelWithInvocation.
+	mooseModel allMethods do: [:each | each name = #aMethod ifTrue: [ invocation := each  deepCalledMethods ] ].
+	
+	self assert: ( invocation isKindOf: OrderedCollection ).
+	self assert: ( invocation size = 2 ).
+	self assert: ( ( invocation at: 1 ) isKindOf: FAMIXMethod ).
+	self assert: ( ( invocation at: 1 ) name = #aMethod ).
+	self assert: ( ( invocation at: 2 ) isKindOf: FAMIXMethod ).	
+	self assert: ( ( invocation at: 2 ) name = #someMethod ).
+]
+
+{ #category : #testing }
+JEETests >> testInvocationCalleeChain [
+	
+	| mooseModel  invocation |
+	mooseModel := self sampleMooseModelWithInvocation.
+
+	mooseModel allMethods do: [:each | each name = #someMethod ifTrue: [ invocation := ( (FAMIXMethodGroup new add: each ) deepCalleeMethods )] ].
+	
+	self assert: ( invocation isKindOf: OrderedCollection ).
+	self assert: ( invocation size = 2 ).
+	self assert: ( ( invocation at: 1 ) isKindOf: FAMIXMethod ).
+	self assert: ( ( invocation at: 1 ) name = #someMethod ).
+	self assert: ( ( invocation at: 2 ) isKindOf: FAMIXMethod ).	
+	self assert: ( ( invocation at: 2 ) name = #aMethod ).
+]
+
+{ #category : #testing }
+JEETests >> testInvocationCalleeChainWhitoutTransactionPath [
+	
+	| mooseModel  invocation MG |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+	invocation := OrderedCollection new.
+	MG := FAMIXMethodGroup new.
+
+
+	mooseModel allMethods do: [ :each | each doesExecuteAQuery ifTrue: [ MG add: each ] ].
+	invocation addAll: MG deepCalleeMethodsWithoutTransactionPath.
+
+	self assert: ( invocation isKindOf: OrderedCollection ).
+	self assert: (invocation size = 6 ).
+]
+
+{ #category : #testing }
+JEETests >> testInvocationCalleeChainWithMethodGroup [
+
+	| mooseModel  invocation MG |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+	MG := FAMIXMethodGroup new.
+
+	mooseModel allMethods do: [:each | each doesExecuteAQuery ifTrue: [  MG add: each ] ].
+
+	invocation := MG deepCalleeMethods.
+
+	self assert: ( invocation isKindOf: OrderedCollection ).
+	self assert: ( invocation size = 14 ).
+]
+
+{ #category : #testing }
+JEETests >> testInvocations [
+
+	| mooseModel  invocation |
+	mooseModel := self sampleMooseModelWithTransaction.
+	invocation := mooseModel allInvocations.
+	
+	self assert: ( invocation isKindOf: MooseGroup ).
+	self assert: ( invocation size = 5 ).
+
+	self assert: ( ( invocation at: 1 ) isKindOf: FAMIXInvocation ).
+	self assert: ( ( ( invocation at: 1 ) invokedBy ) isKindOf: FAMIXMethod ).
+	self assert: ( ( ( invocation at: 1 ) candidateList ) isKindOf: OrderedCollection ).
+	self assert: ( ( ( invocation at: 1 ) candidateList ) size = 1 ).
+	self assert: ( ( ( ( invocation at: 1 ) candidateList ) at: 1 ) isKindOf: FAMIXMethod ).
+	self assert: ( ( ( ( invocation at: 1 ) candidateList ) at: 1 ) name = #someMethod ).
+]
+
+{ #category : #testing }
+JEETests >> testIsADataLayerClass [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaFake.
+
+	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADataLayerClass ] ).
+ 
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+
+	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADataLayerClass ] ).
+]
+
+{ #category : #testing }
+JEETests >> testIsADomainLayerClass [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+
+	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADomainLayerClass ] ).
+]
+
+{ #category : #testing }
+JEETests >> testIsAPresentationLayerClass [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+
+	self deny: ( mooseModel allClasses anySatisfy: [ :each | each isAPresentationLayerClass ] ).
+]
+
+{ #category : #testing }
+JEETests >> testIsPartOfATransaction [
+
+	| mooseModel  methodGroup |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+
+	methodGroup := mooseModel allMethods select: [ :each | each name = #method1 ].
+	
+	self assert: methodGroup first isPartOfATransaction.
+]
+
+{ #category : #testing }
+JEETests >> testIsPartOfATransactionVsDeepCalledMethods [
+
+	| mooseModel  allMethods methods |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+	
+	allMethods := ( mooseModel allMethods select: #isPartOfATransaction ).
+	methods := ( mooseModel allMethods select: #hasEJBTransactionAttribute ) deepCalledMethods.
+
+	self assert: (methods isKindOf: OrderedCollection).
+	self assert: ( methods size = allMethods size ).
+
+	mooseModel := self sampleMooseModelWithTransAndQuery.
+	
+	allMethods := ( mooseModel allMethods select: #isPartOfATransaction ).
+	methods := ( mooseModel allMethods select: #hasEJBTransactionAttribute ) deepCalledMethods.
+
+	self assert: (methods isKindOf: OrderedCollection).
+	self assert: ( methods size = allMethods size ).
+
+	mooseModel := self sampleMooseModelWithTransaction.
+	
+	allMethods := ( mooseModel allMethods select: #isPartOfATransaction ).
+	methods := ( mooseModel allMethods select: #hasEJBTransactionAttribute ) deepCalledMethods.
+
+	self assert: (methods isKindOf: OrderedCollection).
+	self assert: ( methods size = allMethods size ).
+
+	mooseModel := self sampleMooseModelWithInvocation.
+	
+	allMethods := ( mooseModel allMethods select: #isPartOfATransaction ).
+	methods := ( mooseModel allMethods select: #hasEJBTransactionAttribute ).
+
+	self assert: (allMethods size = 0).
+	self assert: ( methods size = 0 ).
+]
+
+{ #category : #testing }
+JEETests >> testIsPartOfAnUnsafeTransactionPath [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #method1 ] ) first isPartOfAnUnsafeTransactionPath ).
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #executeBatch ] ) first isPartOfAnUnsafeTransactionPath ).
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #method6 ] ) first isPartOfAnUnsafeTransactionPath ).
+	self deny: ( ( mooseModel allMethods select: [:each | each name = #method3 ] ) first isPartOfAnUnsafeTransactionPath ).
+
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #method8 ] ) first isPartOfAnUnsafeTransactionPath ).
+	self deny: ( ( mooseModel allMethods select: [:each | each name = #method9 ] ) first startATransaction ).
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #method9 ] ) first isPartOfAnUnsafeTransactionPath ).
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #method4 ] ) first isPartOfAnUnsafeTransactionPath ).
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #method4 ] ) first isPartOfATransaction ).
+	"method 4 is called from method 8 and 9. the first start a transaction, the second does not"
+	
+	self assert: ( ( mooseModel allMethods select: [:each | each name = #someMethod ] ) first isPartOfAnUnsafeTransactionPath ).
+]
+
+{ #category : #testing }
+JEETests >> testMessageDrivenResolving [
+	
+	| mooseModel aBean |
+	mooseModel := self sampleMooseModel.
+
+	(root allChildren select: [:each | each class = MessageDrivenElement]) do: [:each | each populate: mooseModel].
+
+	self assert: mooseModel allMessageDrivenBeans size = 1.
+	self assert: (mooseModel allMessageDrivenBeans contains: [:each | each name = #AMessageDriven]).
+
+	aBean := mooseModel allMessageDrivenBeans detect: [:each | each name = #AMessageDriven].
+	self assert: aBean homeInterface isNil.
+	self assert: aBean remoteInterface isNil.
+	self assert: aBean implementationClass notNil.
+]
+
+{ #category : #testing }
+JEETests >> testNOQM [
+
+	| mooseModel  sum |
+	sum := 0.
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+"	self assert: ( ( ( ( mooseModel allClasses select: [:each | each isADataLayerClass ] ) at: 1 ) numberOfQueryingMethods ) = 3 ). "
+	mooseModel allClasses do: [:each | sum := sum + each numberOfQueryingMethods ].
+	self assert: ( sum = 3 ).
+]
+
+{ #category : #testing }
+JEETests >> testNOTM [
+
+	| mooseModel  sum |
+	sum := 0.
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	mooseModel allClasses do: [:each | sum := sum + each numberOfTransactionMethods ].
+	self assert: ( sum = 13 ).
+]
+
+{ #category : #testing }
+JEETests >> testRationNOQMNOM [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOQM ) = 3).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM) = 19 ).
+
+	self assert: ( mooseModel allClasses RatioNOQMNOM = ( 3 / 19 )).
+]
+
+{ #category : #testing }
+JEETests >> testRationNOTMNOM [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM) = 19 ).
+
+	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13 / 19 )).
+]
+
+{ #category : #testing }
+JEETests >> testSessionResolving [
+	
+	| mooseModel aStateless aStateful |
+	mooseModel := self sampleMooseModel.
+	(root allChildren select: [:each | each class = SessionElement]) do: [:each | each populate: mooseModel].
+
+	self assert: mooseModel allSessionBeans size = 2.
+	self assert: (mooseModel allSessionBeans contains: [:each | each name = #AStatelessSession]).
+	self assert: (mooseModel allSessionBeans contains: [:each | each name = #AStatefulSession]).
+
+	aStateless := mooseModel allSessionBeans detect: [:each | each name = #AStatelessSession].
+	self assert: aStateless remoteInterface notNil.
+	self assert: aStateless homeInterface notNil.
+	self assert: aStateless implementationClass notNil.
+	self assert: aStateless isStateless.
+
+	aStateful := mooseModel allSessionBeans detect: [:each | each name = #AStatefulSession].
+	self assert: aStateful remoteInterface notNil.
+	self assert: aStateful homeInterface notNil.
+	self assert: aStateful implementationClass notNil.
+	self assert: aStateful isStateful.
+]
+
+{ #category : #testing }
+JEETests >> testStartAUselessTransaction [
+
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	self assert: ( mooseModel allMethods select: [:each | each startAUselessTransaction ] ) size = 2.
+]
+
+{ #category : #testing }
+JEETests >> testTransactionType [
+	
+	| mooseModel  |
+	mooseModel := self sampleMooseModel.
+	(root allChildren select: [:each | each class = SessionElement]) do: [:each |
+		each populate: mooseModel].
+	(root allChildren select: [:each | each class = ContainerTransactionElement]) do: [:each |
+		each populate: mooseModel].
+
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
+					hasEJBTransactionAttribute.
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod()')
+					hasEJBTransactionAttribute not.
+
+	self assert: ((mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
+					allMethods allSatisfy: #hasEJBTransactionAttribute).
+	self assert: (mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
+					allMethods size = 2
 ]

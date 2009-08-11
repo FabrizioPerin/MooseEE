@@ -3,7 +3,7 @@ Extension { #name : #MooseModel }
 { #category : #'*Moose-JEE' }
 MooseModel >> allEntityBeans [
 
-	^self allWithType: FAMIXEntityBean asMetaDescription
+	^self allWithType: FAMIXEntityBean "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
@@ -15,14 +15,14 @@ MooseModel >> allJEEBeans [
 { #category : #'*Moose-JEE' }
 MooseModel >> allMessageDrivenBeans [
 
-	^self allWithType: FAMIXMessageDrivenBean asMetaDescription
+	^self allWithType: FAMIXMessageDrivenBean "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> allSessionBeans [
 	<navigation: 'All session beans'>
 
-	^self allWithType: FAMIXSessionBean asMetaDescription
+	^self allWithType: FAMIXSessionBean "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
