@@ -50,9 +50,9 @@ FAMIXMethodGroup >> deepCalleeMethodsWithoutTransactionPath [
 	[cursor <= temp size] whileTrue: [
 		(temp at: cursor) isNil ifFalse: [ 
 								( (temp at: cursor) incomingInvocations ) 
-									do: [:each | ( each invokedBy doesSupportTransaction and:[ ( each invokedBy startATransaction or: [ each invokedBy doesOverrideAMethodInvolveInATransaction ] ) ] ) 
-																	ifFalse: [ ( temp includes: ( each invokedBy ) ) 
-																					ifFalse: [ temp add: ( each invokedBy ) ] ] 
+									do: [:each | ( each sender doesSupportTransaction and:[ ( each sender startATransaction or: [ each sender doesOverrideAMethodInvolveInATransaction ] ) ] ) 
+																	ifFalse: [ ( temp includes: ( each sender ) ) 
+																					ifFalse: [ temp add: ( each sender ) ] ] 
 										].
 							].
 		cursor := cursor + 1.

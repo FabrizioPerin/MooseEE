@@ -2088,6 +2088,7 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 	methodThatExecute := FAMIXMethod new
 							name: #executeBatch;
 							parentType: prepareStatement;
+							signature: #executeBatch;
 							yourself.
 
 	prepareStatement addMethod: (methodThatExecute).
@@ -2100,12 +2101,14 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 	aMethod := FAMIXMethod new
 				name: #aMethod;
 				parentType: aStatelessSessionBean;
+				signature: #aMethod;
 				yourself.
 
 	aStatelessSessionBean addMethod: (aMethod);
 			addMethod: (FAMIXMethod new
 				name: #anotherMethod;
 				parentType: aStatelessSessionBean;
+				signature: #anotherMethod;
 				yourself
 			).
 	aStatefulSessionBean := FAMIXClass new
@@ -2116,11 +2119,13 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 	someMethod := FAMIXMethod new
 				name: #someMethod;
 				parentType: aStatefulSessionBean;
+				signature: #someMethod;
 				yourself.
 
 	someOtherMethod := FAMIXMethod new
 				name: #someOtherMethod;
 				parentType: aStatefulSessionBean;
+				signature: #someOtherMethod;
 				yourself.	
 
 	aStatefulSessionBean
@@ -2135,38 +2140,45 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 	method1 := FAMIXMethod new
 				name: #method1;
 				parentType: class3;
+				signature: #method1;
 				yourself.
 	
 	method2 := FAMIXMethod new
 				name: #method2;
 				parentType: class3;
+				signature: #method2;
 				yourself.
 
 	method3 := FAMIXMethod new
 				name: #method3;
 				parentType: class3;
+				signature: #method3;
 				ejbTransactionType: 'RequiresNew';
 				yourself.
 
 	method4 := FAMIXMethod new
 				name: #method4;
 				parentType: class3;
+				signature: #method4;
 				yourself.
 
 	method5 := FAMIXMethod new
 				name: #method5;
 				parentType: class3;
+				signature: #method5;
 				yourself.
 
 	method6 := FAMIXMethod new
 				name: #method6;
 				parentType: class3;
 				ejbTransactionType: 'RequiresNew';
+				signature: #method6;
 				yourself.
 
 	method7 := FAMIXMethod new
 				name: #method7;
 				parentType: class3;
+				signature: #method7;
 				ejbTransactionType: 'Required';
 				yourself.
 
@@ -2188,37 +2200,44 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 				name: #method8;
 				parentType: class4;
 				ejbTransactionType: 'Required';
+				signature: #method8;
 				yourself.
 	
 	method9 := FAMIXMethod new
 				name: #method9;
 				parentType: class4;
+				signature: #method9;
 				yourself.
 
 	method10 := FAMIXMethod new
 				name: #method10;
 				parentType: class4;
+				signature: #method10;
 				yourself.
 	method11 := FAMIXMethod new
 				name: #method11;
 				parentType: class4;
 				ejbTransactionType: 'Required';
+				signature: #method11;
 				yourself.
 
 	method12 := FAMIXMethod new
 				name: #method12;
 				parentType: class4;
+				signature: #method12;
 				yourself.
 
 	method13 := FAMIXMethod new
 				name: #method13;
 				parentType: class4;
+				signature: #method13;
 				yourself.
 
 	method14 := FAMIXMethod new
 				name: #method14;
 				parentType: class4;
 				ejbTransactionType: 'Required';
+				signature: #method14;
 				yourself.
 
 	class4	addMethod: (method8);
@@ -2431,7 +2450,7 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaFake [
 			yourself.
 	sql := FAMIXNamespace new
 			name: #sql;
-			setBelongsTo: java;
+			container: java;
 			yourself.
 	prepareStatement := FAMIXClass new
 						name: #prepareStatment;
@@ -3381,11 +3400,11 @@ JEETests >> testInvocations [
 	self assert: ( invocation size = 5 ).
 
 	self assert: ( ( invocation at: 1 ) isKindOf: FAMIXInvocation ).
-	self assert: ( ( ( invocation at: 1 ) invokedBy ) isKindOf: FAMIXMethod ).
-	self assert: ( ( ( invocation at: 1 ) candidateList ) isKindOf: OrderedCollection ).
-	self assert: ( ( ( invocation at: 1 ) candidateList ) size = 1 ).
-	self assert: ( ( ( ( invocation at: 1 ) candidateList ) at: 1 ) isKindOf: FAMIXMethod ).
-	self assert: ( ( ( ( invocation at: 1 ) candidateList ) at: 1 ) name = #someMethod ).
+	self assert: ( ( ( invocation at: 1 ) sender ) isKindOf: FAMIXMethod ).
+	self assert: ( ( ( invocation at: 1 ) candidates ) isKindOf: Collection ).
+	self assert: ( ( ( invocation at: 1 ) candidates ) size = 1 ).
+	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) isKindOf: FAMIXMethod ).
+	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) name = #someMethod ).
 ]
 
 { #category : #testing }
@@ -3601,7 +3620,7 @@ JEETests >> testTransactionType [
 					hasEJBTransactionAttribute not.
 
 	self assert: ((mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
-					allMethods allSatisfy: #hasEJBTransactionAttribute).
+					methods allSatisfy: #hasEJBTransactionAttribute).
 	self assert: (mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
-					allMethods size = 2
+					methods size = 2
 ]
