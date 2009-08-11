@@ -1465,7 +1465,7 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeansAndHierarchi [
 			yourself.
 	sql := FAMIXNamespace new
 			name: #sql;
-			container: java;
+			parentScope: java;
 			yourself.
 	prepareStatement := FAMIXClass new
 						name: #prepareStatment;
@@ -2450,7 +2450,7 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaFake [
 			yourself.
 	sql := FAMIXNamespace new
 			name: #sql;
-			container: java;
+			parentScope: java;
 			yourself.
 	prepareStatement := FAMIXClass new
 						name: #prepareStatment;
