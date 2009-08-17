@@ -2979,13 +2979,12 @@ JEETests >> sampleMooseModelWithTransaction [
 
 { #category : #testing }
 JEETests >> setUp [
-
 	| parser |
-	parser := OPOpaxDriver on: self minimalEjbJar readStream.
+	parser := OPOpaxHandler on: self minimalEjbJar readStream.
 	parser startDocument.
 	parser parseDocument.
-	
 	root := parser stack first.
+
 ]
 
 { #category : #testing }
@@ -3148,10 +3147,10 @@ JEETests >> testDoesImplements [
 { #category : #testing }
 JEETests >> testElementCreation [
 
-	self assert: (root allChildren select: [:each | each class = EntityElement]) size = 2.
-	self assert: (root allChildren select: [:each | each class = SessionElement]) size = 2.
-	self assert: (root allChildren select: [:each | each class = ContainerTransactionElement]) size = 3.
-	self assert: (root allChildren select: [:each | each class = MessageDrivenElement]) size = 1.
+	self assert: (root allChildren select: [:each | each isMemberOf: EntityElement ]) size = 2.
+	self assert: (root allChildren select: [:each | each isMemberOf: SessionElement ]) size = 2.
+	self assert: (root allChildren select: [:each | each isMemberOf: ContainerTransactionElement ]) size = 3.
+	self assert: (root allChildren select: [:each | each isMemberOf:  MessageDrivenElement ]) size = 1.
 ]
 
 { #category : #testing }
@@ -3160,7 +3159,7 @@ JEETests >> testEntityResolving [
 	| mooseModel aBean |
 	mooseModel := self sampleMooseModel.
 
-	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	(root allChildren select: [:each | each class = EntityElement ]) do: [:each | each populate: mooseModel].
 
 	self assert: mooseModel allEntityBeans size = 2.
 	self assert: (mooseModel allEntityBeans contains: [:each | each name = #ACMPEntity]).
@@ -3530,10 +3529,12 @@ JEETests >> testNOQM [
 	| mooseModel  sum |
 	sum := 0.
 	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
-
-"	self assert: ( ( ( ( mooseModel allClasses select: [:each | each isADataLayerClass ] ) at: 1 ) numberOfQueryingMethods ) = 3 ). "
+	
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOQM ) = 3).
+	
 	mooseModel allClasses do: [:each | sum := sum + each numberOfQueryingMethods ].
 	self assert: ( sum = 3 ).
+	
 ]
 
 { #category : #testing }
@@ -3543,6 +3544,8 @@ JEETests >> testNOTM [
 	sum := 0.
 	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
+
 	mooseModel allClasses do: [:each | sum := sum + each numberOfTransactionMethods ].
 	self assert: ( sum = 13 ).
 ]
@@ -3550,13 +3553,16 @@ JEETests >> testNOTM [
 { #category : #testing }
 JEETests >> testRationNOQMNOM [
 
+
 	| mooseModel  |
+	self flag: #TODO.
+	
 	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOQM ) = 3).
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM) = 19 ).
 
-	self assert: ( mooseModel allClasses RatioNOQMNOM = ( 3 / 19 )).
+	self assert: ( mooseModel allClasses RatioNOQMNOM = ( 3.0 / 19.0 )).
 ]
 
 { #category : #testing }
@@ -3566,7 +3572,7 @@ JEETests >> testRationNOTMNOM [
 	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
-	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM) = 19 ).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM ) = 19 ).
 
 	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13 / 19 )).
 ]

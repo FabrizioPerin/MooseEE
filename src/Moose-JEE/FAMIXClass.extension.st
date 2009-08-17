@@ -37,10 +37,44 @@ FAMIXClass >> hasImplementsAnEntityBean [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> hasMethodsThatExecuteAQuery [
+
+	self flag: #TODO test.
+	^self methods anySatisfy: [ :method | method doesExecuteAQuery ]
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClass >> hasUnsafeMethods [
+
+	self flag: #TODO test.
+	^self methods anySatisfy: [ :method | method isPartOfATransaction not ]
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClass >> hasUnsafeMethodsThatExecuteAQuery [
+
+	"s| allMethods |
+	allMethods := ( self methods select: #doesExecuteAQuery ) deepCalleeMethodsWithoutTransactionPath.
+	^(self methods intersection: allMethods) isEmpty not"
+	self flag: #TODO test.
+	^self methods anySatisfy: [ :method | method isPartOfAnUnsafeTransactionPath and: [ method doesExecuteAQuery ] ].
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> implementedInterfaces [
 	"returns a collection with all superclasses of this class"
 
 	^self directSuperclasses select: #isInterface.
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClass >> internalInvocations [
+
+	self flag: #TODO test.
+	^ self outgoingInvocationsGroup select: [:each |
+				each anyCandidate notNil and: [
+					each anyCandidate belongsTo == self and: [
+							each invokedBy ~= each anyCandidate]]]
 ]
 
 { #category : #'*Moose-JEE' }
@@ -70,9 +104,31 @@ FAMIXClass >> isAPresentationLayerClass [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> isARowDataGateway [
+
+	| executeUpdate executeDelete executeInsert |
+
+	self flag: #TODOAndOtherStuff.
+
+	executeUpdate := false.
+	executeDelete := false.
+	executeInsert := false.
+	
+	"Have to be implemented the rules related to the attributes of the class information from sql nedeed"
+
+	self methods do: [ :eachMethod | ( ( eachMethod doesCall: #executeUpdate ) and: [ ( '.*delete.*' asRegex matches: ( eachMethod name asString ) ) ifTrue: [ executeDelete := true ] ] ). "This implementation have to be improve ( checking inside the method or in the name if is present the keyword delete )" 
+								   ( (eachMethod doesCall: #executeUpdate ) and: [ ( '.*insert.*' asRegex matches: ( eachMethod name asString ) ) ifTrue: [ executeInsert := true ] ] ). "This implementation have to be improve ( checking inside the method or in the name if is present the keyword insert )" 
+								   ( eachMethod doesCall: #executeUpdate )  ifTrue: [ executeUpdate := true ].
+								   
+	].
+
+	^( ( executeUpdate and: [ executeDelete ] ) and: [ executeInsert ] )
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> numberOfQueryingMethods [
-	<property: #NOQM
-		longName: 'Number of querying methods'
+	<MSEProperty: #NOQM type: #Number>
+	<property: #NOQM	longName: 'Number of querying methods'
 		description: 'The number of methods that execute a query'
 	>
 	^self lookUpPropertyNamed: #NOQM computedAs: [ ( self methods select: [:method | method doesExecuteAQuery ] ) size ]
@@ -80,11 +136,19 @@ FAMIXClass >> numberOfQueryingMethods [
 
 { #category : #'*Moose-JEE' }
 FAMIXClass >> numberOfTransactionMethods [
+	<MSEProperty: #NOTM type: #Number>
 	<property: #NOTM
 		longName: 'Number of transaction methods'
 		description: 'The number of methods involved in a transaction'
 	>
 	^self lookUpPropertyNamed: #NOTM computedAs: [ ( self methods select: [:method | method isPartOfATransaction ] ) size ]
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClass >> parentEJBBean [
+
+	^self privateState attributeGet: #parentEJBBean default: [nil]
+
 ]
 
 { #category : #'*Moose-JEE' }

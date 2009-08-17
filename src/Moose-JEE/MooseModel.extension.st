@@ -31,3 +31,38 @@ MooseModel >> allTransactionalMethods [
 
 	^self allMethods select: #hasEJBTransactionAttribute
 ]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> importEjbJarFromFolder [
+
+	<menuItem: 'Import ejb-jar xmls from folder' category: 'Import / Export'>
+
+	| folderName folder parser root |
+	
+	self flag: #TODO test.
+	
+	folderName := UIManager default chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self].
+	folder := folderName asFileName.
+	(folder exists and: [folder isDirectory]) ifFalse: [DialogWindow alert: 'File not found.'. ^self].
+
+	folder entries do: [ :each |
+			(each exists and: [each isDirectory not] and: [ '*ejb*.xml' match: each asString ]) ifTrue: 
+			[
+				
+				parser := OPOpaxHandler on: self simpleXmlSample readStream.
+				parser startDocument.
+				parser parseDocument.
+				root := parser stack first.
+
+				(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
+					eachElement populate: self].
+				(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
+					eachElement populate: self].
+				(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
+					eachElement populate: self].
+				(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
+					eachElement populate: self].
+			]
+	]
+]

@@ -16,6 +16,20 @@ FAMIXMethod >> allInvocationsBetweenHereTo: anotherMethod [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXMethod >> allMethodsTouchFromHereTo: anotherMethod [
+
+	| methodInvocationChain |
+	
+	self flag: #TODOTests.
+	
+	methodInvocationChain := self deepCalledMethods asOrderedCollection.
+
+	( methodInvocationChain includes: anotherMethod ) ifFalse: [ ^ OrderedCollection new ].
+
+	^ methodInvocationChain intersection: ( anotherMethod deepCalleeMethods asOrderedCollection )
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXMethod >> callsJavaSqlPackage [
 
 	| result invokedMethodsCollection |
@@ -196,6 +210,19 @@ FAMIXMethod >> isPartOfATransaction [
 FAMIXMethod >> isPartOfAnUnsafeTransactionPath [
 
 	^ ( ( self doesSupportTransaction ) and: [self deepCalleeMethodsWithoutTransactionPath anySatisfy: [ :method | method couldBeAnEntryPoint ] ] )
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> ownedTable [
+	self flag: #TODOTest.
+	^self privateState attributeGet: #ownedTable default: [nil]
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXMethod >> ownedTable: anObject [
+
+	self flag: #TODOTest.
+	self privateState attributeSet: #ownedTable value: anObject
 ]
 
 { #category : #'*Moose-JEE' }
