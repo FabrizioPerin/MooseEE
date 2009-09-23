@@ -9,6 +9,13 @@ Class {
 	#category : #'Moose-JEE'
 }
 
+{ #category : #'as yet unclassified' }
+FAMIXDBTable class >> annotation [
+	<MSEClass: 'Table' super: #FAMIXNamedEntity>
+	<package: 'FAMIX'>
+	<abstract>
+]
+
 { #category : #accessing }
 FAMIXDBTable >> addColumn: aFAMIXTablesColumn [
 

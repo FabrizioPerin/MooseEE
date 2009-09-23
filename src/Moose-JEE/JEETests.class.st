@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'root'
 	],
-	#category : #'Moose-JEE-tests'
+	#category : #'Moose-JEE-Tests'
 }
 
 { #category : #testing }

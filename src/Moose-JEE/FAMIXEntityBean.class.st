@@ -8,6 +8,12 @@ Class {
 	#category : #'Moose-JEE'
 }
 
+{ #category : #'as yet unclassified' }
+FAMIXEntityBean class >> annotation [
+	<MSEClass: 'EntityBean' super: #FAMIXEJBean>
+	<package: 'FAMIX'>
+]
+
 { #category : #accessing }
 FAMIXEntityBean >> isBMP [
 

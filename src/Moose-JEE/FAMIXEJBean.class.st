@@ -9,8 +9,16 @@ Class {
 	#category : #'Moose-JEE'
 }
 
+{ #category : #'as yet unclassified' }
+FAMIXEJBean class >> annotation [
+	<MSEClass: 'JEBean' super: #FAMIXNamedEntity>
+	<package: 'FAMIX'>
+	<abstract>
+]
+
 { #category : #accessing }
 FAMIXEJBean >> homeInterface [
+	<MSEProperty: #homeInterface type: #FAMIXClass>
 	^homeInterface
 ]
 
@@ -21,6 +29,7 @@ FAMIXEJBean >> homeInterface: anObject [
 
 { #category : #accessing }
 FAMIXEJBean >> implementationClass [
+	<MSEProperty: #implementingClass type: #FAMIXClass>
 	^implementationClass
 ]
 
@@ -31,6 +40,7 @@ FAMIXEJBean >> implementationClass: anObject [
 
 { #category : #accessing }
 FAMIXEJBean >> remoteInterface [
+	<MSEProperty: #remoteInterface type: #FAMIXClass>
 	^remoteInterface
 ]
 

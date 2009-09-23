@@ -8,6 +8,12 @@ Class {
 	#category : #'Moose-JEE'
 }
 
+{ #category : #'as yet unclassified' }
+FAMIXSessionBean class >> annotation [
+	<MSEClass: 'SessionBean' super: #FAMIXEJBean>
+	<package: 'FAMIX'>
+]
+
 { #category : #accessing }
 FAMIXSessionBean >> isStateful [
 	^self sessionType = #Stateful

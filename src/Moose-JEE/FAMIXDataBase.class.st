@@ -7,6 +7,13 @@ Class {
 	#category : #'Moose-JEE'
 }
 
+{ #category : #'as yet unclassified' }
+FAMIXDataBase class >> annotation [
+	<MSEClass: 'DataBase' super: #FAMIXNamedEntity>
+	<package: 'FAMIX'>
+	<abstract>
+]
+
 { #category : #accessing }
 FAMIXDataBase >> addTable: aFAMIXDBTable [
 	tables add: aFAMIXDBTable.

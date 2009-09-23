@@ -11,6 +11,13 @@ Class {
 	#category : #'Moose-JEE'
 }
 
+{ #category : #'as yet unclassified' }
+FAMIXTablesColumn class >> annotation [
+	<MSEClass: 'TableColumn' super: #FAMIXNamedEntity>
+	<package: 'FAMIX'>
+	<abstract>
+]
+
 { #category : #accessing }
 FAMIXTablesColumn >> columnReference [
 
