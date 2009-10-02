@@ -68,16 +68,6 @@ FAMIXClass >> implementedInterfaces [
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXClass >> internalInvocations [
-
-	self flag: #TODO test.
-	^ self outgoingInvocationsGroup select: [:each |
-				each anyCandidate notNil and: [
-					each anyCandidate belongsTo == self and: [
-							each invokedBy ~= each anyCandidate]]]
-]
-
-{ #category : #'*Moose-JEE' }
 FAMIXClass >> isADataLayerClass [
 
 	^ ( self methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ) or: [ self doesImplements: #Serializable ].

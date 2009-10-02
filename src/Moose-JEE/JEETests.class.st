@@ -3574,7 +3574,7 @@ JEETests >> testRationNOTMNOM [
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM ) = 19 ).
 
-	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13 / 19 )).
+	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13.0 / 19.0 )).
 ]
 
 { #category : #testing }
