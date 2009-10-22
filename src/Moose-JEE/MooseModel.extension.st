@@ -33,24 +33,31 @@ MooseModel >> allTransactionalMethods [
 ]
 
 { #category : #'*Moose-JEE' }
-MooseModel >> importEjbJarFromFolder [
+MooseModel >> importDataBaseFromSQLFile [
 
-	<menuItem: 'Import ejb-jar xmls from folder' category: 'Import / Export'>
+	<menuItem: 'Import database from SQL file' category: 'Import / Export'>
 
-	| folderName folder parser root |
+	| file parser result stream |
 	
 	self flag: #TODO test.
+	file := UITheme builder 
+		fileOpen: 'Import information from SQL file'
+		extensions: #('sql').
+		
+	file exists ifFalse: [DialogWindow alert: 'File not found.'. ^self].
 	
-	folderName := UIManager default chooseDirectory: 'Folder Name:'.
-	folderName = '' ifTrue: [^self].
-	folder := folderName asFileName.
-	(folder exists and: [folder isDirectory]) ifFalse: [DialogWindow alert: 'File not found.'. ^self].
-
-	folder entries do: [ :each |
-			(each exists and: [each isDirectory not] and: [ '*ejb*.xml' match: each asString ]) ifTrue: 
+	parser := PGSQLParserNew new stream: file readStream.
+		
+	result := parser run.
+	
+	
+	stream close.
+	
+	"folder entries do: [ :each |
+			(each exists and: [each isDirectory not] and: [ '*.sql' match: each asString ]) ifTrue: 
 			[
 				
-				parser := OPOpaxHandler on: self simpleXmlSample readStream.
+				parser := PGSQLParserNew new stream: stream. OPOpaxHandler on: self simpleXmlSample readStream.
 				parser startDocument.
 				parser parseDocument.
 				root := parser stack first.
@@ -63,6 +70,39 @@ MooseModel >> importEjbJarFromFolder [
 					eachElement populate: self].
 				(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
 					eachElement populate: self].
+			]
+	]"
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> importEjbJarFromFolder [
+
+	<menuItem: 'Import ejb-jar xmls from folder' category: 'Import / Export'>
+
+	| folderName parser root |
+	
+	folderName := UIManager default chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self].
+	
+	folderName fileNames do: [:n | 
+				| file |
+				file := (FileStream readOnlyFileNamed: (folderName fullNameFor: n)).
+				(n matchesRegex: '^.+\.(xml)$') ifTrue: 
+						[
+							parser := OPOpaxHandler on: file readStream.
+				
+							parser startDocument.
+							parser parseDocument.
+							root := parser stack first.
+					self halt.
+							(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
+								eachElement populate: self].
 			]
 	]
 ]

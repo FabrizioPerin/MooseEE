@@ -68,6 +68,16 @@ FAMIXClass >> implementedInterfaces [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> internalInvocations [
+
+	"self flag: #TODO test."
+	^ self outgoingInvocationsGroup select: [:each |
+				each anyCandidate notNil and: [
+					each anyCandidate belongsTo == self and: [
+							each invokedBy ~= each anyCandidate]]]
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> isADataLayerClass [
 
 	^ ( self methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ) or: [ self doesImplements: #Serializable ].
@@ -145,4 +155,22 @@ FAMIXClass >> parentEJBBean [
 FAMIXClass >> parentEJBBean: aBean [
 
 	^self privateState attributeSet: #parentEJBBean value: aBean
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClass >> withDeepInvokedClasses [
+
+	| cursor result invokedClassesAndTheirSubclasses |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: self.
+	
+	[cursor <= result size] whileTrue: [
+		invokedClassesAndTheirSubclasses := (( result at: cursor ) invokedClasses reject: #isStub) flatCollect: [:each | each withSubclassHierarchy].
+		result addAll: ( invokedClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1.
+	].
+
+	^ result.
 ]

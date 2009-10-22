@@ -3327,6 +3327,44 @@ JEETests >> testHasImplementsAnEntityBean [
 ]
 
 { #category : #testing }
+JEETests >> testImportEjbJarFromFolder [
+	
+	| folderName parser root |
+
+	folderName := UIManager default chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self].
+	
+	"folderName := UITheme builder chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self]."
+	
+	folderName fileNames do: [:n | 
+				| file |
+				file := (FileStream readOnlyFileNamed: (folderName fullNameFor: n)).
+				(n matchesRegex: '^.+\.(xml)$') ifTrue: 
+						[
+							parser := OPOpaxHandler on: file "readStream".
+							parser startDocument.
+							parser parseDocument.
+							
+							root := parser stack first.
+														
+							
+							"(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
+								eachElement populate: self]." 
+						]ifFalse:[]
+					].
+		
+		self assert: (root isMemberOf: OPRootElement).
+	
+]
+
+{ #category : #testing }
 JEETests >> testInvocationCallChain [
 	
 	| mooseModel  invocation |
