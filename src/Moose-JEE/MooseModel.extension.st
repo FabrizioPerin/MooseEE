@@ -86,6 +86,7 @@ MooseModel >> importEjbJarFromFolder [
 	
 	folderName fileNames do: [:n | 
 				| file |
+
 				file := (FileStream readOnlyFileNamed: (folderName fullNameFor: n)).
 				(n matchesRegex: '^.+\.(xml)$') ifTrue: 
 						[
@@ -94,7 +95,8 @@ MooseModel >> importEjbJarFromFolder [
 							parser startDocument.
 							parser parseDocument.
 							root := parser stack first.
-					self halt.
+
+							
 							(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
 								eachElement populate: self].
 							(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
@@ -103,6 +105,6 @@ MooseModel >> importEjbJarFromFolder [
 								eachElement populate: self].
 							(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
 								eachElement populate: self].
+					]
 			]
-	]
 ]

@@ -86,7 +86,7 @@ FAMIXClassGroup >> viewTransactionFlowOn: view [
 	"view newShape line; lineColor: #red asColor."
 	view edges: self from: #yourself toAll: #superclassHierarchy.
 	
-	view edges: ( self flatCollect: [:each | each internalInvocations ] ) from: #invokedBy to: #anyCandidate using: (MOLineShape color: Color transparent).
+	"view edges: ( self flatCollect: [:each | each internalInvocations ] ) from: #invokedBy to: #anyCandidate using: (MOLineShape color: Color transparent)."
 
 
 	view edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.

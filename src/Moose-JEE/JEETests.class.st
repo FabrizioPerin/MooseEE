@@ -3347,6 +3347,8 @@ JEETests >> testImportEjbJarFromFolder [
 							parser parseDocument.
 							
 							root := parser stack first.
+							
+							self halt.
 														
 							
 							"(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
@@ -3362,6 +3364,55 @@ JEETests >> testImportEjbJarFromFolder [
 		
 		self assert: (root isMemberOf: OPRootElement).
 	
+]
+
+{ #category : #testing }
+JEETests >> testImportSqlFile [
+	
+	| folderName file |
+
+	file := UITheme builder
+		fileOpen: 'Import DB Structure from SQL file' 
+		extensions: #('sql').
+		
+	file isNil ifFalse: [
+		self name: (FileDirectory baseNameFor: file localName).
+		self importFromMSEStream: file.
+		file close ].
+
+	folderName := UIManager default chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self].
+	
+	"folderName := UITheme builder chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self]."
+	
+	"folderName fileNames do: [:n | 
+				| file |
+				file := (FileStream readOnlyFileNamed: (folderName fullNameFor: n)).
+				(n matchesRegex: '^.+\.(xml)$') ifTrue: 
+						[
+							parser := OPOpaxHandler on: file.
+							parser startDocument.
+							parser parseDocument.
+							
+							root := parser stack first.
+							
+							self halt."
+														
+							
+							"(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
+								eachElement populate: self].
+							(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
+								eachElement populate: self]." 
+						"]ifFalse:[]
+					].
+		
+		self assert: (root isMemberOf: OPRootElement).
+	"
 ]
 
 { #category : #testing }
