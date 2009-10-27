@@ -3347,22 +3347,9 @@ JEETests >> testImportEjbJarFromFolder [
 							parser parseDocument.
 							
 							root := parser stack first.
-							
-							self halt.
-														
-							
-							"(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
-								eachElement populate: self].
-							(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
-								eachElement populate: self].
-							(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
-								eachElement populate: self].
-							(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
-								eachElement populate: self]." 
 						]ifFalse:[]
 					].
-		
-		self assert: (root isMemberOf: OPRootElement).
+		self assert: (root isKindOf: OPRootElement).
 	
 ]
 
@@ -3375,13 +3362,15 @@ JEETests >> testImportSqlFile [
 		fileOpen: 'Import DB Structure from SQL file' 
 		extensions: #('sql').
 		
-	file isNil ifFalse: [
+"	file isNil ifFalse: [
 		self name: (FileDirectory baseNameFor: file localName).
 		self importFromMSEStream: file.
 		file close ].
-
+"
 	folderName := UIManager default chooseDirectory: 'Folder Name:'.
-	folderName = '' ifTrue: [^self].
+	
+	self deny: (folderName = '').
+	
 	
 	"folderName := UITheme builder chooseDirectory: 'Folder Name:'.
 	folderName = '' ifTrue: [^self]."
