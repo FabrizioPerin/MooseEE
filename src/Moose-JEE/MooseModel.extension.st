@@ -34,25 +34,21 @@ MooseModel >> allTransactionalMethods [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> importDataBaseFromSQLFile [
-
-	<menuItem: 'Import database from SQL file' category: 'Import / Export'>
-
+	<
+	menuItem: 'Import database from SQL file'
+	category: 'Import / Export'>
 	| file parser result stream |
-	
 	self flag: #TODO test.
 	file := UITheme builder 
 		fileOpen: 'Import information from SQL file'
-		extensions: #('sql').
-		
-	file exists ifFalse: [DialogWindow alert: 'File not found.'. ^self].
-	
-	parser := PGSQLParserNew new stream: file readStream.
-		
+		extensions: #('sql' ).
+	file exists ifFalse: 
+		[ DialogWindow alert: 'File not found.'.
+		^ self ].
+	parser := PGSQLParser new stream: file readStream.
 	result := parser run.
-	
-	
-	stream close.
-	
+	stream close
+
 	"folder entries do: [ :each |
 			(each exists and: [each isDirectory not] and: [ '*.sql' match: each asString ]) ifTrue: 
 			[
