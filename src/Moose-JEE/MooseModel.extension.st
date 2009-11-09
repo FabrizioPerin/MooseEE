@@ -33,6 +33,12 @@ MooseModel >> allTransactionalMethods [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
+
+	^self bookmarks detect: [:each | each mooseName = aSymbol ] ifNone: aBlock
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> importDataBaseFromSQLFile [
 	<
 	menuItem: 'Import database from SQL file'
@@ -136,4 +142,12 @@ MooseModel >> instanciateJBeansFromAnnotations [
 		self add: bean ].
 	
 	^self
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> referenceClasses [
+	<navigation: 'Reference classes'>
+	^FAMIXClassGroup  
+		withAll: (self bookmarkNamed: #referenceClasses ifAbsent: [self allModelClasses] ) 
+		withDescription: 'All reference classes'
 ]

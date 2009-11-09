@@ -5,10 +5,46 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+FAMIXSessionBeanGroup >> umlShape: aString [
+	| builder |
+	builder := MOFormsBuilder new.
+	builder
+		column;
+		fill.
+	builder
+		row;
+		fill;
+		row;
+		fill.
+	builder 
+		x: 1
+		y: 1
+		add: MORectangleShape new.
+	builder 
+		x: 1
+		y: 1
+		add: (MOLabelShape new text: aString).
+	builder 
+		x: 1
+		y: 2
+		add: MORectangleShape new.
+	builder 
+		x: 1
+		y: 2
+		add: (MOLabelShape new text: 
+			[ :cls | 
+			cls methodDict keys 
+				inject: ''
+				into: [ :sum :el | sum , el , String cr ] ]).
+	^ builder shape
+]
+
+{ #category : #'as yet unclassified' }
 FAMIXSessionBeanGroup >> viewAsSelectionOnSystemComplexity [
 
 	<menuItem: 'As selection on System Complexity' category: 'Mondrian'>
-
+	
+	self flag: 'NOT WORKING'.
 	(FAMIXClassGroup withAll: (self collect: #implementationClass)) viewAsSelectionOnSystemComplexity.
 ]
 
@@ -30,21 +66,22 @@ FAMIXSessionBeanGroup >> viewLayers [
 
 	invocationsMap := beans first mooseModel allClasses flatCollect: [:each | each invokedClasses collect: [:x | each -> x]]. 
 
-	view umlPackageShapeWithLabel: 'Service Layer'.
+	view shape: (self umlShape: 'Service Layer').
 	view node: beans forIt: [
-		view newShape rectangle; height: #numberOfMethods; width: #numberOfAttributes; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel referenceClasses; withBorder.
+		view nodeShape: ( MORectangleShape new width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
 		view nodes: beans.
 		view horizontalLineLayout.
 	].
-	view umlPackageShapeWithLabel: 'Logic Layer'.
+	view shape: (self umlShape: 'Logic Layer').
 	view node: #logic forIt: [
-		view newShape rectangle; height: #numberOfMethods; width: #numberOfAttributes; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel referenceClasses; withBorder.
+		view nodeShape: ( MORectangleShape new width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
 		view nodes: logic.
 		view dominanceTreeLayout.
 	].
-	view umlPackageShapeWithLabel: 'Data Layer'.
+	"view umlPackageShapeWithLabel: 'Data Layer'."
+	view shape: (self umlShape: 'Data Layer').
 	view node: #data forIt: [
-		view newShape rectangle; height: #numberOfMethods; width: #numberOfAttributes; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel referenceClasses; withBorder.
+		view nodeShape: ( MORectangleShape new width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
 		view nodes: data.
 		view dominanceTreeLayout.
 	].
