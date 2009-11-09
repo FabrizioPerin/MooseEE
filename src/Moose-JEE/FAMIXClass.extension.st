@@ -68,16 +68,6 @@ FAMIXClass >> implementedInterfaces [
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXClass >> internalInvocations [
-
-	"self flag: #TODO test."
-	^ self outgoingInvocationsGroup select: [:each |
-				each anyCandidate notNil and: [
-					each anyCandidate belongsTo == self and: [
-							each invokedBy ~= each anyCandidate]]]
-]
-
-{ #category : #'*Moose-JEE' }
 FAMIXClass >> isADataLayerClass [
 
 	^ ( self methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ) or: [ self doesImplements: #Serializable ].
@@ -146,7 +136,8 @@ FAMIXClass >> numberOfTransactionMethods [
 
 { #category : #'*Moose-JEE' }
 FAMIXClass >> parentEJBBean [
-
+	<MSEProperty: #parentEJBBean type: #Object>
+	"self flag: 'annotate with fame meta descriptions'."
 	^self privateState attributeGet: #parentEJBBean default: [nil]
 
 ]

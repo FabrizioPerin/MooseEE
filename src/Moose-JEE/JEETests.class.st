@@ -3405,9 +3405,39 @@ JEETests >> testImportSqlFile [
 ]
 
 { #category : #testing }
-JEETests >> testInstanciateJBeansFromAnnotations [
+JEETests >> testInstanciateAllBeansFromAnnotations [
+	| model entityBeansAnnotations |
+	MooseModel resetMeta.
+	model := MooseModel new.
+	model importFromMSEStream: '(
+		(FAMIX.Namespace (id: 100) (name ''aNamespace''))				
+		(FAMIX.Class (id: 1) (name ''AClass''))
+		(FAMIX.Class (id: 10) (name ''AnotherClass''))
+		(FAMIX.Class (id: 11) (name ''StillAnotherClass''))
+		(FAMIX.Method (id: 2) (name ''aMethod'') (parentType (ref: 1)))
+		(FAMIX.Class (id: 3) (name ''AnAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 4) (name ''Entity'') (container (ref: 100)))
+		(FAMIX.Class (id: 5) (name ''AnotherAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 6) (name ''Session'') (container (ref: 100)))
+		(FAMIX.AnnotationInstance (id: 7) (annotatedEntity (ref: 1)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 8) (annotatedEntity (ref: 10)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 9) (annotatedEntity (ref: 11)) (annotationType (ref: 6)))
+	)' readStream.
 	
-| model entityBeansAnnotations |
+	model instanciateJBeansFromAnnotations.
+	
+	self assert: (model allEntityBeans size = 2).
+	self assert: (model allSessionBeans size = 1).
+
+	self assert: ((model allClasses entityNamed:#AClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  ).
+	"self assert: ((model allClasses entityNamed:#AnotherClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  )."
+	self assert: ((model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID = (model allSessionBeans select: [:sessionBean | sessionBean mooseID = (model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID]) first  ).
+	
+]
+
+{ #category : #testing }
+JEETests >> testInstanciateEntityBeansFromAnnotations [
+	| model entityBeansAnnotations |
 	MooseModel resetMeta.
 	model := MooseModel new.
 	model importFromMSEStream: '(
@@ -3424,20 +3454,10 @@ JEETests >> testInstanciateJBeansFromAnnotations [
 		(FAMIX.AnnotationInstance (id: 9) (annotatedEntity (ref: 2)) (annotationType (ref: 6)))
 	)' readStream.
 	
+	model instanciateJBeansFromAnnotations.
 	
-	entityBeansAnnotations := model allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
-
-	entityBeansAnnotations do: [:annotation | 
-		
-									| bean |
-									bean := FAMIXEntityBean new.
-									self haltOnce.
-									( model allClasses select: [:class | class name = annotation annotatedEntity name.] ) do: [ :each | each parentEJBBean: bean ].
-									model add: bean.
-									].
-
 	self assert: (model allEntityBeans size = 2).
-	self assert: ( ( model allClasses at: 1 ) parentEJBBean = (( model allClasses select: [:class | class name = #AnotherClass ]) at: 1)  ).
+	self assert: ((model allClasses entityNamed:#AClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  ).
 	
 ]
 
