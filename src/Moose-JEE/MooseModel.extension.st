@@ -104,3 +104,33 @@ MooseModel >> importEjbJarFromFolder [
 					]
 			]
 ]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> instanciateJBeansFromAnnotations [
+	
+	| annotations entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations sessionBeans aMooseModel |
+	
+	entityBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
+	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
+	sessionBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Session'].
+	
+	entityBeansAnnotations do: [:annotation | 
+									| bean |
+									self haltOnce. 
+									bean := FAMIXEntityBean new.
+									self allClasses detect: [:class | class name: (annotation annotatedEntities name).] 
+									].
+	
+	"sessionBeansAnnotations do: [:annotation |  annotation ]."
+
+	"bean := self createBeanFrom: aMooseModel.
+	bean name: self ejbName.
+	bean remoteInterface: (self remoteInterfaceFrom: aMooseModel).
+	bean remoteInterface ifNotNil: [:cls | cls parentEJBBean: bean].
+	bean homeInterface: (self homeInterfaceFrom: aMooseModel).
+	bean homeInterface ifNotNil: [:cls | cls parentEJBBean: bean].
+	bean implementationClass: (self implementationClassFrom: aMooseModel).
+	bean implementationClass ifNotNil: [:cls | cls parentEJBBean: bean].
+	aMooseModel add: bean.
+	^bean"
+]

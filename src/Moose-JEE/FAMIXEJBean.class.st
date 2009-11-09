@@ -17,11 +17,6 @@ FAMIXEJBean class >> annotation [
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> belongsTo [ 
-	^''
-]
-
-{ #category : #accessing }
 FAMIXEJBean >> homeInterface [
 	<MSEProperty: #homeInterface type: #FAMIXClass>
 	^homeInterface

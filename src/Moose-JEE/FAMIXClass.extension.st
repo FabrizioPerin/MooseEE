@@ -8,7 +8,7 @@ FAMIXClass >> completeHierarchyInWhichThisResides [
 	collection := ( self withSuperclassHierarchy reject: [ :each | each isStub or: [ each isInterface ] ] ).
 
 	collection isEmpty ifFalse: [ ^ (collection union: ( collection last withSubclassHierarchy ) ) ].
-	^Set new.
+	^OrderedCollection new.
 ]
 
 { #category : #'*Moose-JEE' }
@@ -169,24 +169,6 @@ FAMIXClass >> withDeepInvokedClasses [
 	[cursor <= result size] whileTrue: [
 		invokedClassesAndTheirSubclasses := (( result at: cursor ) invokedClasses reject: #isStub) flatCollect: [:each | each withSubclassHierarchy].
 		result addAll: ( invokedClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
-		cursor := cursor + 1.
-	].
-
-	^ result.
-]
-
-{ #category : #'*Moose-JEE' }
-FAMIXClass >> withDeepInvokingClasses [
-
-	| cursor result invokingClassesAndTheirSubclasses |
-
-	cursor := 1.
-	result := OrderedCollection new.
-	result add: self.
-	
-	[cursor <= result size] whileTrue: [
-		invokingClassesAndTheirSubclasses := (( result at: cursor ) invokingClasses reject: #isStub) flatCollect: [:each | each withSubclassHierarchy].
-		result addAll: ( invokingClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
 		cursor := cursor + 1.
 	].
 
