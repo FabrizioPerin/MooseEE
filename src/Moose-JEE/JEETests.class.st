@@ -3431,7 +3431,7 @@ JEETests >> testInstanciateAllBeansFromAnnotations [
 
 	self assert: ((model allClasses entityNamed:#AClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  ).
 	"self assert: ((model allClasses entityNamed:#AnotherClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  )."
-	self assert: ((model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID = (model allSessionBeans select: [:sessionBean | sessionBean mooseID = (model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID]) first  ).
+	self assert: ((model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID = (model allSessionBeans select: [:sessionBean | sessionBean mooseID = (model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID]) first mooseID ).
 	
 ]
 

@@ -113,6 +113,7 @@ MooseModel >> importEjbJarFromFolder [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> instanciateJBeansFromAnnotations [
+	<menuItem: 'Import beans from annotations' category: 'Import / Export'>
 	
 	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations |
 	
@@ -142,12 +143,4 @@ MooseModel >> instanciateJBeansFromAnnotations [
 		self add: bean ].
 	
 	^self
-]
-
-{ #category : #'*Moose-JEE' }
-MooseModel >> referenceClasses [
-	<navigation: 'Reference classes'>
-	^FAMIXClassGroup  
-		withAll: (self bookmarkNamed: #referenceClasses ifAbsent: [self allModelClasses] ) 
-		withDescription: 'All reference classes'
 ]

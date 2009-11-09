@@ -43,9 +43,9 @@ FAMIXSessionBeanGroup >> umlShape: aString [
 FAMIXSessionBeanGroup >> viewAsSelectionOnSystemComplexity [
 
 	<menuItem: 'As selection on System Complexity' category: 'Mondrian'>
-	
-	self flag: 'NOT WORKING'.
+
 	(FAMIXClassGroup withAll: (self collect: #implementationClass)) viewAsSelectionOnSystemComplexity.
+
 ]
 
 { #category : #'as yet unclassified' }
