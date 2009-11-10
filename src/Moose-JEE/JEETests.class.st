@@ -1190,264 +1190,6 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeans [
 ]
 
 { #category : #testing }
-JEETests >> sampleMooseModelWithTransAndQueryAndBeans2 [
-	
-	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute invocation6 class1 class2 class5 class6 inheritance java sql prepareStatement |
-
-	mooseModel := MooseModel new.
-	aPackage := FAMIXNamespace new
-			name: #aPackage;
-			yourself.
-	anotherPackage := FAMIXNamespace new
-			name: #anotherPackage;
-			yourself.
-
-	java := FAMIXNamespace new
-			name: #java;
-			yourself.
-	sql := FAMIXNamespace new
-			name: #sql;
-			container: java;
-			yourself.
-	prepareStatement := FAMIXClass new
-						name: #prepareStatment;
-						container: sql;
-						yourself.
-	methodThatExecute := FAMIXMethod new
-							name: #executeBatch;
-							parentType: prepareStatement;
-							yourself.
-
-	prepareStatement addMethod: (methodThatExecute).
-
-	aStatelessSessionBean := FAMIXClass new
-			name: #AStatelessSessionBean;
-			container: aPackage;
-			yourself.
-
-	aMethod := FAMIXMethod new
-				name: #aMethod;
-				parentType: aStatelessSessionBean;
-				yourself.
-
-	aStatelessSessionBean addMethod: (aMethod);
-			addMethod: (FAMIXMethod new
-				name: #anotherMethod;
-				parentType: aStatelessSessionBean;
-				yourself
-			).
-	aStatefulSessionBean := FAMIXClass new
-			name: #AStatefulSessionBean;
-			container: aPackage;
-			yourself.
-
-	someMethod := FAMIXMethod new
-				name: #someMethod;
-				parentType: aStatefulSessionBean;
-				yourself.
-
-	methodThatExecute := FAMIXMethod new
-						name: #executeBatch;
-						parentType: aStatefulSessionBean;
-						yourself.
-	
-	someOtherMethod := FAMIXMethod new
-				name: #someOtherMethod;
-				parentType: aStatefulSessionBean;
-				yourself.
-
-	aStatefulSessionBean
-			addMethod: (someMethod);
-			addMethod: (someOtherMethod).
-
-	class1 := FAMIXClass new
-			name: #Class1;
-			container: aPackage;
-			yourself.
-	class2 := FAMIXClass new
-			name: #Class2;
-			container: aPackage;
-			yourself.
-	class5 := FAMIXClass new
-			name: #Class5;
-			container: aPackage;
-			yourself.
-	class6 := FAMIXClass new
-			name: #Class6;
-			container: aPackage;
-			yourself.
-
-	class3 := FAMIXClass new
-			name: #Class3;
-			container: aPackage;
-			yourself.
-
-	inheritance := FAMIXInheritance new 
-					superclass: class6; 
-					subclass: class3.
-
-	class3 addSuperInheritance: inheritance.
-	class6 addSubInheritance: inheritance.
-
-	class4 := FAMIXClass new
-			name: #Class4;
-			container: aPackage;
-			yourself.
-	
-	inheritance := FAMIXInheritance new 
-					superclass: class2; 
-					subclass: class4.
-
-	class4 addSuperInheritance: inheritance.
-	class2 addSubInheritance: inheritance.
-
-	method1 := FAMIXMethod new
-				name: #method1;
-				parentType: class3;
-				yourself.
-	
-	method2 := FAMIXMethod new
-				name: #method2;
-				parentType: class3;
-				ejbTransactionType: 'Required';
-				yourself.
-
-	method3 := FAMIXMethod new
-				name: #method3;
-				parentType: class4;
-				ejbTransactionType: 'Required';
-				yourself.
-
-	method4 := FAMIXMethod new
-				name: #method4;
-				parentType: class4;
-				yourself.
-
-	class3	addMethod: (method1);
-			addMethod: (method2).
-
-	class4	addMethod: (method3);
-			addMethod: (method4).
-
-	invocation := FAMIXInvocation new sender: aMethod; addCandidate: someMethod ; signature: #someMethod ;yourself.
-	aMethod addOutgoingInvocation: invocation.
-	someMethod addIncomingInvocation: invocation.	
-
-	invocation2 := FAMIXInvocation new sender: method1; addCandidate: aMethod ; signature: #aMethod ;yourself.
-	method1 addOutgoingInvocation: invocation2.
-	aMethod addIncomingInvocation: invocation2.
-
-	invocation3 := FAMIXInvocation new sender: method2; addCandidate: aMethod ; signature: #aMethod ;yourself.
-	method2 addOutgoingInvocation: invocation3.
-	aMethod addIncomingInvocation: invocation3.
-
-	invocation4 := FAMIXInvocation new sender: method3; addCandidate: method1 ; signature: #method1 ;yourself.
-	method3 addOutgoingInvocation: invocation4.
-	method1 addIncomingInvocation: invocation4.
-
-	invocation5 := FAMIXInvocation new sender: method4; addCandidate: method2 ; signature: #method2 ;yourself.
-	method4 addOutgoingInvocation: invocation5.
-	method2 addIncomingInvocation: invocation5.
-
-	"invocation to method that executes a queryes"
-	invocation6 := FAMIXInvocation new sender: someMethod; addCandidate: methodThatExecute ; signature: #executeBatch ;yourself.
-	someMethod addOutgoingInvocation: invocation6.
-	methodThatExecute addIncomingInvocation: invocation6.
-
-	mooseModel
-		addAll: aStatelessSessionBean methods;
-		addAll: aStatefulSessionBean methods;
-		addAll: class3 methods;
-		addAll: class4 methods;
-		add: aPackage;
-		add: anotherPackage;
-		addAll: prepareStatement methods;
-		add: java;
-		add: sql;	
-		add: invocation;
-		add: invocation2;
-		add: invocation3;
-		add: invocation4;
-		add: invocation5;
-		add: class1;
-		add: class2;
-		add: class3;
-		add: class4;
-		add: class5;
-		add: class6;
-		add: inheritance;
-		add: prepareStatement;
-		add: (FAMIXClass new
-			name: #AStatelessSessionHome;
-			container: aPackage;
-			yourself
-		);
-		add: (FAMIXSessionBean new
-			name: #AStatelessSession;
-			implementationClass: aStatelessSessionBean;
-			yourself
-		);
-		add: aStatelessSessionBean;
-		add: (FAMIXSessionBean new
-			name: #AStatefulSessionHome;
-			implementationClass: aStatefulSessionBean;
-			yourself
-		);
-		add: (FAMIXEntityBean new
-			name: #AStatefulSession;
-			implementationClass: class3;
-			yourself
-		);
-		add: aStatefulSessionBean;
-		add: (FAMIXSessionBean new
-			name: #ACMPEntityHome;
-			implementationClass: class6;
-			yourself
-		);
-		add: (FAMIXEntityBean new
-			name: #ACMPEntity;
-			implementationClass: class1;
-			yourself
-		);
-		add: (FAMIXEntityBean new
-			name: #ACMPEntityBean;
-			yourself
-		);
-		add: (FAMIXMessageDrivenBean new
-			name: #ACMPMessagePK;
-			implementationClass: class5;
-			yourself
-		);
-		add: (FAMIXMessageDrivenBean new
-			name: #ABMPMessageHome;
-			implementationClass: class4;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntityBean;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #AMessageBean;
-			container: aPackage;
-			yourself
-		).
-
-	^mooseModel
-]
-
-{ #category : #testing }
 JEETests >> sampleMooseModelWithTransAndQueryAndBeansAndHierarchi [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute invocation6 class1 class2 class5 class6 inheritance java sql prepareStatement |
@@ -3033,7 +2775,10 @@ JEETests >> testCompleteHierarchyInWhichThisResides [
 	| allMethods interestingClasses mooseModel |
 
 	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
-	allMethods := ( ( ( mooseModel allClasses ) flatCollect: [:each | each methods] ) select: #hasEJBTransactionAttribute ) deepCalledMethods.
+	
+	allMethods :=  ( ( ( mooseModel allClasses ) flatCollect: [:each | each methods] ) select: #hasEJBTransactionAttribute ).
+	allMethods := (( FAMIXMethodGroup new ) addAll: allMethods) deepCalledMethods.	
+
 
 	"selecting just the classes that contained methods under analysis and the hierarchy that contain those classes."
 	interestingClasses := OrderedCollection new addAll: ( ( mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) collect: [ :each | each completeHierarchyInWhichThisResides ] ) .
@@ -3049,7 +2794,8 @@ JEETests >> testCompleteHierarchyInWhichThisResides2 [
 	| allMethods interestingClasses mooseModel |
 
 	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
-	allMethods := ( FAMIXMethodGroup new ) addAll: ( ( ( ( mooseModel allClasses ) flatCollect: [:class | class methods]) select: #hasEJBTransactionAttribute ) deepCalledMethods ) .
+	allMethods :=  ( ( ( mooseModel allClasses ) flatCollect: [:each | each methods] ) select: #hasEJBTransactionAttribute ).
+	allMethods := (( FAMIXMethodGroup new ) addAll: allMethods) deepCalledMethods.
 
 	"selecting just the classes that contained methods under analysis and the hierarchy that contain those classes."
 	interestingClasses := ( OrderedCollection new addAll: ( (  mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) ) ) collect: [ :each | each completeHierarchyInWhichThisResides ].
@@ -3065,7 +2811,8 @@ JEETests >> testCompleteHierarchyInWhichThisResides3 [
 	| allMethods interestingClasses mooseModel |
 
 	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
-	allMethods := ( FAMIXMethodGroup new ) addAll: ( ( ( ( mooseModel allClasses ) flatCollect: [:class | class methods] ) select: #hasEJBTransactionAttribute ) deepCalledMethods ) .
+	allMethods :=  ( ( ( mooseModel allClasses ) flatCollect: [:each | each methods] ) select: #hasEJBTransactionAttribute ).
+	allMethods := (( FAMIXMethodGroup new ) addAll: allMethods) deepCalledMethods.
 
 	"selecting just the classes that contained methods under analysis and the hierarchy that contain those classes."
 	interestingClasses := FAMIXClassGroup new addAll: ( ( (  mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) ) collect: [ :each | each completeHierarchyInWhichThisResides ] ).
@@ -3093,8 +2840,9 @@ JEETests >> testDeepCalledMethods [
 	| allMethods interestingClasses mooseModel |
 
 	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
-	allMethods := ( FAMIXMethodGroup new ) addAll: ( ( ( ( mooseModel allClasses ) flatCollect: [:class | class methods ] ) select: #hasEJBTransactionAttribute ) deepCalledMethods ) .
-
+	allMethods :=  ( ( ( mooseModel allClasses ) flatCollect: [:class | class methods ] ) select: #hasEJBTransactionAttribute ).
+	allMethods := (( FAMIXMethodGroup new ) addAll: allMethods) deepCalledMethods.
+	
 	"selecting just the classes that contained methods under analysis and the hierarchy that contain those classes."
 	interestingClasses := FAMIXClassGroup new addAll: ( ( (  mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) ) collect: [ :each | each completeHierarchyInWhichThisResides ] ).
 
@@ -3327,6 +3075,36 @@ JEETests >> testHasImplementsAnEntityBean [
 ]
 
 { #category : #testing }
+JEETests >> testImplementationClassAfterThePopulation [
+	| model entityBeansAnnotations |
+	MooseModel resetMeta.
+	model := MooseModel new.
+	model importFromMSEStream: '(
+		(FAMIX.Namespace (id: 100) (name ''aNamespace''))				
+		(FAMIX.Class (id: 1) (name ''AClass''))
+		(FAMIX.Class (id: 10) (name ''AnotherClass''))
+		(FAMIX.Class (id: 11) (name ''StillAnotherClass''))
+		(FAMIX.Method (id: 2) (name ''aMethod'') (parentType (ref: 1)))
+		(FAMIX.Class (id: 3) (name ''AnAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 4) (name ''Entity'') (container (ref: 100)))
+		(FAMIX.Class (id: 5) (name ''AnotherAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 6) (name ''Stateful'') (container (ref: 100)))
+		(FAMIX.AnnotationInstance (id: 7) (annotatedEntity (ref: 1)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 8) (annotatedEntity (ref: 10)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 9) (annotatedEntity (ref: 11)) (annotationType (ref: 6)))
+	)' readStream.
+	
+	model instanciateJBeansFromAnnotations.
+	
+	self assert: (model allEntityBeans size = 2).
+	self assert: (model allSessionBeans size = 1).
+	
+	self assert: (model allJEEBeans select: [:bean | bean implementationClass isNil ] ) size = 0.
+	self assert: (model allSessionBeans anySatisfy: [:bean | bean implementationClass = (model allClasses select: [:each | each mooseName = #StillAnotherClass]) first ])
+
+]
+
+{ #category : #testing }
 JEETests >> testImportEjbJarFromFolder [
 	
 	| folderName parser root |
@@ -3457,7 +3235,36 @@ JEETests >> testInstanciateEntityBeansFromAnnotations [
 	model instanciateJBeansFromAnnotations.
 	
 	self assert: (model allEntityBeans size = 2).
-	self assert: ((model allClasses entityNamed:#AClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  ).
+	self assert: ((model allEntityBeans detect: [:each | each mooseID = ((model allClasses entityNamed:#AClass) parentEJBBean mooseID) ] ) isKindOf: FAMIXEntityBean).
+
+	
+]
+
+{ #category : #testing }
+JEETests >> testInstanciateSessionBeansFromAnnotations [
+	| model entityBeansAnnotations |
+	MooseModel resetMeta.
+	model := MooseModel new.
+	model importFromMSEStream: '(
+		(FAMIX.Namespace (id: 100) (name ''aNamespace''))				
+		(FAMIX.Class (id: 1) (name ''AClass''))
+		(FAMIX.Class (id: 10) (name ''AnotherClass''))
+		(FAMIX.Method (id: 2) (name ''aMethod'') (parentType (ref: 1)))
+		(FAMIX.Class (id: 3) (name ''AnAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 4) (name ''Stateless'') (container (ref: 100)))
+		(FAMIX.Class (id: 5) (name ''AnotherAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 6) (name ''Stateful'') (container (ref: 100)))
+		(FAMIX.AnnotationInstance (id: 7) (annotatedEntity (ref: 1)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 8) (annotatedEntity (ref: 10)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 9) (annotatedEntity (ref: 2)) (annotationType (ref: 6)))
+	)' readStream.
+	
+	model instanciateJBeansFromAnnotations.
+	
+	self assert: (model allSessionBeans size = 3).
+	self assert: ((model allSessionBeans detect: [:each | 
+			each mooseID = ((model allClasses entityNamed:#AClass) parentEJBBean mooseID) ] ) isKindOf: FAMIXSessionBean).
+
 	
 ]
 

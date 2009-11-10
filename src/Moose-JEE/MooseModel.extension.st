@@ -119,27 +119,34 @@ MooseModel >> instanciateJBeansFromAnnotations [
 	
 	entityBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
 	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
-	sessionBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Session'].
+	sessionBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Stateless' or: [each annotationType name = 'Stateful'] ].
 
 	entityBeansAnnotations do: [:annotation | 
 		| bean |
 		bean := FAMIXEntityBean new name: annotation mooseName.
 		( self allClasses select: [:class |
-			class name = (annotation annotatedEntity name).] ) do: [:each | each parentEJBBean: bean].
+			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
+																			each parentEJBBean: bean.
+																			bean implementationClass: each.].
 		self add: bean ].
 	
 	messageDrivenBeansAnnotations do: [:annotation | 
 		| bean |
 		bean := FAMIXMessageDrivenBean new name: annotation mooseName.
 		( self allClasses select: [:class |
-			class name = (annotation annotatedEntity name).] ) do: [:each | each parentEJBBean: bean].
+			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
+																			each parentEJBBean: bean.
+																			bean implementationClass: each.].
 		self add: bean ].
 	
 	sessionBeansAnnotations do: [:annotation | 
 		| bean |
 		bean := FAMIXSessionBean new name: annotation mooseName.
+		bean sessionType: annotation annotationType name.
 		( self allClasses select: [:class |
-			class name = (annotation annotatedEntity name).] ) do: [:each | each parentEJBBean: bean].
+			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
+																			each parentEJBBean: bean.
+																			bean implementationClass: each.].
 		self add: bean ].
 	
 	^self

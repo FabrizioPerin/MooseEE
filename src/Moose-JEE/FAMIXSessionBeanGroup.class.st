@@ -86,7 +86,8 @@ FAMIXSessionBeanGroup >> viewLayers [
 		view dominanceTreeLayout.
 	].
 	
-	view newShape curvedLine; lineColor: [:assoc | 
+	view shape curvedLine
+		color: [:assoc | 
 		(map at: assoc key mooseName) = (map at: assoc value mooseName) 
 			ifTrue: [Color white] 
 			ifFalse: [	((map at: assoc key mooseName) - (map at: assoc value mooseName)) abs < 2 ifTrue: [Color blue] ifFalse: [Color orange]]
