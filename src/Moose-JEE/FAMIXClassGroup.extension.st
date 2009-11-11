@@ -35,6 +35,7 @@ FAMIXClassGroup >> viewTransactionFlowOn: view [
 	| interestingClasses allInterestingMethods |
 
 	interestingClasses := ( ( ( self select: #hasImplementsABean ) asSet flatCollectAsSet: #withSuperclassHierarchy) flatCollectAsSet: #withDeepInvokedClasses ).
+
 	"interestingClasses := ( ( ( self select: [ :eachClass | ( eachClass methods select: #isPartOfATransaction ) notEmpty ] )."
 
 

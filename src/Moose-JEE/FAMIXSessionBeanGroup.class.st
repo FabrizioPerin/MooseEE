@@ -28,14 +28,33 @@ FAMIXSessionBeanGroup >> umlShape: aString [
 		x: 1
 		y: 2
 		add: MORectangleShape new.
+	^ builder shape
+]
+
+{ #category : #'as yet unclassified' }
+FAMIXSessionBeanGroup >> umlShape: aString with: aBlock [
+	| builder |
+	builder := MOFormsBuilder new.
+	builder
+		column;
+		fill.
+	builder
+		row;
+		fill;
+		row;
+		fill.
+	builder 
+		x: 1
+		y: 1
+		add: MORectangleShape new.
+	builder 
+		x: 1
+		y: 1
+		add: (MOLabelShape new text: aString).
 	builder 
 		x: 1
 		y: 2
-		add: (MOLabelShape new text: 
-			[ :cls | 
-			cls methodDict keys 
-				inject: ''
-				into: [ :sum :el | sum , el , String cr ] ]).
+		add: aBlock.
 	^ builder shape
 ]
 
@@ -92,8 +111,8 @@ FAMIXSessionBeanGroup >> viewLayers [
 			ifTrue: [Color white] 
 			ifFalse: [	((map at: assoc key mooseName) - (map at: assoc value mooseName)) abs < 2 ifTrue: [Color blue] ifFalse: [Color orange]]
 	].
-	view edges: invocationsMap from: #key to: #value.
+	"view edges: invocationsMap from: #key to: #value.
 	view edges: beans first mooseModel allClasses from: #superclass to: #yourself.
-	view verticalLineLayout verticalGap: 40.
+	view verticalLineLayout verticalGap: 40."
 	view open
 ]
