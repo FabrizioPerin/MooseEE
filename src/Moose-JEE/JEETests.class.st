@@ -3196,7 +3196,7 @@ JEETests >> testInstanciateAllBeansFromAnnotations [
 		(FAMIX.Class (id: 3) (name ''AnAnnotationDefinitionClass''))
 		(FAMIX.AnnotationType (id: 4) (name ''Entity'') (container (ref: 100)))
 		(FAMIX.Class (id: 5) (name ''AnotherAnnotationDefinitionClass''))
-		(FAMIX.AnnotationType (id: 6) (name ''Session'') (container (ref: 100)))
+		(FAMIX.AnnotationType (id: 6) (name ''Stateless'') (container (ref: 100)))
 		(FAMIX.AnnotationInstance (id: 7) (annotatedEntity (ref: 1)) (annotationType (ref: 4)))
 		(FAMIX.AnnotationInstance (id: 8) (annotatedEntity (ref: 10)) (annotationType (ref: 4)))
 		(FAMIX.AnnotationInstance (id: 9) (annotatedEntity (ref: 11)) (annotationType (ref: 6)))
@@ -3207,7 +3207,7 @@ JEETests >> testInstanciateAllBeansFromAnnotations [
 	self assert: (model allEntityBeans size = 2).
 	self assert: (model allSessionBeans size = 1).
 
-	self assert: ((model allClasses entityNamed:#AClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  ).
+	self assert: ((model allClasses entityNamed:#AClass) parentEJBBean mooseID = (model allEntityBeans select: [:entityBean | entityBean mooseID = (model allClasses entityNamed:#AClass) parentEJBBean mooseID]) first mooseID ).
 	"self assert: ((model allClasses entityNamed:#AnotherClass) parentEJBBean = (model allEntityBeans entityNamed: 'Entity')  )."
 	self assert: ((model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID = (model allSessionBeans select: [:sessionBean | sessionBean mooseID = (model allClasses entityNamed:#StillAnotherClass) parentEJBBean mooseID]) first mooseID ).
 	

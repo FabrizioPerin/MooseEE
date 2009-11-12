@@ -227,10 +227,13 @@ FAMIXMethod >> ownedTable: anObject [
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> startATransaction [
-	^ self ejbTransactionType = 'RequiresNew' or: [  self ejbTransactionType = 'Required' ].
+	^ self ejbTransactionType = 'RequiresNew' or: [  self ejbTransactionType = 'Required' 
+														or: [  self ejbTransactionType = 'REQUIRES_NEW' 
+															or: [  self ejbTransactionType = 'REQUIRED' ]]].
 ]
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> startAUselessTransaction [
-	^ ( ( self ejbTransactionType = 'RequiresNew' ) and: [ self isPartOfATransaction and: [ self couldBeAnEntryPoint not ] ] )
+	^ ( ( self ejbTransactionType = 'RequiresNew' ) and: [ self isPartOfATransaction and: [ self couldBeAnEntryPoint not ] ] ) 
+			or: [ ( self ejbTransactionType = 'REQUIRES_NEW' ) and: [ self isPartOfATransaction and: [ self couldBeAnEntryPoint not ] ] ].
 ]

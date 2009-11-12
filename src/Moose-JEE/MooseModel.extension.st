@@ -115,12 +115,9 @@ MooseModel >> importEjbJarFromFolder [
 MooseModel >> instanciateJBeansFromAnnotations [
 	<menuItem: 'Import beans from annotations' category: 'Import / Export'>
 	
-	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations |
+	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes |
 	
 	entityBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
-	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
-	sessionBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Stateless' or: [each annotationType name = 'Stateful'] ].
-
 	entityBeansAnnotations do: [:annotation | 
 		| bean |
 		bean := FAMIXEntityBean new name: annotation mooseName.
@@ -129,7 +126,8 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																			each parentEJBBean: bean.
 																			bean implementationClass: each.].
 		self add: bean ].
-	
+
+	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
 	messageDrivenBeansAnnotations do: [:annotation | 
 		| bean |
 		bean := FAMIXMessageDrivenBean new name: annotation mooseName.
@@ -139,6 +137,9 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																			bean implementationClass: each.].
 		self add: bean ].
 	
+	sessionBeansAnnotations := self allAnnotationInstances entities select: [:each | 
+																				each annotationType name = 'Stateless' or: [
+																					each annotationType name = 'Stateful'] ].
 	sessionBeansAnnotations do: [:annotation | 
 		| bean |
 		bean := FAMIXSessionBean new name: annotation mooseName.
@@ -147,7 +148,20 @@ MooseModel >> instanciateJBeansFromAnnotations [
 			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
 																			each parentEJBBean: bean.
 																			bean implementationClass: each.].
-		self add: bean ].
+		self add: bean 
+	].
+	
+	transactionAttributes := self allAnnotationTypes select: [:each | each name = 'TransactionAttribute'].
+	transactionAttributes do: [:annotation |
+		"maintain the order: classes have to be analized before methods because annotations at method level they override the class one"
+		| attribute classes methods |
+
+		classes := annotation annotatedEntities select: [:each | each isKindOf: FAMIXClass].
+		methods := annotation annotatedEntities select: [:each | each isKindOf: FAMIXMethod].
+	
+		classes do: [:class | class methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ] ].
+		methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ].		
+	].
 	
 	^self
 ]
