@@ -154,7 +154,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 	transactionAttributes := self allAnnotationTypes select: [:each | each name = 'TransactionAttribute'].
 	transactionAttributes do: [:annotation |
 		"maintain the order: classes have to be analized before methods because annotations at method level they override the class one"
-		| attribute classes methods |
+		| classes methods |
 
 		classes := annotation annotatedEntities select: [:each | each isKindOf: FAMIXClass].
 		methods := annotation annotatedEntities select: [:each | each isKindOf: FAMIXMethod].
