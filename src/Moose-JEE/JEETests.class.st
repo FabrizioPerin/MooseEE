@@ -2768,6 +2768,27 @@ JEETests >> testAllInvocationsBetweenHereToAnotherMethod [
 ]
 
 { #category : #testing }
+JEETests >> testAnnotationTypeAndInstancesofTransactionScope [
+
+	| mooseModel annotatedMethods annotatedClasses |
+
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	mooseModel annotateTheModelFromJEEViewPoint.
+	
+	annotatedMethods := mooseModel allAnnotationInstances select: [ :each | each annotatedEntity isKindOf: FAMIXMethod ].
+	annotatedClasses := mooseModel allAnnotationInstances select: [ :each | each annotatedEntity isKindOf: FAMIXClass ].
+	
+	self assert: ( ( mooseModel allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ] ) isEmpty not ).
+	
+	self assert: ( annotatedClasses size = 5 ).
+	self assert: ( annotatedMethods size = 13 ). 
+		
+	
+"	MooseBrowsers new codeWithAnnotationsBrowser openOn: mooseModel."
+]
+
+{ #category : #testing }
 JEETests >> testCompleteHierarchyInWhichThisResides [
 	
 	

@@ -48,11 +48,11 @@ FAMIXClassGroup >> viewTransactionFlow2On: view [
 
 		allInterestingMethods := eachClass methods select: #isPartOfATransaction.
 
-		view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color veryLightGray).
+		view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color white).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color veryLightGray ) ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color white ) ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
@@ -191,8 +191,7 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 	
 	
 	| allMethods interestingClasses interestingClassesWithoutLonelyClasses |
-
-	allMethods := ( ( self flatCollect: #methodsGroup ) select: #doesExecuteAQuery ) deepCalleeMethodsWithoutTransactionPath.
+	allMethods := ( FAMIXMethodGroup withAll: ( ( self flatCollect: #methodsGroup ) select: #doesExecuteAQuery ) ) deepCalleeMethodsWithoutTransactionPath.
 	interestingClasses := FAMIXClassGroup new addAll: ( self select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ).
 	interestingClassesWithoutLonelyClasses := interestingClasses 
 												reject: [ :class | ( class invokingClasses intersection: interestingClasses ) isEmpty 

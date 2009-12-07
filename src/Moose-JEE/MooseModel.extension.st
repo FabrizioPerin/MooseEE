@@ -33,6 +33,54 @@ MooseModel >> allTransactionalMethods [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> annotateTheModelFromJEEViewPoint [
+
+	<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>
+
+
+	| interestingClasses view allInterestingMethods type classesInvolvedInATransaction transactionScopeType |
+
+	"Creation of the annotation types"
+	type := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
+	( type isNil or: [ type isEmpty ] )
+			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope]
+			ifFalse:[ transactionScopeType := type ].
+	self add: transactionScopeType.
+	
+	"Creation of the annotation istances for method and classes for transactionScope"
+	interestingClasses := ( self allClasses select: [ :class | ( class methods select: #isPartOfATransaction ) notEmpty ] ).
+	allInterestingMethods := interestingClasses allMethods select: #isPartOfATransaction.
+	
+	interestingClasses do: [:class | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: transactionScopeType.
+							instance annotatedEntity: class.
+							self add: instance.
+							 ].		
+	
+	allInterestingMethods do: [:method | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: transactionScopeType.
+							instance annotatedEntity: method.
+							self add: instance.
+							 ].	
+	
+"	classesInvolvedInATransaction := self allClasses select: [:class | class parentEJBBean isNil ].
+
+	classesInvolvedInATransaction do: [:class | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: transactionScopeType.
+							instance annotatedEntity: class.
+							self add: instance.
+							 ].	"
+
+	^self
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
 
 	^self bookmarks detect: [:each | each mooseName = aSymbol ] ifNone: aBlock
