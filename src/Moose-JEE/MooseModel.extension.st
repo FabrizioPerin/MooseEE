@@ -38,14 +38,18 @@ MooseModel >> annotateTheModelFromJEEViewPoint [
 	<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>
 
 
-	| interestingClasses view allInterestingMethods type classesInvolvedInATransaction transactionScopeType |
+	| interestingClasses view allInterestingMethods type classesInvolvedInATransaction transactionScopeType interestingClassesWithoutLonelyClasses unsafeQueryType |
 
 	"Creation of the annotation types"
-	type := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
-	( type isNil or: [ type isEmpty ] )
-			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope]
-			ifFalse:[ transactionScopeType := type ].
+	transactionScopeType := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
+	( transactionScopeType isNil or: [ transactionScopeType isEmpty ] )
+			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope].
 	self add: transactionScopeType.
+	
+	unsafeQueryType := self allAnnotationTypes select: [:annotationType | annotationType name = #unsafeQuery ].
+	( unsafeQueryType isNil or: [ unsafeQueryType isEmpty ] )
+			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery].
+	self add: unsafeQueryType.
 	
 	"Creation of the annotation istances for method and classes for transactionScope"
 	interestingClasses := ( self allClasses select: [ :class | ( class methods select: #isPartOfATransaction ) notEmpty ] ).
@@ -66,16 +70,31 @@ MooseModel >> annotateTheModelFromJEEViewPoint [
 							instance annotatedEntity: method.
 							self add: instance.
 							 ].	
-	
-"	classesInvolvedInATransaction := self allClasses select: [:class | class parentEJBBean isNil ].
 
-	classesInvolvedInATransaction do: [:class | 
+	"Creation of annotation instances on methods and classes for Unsafe Query "
+	allInterestingMethods := ( FAMIXMethodGroup withAll: ( ( self allMethods ) select: #doesExecuteAQuery ) ) deepCalleeMethodsWithoutTransactionPath.
+	interestingClasses := FAMIXClassGroup new addAll: ( self allClasses select: [ :eachClass | 
+															(eachClass methods intersection: allInterestingMethods) notEmpty ] ).
+
+	interestingClassesWithoutLonelyClasses := interestingClasses 
+												reject: [ :class | ( class invokingClasses intersection: interestingClasses ) isEmpty 
+																	and: [ ( class invokedClasses intersection: interestingClasses ) isEmpty ] ].
+
+	interestingClassesWithoutLonelyClasses do: [:class | 
 							| instance |
 							instance := FAMIXAnnotationInstance new.
-							instance annotationType: transactionScopeType.
+							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: class.
 							self add: instance.
-							 ].	"
+							 ].		
+	
+	allInterestingMethods do: [:method | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: unsafeQueryType.
+							instance annotatedEntity: method.
+							self add: instance.
+							 ].	
 
 	^self
 ]
