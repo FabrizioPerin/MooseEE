@@ -75,12 +75,12 @@ ConfigurationOfMooseJEE >> default: spec [
 				spec repository: 'http://www.squeaksource.com/OPAX'.
 				spec requires: 'XML-Parser'];
 			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
-		"spec project: 'Moose for MooseJEE' with: [
+		spec project: 'Moose for MooseJEE' with: [
 				spec
 					className: 'ConfigurationOfMoose';
 					file: 'ConfigurationOfMoose';
 					version: 'default';
-					repository: 'http://www.squeaksource.com/Moose' ]."
+					repository: 'http://www.squeaksource.com/Moose' ].
 	]
 ]
 
