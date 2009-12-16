@@ -33,13 +33,25 @@ MooseModel >> allTransactionalMethods [
 ]
 
 { #category : #'*Moose-JEE' }
-MooseModel >> annotateTheModelFromJEEViewPoint [
+MooseModel >> annotateTheModelForJEEBrowser [
 
 	<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>
 
+	self createAnnotationForTransactionScope.
+	self createAnnotationForUnsafeQuery.
+	
+	^self
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> annotateTheModelFromJEEViewPoint [
+
+	"<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>"
 
 	| interestingClasses view allInterestingMethods type classesInvolvedInATransaction transactionScopeType interestingClassesWithoutLonelyClasses unsafeQueryType |
 
+	self flag: #TODO remove.
+		
 	"Creation of the annotation types"
 	transactionScopeType := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
 	( transactionScopeType isNil or: [ transactionScopeType isEmpty ] )
@@ -102,7 +114,105 @@ MooseModel >> annotateTheModelFromJEEViewPoint [
 { #category : #'*Moose-JEE' }
 MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
 
+	self flag: #toRemove.
 	^self bookmarks detect: [:each | each mooseName = aSymbol ] ifNone: aBlock
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> browseCodeWithAnnotationsForJEA [
+	<menuItem: 'Code Browser For JEA' category: 'Browse'>
+	MooseBrowsers new codeBrowserForJEA openOn: self	
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> createAnnotationForTransactionScope [
+
+	"Creation of the annotation types"
+	| transactionScopeType interestingClasses allInterestingMethods allNamespaces |
+	transactionScopeType := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
+	( transactionScopeType isNil or: [ transactionScopeType isEmpty ] )
+			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope].
+	self add: transactionScopeType.
+
+	
+	"Creation of the annotation istances for method and classes for transactionScope"
+	interestingClasses := ( self allClasses select: [ :class | ( class methods select: #isPartOfATransaction ) notEmpty ] ).
+	allInterestingMethods := interestingClasses allMethods select: #isPartOfATransaction.
+	allNamespaces := interestingClasses collect: [:class | class container ].
+	
+	allNamespaces do: [:namespace | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: transactionScopeType.
+							instance annotatedEntity: namespace.
+							self add: instance.
+							 ].
+	
+	interestingClasses do: [:class | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: transactionScopeType.
+							instance annotatedEntity: class.
+							self add: instance.
+							 ].		
+
+	allInterestingMethods do: [:method | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: transactionScopeType.
+							instance annotatedEntity: method.
+							self add: instance.
+							 ].	
+
+	^self
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> createAnnotationForUnsafeQuery [
+
+	| unsafeQueryType allInterestingMethods interestingClasses interestingClassesWithoutLonelyClasses allNamespaces |
+
+	"Creation of the annotation types"
+	unsafeQueryType := self allAnnotationTypes select: [:annotationType | annotationType name = #unsafeQuery ].
+	( unsafeQueryType isNil or: [ unsafeQueryType isEmpty ] )
+			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery].
+	self add: unsafeQueryType.
+
+	
+	"Creation of annotation instances on methods and classes for Unsafe Query "
+	allInterestingMethods := ( FAMIXMethodGroup withAll: ( ( self allMethods ) select: #doesExecuteAQuery ) ) deepCalleeMethodsWithoutTransactionPath.
+	interestingClasses := FAMIXClassGroup new addAll: ( self allClasses select: [ :eachClass | 
+															(eachClass methods intersection: allInterestingMethods) notEmpty ] ).
+	interestingClassesWithoutLonelyClasses := interestingClasses 
+												reject: [ :class | ( class invokingClasses intersection: interestingClasses ) isEmpty 
+																	and: [ ( class invokedClasses intersection: interestingClasses ) isEmpty ] ].
+	allNamespaces := interestingClassesWithoutLonelyClasses collect: [:class | class container ].
+	
+	allNamespaces do: [:namespace | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: unsafeQueryType.
+							instance annotatedEntity: namespace.
+							self add: instance.
+							 ].	
+
+	interestingClassesWithoutLonelyClasses do: [:class | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: unsafeQueryType.
+							instance annotatedEntity: class.
+							self add: instance.
+							 ].		
+	
+	allInterestingMethods do: [:method | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: unsafeQueryType.
+							instance annotatedEntity: method.
+							self add: instance.
+							 ].	
+
+	^self
 ]
 
 { #category : #'*Moose-JEE' }
@@ -114,7 +224,7 @@ MooseModel >> importDataBaseFromSQLFile [
 	self flag: #TODO test.
 	file := UITheme builder 
 		fileOpen: 'Import information from SQL file'
-		extensions: #('sql' ).
+		extensions: #('sql').
 	file exists ifFalse: 
 		[ DialogWindow alert: 'File not found.'.
 		^ self ].

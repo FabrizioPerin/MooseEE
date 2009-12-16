@@ -142,7 +142,9 @@ FAMIXMethod >> doesOverrideAMethodInvolveInATransaction [
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> doesSupportTransaction [
-	^(self ejbTransactionType = 'NotSupported' or: [ self ejbTransactionType = 'Never' ] ) not
+	^(self ejbTransactionType = 'NotSupported' 
+		or: [ self ejbTransactionType asString asLowercase = 'never'
+			or:[ self ejbTransactionType asString asLowercase = 'not_supported' ] ] ) not
 ]
 
 { #category : #'*Moose-JEE' }
@@ -234,6 +236,7 @@ FAMIXMethod >> startATransaction [
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> startAUselessTransaction [
-	^ ( ( self ejbTransactionType = 'RequiresNew' ) and: [ self isPartOfATransaction and: [ self couldBeAnEntryPoint not ] ] ) 
-			or: [ ( self ejbTransactionType = 'REQUIRES_NEW' ) and: [ self isPartOfATransaction and: [ self couldBeAnEntryPoint not ] ] ].
+	^ ( ( ( self ejbTransactionType = 'RequiresNew' ) or: [ self ejbTransactionType = 'REQUIRES_NEW' ] ) 
+		and: [ self isPartOfATransaction 
+			and: [ self couldBeAnEntryPoint not ] ] )
 ]
