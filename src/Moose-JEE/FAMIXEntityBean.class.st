@@ -14,13 +14,13 @@ FAMIXEntityBean class >> annotation [
 	<package: 'FAMIX'>
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 FAMIXEntityBean >> isBMP [
 
 	^self persistenceType = #Bean
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 FAMIXEntityBean >> isCMP [
 
 	^self persistenceType = #Container

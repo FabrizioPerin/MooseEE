@@ -1,6 +1,18 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE' }
+MooseModel >> allColumns [
+
+	^self allWithType: FAMIXTablesColumn "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> allDatabases [
+
+	^self allWithType: FAMIXDataBase "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> allEntityBeans [
 
 	^self allWithType: FAMIXEntityBean "asMetaDescription"
@@ -26,6 +38,12 @@ MooseModel >> allSessionBeans [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> allTables [
+
+	^self allWithType: FAMIXDBTable "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> allTransactionalMethods [
 	<navigation: 'All methods involved in EJB transactions'>
 
@@ -40,74 +58,6 @@ MooseModel >> annotateTheModelForJEEBrowser [
 	self createAnnotationForTransactionScope.
 	self createAnnotationForUnsafeQuery.
 	
-	^self
-]
-
-{ #category : #'*Moose-JEE' }
-MooseModel >> annotateTheModelFromJEEViewPoint [
-
-	"<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>"
-
-	| interestingClasses view allInterestingMethods type classesInvolvedInATransaction transactionScopeType interestingClassesWithoutLonelyClasses unsafeQueryType |
-
-	self flag: #TODO remove.
-		
-	"Creation of the annotation types"
-	transactionScopeType := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
-	( transactionScopeType isNil or: [ transactionScopeType isEmpty ] )
-			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope].
-	self add: transactionScopeType.
-	
-	unsafeQueryType := self allAnnotationTypes select: [:annotationType | annotationType name = #unsafeQuery ].
-	( unsafeQueryType isNil or: [ unsafeQueryType isEmpty ] )
-			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery].
-	self add: unsafeQueryType.
-	
-	"Creation of the annotation istances for method and classes for transactionScope"
-	interestingClasses := ( self allClasses select: [ :class | ( class methods select: #isPartOfATransaction ) notEmpty ] ).
-	allInterestingMethods := interestingClasses allMethods select: #isPartOfATransaction.
-	
-	interestingClasses do: [:class | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: transactionScopeType.
-							instance annotatedEntity: class.
-							self add: instance.
-							 ].		
-	
-	allInterestingMethods do: [:method | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: transactionScopeType.
-							instance annotatedEntity: method.
-							self add: instance.
-							 ].	
-
-	"Creation of annotation instances on methods and classes for Unsafe Query "
-	allInterestingMethods := ( FAMIXMethodGroup withAll: ( ( self allMethods ) select: #doesExecuteAQuery ) ) deepCalleeMethodsWithoutTransactionPath.
-	interestingClasses := FAMIXClassGroup new addAll: ( self allClasses select: [ :eachClass | 
-															(eachClass methods intersection: allInterestingMethods) notEmpty ] ).
-
-	interestingClassesWithoutLonelyClasses := interestingClasses 
-												reject: [ :class | ( class invokingClasses intersection: interestingClasses ) isEmpty 
-																	and: [ ( class invokedClasses intersection: interestingClasses ) isEmpty ] ].
-
-	interestingClassesWithoutLonelyClasses do: [:class | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: unsafeQueryType.
-							instance annotatedEntity: class.
-							self add: instance.
-							 ].		
-	
-	allInterestingMethods do: [:method | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: unsafeQueryType.
-							instance annotatedEntity: method.
-							self add: instance.
-							 ].	
-
 	^self
 ]
 
@@ -217,40 +167,25 @@ MooseModel >> createAnnotationForUnsafeQuery [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> importDataBaseFromSQLFile [
-	<
-	menuItem: 'Import database from SQL file'
-	category: 'Import / Export'>
-	| file parser result stream |
-	self flag: #TODO test.
+	<menuItem: 'Import database from SQL file' category: 'Import / Export'>
+	
+	| file parser result stream bB |
+	
 	file := UITheme builder 
 		fileOpen: 'Import information from SQL file'
 		extensions: #('sql').
-	file exists ifFalse: 
+		
+	file isNil ifTrue: 
 		[ DialogWindow alert: 'File not found.'.
 		^ self ].
+	
 	parser := PGSQLParser new stream: file readStream.
 	result := parser run.
-	stream close
+	
+	self populateWithRelationalElementsFrom: parser blackBoard.
+		
+	^self
 
-	"folder entries do: [ :each |
-			(each exists and: [each isDirectory not] and: [ '*.sql' match: each asString ]) ifTrue: 
-			[
-				
-				parser := PGSQLParserNew new stream: stream. OPOpaxHandler on: self simpleXmlSample readStream.
-				parser startDocument.
-				parser parseDocument.
-				root := parser stack first.
-
-				(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
-					eachElement populate: self].
-				(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
-					eachElement populate: self].
-				(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
-					eachElement populate: self].
-				(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
-					eachElement populate: self].
-			]
-	]"
 ]
 
 { #category : #'*Moose-JEE' }
@@ -339,6 +274,16 @@ MooseModel >> instanciateJBeansFromAnnotations [
 		classes do: [:class | class methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ] ].
 		methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ].		
 	].
+	
+	^self
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
+
+	aBlackBoard databases do: [:each | self add: each createRelationalElement ].
+	aBlackBoard tables  do: [:each | self add: each createRelationalElement ].
+	aBlackBoard attributes do: [:each | self add: each createRelationalElement ].
 	
 	^self
 ]

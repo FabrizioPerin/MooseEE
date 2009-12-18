@@ -33,13 +33,13 @@ In addition, it knows whether it is stateless or stateful, and it knows about th
 	'>
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 FAMIXSessionBean >> isStateful [
 	<MSEProperty: #isStatefull type: #Boolean> <derived>
 	^self sessionType = #Stateful
 ]
 
-{ #category : #accessing }
+{ #category : #testing }
 FAMIXSessionBean >> isStateless [
 	<MSEProperty: #isStateless type: #Boolean> <derived>
 	^self sessionType = #Stateless

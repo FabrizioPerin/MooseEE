@@ -2425,7 +2425,7 @@ JEETests >> testAnnotationTypeAndInstancesofTransactionScope [
 	
 	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
-	mooseModel annotateTheModelFromJEEViewPoint.
+	mooseModel annotateTheModelForJEEBrowser.
 	
 	annotationTp := mooseModel allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
 	
@@ -2450,7 +2450,7 @@ JEETests >> testAnnotationTypeAndInstancesofUnsafeQuery [
 	
 	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
-	mooseModel annotateTheModelFromJEEViewPoint.
+	mooseModel annotateTheModelForJEEBrowser.
 	
 	annotationTp := mooseModel allAnnotationTypes select: [:annotationType | annotationType name = #unsafeQuery ].
 	
