@@ -78,10 +78,11 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 MooseModel >> createAnnotationForTransactionScope [
 
 	"Creation of the annotation types"
-	| transactionScopeType interestingClasses allInterestingMethods allNamespaces |
-	transactionScopeType := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
-	( transactionScopeType isNil or: [ transactionScopeType isEmpty ] )
-			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope].
+	| transactionScopeType interestingClasses allInterestingMethods allNamespaces transactionScopeTypeGroup |
+	transactionScopeTypeGroup := self allAnnotationTypes select: [:annotationType | annotationType name = #transactionScope ].
+	( transactionScopeTypeGroup isNil or: [ transactionScopeTypeGroup isEmpty ] )
+			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope]
+			ifFalse: [transactionScopeType := transactionScopeTypeGroup first].
 	self add: transactionScopeType.
 
 	
@@ -120,12 +121,13 @@ MooseModel >> createAnnotationForTransactionScope [
 { #category : #'*Moose-JEE' }
 MooseModel >> createAnnotationForUnsafeQuery [
 
-	| unsafeQueryType allInterestingMethods interestingClasses interestingClassesWithoutLonelyClasses allNamespaces |
+	| unsafeQueryType allInterestingMethods interestingClasses interestingClassesWithoutLonelyClasses allNamespaces unsafeQueryTypeGroup |
 
 	"Creation of the annotation types"
-	unsafeQueryType := self allAnnotationTypes select: [:annotationType | annotationType name = #unsafeQuery ].
-	( unsafeQueryType isNil or: [ unsafeQueryType isEmpty ] )
-			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery].
+	unsafeQueryTypeGroup := self allAnnotationTypes select: [:annotationType | annotationType name = #unsafeQuery ].
+	( unsafeQueryTypeGroup isNil or: [ unsafeQueryTypeGroup isEmpty ] )
+			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery]
+			ifFalse: [unsafeQueryType := unsafeQueryTypeGroup first].
 	self add: unsafeQueryType.
 
 	
