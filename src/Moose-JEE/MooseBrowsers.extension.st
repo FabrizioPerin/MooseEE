@@ -86,6 +86,9 @@ MooseBrowsers >> codeBrowserForJEA: title withNamespaceTags: namespaceTagsBlock 
 							text isEmpty ifTrue: [ 'No source available' ] ifFalse: [ text ] ].
 					(browser mondrian)
 						title: 'Transaction Flow';
-						painting: [ :view :class | (FAMIXClassGroup withAll: ( (class withDeepInvokingClasses) union: (class withDeepInvokedClasses ) )) viewMethodsWithTransactionFlowWithoutEllipseShapesOn: view ] ].
+						painting: [ :view :class | 
+										(FAMIXClassGroup withAll: (((class withDeepInvokingClasses) union: (class withDeepInvokedClasses)) select:[:each | each isStub not ])
+										) viewMethodsWithTransactionFlowWithoutEllipseShapesOn: view ] 
+				].
 	^ browser
 ]

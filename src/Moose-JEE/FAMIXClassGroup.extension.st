@@ -455,29 +455,33 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 
 		methods := eachClass methods intersection: allMethods.
 	
-		view newShape MOEllipseShape; radius: 8; fillColor: #yellow asColor; borderColor: #white asColor.
+		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color yellow ).
 		view nodes: ( methods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ ( each doesCall: 'executeUpdate' ) not ] ] ).
 
-		view newShape MOEllipseShape; radius: 8; fillColor: #orange asColor; borderColor: #white asColor.
+		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color orange ).
 		view nodes: ( methods select: [ :each | ( each doesCall: 'executeQuery' ) not and: [ ( each doesCall: 'executeUpdate' )  ] ] ).
 		
-		view newShape MOEllipseShape; radius: 8; fillColor: #red asColor; borderColor: #white asColor.
+		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color red ).
 		view nodes: ( methods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ each doesCall: 'executeUpdate' ] ] ).
-
-		view newShape rectangle; withBorder; lineColor: #veryLightGray asColor.
+		
+		view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
 		view nodes: ( methods select: [ :each | each doesExecuteAQuery not ] ).
 
-		view horizontalTreeLayout.
+		view shape line color darker.
+		view edges: eachClass internalInvocations from: #sender toAll: #candidates.
+		view horizontalTreeLayout 
 	].
 
-	view newShape MOOrthogonalLineShape.
+	view shape line color lighter.
 	view edgesFrom: #superclass.
 
-	view newShape line; lineColor: Color veryLightGray.
-	view edges: self mooseModel allInvocations from: #invokedBy to: #anyCandidate.
+	"view newShape line; lineColor: Color veryLightGray.
+	view edges: self mooseModel allInvocations from: #invokedBy to: #anyCandidate."
 	
-	view newShape line; invisible.
-	view edges: self from: #yourself toAll: #invokedClasses.
-
-	view dominanceTreeLayout.
+	view shape curvedLine color lighter.
+	view edges: self mooseModel allClasses
+		from: #yourself
+		toAll: #invokedClasses.
+		
+	view dominanceTreeLayout
 ]
