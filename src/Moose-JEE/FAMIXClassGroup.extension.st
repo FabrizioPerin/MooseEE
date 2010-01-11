@@ -21,7 +21,7 @@ FAMIXClassGroup >> RatioNOTMNOM [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlow [
-	<menuItem: 'Methods With Transaction Flow' category: 'Mondrian'>
+	<menuItem: 'Transaction Flow with all methods' category: 'Mondrian'>
 	| view |
 	view := MOViewRenderer new.
 	self viewMethodsWithTransactionFlowOn: view.
@@ -104,7 +104,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
 				toAll: #candidates.
 			view horizontalTreeLayout ].	
 			
-	view shape curvedLine color lighter.
+	view shape line color lighter.
 	view edges: self mooseModel allClasses
 		from: #yourself
 		toAll: #invokedClasses.

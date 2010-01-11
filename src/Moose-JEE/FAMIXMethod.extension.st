@@ -47,7 +47,10 @@ FAMIXMethod >> callsJavaSqlPackage [
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> couldBeAnEntryPoint [
-	^ self incomingInvocations isEmpty
+	^ self incomingInvocations isEmpty 
+			ifFalse: [ self incomingInvocations 
+								allSatisfy: [ :method | '.*test.*' asRegex matches: method name asLowercase ] ]
+			ifTrue: [true]				
 ]
 
 { #category : #'*Moose-JEE' }
@@ -199,13 +202,18 @@ FAMIXMethod >> isInvokedFromAPathThatSupportTransaction [
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> isInvokedFromATransactionMethod [
 
-	^( self doesSupportTransaction and: [self deepCalleeMethods anySatisfy: [ :method | method startATransaction ] ] )
+	^( self doesSupportTransaction 
+			and: [
+					|tmp| 
+					tmp := self deepCalleeMethods.
+					tmp remove: self.
+					tmp anySatisfy: [ :method | method startATransaction ] ] )
 ]
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> isPartOfATransaction [
 
-	^ self isInvokedFromATransactionMethod or: [ self doesOverrideAMethodInvolveInATransaction or: [ self isInvokedFromAPathThatSupportTransaction ] ]
+	^ self isInvokedFromATransactionMethod or: [ self doesOverrideAMethodInvolveInATransaction or: [ self isInvokedFromAPathThatSupportTransaction or: [ self startATransaction ] ] ]
 ]
 
 { #category : #'*Moose-JEE' }
@@ -230,8 +238,8 @@ FAMIXMethod >> ownedTable: anObject [
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> startATransaction [
 	^ self ejbTransactionType = 'RequiresNew' or: [  self ejbTransactionType = 'Required' 
-														or: [  self ejbTransactionType = 'REQUIRES_NEW' 
-															or: [  self ejbTransactionType = 'REQUIRED' ]]].
+														or: [  self ejbTransactionType = 'REQUIRES_NEW'
+															or: [self ejbTransactionType = 'REQUIRED' ] ] ].
 ]
 
 { #category : #'*Moose-JEE' }
