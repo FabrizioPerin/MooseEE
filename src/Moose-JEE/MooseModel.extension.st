@@ -191,7 +191,38 @@ MooseModel >> importDataBaseFromSQLFile [
 ]
 
 { #category : #'*Moose-JEE' }
-MooseModel >> importEjbJarFromFolder [
+MooseModel >> importEjbJarFromFolder: aString [
+	
+	| fileSystem entries directoryEntries parser root |
+	
+	fileSystem := FSDiskFilesystem currentClass new workingDirectory: (FSPath / aString).
+	entries := FSCollectVisitor breadthFirst: (fileSystem referenceTo: (fileSystem workingDirectory asString)).
+	
+	directoryEntries := entries select: [:entry| '.*ejb-jar.xml$' asRegex matches: entry reference name ].
+	
+	directoryEntries do: [:entry | 
+					| file |
+					file := FileStream readOnlyFileNamed: (entry reference name).
+					parser := OPOpaxHandler on: file readStream. 
+				
+					parser startDocument.
+					parser parseDocument.
+					root := parser stack first.
+							
+					(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
+							eachElement populate: self].
+					(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
+							eachElement populate: self].
+					(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
+							eachElement populate: self].
+					(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
+							eachElement populate: self].
+				].
+
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> importEjbJarFromFolderGUI [
 
 	<menuItem: 'Import ejb-jar xmls from folder' category: 'Import / Export'>
 
@@ -200,29 +231,7 @@ MooseModel >> importEjbJarFromFolder [
 	folderName := UIManager default chooseDirectory: 'Folder Name:'.
 	folderName = '' ifTrue: [^self].
 	
-	folderName fileNames do: [:n | 
-				| file |
-
-				file := (FileStream readOnlyFileNamed: (folderName fullNameFor: n)).
-				(n matchesRegex: '^.+\.(xml)$') ifTrue: 
-						[
-							parser := OPOpaxHandler on: file readStream.
-				
-							parser startDocument.
-							parser parseDocument.
-							root := parser stack first.
-
-							
-							(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
-								eachElement populate: self].
-							(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
-								eachElement populate: self].
-							(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
-								eachElement populate: self].
-							(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
-								eachElement populate: self].
-					]
-			]
+	self importEjbJarFromFolder: folderName pathName.
 ]
 
 { #category : #'*Moose-JEE' }
