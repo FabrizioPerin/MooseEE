@@ -149,6 +149,63 @@ FAMIXClass >> parentEJBBean: aBean [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> viewInterestingTransactionMethodsOn: view [
+	| allInterestingMethods |
+
+	allInterestingMethods := self methods select: #isPartOfATransaction.
+
+		view newShape ellipse; fillColor: #veryLightGray asColor; radius: 7; borderColor: #white asColor.
+		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
+															and: [ each hasEJBTransactionAttribute not ] ] ).
+
+		view newShape rectangle; withBorder; lineColor: #veryLightGray asColor.
+		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
+															and: [ each hasEJBTransactionAttribute not ] ] ).
+
+		view newShape ellipse; fillColor: #blue asColor; radius: 8; borderColor: #white asColor.
+		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery and: [ each startATransaction and: [ each couldBeAnEntryPoint ] ] ] ).
+
+		view newShape rectangle; fillColor: #blue asColor; withBorder; lineColor: #darkBlue asColor.
+		view nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
+															and: [ each startATransaction 
+																and: [ each couldBeAnEntryPoint ] ] ] ).
+
+		view newShape ellipse; fillColor: #red asColor; radius: 8; borderColor: #white asColor.
+		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery															 
+															and: [ each startAUselessTransaction ] ] ).
+
+		view newShape rectangle; fillColor: #red asColor; withBorder; lineColor: #darkRed asColor.
+		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
+															and: [ each startAUselessTransaction ] ] ).
+
+		view newShape ellipse; fillColor: #cyan asColor; radius: 8; borderColor: #darkCyan asColor.
+		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
+															and: [ each startAUselessTransaction not 
+																and: [ each couldBeAnEntryPoint not
+																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
+
+		view newShape rectangle; fillColor: #cyan asColor; withBorder; lineColor: #darkCyan asColor.
+		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
+															and: [ each startAUselessTransaction not 
+																and: [ each couldBeAnEntryPoint not
+																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
+
+		view newShape ellipse; fillColor: #darkGreen asColor; radius: 8; borderColor: #green asColor.
+		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
+															and: [ each startAUselessTransaction not 
+																and: [ each couldBeAnEntryPoint
+																	and: [ each ejbTransactionType = 'Supports' ] ] ] ] ).
+
+		view newShape rectangle; fillColor: #darkGreen asColor; withBorder; lineColor: #green asColor.
+		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
+															and: [ each startAUselessTransaction not 
+																and: [ each couldBeAnEntryPoint
+																	and: [ each ejbTransactionType = 'Supports' ] ] ] ] ).
+
+		view horizontalDominanceTreeLayout.
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> withDeepInvokedClasses [
 
 	| cursor result invokedClassesAndTheirSubclasses |

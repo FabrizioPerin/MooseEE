@@ -373,6 +373,58 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 ]
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
+FAMIXClassGroup >> viewTransactionFlowByLayers [
+	<menuItem: 'Transaction Flow By Layers' category: 'Mondrian'>
+	| view |
+	view := MOViewRenderer new.
+	self viewTransactionFlowByLayersOn: view.
+	view open
+]
+
+{ #category : #'*Moose-JEE-mondrianvisualizations' }
+FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [ 
+	<mondrianView: 'viewTransactionFlowByLayersOn: view '>
+	| beans data logic map invocationsMap invoked |
+
+
+	beans := ( self select: [ :class | class hasImplementsABean ] )asSet asOrderedCollection. 
+	"beansWithSuperclassses := (beans flatCollect: [:each | each withSuperclassHierarchy]) asSet asOrderedCollection."
+
+	invoked := ( self select: [ :eachClass | ( eachClass methods select: #isPartOfATransaction ) notEmpty ] ) asSet asOrderedCollection.
+	data := invoked select: #isADataLayerClass.
+	beans := beans difference: data.
+
+	invoked := invoked  reject: [:each | beans includes: each].
+	logic := invoked reject: #isADataLayerClass.
+	
+	map := IdentityDictionary new.
+	data do: [:each | map at: each mooseName put: 3].
+	logic do: [:each | map at: each mooseName put: 2].
+	beans do: [:each | map at: each mooseName put: 1].
+	invocationsMap := beans first mooseModel allClasses flatCollect: [:each | each invokedClasses collect: [:x | each -> x]].
+
+	view umlPackageShapeWithLabel: 'Service Layer'.
+	view node: beans forIt: [ view nodes: beans forEach: [:each | each viewInterestingTransactionMethodsOn: view. "view gridLayout" ]. view dominanceTreeLayout.].
+
+	view umlPackageShapeWithLabel: 'Logic Layer'.
+	view node: logic forIt:[ view nodes: logic forEach: [:each | each viewInterestingTransactionMethodsOn: view. view gridLayout ]. view dominanceTreeLayout. ].
+
+	view umlPackageShapeWithLabel: 'Data Layer'.
+	view node: data forIt:[ view nodes: data forEach: [:each | each viewInterestingTransactionMethodsOn: view. view gridLayout  ]. view dominanceTreeLayout. ].
+	
+
+	view newShape line; invisible.
+	view edges: ( invocationsMap reject: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  from: #key to: #value.
+
+	view newShape curvedLine; lineColor: #orange asColor.
+	view edges: ( invocationsMap select: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  from: #key to: #value.
+	"view newShape line; lineWidth: 4; lineColor: Color red."
+	view newShape curvedLine; lineColor: #darkGray asColor.
+	view edges: beans first mooseModel allClasses from: #directSuperclasses to: #yourself.
+	view verticalLineLayout verticalGap: 40.
+]
+
+{ #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlowOn: view [ 
 	"<menuItem: 'Transaction Flow' category: 'Visualize'>"
 	

@@ -88,7 +88,7 @@ MooseBrowsers >> codeBrowserForJEA: title withNamespaceTags: namespaceTagsBlock 
 						title: 'Transaction Flow';
 						painting: [ :view :class | 
 										(FAMIXClassGroup withAll: (((class withDeepInvokingClasses) union: (class withDeepInvokedClasses)) select:[:each | each isStub not ])
-										) viewMethodsWithTransactionFlowWithoutEllipseShapesOn: view ] 
+										) viewMethodsWithTransactionFlowOn: view ] 
 				].
 	^ browser
 ]

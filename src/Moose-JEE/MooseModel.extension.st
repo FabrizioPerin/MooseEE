@@ -87,7 +87,7 @@ MooseModel >> createAnnotationForTransactionScope [
 
 	
 	"Creation of the annotation istances for method and classes for transactionScope"
-	interestingClasses := ( self allClasses select: [ :class | ( class methods select: #isPartOfATransaction ) notEmpty ] ).
+	interestingClasses := ( self allClasses select: [ :class | class isStub not and:[ (class methods select: #isPartOfATransaction) notEmpty ] ] ).
 	allInterestingMethods := interestingClasses allMethods select: #isPartOfATransaction.
 	allNamespaces := interestingClasses collect: [:class | class container ].
 	
