@@ -116,6 +116,12 @@ FAMIXClass >> isARowDataGateway [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> isTestClass [
+
+	^('.*test.*' asRegex matches: self name) or: ['.*test.*' asRegex matches: self container name]
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> numberOfQueryingMethods [
 	<MSEProperty: #NOQM type: #Number>
 	<property: #NOQM	longName: 'Number of querying methods'

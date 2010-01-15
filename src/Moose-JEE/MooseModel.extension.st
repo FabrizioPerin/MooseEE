@@ -56,7 +56,7 @@ MooseModel >> annotateTheModelForJEEBrowser [
 	<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>
 
 	self createAnnotationForTransactionScope.
-	self createAnnotationForUnsafeQuery.
+	"self createAnnotationForUnsafeQuery."
 	
 	^self
 ]
