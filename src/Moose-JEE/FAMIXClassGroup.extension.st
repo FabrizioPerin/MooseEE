@@ -470,7 +470,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayers [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [ 
-	<mondrianView: 'viewTransactionFlowByLayersOn: view '>
+	"<mondrianView: 'viewTransactionFlowByLayersOn: view '>"
 	| beans data logic map invocationsMap invoked |
 
 

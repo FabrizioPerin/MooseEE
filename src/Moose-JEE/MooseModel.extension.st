@@ -184,7 +184,17 @@ MooseModel >> importDataBaseFromSQLFile [
 	parser := PGSQLParser new stream: file readStream.
 	result := parser run.
 	
+	self halt.
+	
 	self populateWithRelationalElementsFrom: parser blackBoard.
+	
+	"| tables entities out |
+out := OrderedCollection new.
+entities := (MooseModel root first allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
+
+tables := MooseModel root first allTables.
+tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ].
+out inspect."
 		
 	^self
 

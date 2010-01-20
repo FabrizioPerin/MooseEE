@@ -118,7 +118,11 @@ FAMIXClass >> isARowDataGateway [
 { #category : #'*Moose-JEE' }
 FAMIXClass >> isTestClass [
 
-	^('.*test.*' asRegex matches: self name) or: ['.*test.*' asRegex matches: self container name]
+	| re |
+	
+	re := '.*test.*' asRegex.
+	
+	^( re matches: self name) or: [re matches: self container name]
 ]
 
 { #category : #'*Moose-JEE' }
