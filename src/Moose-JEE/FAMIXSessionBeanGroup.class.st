@@ -6,7 +6,9 @@ Class {
 
 { #category : #'as yet unclassified' }
 FAMIXSessionBeanGroup >> umlShape: aString [
+
 	| builder |
+
 	builder := MOFormsBuilder new.
 	builder
 		column;
@@ -28,7 +30,16 @@ FAMIXSessionBeanGroup >> umlShape: aString [
 		x: 1
 		y: 2
 		add: MORectangleShape new.
+	builder 
+		x: 1
+		y: 2
+		add: (MOLabelShape new text: 
+			[ :cls | 
+			cls methodDict keys 
+				inject: ''
+				into: [ :sum :el | sum , el , String cr ] ]).
 	^ builder shape
+
 ]
 
 { #category : #'as yet unclassified' }

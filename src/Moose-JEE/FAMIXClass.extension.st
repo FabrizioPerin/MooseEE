@@ -164,49 +164,49 @@ FAMIXClass >> viewInterestingTransactionMethodsOn: view [
 
 	allInterestingMethods := self methods select: #isPartOfATransaction.
 
-		view newShape ellipse; fillColor: #veryLightGray asColor; radius: 7; borderColor: #white asColor.
+		view shape ellipse fillColor: Color veryLightGray.
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
-		view newShape rectangle; withBorder; lineColor: #veryLightGray asColor.
+		view shape rectangle borderColor: Color veryLightGray.
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
-		view newShape ellipse; fillColor: #blue asColor; radius: 8; borderColor: #white asColor.
+		view shape ellipse fillColor: Color blue.
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery and: [ each startATransaction and: [ each couldBeAnEntryPoint ] ] ] ).
 
-		view newShape rectangle; fillColor: #blue asColor; withBorder; lineColor: #darkBlue asColor.
+		view shape rectangle fillColor: Color blue; borderColor: Color blue darker.
 		view nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
 															and: [ each startATransaction 
 																and: [ each couldBeAnEntryPoint ] ] ] ).
 
-		view newShape ellipse; fillColor: #red asColor; radius: 8; borderColor: #white asColor.
+		view shape ellipse fillColor: Color red.
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery															 
 															and: [ each startAUselessTransaction ] ] ).
 
-		view newShape rectangle; fillColor: #red asColor; withBorder; lineColor: #darkRed asColor.
+		view shape rectangle fillColor: Color red; borderColor: Color red darker.
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction ] ] ).
 
-		view newShape ellipse; fillColor: #cyan asColor; radius: 8; borderColor: #darkCyan asColor.
+		view shape ellipse fillColor: Color cyan darker.
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 
-		view newShape rectangle; fillColor: #cyan asColor; withBorder; lineColor: #darkCyan asColor.
+		view shape rectangle fillColor: Color cyan darker; borderColor: Color cyan darker.
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 
-		view newShape ellipse; fillColor: #darkGreen asColor; radius: 8; borderColor: #green asColor.
+		view shape ellipse fillColor: Color green darker.
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint
 																	and: [ each ejbTransactionType = 'Supports' ] ] ] ] ).
 
-		view newShape rectangle; fillColor: #darkGreen asColor; withBorder; lineColor: #green asColor.
+		view shape rectangle fillColor: Color green darker; borderColor: Color green.
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint
