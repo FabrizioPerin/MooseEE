@@ -29,6 +29,11 @@ ConfigurationOfMooseJEE class >> loadDefault [
 	(self project version: 'default') load
 ]
 
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
+	(self project version: 'withoutMoose') load
+]
+
 { #category : #accessing }
 ConfigurationOfMooseJEE class >> project [
 
@@ -57,6 +62,25 @@ ConfigurationOfMooseJEE >> default: spec [
 					file: 'ConfigurationOfMoose';
 					version: 'default';
 					repository: 'http://www.squeaksource.com/Moose' ].
+	]
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [ 
+	<version: 'withoutMoose'>
+	
+	spec for: #common do: [
+		spec blessing: #default.
+		spec 
+			package: 'Moose-JEE' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				"spec requires: 'Moose for MooseJEE'"];
+			package: 'XML-Parser' with: [
+				spec repository: 'http://www.squeaksource.com/XMLSupport'];
+			package: 'Opax' with: [
+				spec repository: 'http://www.squeaksource.com/OPAX'.
+				spec requires: 'XML-Parser'];
+			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
 	]
 ]
 
