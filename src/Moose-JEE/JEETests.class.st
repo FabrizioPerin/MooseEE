@@ -2806,7 +2806,7 @@ JEETests >> testImplementationClassAfterThePopulation [
 { #category : #testing }
 JEETests >> testImportEjbJarFromFolder [
 	
-	| folderName parser root |
+	| folderName mooseModel |
 
 	folderName := UIManager default chooseDirectory: 'Folder Name:'.
 	folderName = '' ifTrue: [^self].
@@ -2814,19 +2814,21 @@ JEETests >> testImportEjbJarFromFolder [
 	"folderName := UITheme builder chooseDirectory: 'Folder Name:'.
 	folderName = '' ifTrue: [^self]."
 	
-	folderName fileNames do: [:n | 
+	mooseModel := MooseModel new importEjbJarFromFolder: folderName pathName.
+	
+	"folderName fileNames do: [:n | 
 				| file |
 				file := (FileStream readOnlyFileNamed: (folderName fullNameFor: n)).
 				(n matchesRegex: '^.+\.(xml)$') ifTrue: 
 						[
-							parser := OPOpaxHandler on: file "readStream".
+							parser := OPOpaxHandler on: file readStream.
 							parser startDocument.
 							parser parseDocument.
 							
 							root := parser stack first.
 						]ifFalse:[]
-					].
-		self assert: (root isKindOf: OPRootElement).
+					]."
+	self assert: (mooseModel allSessionBeans notEmpty ).
 	
 ]
 

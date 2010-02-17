@@ -30,8 +30,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlow [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
-	"<menuItem: 'Transaction Flow 2' category: 'Visualize'>"
-
+	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods |
 	
 	interestingClasses := self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ].
@@ -117,8 +116,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
-	"<menuItem: 'Transaction Flow 2' category: 'Visualize'>"
-
+	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods |
 	
 	interestingClasses := self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ].
@@ -201,8 +199,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowWithoutEllipseShapesOn: view [
-	"<menuItem: 'Transaction Flow 2' category: 'Visualize'>"
-
+	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods |
 	
 	interestingClasses := self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ].
@@ -377,7 +374,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayers [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [ 
-	"<mondrianView: 'viewTransactionFlowByLayersOn: view '>"
+	
 	| beans data logic map invocationsMap invoked |
 
 
@@ -459,7 +456,7 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 	"view newShape line; lineColor: Color veryLightGray.
 	view edges: self mooseModel allInvocations from: #invokedBy to: #anyCandidate."
 	
-	view shape curvedLine color lighter.
+	view shape line color lighter.
 	view edges: self mooseModel allClasses
 		from: #yourself
 		toAll: #invokedClasses.

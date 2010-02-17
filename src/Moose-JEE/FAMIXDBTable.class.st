@@ -41,8 +41,8 @@ FAMIXDBTable >> initialize [
 	super initialize.
 	columns := OrderedCollection new.
 	ownerDataBase := nil.
-	nameAsRegExIgCa := ('.*', self name, '.*') asRegexIgnoringCase. 
-	nameAsRegEx := ('.*', self name, '.*') asRegex.
+	nameAsRegExIgCa := nil.
+	nameAsRegEx := nil.
 ]
 
 { #category : #accessing }
