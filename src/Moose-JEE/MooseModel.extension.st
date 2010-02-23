@@ -168,23 +168,12 @@ MooseModel >> createAnnotationForUnsafeQuery [
 ]
 
 { #category : #'*Moose-JEE' }
-MooseModel >> importDataBaseFromSQLFile [
-	<menuItem: 'Import database from SQL file' category: 'Import / Export'>
+MooseModel >> importDBFromSQLFile: aFileStream [
 	
-	| file parser result stream bB |
+	| parser result |
 	
-	file := UITheme builder 
-		fileOpen: 'Import information from SQL file'
-		extensions: #('sql').
-		
-	file isNil ifTrue: 
-		[ DialogWindow alert: 'File not found.'.
-		^ self ].
-	
-	parser := PGSQLParser new stream: file readStream.
+	parser := PGSQLParser new stream: aFileStream.
 	result := parser run.
-	
-	self halt.
 	
 	self populateWithRelationalElementsFrom: parser blackBoard.
 	
@@ -198,6 +187,22 @@ out inspect."
 		
 	^self
 
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> importDBFromSQLFileGUI [
+	<menuItem: 'Import database from SQL file' category: 'Import / Export'>
+	
+	| file |
+	
+	file := UITheme builder 
+		fileOpen: 'Import information from SQL file'
+		extensions: #('sql').
+		
+	file isNil 
+		ifTrue: [ DialogWindow alert: 'File not found.'.]
+		ifFalse:[self importDBFromSQLFile: file readStream].
+	
 ]
 
 { #category : #'*Moose-JEE' }
