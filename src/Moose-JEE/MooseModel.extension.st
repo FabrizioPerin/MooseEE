@@ -250,6 +250,38 @@ MooseModel >> importEjbJarFromFolderGUI [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> initAndOpenJEEFromFolder: srcFolderString withName: applicationNameString [ 
+	self rootFolder: srcFolderString.
+
+	self importFromMSEStream: (StandardFileStream readOnlyFileNamed: (FileDirectory default fullName,
+											FileDirectory slash,
+											'..',
+											FileDirectory slash,
+											'..',
+											FileDirectory slash,
+											'inFusion',
+											FileDirectory slash,
+											'tools',
+											FileDirectory slash,
+											'inFusion',
+											FileDirectory slash,
+											'project.mse')).
+
+
+self importEjbJarFromFolder: srcFolderString.
+self annotateTheModelForJEEBrowser.
+
+self install.
+
+self allClasses viewTransactionFlow3.
+self allClasses viewUnsafeQueries.
+self browseCodeWithAnnotationsForJEA.
+
+MoosePanel open.
+
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> instanciateJBeansFromAnnotations [
 	<menuItem: 'Import beans from annotations' category: 'Import / Export'>
 	
