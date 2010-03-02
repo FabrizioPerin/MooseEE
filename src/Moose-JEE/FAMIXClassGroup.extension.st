@@ -33,24 +33,15 @@ FAMIXClassGroup >> determinGroupStartingFrom: groupNum [
 	| currentGroupNumber groupsToChange |
 
 	currentGroupNumber := groupNum.
-	groupsToChange := Dictionary new.
+	groupsToChange := OrderedCollection with: currentGroupNumber .
 		
 	self do: [:class | 
 				class groupNumber isNil
 					ifTrue: [ class groupNumber: currentGroupNumber ]
 					ifFalse: [ "if False means that as been found a class of another hierarchy"
 						"determin new group number"
-						| min currentValue |
-						min := currentGroupNumber min: class groupNumber.
-						
-						currentValue := groupsToChange at: currentGroupNumber ifAbsent: [^nil].
-						
-						currentValue isNil
-							ifTrue: [ groupsToChange at: currentGroupNumber put: min ]
-							ifFalse: [ 
-								currentGroupNumber := groupsToChange determinAGroupNumber: currentGroupNumber.
-								groupsToChange updateGroupNumberWith: currentGroupNumber. ].
-
+						groupsToChange add: class groupNumber.					
+						currentGroupNumber := currentGroupNumber min: class groupNumber.
 						"assign class group"
 						class groupNumber: currentGroupNumber  ]
 			].
@@ -61,43 +52,39 @@ FAMIXClassGroup >> determinGroupStartingFrom: groupNum [
 { #category : #'*Moose-JEE' }
 FAMIXClassGroup >> groupClassesConsiderInvokationHierarchy [
 
-| startSet wholeSet groupNumber |
+| wholeSet groupNumber |
 
-startSet := self select: [ :class | class hasImplementsASessionBean ].
+"I should move away this and just invoke"
+"startSet := self select: [ :class | class hasImplementsASessionBean ]."
 
 "initialize"
 wholeSet := OrderedCollection new.
-startSet do: [:bean | wholeSet add: bean withDeepInvokedClasses asMooseGroup ].
+self do: [:bean | wholeSet add: bean withDeepInvokedClasses asMooseGroup ].
 groupNumber := 1.
 
 wholeSet do: [:classGroup | 
-				| changesDictionary|
-				changesDictionary := classGroup determinGroupStartingFrom: groupNumber.
-				"self halt."
-				"self updateGroupNumberUsing: changesDictionary."			
+				| changesCollection|
+				changesCollection := classGroup determinGroupStartingFrom: groupNumber.
+				self updateGroupNumberUsing: changesCollection.		
 				groupNumber := groupNumber+1. ].
-
-"wholeSet determinGroup.
-wholeSet assignGroup.
-
-startSet do: [:class | 
-				| actualHierarchy |
-				actualHierarchy := class withDeepInvokedClasses.
-				actualHierarchy assignAGroupNumberConsidering: wholeSet . ]"
-
 
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXClassGroup >> updateGroupNumberUsing: aDictionary [
+FAMIXClassGroup >> updateGroupNumberUsing: anOrderedCollection [
 
-	| classesToUpdate |
-
-	classesToUpdate := FAMIXClassGroup new.
-
-	aDictionary keysDo: [:key | classesToUpdate addAll:( self select: [:class | class groupNumber = key ] ) ].
-
-	aDictionary keysDo: [:key | classesToUpdate do: [:class | class groupNumber: ( aDictionary at: key ) ] ].
+	(anOrderedCollection size = 1)
+		ifFalse: [ 
+			| valueToAssign |
+			
+			valueToAssign := anOrderedCollection min.
+			anOrderedCollection remove: valueToAssign.
+			
+			anOrderedCollection 
+					do: [:groupNm |
+						self do: [:class | ( class groupNumber = groupNm ) ifTrue: [ class groupNumber: valueToAssign ] ]
+					]	
+		].
 ]
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }

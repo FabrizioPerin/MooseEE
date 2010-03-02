@@ -1465,7 +1465,7 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeansAndHierarchi [
 			yourself
 		);
 		add: (FAMIXClass new
-			name: #ABMPEntity;
+			name: #PAOEntity;
 			container: anotherPackage;
 			yourself
 		);
@@ -2704,12 +2704,24 @@ JEETests >> testFAMIXMethodDeepCalleeMethodsWithoutTransactionPath [
 
 { #category : #testing }
 JEETests >> testGroupClassesConsiderInvokationHierarchy [
-
-	| mooseModel method anotherMethod |
-
+	| mooseModel max aStatelessSessionBean aStatefulSessionBean class3 class4 |
+	
+	max := 0.
 	mooseModel := self sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
 	
 	mooseModel allClasses groupClassesConsiderInvokationHierarchy.
+	self assert: (mooseModel allClasses select: [ :class | class groupNumber isNil ]) isEmpty.
+
+	aStatelessSessionBean := (mooseModel allClasses select: [:class | class name = 'AStatelessSessionBean']) first.
+	aStatefulSessionBean := (mooseModel allClasses select: [:class | class name = 'AStatefulSessionBean']) first.
+	class3 := (mooseModel allClasses select: [:class | class name = 'Class3']) first.
+	class4 := (mooseModel allClasses select: [:class | class name = 'Class4']) first.
+	self assert: ( (aStatelessSessionBean groupNumber = aStatefulSessionBean groupNumber) and: [
+				(aStatefulSessionBean groupNumber = class3 groupNumber) and: [
+				(class3 groupNumber = class4 groupNumber) ]]	).
+	
+	mooseModel allClasses do: [ :class | max := class groupNumber max: max ].
+	self assert: max = 14
 ]
 
 { #category : #testing }
