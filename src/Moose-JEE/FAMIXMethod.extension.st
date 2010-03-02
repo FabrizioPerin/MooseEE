@@ -213,7 +213,7 @@ FAMIXMethod >> isInvokedFromATransactionMethod [
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> isPartOfATransaction [
 
-	^ self isInvokedFromATransactionMethod or: [ self doesOverrideAMethodInvolveInATransaction or: [ self isInvokedFromAPathThatSupportTransaction or: [ self startATransaction ] ] ]
+	^ self startATransaction or: [ self doesOverrideAMethodInvolveInATransaction or: [ self isInvokedFromATransactionMethod or: [ self isInvokedFromAPathThatSupportTransaction ] ] ]
 ]
 
 { #category : #'*Moose-JEE' }

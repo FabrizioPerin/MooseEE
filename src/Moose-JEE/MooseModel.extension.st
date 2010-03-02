@@ -53,7 +53,7 @@ MooseModel >> allTransactionalMethods [
 { #category : #'*Moose-JEE' }
 MooseModel >> annotateTheModelForJEEBrowser [
 
-	<menuItem: 'Annotate the model with JEE informations' category: 'Import / Export'>
+	<menuItem: 'Annotate the model with JEE informations' category: 'JEE Menu'>
 
 	self createAnnotationForTransactionScope.
 	self createAnnotationForUnsafeQuery.
@@ -70,8 +70,21 @@ MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> browseCodeWithAnnotationsForJEA [
-	<menuItem: 'Code Browser For JEA' category: 'Browse'>
+	<menuItem: 'Code Browser For JEA' category: 'JEE Menu'>
 	MooseBrowsers new codeBrowserForJEA openOn: self	
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> buildRelationsAmongDBElementsAndMethods [
+
+| tables entities out |
+out := OrderedCollection new.
+entities := (MooseModel root first allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
+
+tables := MooseModel root first allTables.
+tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ].
+out inspect.
+
 ]
 
 { #category : #'*Moose-JEE' }
@@ -191,7 +204,7 @@ out inspect."
 
 { #category : #'*Moose-JEE' }
 MooseModel >> importDBFromSQLFileGUI [
-	<menuItem: 'Import database from SQL file' category: 'Import / Export'>
+	<menuItem: 'Import database from SQL file' category: 'JEE Menu'>
 	
 	| file |
 	
@@ -200,9 +213,8 @@ MooseModel >> importDBFromSQLFileGUI [
 		extensions: #('sql').
 		
 	file isNil 
-		ifTrue: [ DialogWindow alert: 'File not found.'.]
+		ifTrue: [ DialogWindow new alert: 'File not found.'.]
 		ifFalse:[self importDBFromSQLFile: file readStream].
-	
 ]
 
 { #category : #'*Moose-JEE' }
@@ -239,7 +251,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 { #category : #'*Moose-JEE' }
 MooseModel >> importEjbJarFromFolderGUI [
 
-	<menuItem: 'Import ejb-jar xmls from folder' category: 'Import / Export'>
+	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEE Menu'>
 
 	| folderName parser root |
 	
@@ -251,6 +263,7 @@ MooseModel >> importEjbJarFromFolderGUI [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> initAndOpenJEEFromFolder: srcFolderString withName: applicationNameString [ 
+	
 	self rootFolder: srcFolderString.
 
 	self importFromMSEStream: (StandardFileStream readOnlyFileNamed: (FileDirectory default fullName,
@@ -283,7 +296,7 @@ MoosePanel open.
 
 { #category : #'*Moose-JEE' }
 MooseModel >> instanciateJBeansFromAnnotations [
-	<menuItem: 'Import beans from annotations' category: 'Import / Export'>
+	<menuItem: 'Import beans from annotations' category: 'JEE Menu'>
 	
 	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes |
 	

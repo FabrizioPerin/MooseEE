@@ -17,6 +17,20 @@ FAMIXClass >> doesImplements: aSymbol [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> groupNumber [
+	<MSEProperty: #groupNumber type: #Integer>
+	"self flag: 'annotate with fame meta descriptions'."
+	^self privateState attributeGet: #groupNumber default: [nil]
+
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClass >> groupNumber: anInteger [
+
+	^self privateState attributeSet: #groupNumber value: anInteger
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> hasImplementsABean [
 	^ ( ( self mooseModel allJEEBeans ) anySatisfy: [:bean | bean implementationClass == self ] )
 ]
@@ -120,7 +134,9 @@ FAMIXClass >> isTestClass [
 
 	| re |
 	
-	re := '.*test.*' asRegex.
+	self flag: #TODO test.
+	
+	re := '.*test.*' asRegexIgnoringCase. " '^test.*' "
 	
 	^( re matches: self name) or: [re matches: self container name]
 ]

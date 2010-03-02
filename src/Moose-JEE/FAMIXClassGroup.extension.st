@@ -19,6 +19,87 @@ FAMIXClassGroup >> RatioNOTMNOM [
 	^self lookUpPropertyNamed: #'R_NOTM_NOM' computedAs: [ ( ( self sumOfPropertyNamed: #NOTM ) / ( self sumOfPropertyNamed: #NOM) ) asFloat ]
 ]
 
+{ #category : #'*Moose-JEE' }
+FAMIXClassGroup >> allClassesOfGroup: anInteger [
+
+	^self select: [:class | class groupNumber = anInteger ].
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClassGroup >> determinGroupStartingFrom: groupNum [
+	"This is the algorithm that assigne the group numbers to the elements.
+		anExistingGroups is an OrderedCollection containing an OrderedCollection for each group of classes."
+
+	| currentGroupNumber groupsToChange |
+
+	currentGroupNumber := groupNum.
+	groupsToChange := Dictionary new.
+		
+	self do: [:class | 
+				class groupNumber isNil
+					ifTrue: [ class groupNumber: currentGroupNumber ]
+					ifFalse: [ "if False means that as been found a class of another hierarchy"
+						"determin new group number"
+						| min currentValue |
+						min := currentGroupNumber min: class groupNumber.
+						
+						currentValue := groupsToChange at: currentGroupNumber ifAbsent: [^nil].
+						
+						currentValue isNil
+							ifTrue: [ groupsToChange at: currentGroupNumber put: min ]
+							ifFalse: [ 
+								currentGroupNumber := groupsToChange determinAGroupNumber: currentGroupNumber.
+								groupsToChange updateGroupNumberWith: currentGroupNumber. ].
+
+						"assign class group"
+						class groupNumber: currentGroupNumber  ]
+			].
+		
+	^groupsToChange
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClassGroup >> groupClassesConsiderInvokationHierarchy [
+
+| startSet wholeSet groupNumber |
+
+startSet := self select: [ :class | class hasImplementsASessionBean ].
+
+"initialize"
+wholeSet := OrderedCollection new.
+startSet do: [:bean | wholeSet add: bean withDeepInvokedClasses asMooseGroup ].
+groupNumber := 1.
+
+wholeSet do: [:classGroup | 
+				| changesDictionary|
+				changesDictionary := classGroup determinGroupStartingFrom: groupNumber.
+				"self halt."
+				"self updateGroupNumberUsing: changesDictionary."			
+				groupNumber := groupNumber+1. ].
+
+"wholeSet determinGroup.
+wholeSet assignGroup.
+
+startSet do: [:class | 
+				| actualHierarchy |
+				actualHierarchy := class withDeepInvokedClasses.
+				actualHierarchy assignAGroupNumberConsidering: wholeSet . ]"
+
+
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClassGroup >> updateGroupNumberUsing: aDictionary [
+
+	| classesToUpdate |
+
+	classesToUpdate := FAMIXClassGroup new.
+
+	aDictionary keysDo: [:key | classesToUpdate addAll:( self select: [:class | class groupNumber = key ] ) ].
+
+	aDictionary keysDo: [:key | classesToUpdate do: [:class | class groupNumber: ( aDictionary at: key ) ] ].
+]
+
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlow [
 	<menuItem: 'Transaction Flow with all methods' category: 'Mondrian'>
