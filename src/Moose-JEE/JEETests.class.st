@@ -2797,6 +2797,36 @@ JEETests >> testHasImplementsAnEntityBean [
 ]
 
 { #category : #testing }
+JEETests >> testImplementationClassAfterThePopulation [
+	| model entityBeansAnnotations |
+	MooseModel resetMeta.
+	model := MooseModel new.
+	model importFromMSEStream: '(
+		(FAMIX.Namespace (id: 100) (name ''aNamespace''))				
+		(FAMIX.Class (id: 1) (name ''AClass''))
+		(FAMIX.Class (id: 10) (name ''AnotherClass''))
+		(FAMIX.Class (id: 11) (name ''StillAnotherClass''))
+		(FAMIX.Method (id: 2) (name ''aMethod'') (parentType (ref: 1)))
+		(FAMIX.Class (id: 3) (name ''AnAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 4) (name ''Entity'') (container (ref: 100)))
+		(FAMIX.Class (id: 5) (name ''AnotherAnnotationDefinitionClass''))
+		(FAMIX.AnnotationType (id: 6) (name ''Stateful'') (container (ref: 100)))
+		(FAMIX.AnnotationInstance (id: 7) (annotatedEntity (ref: 1)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 8) (annotatedEntity (ref: 10)) (annotationType (ref: 4)))
+		(FAMIX.AnnotationInstance (id: 9) (annotatedEntity (ref: 11)) (annotationType (ref: 6)))
+	)' readStream.
+	
+	model instanciateJBeansFromAnnotations.
+	
+	self assert: (model allEntityBeans size = 2).
+	self assert: (model allSessionBeans size = 1).
+	
+	self assert: (model allJEEBeans select: [:bean | bean implementationClass isNil ] ) size = 0.
+	self assert: (model allSessionBeans anySatisfy: [:bean | bean implementationClass = (model allClasses select: [:each | each mooseName = #StillAnotherClass]) first ])
+
+]
+
+{ #category : #testing }
 JEETests >> testInstanciateAllBeansFromAnnotations [
 	| model entityBeansAnnotations |
 	MooseModel resetMeta.
