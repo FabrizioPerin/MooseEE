@@ -1,6 +1,11 @@
 Extension { #name : #MOViewRenderer }
 
 { #category : #'*Moose-JEE' }
+MOViewRenderer >> dominanceGrouppedTreeLayout [
+	^self layout: MODominanceTreeWithGroupsLayout new.
+]
+
+{ #category : #'*Moose-JEE' }
 MOViewRenderer >> umlPackageShapeWithLabel: aBlock [
 	| builder |
 	builder := MOFormsBuilder new.

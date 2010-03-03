@@ -56,18 +56,24 @@ FAMIXClassGroup >> groupClassesConsiderInvokationHierarchy [
 
 "I should move away this and just invoke"
 "startSet := self select: [ :class | class hasImplementsASessionBean ]."
+self resetGroups.
 
 "initialize"
 wholeSet := OrderedCollection new.
-self do: [:bean | wholeSet add: bean withDeepInvokedClasses asMooseGroup ].
+self do: [:class | wholeSet add: class withDeepInvokedClasses asMooseGroup ].
 groupNumber := 1.
 
 wholeSet do: [:classGroup | 
 				| changesCollection|
 				changesCollection := classGroup determinGroupStartingFrom: groupNumber.
 				self updateGroupNumberUsing: changesCollection.		
-				groupNumber := groupNumber+1. ].
+				groupNumber := groupNumber + 1. ].
 
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXClassGroup >> resetGroups [
+	self do:[:each | each groupNumber: nil].
 ]
 
 { #category : #'*Moose-JEE' }
@@ -363,7 +369,9 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	| interestingClasses allInterestingMethods otherMethods |
 
 	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
-
+	
+	(interestingClasses select: [ :class | class hasImplementsASessionBean ]) groupClassesConsiderInvokationHierarchy.
+	
 	view nodes: interestingClasses forEach: [:eachClass |
 
 		allInterestingMethods := eachClass methods select: #isPartOfATransaction.
@@ -428,7 +436,8 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	view shape line color lighter.
 	view edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.
 	
-	view dominanceTreeLayout.
+	"view dominanceTreeLayout."
+	view dominanceGrouppedTreeLayout.
 ]
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }

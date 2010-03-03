@@ -18,7 +18,7 @@ FAMIXClass >> doesImplements: aSymbol [
 
 { #category : #'*Moose-JEE' }
 FAMIXClass >> groupNumber [
-	"<MSEProperty: #groupNumber type: #Integer>" "UNCOMMENTING THE LINE BEFORE ERRORS IN THE META STUFF"
+	<MSEProperty: #groupNumber type: #Number>
 	"self flag: 'annotate with fame meta descriptions'."
 	^self privateState attributeGet: #groupNumber default: [nil]
 
