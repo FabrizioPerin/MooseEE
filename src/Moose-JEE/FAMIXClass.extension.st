@@ -17,20 +17,6 @@ FAMIXClass >> doesImplements: aSymbol [
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXClass >> groupNumber [
-	<MSEProperty: #groupNumber type: #Number>
-	"self flag: 'annotate with fame meta descriptions'."
-	^self privateState attributeGet: #groupNumber default: [nil]
-
-]
-
-{ #category : #'*Moose-JEE' }
-FAMIXClass >> groupNumber: anInteger [
-
-	^self privateState attributeSet: #groupNumber value: anInteger
-]
-
-{ #category : #'*Moose-JEE' }
 FAMIXClass >> hasImplementsABean [
 	^ ( ( self mooseModel allJEEBeans ) anySatisfy: [:bean | bean implementationClass == self ] )
 ]

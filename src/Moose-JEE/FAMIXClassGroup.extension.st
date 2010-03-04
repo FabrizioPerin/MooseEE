@@ -56,7 +56,7 @@ FAMIXClassGroup >> groupClassesConsiderInvokationHierarchy [
 
 "I should move away this and just invoke"
 "startSet := self select: [ :class | class hasImplementsASessionBean ]."
-self resetGroups.
+self first mooseModel allClasses resetGroups.
 
 "initialize"
 wholeSet := OrderedCollection new.
@@ -370,7 +370,7 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 
 	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
 	
-	(interestingClasses select: [ :class | class hasImplementsASessionBean ]) groupClassesConsiderInvokationHierarchy.
+	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
 	
 	view nodes: interestingClasses forEach: [:eachClass |
 
