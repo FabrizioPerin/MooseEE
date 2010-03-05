@@ -33,7 +33,7 @@ ConfigurationOfMooseJEE class >> loadDefault [
 	(self project version: 'default') load.
 	
 	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
-	Transcript show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
 
 ]
 
@@ -45,7 +45,7 @@ ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 	
 	(self project version: 'withoutMoose') load.
 
-	Transcript show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
 
 
 ]
