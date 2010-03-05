@@ -26,12 +26,28 @@ ConfigurationOfMooseJEE class >> isMetacelloConfig [
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDefault [
-	(self project version: 'default') load
+	
+	Transcript open.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
+	
+	(self project version: 'default') load.
+	
+	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+	Transcript show: 'Moose JEE configuration loaded. Have fun!'; cr.
+
 ]
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
-	(self project version: 'withoutMoose') load
+
+	Transcript open.
+	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
+	
+	(self project version: 'withoutMoose') load.
+
+	Transcript show: 'Moose JEE configuration loaded. Have fun!'; cr.
+
+
 ]
 
 { #category : #accessing }
