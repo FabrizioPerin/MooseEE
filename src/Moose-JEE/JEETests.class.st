@@ -616,6 +616,208 @@ JEETests >> sampleMooseModel [
 ]
 
 { #category : #testing }
+JEETests >> sampleMooseModelWithDB [
+	
+	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean database dbTable1 dbTable2 dbTable3 tableColumn1 tableColumn2 tableColumn3 tableColumn5 tableColumn6 tableColumn4 |
+	mooseModel := MooseModel new.
+	aPackage := FAMIXNamespace new
+			name: #aPackage;
+			yourself.
+	anotherPackage := FAMIXNamespace new
+			name: #anotherPackage;
+			yourself.
+
+	aStatelessSessionBean := FAMIXClass new
+			name: #AStatelessSessionBean;
+			container: aPackage;
+			yourself.
+
+	aStatelessSessionBean addMethod: (FAMIXMethod new
+				name: #aMethod;
+				parentType: aStatelessSessionBean;
+				signature: #aMethod asString;
+				yourself
+			);
+			addMethod: (FAMIXMethod new
+				name: #anotherMethod;
+				parentType: aStatelessSessionBean;
+				signature: #anotherMethod asString;
+				yourself
+			).
+	aStatefulSessionBean := FAMIXClass new
+			name: #AStatefulSessionBean;
+			container: aPackage;
+			yourself.
+	aStatefulSessionBean
+			addMethod: (FAMIXMethod new
+				name: #someMethod;
+				parentType: aStatefulSessionBean;
+				signature: #someMethod asString;
+				yourself
+			);
+			addMethod: (FAMIXMethod new
+				name: #someOtherMethod;
+				parentType: aStatefulSessionBean;
+				signature: #someOtherMethod asString;
+				yourself
+			).
+			
+	database := FAMIXDataBase new name: #database1.
+
+	dbTable1 := FAMIXDBTable new
+			name: #Table1;
+			ownerDataBase: database.
+	
+	dbTable2 := FAMIXDBTable new
+			name: #Table2;
+			ownerDataBase: database.
+
+	dbTable3 := FAMIXDBTable new
+			name: #Table3;
+			ownerDataBase: database.
+
+	tableColumn1 := FAMIXTablesColumn new
+						name: #column1;
+						isPK: true;
+						isFK: false;
+						ownerTable:  dbTable1;
+						type: 'integer'.
+	
+	tableColumn2 := FAMIXTablesColumn new
+						name: #column2;
+						isPK: false;
+						isFK: false;
+						ownerTable:  dbTable1;
+						type: 'string'.
+	
+	tableColumn3 := FAMIXTablesColumn new
+						name: #column3;
+						isPK: false;
+						isFK: false;
+						ownerTable:  dbTable1;
+						type: 'integer'.
+						
+	dbTable1 addColumn: tableColumn1.
+	dbTable1 addColumn: tableColumn2.
+	dbTable1 addColumn: tableColumn3.
+	
+	
+	tableColumn4 := FAMIXTablesColumn new
+						name: #column4;
+						isPK: true;
+						isFK: false;
+						ownerTable:  dbTable2;
+						type: 'integer'.
+	
+	tableColumn5 := FAMIXTablesColumn new
+						name: #column5;
+						isPK: false;
+						isFK: false;
+						ownerTable:  dbTable2;
+						type: 'integer'.
+	
+	dbTable2 addColumn: tableColumn4.
+	dbTable2 addColumn: tableColumn5.
+						
+	tableColumn6 := FAMIXTablesColumn new
+						name: #column6;
+						isPK: true;
+						isFK: false;
+						ownerTable:  dbTable3;
+						type: 'integer'.
+	
+	dbTable3 addColumn: tableColumn6.
+
+
+	database addTable: dbTable1.
+ 	database addTable: dbTable2.
+	database addTable: dbTable3.
+		
+	mooseModel
+		addAll: aStatelessSessionBean methods;
+		addAll: aStatefulSessionBean methods;
+		add: aPackage;
+		add: anotherPackage;
+		add: database;
+		addAll: database tables;
+		addAll: dbTable1 columns;
+		addAll: dbTable2 columns;
+		addAll: dbTable3 columns;
+		add: (FAMIXClass new
+			name: #AStatelessSessionHome;
+			container: aPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AStatelessSession;
+			container: aPackage;
+			yourself
+		);
+		add: aStatelessSessionBean;
+		add: (FAMIXClass new
+			name: #AStatefulSessionHome;
+			container: aPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AStatefulSession;
+			container: aPackage;
+			yourself
+		);
+		add: aStatefulSessionBean;
+		add: (FAMIXClass new
+			name: #ACMPEntityHome;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntityBean;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntityPK;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntityHome;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntityBean;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AMessageBean;
+			container: aPackage;
+			yourself
+		).
+
+	
+
+
+	^mooseModel
+]
+
+{ #category : #testing }
 JEETests >> sampleMooseModelWithInvocation [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod |
@@ -2629,6 +2831,15 @@ JEETests >> testExecuteAQuery [
 	self deny: ( temp ).
 	methods do: [ :method | method name = #method4 ifTrue: [ temp := ( method doesExecuteAQuery ) ] ].
 	self deny: ( temp ).
+]
+
+{ #category : #testing }
+JEETests >> testFAMIXDBMapping [
+	
+	| mooseModel  |
+	mooseModel := self sampleMooseModelWithDB.
+
+	self assert: false.
 ]
 
 { #category : #testing }

@@ -53,7 +53,7 @@ MooseModel >> allTransactionalMethods [
 { #category : #'*Moose-JEE' }
 MooseModel >> annotateTheModelForJEEBrowser [
 
-	<menuItem: 'Annotate the model with JEE informations' category: 'JEE Menu'>
+	<menuItem: 'Annotate the model with JEE informations' category: 'JEE Menu' >
 
 	self createAnnotationForTransactionScope.
 	self createAnnotationForUnsafeQuery.
@@ -76,12 +76,14 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> buildRelationsAmongDBElementsAndMethods [
+<menuItem: 'Build Relations Among DB And Methods' category: 'JEE Menu'>
 
 | tables entities out |
 out := OrderedCollection new.
-entities := (MooseModel root first allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
+entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
 
-tables := MooseModel root first allTables.
+tables := self allTables.
+
 tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ].
 out inspect.
 

@@ -49,7 +49,7 @@ FAMIXDBTable >> initialize [
 FAMIXDBTable >> nameAsRegex [
 	^nameAsRegEx isNil  
 		ifTrue: [('.*', self name, '.*') asRegex]
-		ifFalse: [nameAsRegExIgCa]
+		ifFalse: [nameAsRegEx]
 ]
 
 { #category : #accessing }

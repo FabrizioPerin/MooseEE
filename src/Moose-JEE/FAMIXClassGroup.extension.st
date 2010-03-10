@@ -369,8 +369,11 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	| interestingClasses allInterestingMethods otherMethods |
 
 	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
-	
 	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
+	
+	"interestingClasses := ((self select: #hasImplementsASessionBean) flatCollect: #withDeepInvokedClasses) asSet asMooseGroup.
+	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy."
+	
 	
 	view nodes: interestingClasses forEach: [:eachClass |
 

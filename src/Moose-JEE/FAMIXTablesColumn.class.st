@@ -31,6 +31,17 @@ FAMIXTablesColumn >> columnReference: aTablesColumnOrNil [
 ]
 
 { #category : #accessing }
+FAMIXTablesColumn >> initialize [
+	super initialize.
+	
+	isPK := nil.
+	isFK := nil.
+	columnReference := nil.
+	ownerTable := nil.
+	type := nil.
+]
+
+{ #category : #accessing }
 FAMIXTablesColumn >> isFK [
 	^isFK
 ]
