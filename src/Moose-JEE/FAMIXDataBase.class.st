@@ -1,6 +1,6 @@
 Class {
 	#name : #FAMIXDataBase,
-	#superclass : #FAMIXNamedEntity,
+	#superclass : #FAMIXRelationalEntity,
 	#instVars : [
 		'tables'
 	],
@@ -9,9 +9,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 FAMIXDataBase class >> annotation [
-	<MSEClass: 'DataBase' super: #FAMIXNamedEntity>
-	<package: 'FAMIX'>
-	<abstract>
+	<MSEClass: #DataBase super: #FAMIXRelationalEntity>
+	<package: #FAMIX>
 ]
 
 { #category : #accessing }

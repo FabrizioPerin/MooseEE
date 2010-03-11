@@ -25,6 +25,13 @@ MooseModel >> allJEEBeans [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> allMaps [
+	
+	<navigation: 'All maps'>
+	^self allWithType: FAMIXMapping
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> allMessageDrivenBeans [
 
 	^self allWithType: FAMIXMessageDrivenBean "asMetaDescription"

@@ -661,7 +661,8 @@ JEETests >> sampleMooseModelWithDB [
 				signature: #someOtherMethod asString;
 				yourself
 			).
-			
+	
+	"instanciating relational elements"
 	database := FAMIXDataBase new name: #database1.
 
 	dbTable1 := FAMIXDBTable new
@@ -727,7 +728,6 @@ JEETests >> sampleMooseModelWithDB [
 						type: 'integer'.
 	
 	dbTable3 addColumn: tableColumn6.
-
 
 	database addTable: dbTable1.
  	database addTable: dbTable2.
@@ -2834,12 +2834,25 @@ JEETests >> testExecuteAQuery [
 ]
 
 { #category : #testing }
-JEETests >> testFAMIXDBMapping [
+JEETests >> testFAMIXMappingCreation [
 	
-	| mooseModel  |
+	| mooseModel  class table map |
 	mooseModel := self sampleMooseModelWithDB.
+	(root allChildren select: [:each | each class = SessionElement]) do: [:each | each populate: mooseModel].
+	
+	class := mooseModel entityNamed: #AStatelessSessionBean.
+	table := mooseModel entityNamed: #Table1.
 
-	self assert: false.
+	self halt.
+
+	(FAMIXMapping source: class target: table)inspect.
+
+	"mooseModel add: (FAMIXMapping source: class target: table).
+
+	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]).
+	self assert: map size = 1."
+
+
 ]
 
 { #category : #testing }
