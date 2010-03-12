@@ -738,11 +738,6 @@ JEETests >> sampleMooseModelWithDB [
 		addAll: aStatefulSessionBean methods;
 		add: aPackage;
 		add: anotherPackage;
-		add: database;
-		addAll: database tables;
-		addAll: dbTable1 columns;
-		addAll: dbTable2 columns;
-		addAll: dbTable3 columns;
 		add: (FAMIXClass new
 			name: #AStatelessSessionHome;
 			container: aPackage;
@@ -809,10 +804,12 @@ JEETests >> sampleMooseModelWithDB [
 			name: #AMessageBean;
 			container: aPackage;
 			yourself
-		).
-
-	
-
+		);
+		add: database;
+		addAll: database tables;
+		addAll: dbTable1 columns;
+		addAll: dbTable2 columns;
+		addAll: dbTable3 columns.
 
 	^mooseModel
 ]
@@ -2836,22 +2833,22 @@ JEETests >> testExecuteAQuery [
 { #category : #testing }
 JEETests >> testFAMIXMappingCreation [
 	
-	| mooseModel  class table map |
+	| mooseModel  class table map mapping |
 	mooseModel := self sampleMooseModelWithDB.
 	(root allChildren select: [:each | each class = SessionElement]) do: [:each | each populate: mooseModel].
 	
-	class := mooseModel entityNamed: #AStatelessSessionBean.
+	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
-
-	self halt.
-
-	(FAMIXMapping source: class target: table)inspect.
-
-	"mooseModel add: (FAMIXMapping source: class target: table).
-
+		
+	mapping := FAMIXMapping new mapped: table; maps: class.
+	
+	class addDefines: mapping.
+	table addDefinedBy: mapping.
+	
+	mooseModel add: mapping.
+		
 	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]).
-	self assert: map size = 1."
-
+	self assert: map size = 1.
 
 ]
 

@@ -1,26 +1,19 @@
 Extension { #name : #FAMIXNamedEntity }
 
 { #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> definedRelationalEntity [
-
-	^self privateState attributeGet: #defines default:[nil].
-]
-
-{ #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> definedRelationalEntity: aFAMIXMapping [
-
-	^self privateState attributeSet: #defines value: aFAMIXMapping
+FAMIXNamedEntity >> addDefines: aMapping [
+	self defines add: aMapping
 ]
 
 { #category : #'*Moose-JEE' }
 FAMIXNamedEntity >> defines [
-	<MSEProperty: #defines type: #FAMIXMapping opposite: #targetRelationalEntity> <multivalued> 
+	<MSEProperty: #defines type: #FAMIXMapping opposite: #maps> <multivalued>  <derived>
 	<MSEComment: 'Map relationship.'>
 	
-	^self definedRelationalEntity
+	^self privateState attributeGet: #defines default:[FMMultivalueLink on: self opposite: #maps:].
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> defines: aFAMIXMapping [
-	self definedRelationalEntity: aFAMIXMapping
+FAMIXNamedEntity >> defines: aMapping [
+	self defines value: aMapping
 ]

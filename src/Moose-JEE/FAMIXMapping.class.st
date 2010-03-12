@@ -1,9 +1,21 @@
+"
+FAMIXMapping represents the relation between a FAMIXClass or a FAMIXAttribute and a Database table and its fields. A FAMIXClass maps in a Table and a FAMIXAttribute map in a column.
+
+Instance Variables
+	mapped:		a FMMultivalueLink containing relational entities
+	maps:		a FMMultivalueLink containing named entities
+
+mapped
+	- xxxxx
+
+maps
+	- xxxxx
+
+"
 Class {
 	#name : #FAMIXMapping,
 	#superclass : #FAMIXAssociation,
 	#instVars : [
-		'targetRelationalEntity',
-		'sourceNamedEntity',
 		'maps',
 		'mapped'
 	],
@@ -18,22 +30,19 @@ FAMIXMapping class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping class >> source: aNamedEntity target: aRelationalEntity [
-
-	^self new sourceNamedEntity: aNamedEntity; targetRelationalEntity: aRelationalEntity.
-
-]
-
-{ #category : #'as yet unclassified' }
 FAMIXMapping >> from [
 
-	^ self sourceNamedEntity
+	^ self maps
 ]
 
 { #category : #'as yet unclassified' }
 FAMIXMapping >> initialize [
 	super initialize.
-	maps := nil.
+	"maps := FMMultivalueLink on: self opposite: #defines:.
+	mapped := FMMultivalueLink on: self opposite: #definedBy:."
+	
+	maps:=nil.
+	mapped:=nil.
 ]
 
 { #category : #'as yet unclassified' }
@@ -75,46 +84,18 @@ FAMIXMapping >> maps: aNamedEntity [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> sourceNamedEntity [
+FAMIXMapping >> printOn: aStream [
 
-	<MSEProperty: #sourceNamedEntity type: #FAMIXRelationalEntity opposite: #definedBy>
-	<MSEComment: 'Named Entity maps a Relational elements.'>
-	
-	^sourceNamedEntity
-]
-
-{ #category : #'as yet unclassified' }
-FAMIXMapping >> sourceNamedEntity: aNamedEntity [
-
-	sourceNamedEntity := FMMultivalueLink 
-										on: self
-										update: #definedBy
-										from: self sourceNamedEntity
-										to: aNamedEntity
-
-]
-
-{ #category : #'as yet unclassified' }
-FAMIXMapping >> targetRelationalEntity [
-
-	<MSEProperty: #targetRelationalEntity type: #FAMIXNamedEntity opposite: #defines>
-	<MSEComment: 'Relational element mapped into the system by a Named Entity.'>
-	
-	^targetRelationalEntity
-]
-
-{ #category : #'as yet unclassified' }
-FAMIXMapping >> targetRelationalEntity: aRelationalEntity [
-
-	targetRelationalEntity := FMMultivalueLink 
-										on: self
-										update: #defines
-										from: self targetRelationalEntity
-										to: aRelationalEntity
+	self from isNil	
+		ifFalse: [aStream nextPutAll: self from name].
+	aStream nextPutAll: ' -> '.
+	self to isNil	
+		ifFalse: [aStream nextPutAll: self to name].
+	aStream nextPutAll: ' (Maps)'
 ]
 
 { #category : #'as yet unclassified' }
 FAMIXMapping >> to [
 
-	^ self targetRelationalEntity
+	^ self mapped
 ]

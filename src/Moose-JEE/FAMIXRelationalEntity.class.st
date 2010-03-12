@@ -15,24 +15,29 @@ FAMIXRelationalEntity class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+FAMIXRelationalEntity >> addDefinedBy: aMapping [
+
+	definedBy add: aMapping
+
+]
+
+{ #category : #'as yet unclassified' }
 FAMIXRelationalEntity >> definedBy [
 
-	<MSEProperty: #definedBy type: #FAMIXMapping opposite: #sourceNamedEntity>
+	<MSEProperty: #definedBy type: #FAMIXMapping opposite: #mapped> <multivalued> <derived>
 	<MSEComment: 'Map relationships.'>
 	
 	^definedBy
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity >> definedBy: aFAMIXMapping [
+FAMIXRelationalEntity >> definedBy: aMapping [
 	
-	definedBy value: aFAMIXMapping
+	definedBy value: aMapping
 ]
 
 { #category : #'as yet unclassified' }
 FAMIXRelationalEntity >> initialize [
 	super initialize.
-	definedBy := FMMultivalueLink 
-		on: self
-		opposite: #sourceNamedEntity:
+	definedBy := FMMultivalueLink on: self opposite: #mapped:.
 ]
