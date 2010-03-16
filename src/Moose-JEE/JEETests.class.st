@@ -2846,7 +2846,9 @@ JEETests >> testFAMIXMappingCreation [
 	table addDefinedBy: mapping.
 	
 	mooseModel add: mapping.
-		
+	
+	self assert: (mooseModel allMaps size = 1).
+	
 	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]).
 	self assert: map size = 1.
 

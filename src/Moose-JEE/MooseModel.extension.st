@@ -91,7 +91,12 @@ entities := (self allAnnotationTypes select: [:each | each name = 'Table']) firs
 
 tables := self allTables.
 
-tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ].
+self halt.
+
+out add: (entities select: [:each | tables first nameAsRegex matches: each sourceText withoutLineEndings  ]).
+
+
+"tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ]."
 out inspect.
 
 ]
@@ -271,10 +276,21 @@ MooseModel >> importEjbJarFromFolderGUI [
 ]
 
 { #category : #'*Moose-JEE' }
-MooseModel >> initAndOpenJEEFromFolder: srcFolderString withName: applicationNameString [ 
+MooseModel >> importInformationForEJB21 [
+
+	<menuItem: 'Import information fro EJB 2.1' category: 'JEE Menu'>
+
+	MooseJEEImportInformationForEJB21 new open.
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> initAndOpenJEEFromFolder: srcFolderString [
+	
+	| applicationName |
 	
 	self rootFolder: srcFolderString.
-	self name: applicationNameString.
+	applicationName := srcFolderString sliceFrom: ((srcFolderString findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1).
+	self name: applicationName.
 
 	self importFromMSEStream: (StandardFileStream readOnlyFileNamed: (FileDirectory default fullName,
 											FileDirectory slash,
