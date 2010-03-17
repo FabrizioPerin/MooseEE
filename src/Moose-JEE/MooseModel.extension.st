@@ -93,11 +93,12 @@ tables := self allTables.
 
 self halt.
 
-out add: (entities select: [:each | tables first nameAsRegex matches: each sourceText withoutLineEndings  ]).
+
+
+"out add: (entities do: [:each | tables first nameAsRegex matches: each sourceText withoutLineEndings  ])."
 
 
 "tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ]."
-out inspect.
 
 ]
 
@@ -198,7 +199,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
-	
+
 	parser := PGSQLParser new stream: aFileStream.
 	result := parser run.
 	
@@ -225,7 +226,7 @@ MooseModel >> importDBFromSQLFileGUI [
 	file := UITheme builder 
 		fileOpen: 'Import information from SQL file'
 		extensions: #('sql').
-		
+
 	file isNil 
 		ifTrue: [ DialogWindow new alert: 'File not found.'.]
 		ifFalse:[self importDBFromSQLFile: file readStream].
@@ -281,6 +282,14 @@ MooseModel >> importInformationForEJB21 [
 	<menuItem: 'Import information fro EJB 2.1' category: 'JEE Menu'>
 
 	MooseJEEImportInformationForEJB21 new open.
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> importInformationForEJB30 [
+
+	<menuItem: 'Import information fro EJB 3.0' category: 'JEE Menu'>
+
+	(MooseJEEImportInformationForEJB30 new: self) open.
 ]
 
 { #category : #'*Moose-JEE' }
