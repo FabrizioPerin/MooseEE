@@ -9,12 +9,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MJChooseDirectoryPart class >> new: aString [
-
-	^self new initialize: aString; yourself.
-]
-
-{ #category : #'as yet unclassified' }
 MJChooseDirectoryPart >> chooseDirectory [
 
 	folderDialog := FileDialogWindow basicNew 
@@ -78,13 +72,6 @@ MJChooseDirectoryPart >> folderDialogContentMorph [
 { #category : #'as yet unclassified' }
 MJChooseDirectoryPart >> initialize [
 	super initialize.
-	self populateContents: {( self chooseDirectory )}.
-]
-
-{ #category : #'as yet unclassified' }
-MJChooseDirectoryPart >> initialize: aString [
-	super initialize.
-	title := aString.
 	self populateContents: {( self chooseDirectory )}.
 ]
 

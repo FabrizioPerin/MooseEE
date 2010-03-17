@@ -24,28 +24,25 @@ MooseJEEImportInformationForEJB21 >> information [
 
 { #category : #'as yet unclassified' }
 MooseJEEImportInformationForEJB21 >> initialize: aMooseModel [
-	 
-	| wizardPane1 wizardPart1 wizardPane2 wizardPart2 wizardPart3 folderName wizardPane3 |
+	| wizardPane1 wizardPane2 wizardPart1 wizardPart2 |
+	
 	super initialize.
 	
 	mooseModel := aMooseModel.
 	
 	wizardPane1 := WizardFirstPane named: 'Information'.
-	wizardPane2 := WizardMiddlePane named: 'Select the source code directory'.
-	wizardPane3 := WizardLastPane named: 'Select the source code directory'.
+	wizardPane2 := WizardLastPane named: 'Select the source code directory'.
 	
 	wizardPart1 := MJInfoPart new initialize.
 	wizardPane1 addPart: wizardPart1 associatedTo: #nothing.
  	
 	wizardPart2 := MJChooseDirectoryPart new.
 	wizardPane2 addPart: wizardPart2 associatedTo: #sourceDirectoryPath.
-	
-	wizardPart3 := MJChooseFilePart new.
-	wizardPane3 addPart: wizardPart3 associatedTo: #fileName.
 
 	self addPane: wizardPane1.
 	self addPane: wizardPane2.
-	self addPane: wizardPane3.
+
+
 
 	
 
@@ -56,24 +53,32 @@ MooseJEEImportInformationForEJB21 >> performTerminateButtonAction [
 	"by default, just close the last current pane. Override this method if you want to create a subclass of WizardControl making a specific action"
 	"^self subclassResponsibility"
 	UIManager default
-		displayProgress: 'executing mjava2mse.sh'
+		displayProgress: 'Importing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 3
+		to: 5
 		during: [ :bar | 
-			progBar := bar. progBar value: 2. 
+			progBar := bar. 
+			progBar value: 2.
 			super performTerminateButtonAction .
 			self validateImportation.].
-
-	
 ]
 
 { #category : #'as yet unclassified' }
 MooseJEEImportInformationForEJB21 >> validateImportation [
+	| sourcePath sourcePathName |
+	
+	sourcePathName := wizardInformations at: #sourceDirectoryPath.
 
-	| mooseModel wizardMessagePane |
+	self halt.
 
-	mooseModel := MooseModel new importFromMSEStream: (StandardFileStream readOnlyFileNamed: (wizardInformations at: #mseFilePath)) filteredBy: ( self createImportingContext).
-
-	MooseModel root add: mooseModel .
+	(sourcePathName isNil or: [ sourcePathName = ''])
+		ifTrue:[ DialogWindow new alert: 'File not found.']
+		ifFalse: [ 
+			sourcePath := FileDirectory on: sourcePathName.
+			mooseModel importEjbJarFromFolder: sourcePath pathName.].
+	progBar value: 4.
+		
+	mooseModel annotateTheModelForJEEBrowser.
+	progBar value: 5.
 ]

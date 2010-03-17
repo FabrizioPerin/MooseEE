@@ -268,11 +268,11 @@ MooseModel >> importEjbJarFromFolderGUI [
 
 	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEE Menu'>
 
-	| folderName parser root |
+	| folderName |
 	
 	folderName := UIManager default chooseDirectory: 'Folder Name:'.
 	folderName = '' ifTrue: [^self].
-	
+
 	self importEjbJarFromFolder: folderName pathName.
 ]
 
@@ -281,7 +281,7 @@ MooseModel >> importInformationForEJB21 [
 
 	<menuItem: 'Import information fro EJB 2.1' category: 'JEE Menu'>
 
-	MooseJEEImportInformationForEJB21 new open.
+	(MooseJEEImportInformationForEJB21 new: self)  open.
 ]
 
 { #category : #'*Moose-JEE' }
