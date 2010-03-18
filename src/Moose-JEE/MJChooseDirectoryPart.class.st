@@ -20,31 +20,6 @@ MJChooseDirectoryPart >> chooseDirectory [
 ]
 
 { #category : #'as yet unclassified' }
-MJChooseDirectoryPart >> contentMorphOf: aFolderDialog [
-
-	"exact copy of newContentMorph method but instead to create a new list of directory it uses the one already present"
-
-	aFolderDialog
-		directoryTreeMorph: aFolderDialog directoryTreeMorph;
-		fileListMorph: aFolderDialog fileListMorph;
-		previewMorph: aFolderDialog newPreviewMorph.
-
-	^(aFolderDialog newRow: {
-		aFolderDialog newColumn: {
-			aFolderDialog newGroupbox: 'Directory' translated for: aFolderDialog directoryTreeMorph.
-			(aFolderDialog newLabelGroup: {
-				'File name' translated->aFolderDialog newFileNameTextEntry})
-				vResizing: #shrinkWrap}.
-		aFolderDialog newGroupbox: 'File' translated forAll: {
-			aFolderDialog fileListMorph.
-			aFolderDialog newActionButtonRow}},
-		(aFolderDialog previewMorph notNil
-			ifTrue: [{aFolderDialog newGroupbox: 'Preview' translated for: aFolderDialog previewMorph}]
-			ifFalse: [#()]))
-		vResizing: #spaceFill.
-]
-
-{ #category : #'as yet unclassified' }
 MJChooseDirectoryPart >> folderDialogContentMorph [
 
 	"exact copy of newContentMorph method but instead to create a new list of directory it uses the one already present"

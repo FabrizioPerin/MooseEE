@@ -9,38 +9,62 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 class >> new: aMooseModel [
+MooseJEEImportInformationForEJB21 >> actionsToPerform [
+	| sourcePathName mseFilePathName |
+	
+	sourcePathName := wizardInformations at: #sourceDirectoryPath.
+	mseFilePathName := wizardInformations at: #mseFilePathName.
 
-	^self new initialize: aMooseModel; yourself.
+	"Import Model"
+
+	mooseModel := MooseModel new.
+	mooseModel name: (mseFilePathName sliceFrom: ((mseFilePathName findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1) to: (mseFilePathName size - 4)  ).
+	mooseModel importFromMSEStream: (StandardFileStream readOnlyFileNamed: mseFilePathName).
+	progBar value: 3.
+	
+	"Import other information"
+	mooseModel size > 0 
+		ifFalse:[DialogWindow new alert: 'No Model installed']
+		ifTrue:[
+			(sourcePathName isNil or: [ sourcePathName = ''])
+				ifTrue:[ DialogWindow new alert: 'Path incorrect']
+				ifFalse: [ 
+					mooseModel importEjbJarFromFolder: sourcePathName.].
+			progBar value: 4.
+		
+			mooseModel annotateTheModelForJEEBrowser.
+			progBar value: 5.
+			
+			MooseModel root add: mooseModel.
+			progBar value: 6.
+		]
+			
 ]
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> information [
-	self inform: self informationText.
-	MooseImportFromJavaSourceFilesWizard  new openFirstWizardPane.
-	self updateModelList .
-
-]
-
-{ #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> initialize: aMooseModel [
-	| wizardPane1 wizardPane2 wizardPart1 wizardPart2 |
+MooseJEEImportInformationForEJB21 >> initialize [
+	| wizardPane1 wizardPane2 wizardPart1 wizardPart2 wizardPane3 wizardPart3 |
 	
 	super initialize.
 	
-	mooseModel := aMooseModel.
+	mooseModel := nil.
 	
 	wizardPane1 := WizardFirstPane named: 'Information'.
-	wizardPane2 := WizardLastPane named: 'Select the source code directory'.
+	wizardPane2 := WizardMiddlePane named: 'Select the MSE file of the project'.
+	wizardPane3 := WizardLastPane named: 'Select the source code directory'.
 	
 	wizardPart1 := MJInfoPart new initialize.
 	wizardPane1 addPart: wizardPart1 associatedTo: #nothing.
- 	
-	wizardPart2 := MJChooseDirectoryPart new.
-	wizardPane2 addPart: wizardPart2 associatedTo: #sourceDirectoryPath.
+ 
+	wizardPart2 := MJChooseFilePart new.
+	wizardPane2 addPart: wizardPart2 associatedTo: #mseFilePathName.
+	
+	wizardPart3 := MJChooseDirectoryPart new.
+	wizardPane3 addPart: wizardPart3 associatedTo: #sourceDirectoryPath.
 
 	self addPane: wizardPane1.
-	self addPane: wizardPane2.
+	self addPane: wizardPane2.	
+	self addPane: wizardPane3.
 
 
 
@@ -56,29 +80,10 @@ MooseJEEImportInformationForEJB21 >> performTerminateButtonAction [
 		displayProgress: 'Importing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 5
+		to: 6
 		during: [ :bar | 
 			progBar := bar. 
 			progBar value: 2.
 			super performTerminateButtonAction .
-			self validateImportation.].
-]
-
-{ #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> validateImportation [
-	| sourcePath sourcePathName |
-	
-	sourcePathName := wizardInformations at: #sourceDirectoryPath.
-
-	self halt.
-
-	(sourcePathName isNil or: [ sourcePathName = ''])
-		ifTrue:[ DialogWindow new alert: 'File not found.']
-		ifFalse: [ 
-			sourcePath := FileDirectory on: sourcePathName.
-			mooseModel importEjbJarFromFolder: sourcePath pathName.].
-	progBar value: 4.
-		
-	mooseModel annotateTheModelForJEEBrowser.
-	progBar value: 5.
+			self actionsToPerform.].
 ]

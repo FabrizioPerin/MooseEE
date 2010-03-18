@@ -277,22 +277,6 @@ MooseModel >> importEjbJarFromFolderGUI [
 ]
 
 { #category : #'*Moose-JEE' }
-MooseModel >> importInformationForEJB21 [
-
-	<menuItem: 'Import information fro EJB 2.1' category: 'JEE Menu'>
-
-	(MooseJEEImportInformationForEJB21 new: self)  open.
-]
-
-{ #category : #'*Moose-JEE' }
-MooseModel >> importInformationForEJB30 [
-
-	<menuItem: 'Import information fro EJB 3.0' category: 'JEE Menu'>
-
-	(MooseJEEImportInformationForEJB30 new: self) open.
-]
-
-{ #category : #'*Moose-JEE' }
 MooseModel >> initAndOpenJEEFromFolder: srcFolderString [
 	
 	| applicationName |
