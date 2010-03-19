@@ -1,11 +1,11 @@
 Class {
-	#name : #MODominanceTreeWithGroupsLayout,
+	#name : #MJDominanceTreeWithGroupsLayout,
 	#superclass : #MOAbstractNormalTreeLayout,
 	#category : #'Moose-JEE'
 }
 
 { #category : #'as yet unclassified' }
-MODominanceTreeWithGroupsLayout >> doExecute: aGraph [
+MJDominanceTreeWithGroupsLayout >> doExecute: aGraph [
 	| rootNodes notnilGroup nilGroup verify ABB BBA|
 	alreadyLayoutedNodes := OrderedCollection new.
 	rootNodes := self rootNodesFor: aGraph nodes.
@@ -40,7 +40,7 @@ MODominanceTreeWithGroupsLayout >> doExecute: aGraph [
 ]
 
 { #category : #'as yet unclassified' }
-MODominanceTreeWithGroupsLayout >> layout: aNodeCollection atPoint: aPoint atLayer: aNumber grouping: aBoolean [
+MJDominanceTreeWithGroupsLayout >> layout: aNodeCollection atPoint: aPoint atLayer: aNumber grouping: aBoolean [
 	| treeWidth childrenY x y xInMiddleOfTree nodeCollectionToUse|
 	aNodeCollection isEmpty
 		ifTrue: [ ^ 0 ].

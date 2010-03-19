@@ -2,7 +2,7 @@ Extension { #name : #MOViewRenderer }
 
 { #category : #'*Moose-JEE' }
 MOViewRenderer >> dominanceGrouppedTreeLayout [
-	^self layout: MODominanceTreeWithGroupsLayout new.
+	^self layout: MJDominanceTreeWithGroupsLayout new.
 ]
 
 { #category : #'*Moose-JEE' }

@@ -2,10 +2,16 @@ Class {
 	#name : #MJInfoPart,
 	#superclass : #WizardPart,
 	#instVars : [
-		'infoDialog'
+		'infoDialog',
+		'informationText'
 	],
 	#category : #'Moose-JEE-Wizard'
 }
+
+{ #category : #'as yet unclassified' }
+MJInfoPart class >> new: aString [
+	^self new initialize: aString; yourself.
+]
 
 { #category : #'as yet unclassified' }
 MJInfoPart >> contentMorph [
@@ -31,16 +37,14 @@ MJInfoPart >> infoPanel [
 
 { #category : #'as yet unclassified' }
 MJInfoPart >> informationText [
-	^ 'To import Java you need inFusion to translate the Java application into an MSE file. If you do not have it, you can find it at:
-	http://www.intooitus.com/inFusion-tryit.html
-
-	To link Moose with inFusion, you need to indicate the path to "java2mse.sh". Just specify its location in the next pane.'
+	^informationText
 ]
 
 { #category : #'as yet unclassified' }
-MJInfoPart >> initialize [
+MJInfoPart >> initialize: aString [
 
 	super initialize.
+	informationText := aString.
 	self populateContents: {( self infoPanel )}.
 ]
 

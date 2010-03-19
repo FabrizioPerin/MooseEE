@@ -22,6 +22,8 @@ MooseJEEImportInformationForEJB21 >> actionsToPerform [
 	mooseModel importFromMSEStream: (StandardFileStream readOnlyFileNamed: mseFilePathName).
 	progBar value: 3.
 	
+	progBar value: 'Importing from ejb-jar files'.
+	
 	"Import other information"
 	mooseModel size > 0 
 		ifFalse:[DialogWindow new alert: 'No Model installed']
@@ -31,42 +33,89 @@ MooseJEEImportInformationForEJB21 >> actionsToPerform [
 				ifFalse: [ 
 					mooseModel importEjbJarFromFolder: sourcePathName.].
 			progBar value: 4.
+			
+			progBar value: 'Creating annotations'.
 		
 			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 5.
 			
 			MooseModel root add: mooseModel.
 			progBar value: 6.
+			
+			progBar value: 'Performing post import operations'.
+			
+			(wizardInformations at: #openVisualizations) 
+						ifTrue:[
+							mooseModel allModelClasses viewTransactionFlow3.
+							progBar value: 7.
+			
+							mooseModel allModelClasses viewUnsafeQueries.
+							progBar value: 8.]
+						ifFalse:[progBar value: 8].
+						
+			(wizardInformations at: #openBrowsers) 
+						ifTrue:[
+							mooseModel browseCodeWithAnnotationsForJEA.
+							progBar value: 10.]
+						ifFalse:[progBar value: 10].
 		]
 			
 ]
 
 { #category : #'as yet unclassified' }
+MooseJEEImportInformationForEJB21 >> buildWizardPanels [
+	| pane1 pane2 pane3 part1 part2 part3 part4 pane4 part5 |
+	
+	pane1 := WizardFirstPane named: 'Information'.
+	pane2 := WizardMiddlePane named: 'Select the MSE file of the project'.
+	pane3 := WizardMiddlePane named: 'Select the source code directory'.
+	pane4 := WizardLastPane named: 'After import operations'.
+	
+	part1 := MJInfoPart new: self informationText.
+	pane1 addPart: part1 associatedTo: #nothing.
+ 
+	part2 := MJChooseFilePart new.
+	pane2 addPart: part2 associatedTo: #mseFilePathName.
+	
+	part3 := MJChooseDirectoryPart new.
+	pane3 addPart: part3 associatedTo: #sourceDirectoryPath.
+
+	part4 :=  MJCheckboxPart new: 'Open visualizations'.
+	part4 selected: true.
+	pane4 addPart: part4 associatedTo: #openVisualizations.
+	
+	part5 :=  MJCheckboxPart new: 'Open annotations browser'.
+	part5 selected: true.
+	pane4 addPart: part5 associatedTo: #openBrowsers.
+
+	self addPane: pane1.
+	self addPane: pane2.	
+	self addPane: pane3.
+	self addPane: pane4.
+
+
+
+	
+
+]
+
+{ #category : #'as yet unclassified' }
+MooseJEEImportInformationForEJB21 >> informationText [
+	^'To properly use all the functionality og Moose JEE on a Java project you need 
+	different information. In the following some panel will required you:
+	
+		- The location of the MSE file of the Java project you plan to analize.
+		- The location of the root directory of the project that you intend to analyze.'
+	
+]
+
+{ #category : #'as yet unclassified' }
 MooseJEEImportInformationForEJB21 >> initialize [
-	| wizardPane1 wizardPane2 wizardPart1 wizardPart2 wizardPane3 wizardPart3 |
-	
+
 	super initialize.
-	
 	mooseModel := nil.
 	
-	wizardPane1 := WizardFirstPane named: 'Information'.
-	wizardPane2 := WizardMiddlePane named: 'Select the MSE file of the project'.
-	wizardPane3 := WizardLastPane named: 'Select the source code directory'.
-	
-	wizardPart1 := MJInfoPart new initialize.
-	wizardPane1 addPart: wizardPart1 associatedTo: #nothing.
- 
-	wizardPart2 := MJChooseFilePart new.
-	wizardPane2 addPart: wizardPart2 associatedTo: #mseFilePathName.
-	
-	wizardPart3 := MJChooseDirectoryPart new.
-	wizardPane3 addPart: wizardPart3 associatedTo: #sourceDirectoryPath.
-
-	self addPane: wizardPane1.
-	self addPane: wizardPane2.	
-	self addPane: wizardPane3.
-
-
+	self buildWizardPanels.
 
 	
 
@@ -77,10 +126,10 @@ MooseJEEImportInformationForEJB21 >> performTerminateButtonAction [
 	"by default, just close the last current pane. Override this method if you want to create a subclass of WizardControl making a specific action"
 	"^self subclassResponsibility"
 	UIManager default
-		displayProgress: 'Importing'
+		displayProgress: 'Processing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 6
+		to: 10
 		during: [ :bar | 
 			progBar := bar. 
 			progBar value: 2.
