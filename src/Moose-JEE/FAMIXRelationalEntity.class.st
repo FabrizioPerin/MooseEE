@@ -41,3 +41,8 @@ FAMIXRelationalEntity >> initialize [
 	super initialize.
 	definedBy := FMMultivalueLink on: self opposite: #mapped:.
 ]
+
+{ #category : #'as yet unclassified' }
+FAMIXRelationalEntity >> mapsNamedEntities [
+	^self mapDirection: #maps on: self mooseModel allMaps 
+]

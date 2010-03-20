@@ -102,7 +102,7 @@ UIManager default
 			
 			tables do: [:table | 
 				entities do: [:class |
-						((class sourceText findString: ('name = "',table name,'"')) > 0)
+						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
 										mapping := FAMIXMapping new mapped: table; maps: class.
 										class addDefines: mapping.

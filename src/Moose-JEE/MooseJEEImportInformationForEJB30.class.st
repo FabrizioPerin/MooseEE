@@ -34,33 +34,36 @@ MooseJEEImportInformationForEJB30 >> actionsToPerform [
 					mooseModel importDBFromSQLFile: (StandardFileStream readOnlyFileNamed: sqlFileNamePath) ].
 			progBar value: 4.
 	
+			mooseModel buildRelationsAmongDBElementsAndMethods.
+			progBar value: 5.
+		
 			progBar value: 'Creating annotations'.
 	
 			mooseModel instanciateJBeansFromAnnotations.
-			progBar value: 5.
-			
-			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 6.
 			
-			MooseModel root add: mooseModel.
+			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 7.
+			
+			MooseModel root add: mooseModel.
+			progBar value: 8.
 			
 			progBar value: 'Performing post import operations'.
 			
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
 							mooseModel allModelClasses viewTransactionFlow3.
-							progBar value: 8.
+							progBar value: 9.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
-							progBar value: 9.]
-						ifFalse:[progBar value: 9].
+							progBar value: 10.]
+						ifFalse:[progBar value: 10].
 						
 			(wizardInformations at: #openBrowsers) 
 						ifTrue:[
 							mooseModel browseCodeWithAnnotationsForJEA.
-							progBar value: 10.]
-						ifFalse:[progBar value: 10].
+							progBar value: 11]
+						ifFalse:[progBar value: 11].
 		]
 ]
 
@@ -130,7 +133,7 @@ MooseJEEImportInformationForEJB30 >> performTerminateButtonAction [
 		displayProgress: 'Importing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 10
+		to: 11
 		during: [ :bar | 
 			progBar := bar. 
 			progBar value: 2.
