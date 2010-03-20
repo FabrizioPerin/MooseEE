@@ -8,6 +8,29 @@ Class {
 }
 
 { #category : #testing }
+JEETests >> fakeSourceText [
+
+	^'import ch.ipi.esv.activity.bo.workunit.ActivityBaseBO;
+
+/**
+ * WorkUnit Authorization.
+ * <p>
+ * Copyright (c) 2009, Swiss Federal Institute of Intellectual Property
+ * </p>
+ * @author roth_ch
+ * @version $Id: WorkUnitAuthorization.java,v 1.7 2009/10/06 14:44:28 roth_ch Exp $
+ */
+@Entity
+@Table(name = "Table1", schema = "ESV")
+public class WorkUnitAuthorization extends ActivityBaseBO {
+
+  /**
+   * The serialization version. Note that this changes with every version of this class!
+   */
+  private static final long serialVersionUID = "$Revision: 1.7 $".hashCode();'
+]
+
+{ #category : #testing }
 JEETests >> minimalEjbJar [
 
 	^'<?xml version="1.0"?>
@@ -666,15 +689,15 @@ JEETests >> sampleMooseModelWithDB [
 	database := FAMIXDataBase new name: #database1.
 
 	dbTable1 := FAMIXDBTable new
-			name: #Table1;
+			name: 'Table1';
 			ownerDataBase: database.
 	
 	dbTable2 := FAMIXDBTable new
-			name: #Table2;
+			name: 'Table2';
 			ownerDataBase: database.
 
 	dbTable3 := FAMIXDBTable new
-			name: #Table3;
+			name: 'Table3';
 			ownerDataBase: database.
 
 	tableColumn1 := FAMIXTablesColumn new
@@ -2835,7 +2858,7 @@ JEETests >> testFAMIXMappingCreation [
 	
 	| mooseModel  class table map mapping |
 	mooseModel := self sampleMooseModelWithDB.
-	(root allChildren select: [:each | each class = SessionElement]) do: [:each | each populate: mooseModel].
+	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
 	
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
@@ -2852,6 +2875,46 @@ JEETests >> testFAMIXMappingCreation [
 	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]).
 	self assert: map size = 1.
 
+]
+
+{ #category : #testing }
+JEETests >> testFAMIXMappingModelPopulation [
+	| mooseModel annotationType famixAnchor entities tables |
+
+	mooseModel := self sampleMooseModelWithDB.
+	
+	"define Entity beans"
+	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	
+	"Creating the annotation type Table"
+	annotationType := FAMIXAnnotationType new name: #Table.
+	mooseModel add: annotationType.
+	
+	"Creating the instances"
+	mooseModel allEntityBeans do: [:bean | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: annotationType.
+							instance annotatedEntity: bean.
+							mooseModel add: instance.
+							 ].
+						
+	"adding a fake sourceText to the Entities"
+	famixAnchor := FAMIXSourceTextAnchor new source: self fakeSourceText.
+	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
+	
+	mooseModel buildRelationsAmongDBElementsAndMethods.
+	
+
+	entities := mooseModel allEntityBeans.
+	tables := mooseModel allTables.
+
+
+	self assert: (entities size = 2).
+	self assert: (tables size = 3).
+	
+	self assert: (mooseModel allMaps size = 1).
+	
 ]
 
 { #category : #testing }

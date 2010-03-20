@@ -85,20 +85,41 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 MooseModel >> buildRelationsAmongDBElementsAndMethods [
 <menuItem: 'Build Relations Among DB And Methods' category: 'JEE Menu'>
 
-| tables entities out |
-out := OrderedCollection new.
+| tables entities counter |
+
 entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
-
 tables := self allTables.
+counter :=  1.
 
-self halt.
-
+UIManager default
+		displayProgress: 'Building relations among DB and Entities'
+		at: Sensor cursorPoint
+		from: counter
+		to: (entities size * tables size)
+		during: [ :bar |
+			counter := counter+1.
+			bar value: counter.
+			
+			tables do: [:table | 
+				entities do: [:class |
+						((class sourceText findString: ('name = "',table name,'"')) > 0)
+								ifTrue:[ |mapping|
+										mapping := FAMIXMapping new mapped: table; maps: class.
+										class addDefines: mapping.
+										table addDefinedBy: mapping.
+										self add: mapping.].
+								counter := counter+1.
+								bar value: counter.
+								]]].
 
 
 "out add: (entities do: [:each | tables first nameAsRegex matches: each sourceText withoutLineEndings  ])."
-
-
 "tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ]."
+"class sourceText findString: table name"
+"Works in 2 min GREAT"
+"((class sourceText findString: table name) > 0)"
+"Works in 10 min"
+"(table nameAsRegex matches: class sourceText withoutLineEndings)"
 
 ]
 
