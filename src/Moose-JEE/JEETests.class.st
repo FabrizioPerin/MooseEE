@@ -2863,10 +2863,10 @@ JEETests >> testFAMIXMappingCreation [
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
 		
-	mapping := FAMIXMapping new mapped: table; maps: class.
+	mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 	
-	class addDefines: mapping.
-	table addDefinedBy: mapping.
+	class addMaps: mapping.
+	table addMappedBy: mapping.
 	
 	mooseModel add: mapping.
 	
@@ -3381,6 +3381,44 @@ JEETests >> testIsPartOfAnUnsafeTransactionPath [
 ]
 
 { #category : #testing }
+JEETests >> testMappedRelationalEntities [
+	| mooseModel annotationType famixAnchor entities table1 aCMPEntity |
+
+	mooseModel := self sampleMooseModelWithDB.
+	
+	"define Entity beans"
+	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	
+	"Creating the annotation type Table"
+	annotationType := FAMIXAnnotationType new name: #Table.
+	mooseModel add: annotationType.
+	
+	"Creating the instances"
+	mooseModel allEntityBeans do: [:bean | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: annotationType.
+							instance annotatedEntity: bean.
+							mooseModel add: instance.
+							 ].
+						
+	"adding a fake sourceText to the Entities"
+	famixAnchor := FAMIXSourceTextAnchor new source: self fakeSourceText.
+	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
+	
+	mooseModel buildRelationsAmongDBElementsAndMethods.
+	
+	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
+	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
+
+	self assert: (aCMPEntity mappedRelationalEntities size = 1).
+	self assert: (aCMPEntity mappedRelationalEntities first = table1 ).
+	
+	
+
+]
+
+{ #category : #testing }
 JEETests >> testMapsNamedEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity |
 
@@ -3408,7 +3446,6 @@ JEETests >> testMapsNamedEntities [
 	
 	mooseModel buildRelationsAmongDBElementsAndMethods.
 	
-
 	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
 	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
 

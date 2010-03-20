@@ -16,8 +16,8 @@ Class {
 	#name : #FAMIXMapping,
 	#superclass : #FAMIXAssociation,
 	#instVars : [
-		'maps',
-		'mapped'
+		'mapSource',
+		'mapTarget'
 	],
 	#category : #'Moose-JEE'
 }
@@ -32,7 +32,7 @@ FAMIXMapping class >> annotation [
 { #category : #'as yet unclassified' }
 FAMIXMapping >> from [
 
-	^ self maps
+	^ self mapSource
 ]
 
 { #category : #'as yet unclassified' }
@@ -41,46 +41,46 @@ FAMIXMapping >> initialize [
 	"maps := FMMultivalueLink on: self opposite: #defines:.
 	mapped := FMMultivalueLink on: self opposite: #definedBy:."
 	
-	maps:=nil.
-	mapped:=nil.
+	mapSource:=nil.
+	mapTarget:=nil.
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> mapped [
-	<MSEProperty: #mapped type: #FAMIXRelationalEntity opposite: #definedBy>
-	<MSEComment: 'Relational element mapped into the system by a Named Entity.'>
-	
-	^mapped
-]
+FAMIXMapping >> mapSource [
 
-{ #category : #'as yet unclassified' }
-FAMIXMapping >> mapped: aRelationalEntity [
-
-	mapped := FMMultivalueLink 
-								on: self
-								update: #definedBy
-								from: self mapped
-								to: aRelationalEntity
-]
-
-{ #category : #'as yet unclassified' }
-FAMIXMapping >> maps [
-
-	<MSEProperty: #maps type: #FAMIXNamedEntity opposite: #defines>
+	<MSEProperty: #mapSource type: #FAMIXNamedEntity opposite: #maps>
 	<MSEComment: 'Named Entity maps a Relational elements.'>
 	
-	^maps
+	^mapSource
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> maps: aNamedEntity [
+FAMIXMapping >> mapSource: aNamedEntity [
 	
-	maps := FMMultivalueLink 
+	mapSource := FMMultivalueLink 
 								on: self
-								update: #defines
-								from: self maps
+								update: #maps
+								from: self mapSource
 								to: aNamedEntity
 	
+]
+
+{ #category : #'as yet unclassified' }
+FAMIXMapping >> mapTarget [
+	<MSEProperty: #mapTarget type: #FAMIXRelationalEntity opposite: #mappedBy>
+	<MSEComment: 'Relational element mapped into the system by a Named Entity.'>
+	
+	^mapTarget
+]
+
+{ #category : #'as yet unclassified' }
+FAMIXMapping >> mapTarget: aRelationalEntity [
+
+	mapTarget := FMMultivalueLink 
+								on: self
+								update: #mappedBy
+								from: self mapTarget
+								to: aRelationalEntity
 ]
 
 { #category : #'as yet unclassified' }
@@ -97,5 +97,5 @@ FAMIXMapping >> printOn: aStream [
 { #category : #'as yet unclassified' }
 FAMIXMapping >> to [
 
-	^ self mapped
+	^ self mapTarget
 ]

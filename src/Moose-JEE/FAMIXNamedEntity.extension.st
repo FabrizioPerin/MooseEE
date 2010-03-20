@@ -1,21 +1,8 @@
 Extension { #name : #FAMIXNamedEntity }
 
 { #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> addDefines: aMapping [
-	self defines add: aMapping
-]
-
-{ #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> defines [
-	<MSEProperty: #defines type: #FAMIXMapping opposite: #maps> <multivalued>  <derived>
-	<MSEComment: 'Map relationship.'>
-	
-	^self privateState attributeGet: #defines default:[FMMultivalueLink on: self opposite: #maps:].
-]
-
-{ #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> defines: aMapping [
-	self defines value: aMapping
+FAMIXNamedEntity >> addMaps: aMapping [
+	self maps add: aMapping
 ]
 
 { #category : #'*Moose-JEE' }
@@ -23,11 +10,11 @@ FAMIXNamedEntity >> mapDirection: directionSymbol on: dependencyList [
 
 	"From a list of dependencies of a given type, select the ones going to or coming from receiver"
 
-	directionSymbol = #maps
+	directionSymbol = #mapSource
 				ifTrue: [
 					^ (dependencyList  select: [:each | each to = self]) collect: [:each | each from].
 					].
-	directionSymbol = #mapped
+	directionSymbol = #mapTarget
 				ifTrue: [
 					^ (dependencyList  select: [:each | each from = self]) collect: [:each | each to].
 					].
@@ -36,11 +23,19 @@ FAMIXNamedEntity >> mapDirection: directionSymbol on: dependencyList [
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> mappedRelationalEntity [
-	^self mapDirection:  #mapped on: self mooseModel allMaps.
+FAMIXNamedEntity >> mappedRelationalEntities [
+	^self mapDirection:  #mapTarget on: self mooseModel allMaps.
 ]
 
 { #category : #'*Moose-JEE' }
-FAMIXNamedEntity >> mappedTables [
-	^self defines collect: [:map | map mapped].
+FAMIXNamedEntity >> maps [
+	<MSEProperty: #maps type: #FAMIXMapping opposite: #mapSource> <multivalued>  <derived>
+	<MSEComment: 'Map relationship.'>
+	
+	^self privateState attributeGet: #maps default:[FMMultivalueLink on: self opposite: #mapSource:].
+]
+
+{ #category : #'*Moose-JEE' }
+FAMIXNamedEntity >> maps: aMapping [
+	self maps value: aMapping
 ]

@@ -83,15 +83,15 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 
 { #category : #'*Moose-JEE' }
 MooseModel >> buildRelationsAmongDBElementsAndMethods [
-<menuItem: 'Build Relations Among DB And Methods' category: 'JEE Menu'>
+	<menuItem: 'Build Relations Among DB And Methods' category: 'JEE Menu'>
 
-| tables entities counter |
+	| tables entities counter |
 
-entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
-tables := self allTables.
-counter :=  1.
+	entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
+	tables := self allTables.
+	counter :=  1.
 
-UIManager default
+	UIManager default
 		displayProgress: 'Building relations among DB and Entities'
 		at: Sensor cursorPoint
 		from: counter
@@ -104,22 +104,13 @@ UIManager default
 				entities do: [:class |
 						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
-										mapping := FAMIXMapping new mapped: table; maps: class.
-										class addDefines: mapping.
-										table addDefinedBy: mapping.
+										mapping := FAMIXMapping new mapTarget: table; mapSource: class.
+										class addMaps: mapping.
+										table addMappedBy: mapping.
 										self add: mapping.].
 								counter := counter+1.
 								bar value: counter.
 								]]].
-
-
-"out add: (entities do: [:each | tables first nameAsRegex matches: each sourceText withoutLineEndings  ])."
-"tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ]."
-"class sourceText findString: table name"
-"Works in 2 min GREAT"
-"((class sourceText findString: table name) > 0)"
-"Works in 10 min"
-"(table nameAsRegex matches: class sourceText withoutLineEndings)"
 
 ]
 
