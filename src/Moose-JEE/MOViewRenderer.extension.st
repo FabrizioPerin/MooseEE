@@ -6,6 +6,20 @@ MOViewRenderer >> dominanceGrouppedTreeLayout [
 ]
 
 { #category : #'*Moose-JEE' }
+MOViewRenderer >> umlLikeShape: aString on: aBlock [
+
+	| builder |
+
+	builder := MOFormsBuilder new.
+	builder column; fill.
+	builder row; fill; row; fill.
+	builder x: 1 y: 1 add: (MOLabelShape new text: aString).
+	builder x: 1 y: 2 add: MORectangleShape new.
+	builder x: 1 y: 2 add: aBlock.
+	^builder shape
+]
+
+{ #category : #'*Moose-JEE' }
 MOViewRenderer >> umlPackageShapeWithLabel: aBlock [
 	| builder |
 	builder := MOFormsBuilder new.

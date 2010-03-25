@@ -400,3 +400,43 @@ MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 	
 	^self
 ]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
+	
+	| allFileAnchors cursor |
+	
+	self rootFolder: aFolder pathName.
+	self name: aFolder localName.
+	
+	allFileAnchors := self allWithType: FAMIXFileAnchor.
+	
+	cursor := 1.
+	UIManager default
+		displayProgress: 'Fixing'
+		at: Sensor cursorPoint
+		from: cursor
+		to: allFileAnchors size
+		during: [ :bar | 
+			allFileAnchors do: [:anchor | 
+				| startingFrom |
+				startingFrom := anchor fileName findString: self name.
+				(startingFrom = 0) ifFalse: [
+					startingFrom := anchor fileName findString: FileDirectory slash startingAt: startingFrom.
+					anchor fileName: (anchor fileName copyFrom: startingFrom + 1 to: anchor fileName size)].
+				cursor := cursor + 1.
+				bar value: cursor.
+				]].
+	
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> tryToFixFAMiXFileAnchorsGUI [
+	<menuItem: 'Try to fix links with files' category: 'JEE Menu'>
+
+	| folder |
+	
+	folder := UITheme builder chooseDirectory: 'Choose the root folder for the sources of ', self name.
+	"folder := FileDirectory on: aPathString"
+	folder ifNotNil: [ self tryToFixFAMiXFileAnchorsFrom: folder].
+]

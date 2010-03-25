@@ -366,7 +366,7 @@ FAMIXClassGroup >> viewTransactionFlow3 [
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlow3On: view [
 
-	| interestingClasses allInterestingMethods otherMethods |
+	| interestingClasses allInterestingMethods otherMethods tables |
 
 	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
 	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
@@ -380,7 +380,7 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 		allInterestingMethods := eachClass methods select: #isPartOfATransaction.
 		otherMethods := eachClass methods difference: allInterestingMethods.
 
-		view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color white).
+		view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
@@ -388,43 +388,43 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor:  Color blue darker ).
+		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor:  Color blue darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 													and: [ each startATransaction 
 														and: [ each couldBeAnEntryPoint ] ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker darker).
 		view nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
 															and: [ each startATransaction 
 																and: [ each couldBeAnEntryPoint ] ] ] ).
 
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker ).
+		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction ] ] ).
 
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color blue lighter lighter ).
+		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color blue lighter lighter ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker ).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 	
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange).
+		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint
 																	and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint
@@ -436,8 +436,14 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	].
 
 
-	view shape line color lighter.
+	view shape curvedLine color lighter.
 	view edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.
+	
+	"Show data base tables"
+	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
+	view nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
+	view shape curvedLine color darker.
+	view edges: self mooseModel allMaps  from: #mapSource to: #mapTarget.
 	
 	"view dominanceTreeLayout."
 	view dominanceGrouppedTreeLayout.

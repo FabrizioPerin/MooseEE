@@ -20,8 +20,6 @@ FAMIXMethod >> allMethodsTouchFromHereTo: anotherMethod [
 
 	| methodInvocationChain |
 	
-	self flag: #TODOTests.
-	
 	methodInvocationChain := self deepCalledMethods asOrderedCollection.
 
 	( methodInvocationChain includes: anotherMethod ) ifFalse: [ ^ OrderedCollection new ].

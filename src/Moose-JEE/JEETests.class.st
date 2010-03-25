@@ -2613,6 +2613,30 @@ JEETests >> testAllInvocationsBetweenHereToAnotherMethod [
 ]
 
 { #category : #testing }
+JEETests >> testAllMethodsTouchFromHereTo [
+
+	| mooseModel  methods methodsTouched aMethod method11 |
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+	methods := mooseModel allMethods.
+
+	aMethod := ( methods detect: [ :method | method name = #aMethod ] ).
+	method11 := ( methods detect: [ :method | method name = #method11 ] ).
+
+	self assert: ( methods isKindOf: FAMIXMethodGroup ).
+	self assert: ( methods size = 19 ).
+	
+	methodsTouched := method11 allMethodsTouchFromHereTo: aMethod.
+	
+	self assert: ( methodsTouched size = 5 ).
+	self assert: ( methodsTouched includes: ( methods detect: [ :method | method name = #method1 ] ) ).
+	self assert: ( methodsTouched includes: ( methods detect: [ :method | method name = #method6 ] ) ).
+	self assert: ( methodsTouched includes: ( methods detect: [ :method | method name = #method2 ] ) ).
+	self assert: ( methodsTouched includes: aMethod ).
+	self assert: ( methodsTouched includes: method11 ).
+
+]
+
+{ #category : #testing }
 JEETests >> testAnnotationTypeAndInstancesofTransactionScope [
 
 	| mooseModel annotationTp allInstances annotatedMethods annotatedClasses |

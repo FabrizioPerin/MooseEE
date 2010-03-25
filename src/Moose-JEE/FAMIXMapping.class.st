@@ -24,7 +24,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 FAMIXMapping class >> annotation [
-	<MSEClass: #DBMapping super: 'FAMIX.Association'>
+	<MSEClass: #Mapping super: 'FAMIX.Association'>
 	<package: #FAMIX>
 	^self
 ]
