@@ -20,6 +20,7 @@ MooseJEEImportInformationForEJB21 >> actionsToPerform [
 	mooseModel := MooseModel new.
 	mooseModel name: (mseFilePathName sliceFrom: ((mseFilePathName findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1) to: (mseFilePathName size - 4)  ).
 	mooseModel importFromMSEStream: (StandardFileStream readOnlyFileNamed: mseFilePathName).
+	mooseModel ejbVersion: 'EJB2.1'.
 	progBar value: 3.
 	
 	progBar value: 'Importing from ejb-jar files'.
@@ -39,19 +40,22 @@ MooseJEEImportInformationForEJB21 >> actionsToPerform [
 			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 5.
 			
-			MooseModel root add: mooseModel.
-			progBar value: 6.
-			
 			progBar value: 'Performing post import operations'.
 			
+			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePathName).
+			progBar value: 6.
+
+			MooseModel root add: mooseModel.
+			progBar value: 7.
+
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
 							mooseModel allModelClasses viewTransactionFlow3.
-							progBar value: 7.
+							progBar value: 8.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
-							progBar value: 8.]
-						ifFalse:[progBar value: 8].
+							progBar value: 9.]
+						ifFalse:[progBar value: 9].
 						
 			(wizardInformations at: #openBrowsers) 
 						ifTrue:[

@@ -10,16 +10,18 @@ Class {
 
 { #category : #'as yet unclassified' }
 MooseJEEImportInformationForEJB30 >> actionsToPerform [
-	| sqlFileNamePath mseFilePathName |
+	| sqlFileNamePath mseFilePathName sourcePath |
 	
 	sqlFileNamePath := wizardInformations at: #SQLFileName.
 	mseFilePathName := wizardInformations at: #mseFilePathName.
+	sourcePath := wizardInformations at: #sourceDirectoryPath.
 
 	"Import Model"
 
 	mooseModel := MooseModel new.
 	mooseModel name: (mseFilePathName sliceFrom: ((mseFilePathName findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1)  to: (mseFilePathName size - 4)  ).
 	mooseModel importFromMSEStream: (StandardFileStream readOnlyFileNamed: mseFilePathName).
+	mooseModel ejbVersion: 'EJB3.0'.
 	progBar value: 3.
 	
 	progBar value: 'Importing from sql file'.
@@ -45,37 +47,41 @@ MooseJEEImportInformationForEJB30 >> actionsToPerform [
 			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 7.
 			
-			MooseModel root add: mooseModel.
+			progBar value: 'Performing post import operations'.
+			
+			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePath).
 			progBar value: 8.
 			
-			progBar value: 'Performing post import operations'.
+			MooseModel root add: mooseModel.
+			progBar value: 9.
 			
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
 							mooseModel allModelClasses viewTransactionFlow3.
-							progBar value: 9.
+							progBar value: 10.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
-							progBar value: 10.]
-						ifFalse:[progBar value: 10].
+							progBar value: 11.]
+						ifFalse:[progBar value: 11].
 						
 			(wizardInformations at: #openBrowsers) 
 						ifTrue:[
 							mooseModel browseCodeWithAnnotationsForJEA.
-							progBar value: 11]
-						ifFalse:[progBar value: 11].
+							progBar value: 12]
+						ifFalse:[progBar value: 12].
 		]
 ]
 
 { #category : #'as yet unclassified' }
 MooseJEEImportInformationForEJB30 >> buildWizardPanels [
 	
+	| pane1 pane2 pane3 pane4 pane5 part1 part2 part3 part4 part5 part6 |
 	
-	| pane1 pane2 pane3 pane4 part1 part2 part3 part4 part5 |
 	pane1 := WizardFirstPane named: 'Information'.
 	pane2 := WizardMiddlePane named: 'Select the MSE file of the project'.
 	pane3 := WizardMiddlePane named: 'Import information from SQL file'.
-	pane4 := WizardLastPane named: 'After import operations'.
+	pane4 := WizardMiddlePane named: 'Select the source code directory'.
+	pane5 := WizardLastPane named: 'After import operations'.
 	
 	part1 := MJInfoPart new: self informationText.
 	pane1 addPart: part1 associatedTo: #nothing.
@@ -86,19 +92,23 @@ MooseJEEImportInformationForEJB30 >> buildWizardPanels [
 	part3 := MJChooseFilePart new.
 	pane3 addPart: part3 associatedTo: #SQLFileName.
 	
-	part4 :=  MJCheckboxPart new: 'Open visualizations'.
-	part4 selected: true.
-	pane4 addPart: part4 associatedTo: #openVisualizations.
+	part4 := MJChooseDirectoryPart new.
+	pane4 addPart: part4 associatedTo: #sourceDirectoryPath.
 	
-	part5 :=  MJCheckboxPart new: 'Open annotations browser'.
+	part5 :=  MJCheckboxPart new: 'Open visualizations'.
 	part5 selected: true.
-	pane4 addPart: part5 associatedTo: #openBrowsers.
+	pane5 addPart: part4 associatedTo: #openVisualizations.
+	
+	part6 :=  MJCheckboxPart new: 'Open annotations browser'.
+	part6 selected: true.
+	pane5 addPart: part5 associatedTo: #openBrowsers.
 	
 	
 	self addPane: pane1.
 	self addPane: pane2.
 	self addPane: pane3.
 	self addPane: pane4.
+	self addPane: pane5.
 
 	
 
@@ -133,7 +143,7 @@ MooseJEEImportInformationForEJB30 >> performTerminateButtonAction [
 		displayProgress: 'Importing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 11
+		to: 12
 		during: [ :bar | 
 			progBar := bar. 
 			progBar value: 2.

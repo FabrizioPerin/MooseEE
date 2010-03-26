@@ -208,6 +208,20 @@ MooseModel >> createAnnotationForUnsafeQuery [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> ejbVersion [
+	<MSEProperty: #EJBVersion type: #Object>
+	"self flag: 'annotate with fame meta descriptions'."
+	^self privateState attributeGet: #EJBVersion default: [nil]
+
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> ejbVersion: aString [
+	
+	^self privateState attributeSet: #EJBversion value: aString
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
@@ -392,6 +406,16 @@ MooseModel >> instanciateJBeansFromAnnotations [
 ]
 
 { #category : #'*Moose-JEE' }
+MooseModel >> isEJB21 [
+	^self ejbVersion = 'EJB2.1'
+]
+
+{ #category : #'*Moose-JEE' }
+MooseModel >> isEJB30 [
+	^self ejbVersion = 'EJB3.0'
+]
+
+{ #category : #'*Moose-JEE' }
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 
 	aBlackBoard databases do: [:each | self add: each createRelationalElement ].
@@ -405,6 +429,8 @@ MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
 	| allFileAnchors cursor |
+	
+	self flag: #TODOtest.
 	
 	self rootFolder: aFolder pathName.
 	self name: aFolder localName.
@@ -420,6 +446,25 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 		during: [ :bar | 
 			allFileAnchors do: [:anchor | 
 				| startingFrom |
+				"Trying to readapt also the path separator in the case that you imported a mse file from another platform"
+				OSProcess platformName = 'Win32'
+					ifTrue: [
+						[(anchor fileName indexOf: $/) = 0]
+							whileFalse: [ 
+								|newPath |
+								newPath := anchor fileName.
+								newPath at: (anchor fileName indexOf: $/) put: $\.
+								anchor fileName: newPath.
+								]]
+					ifFalse: [
+						[(anchor fileName indexOf: $\) = 0]
+							whileFalse: [ 
+								|newPath |
+								newPath := anchor fileName.
+								newPath at: (anchor fileName indexOf: $\) put: $/.
+								anchor fileName: newPath.
+								]].
+			
 				startingFrom := anchor fileName findString: self name.
 				(startingFrom = 0) ifFalse: [
 					startingFrom := anchor fileName findString: FileDirectory slash startingAt: startingFrom.
