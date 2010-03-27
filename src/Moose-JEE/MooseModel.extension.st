@@ -261,19 +261,30 @@ MooseModel >> importDBFromSQLFileGUI [
 { #category : #'*Moose-JEE' }
 MooseModel >> importEjbJarFromFolder: aString [
 	
-	| fileSystem entries directoryEntries parser root |
+	| fileSystem entries directoryEntries parser root counter |
 	
 	fileSystem := FSDiskFilesystem current referenceTo: aString.
 	entries := FSCollectVisitor breadthFirst: fileSystem.
 	
 	directoryEntries := entries select: [:entry| '.*ejb-jar.xml$' asRegex matches: entry reference name ].
-	
-	directoryEntries do: [:entry | 
-					| file |
-					file := FileStream readOnlyFileNamed: (entry reference name).
-					parser := OPOpaxHandler on: file readStream. 
+
+	counter := 1.			
+	UIManager default
+		displayProgress: 'Importing From ejb-jar files'
+		at: Sensor cursorPoint
+		from: 1 
+		to: directoryEntries size
+		during: [ :bar | 
+			bar  value: counter.
+			
+			directoryEntries do: [:entry |
 				
-					parser startDocument.
+					 | stream |
+					
+					stream := StandardFileStream readOnlyFileNamed: (entry reference name).
+					parser := OPOpaxHandler on:stream.
+					
+					"parser startDocument."
 					parser parseDocument.
 					root := parser stack first.
 							
@@ -285,7 +296,9 @@ MooseModel >> importEjbJarFromFolder: aString [
 							eachElement populate: self].
 					(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
 							eachElement populate: self].
-				].
+					counter := counter + 1.
+					bar value: counter.
+				]].
 
 ]
 
