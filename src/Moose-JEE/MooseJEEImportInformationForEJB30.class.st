@@ -36,21 +36,21 @@ MooseJEEImportInformationForEJB30 >> actionsToPerform [
 					mooseModel importDBFromSQLFile: (StandardFileStream readOnlyFileNamed: sqlFileNamePath) ].
 			progBar value: 4.
 	
-			mooseModel buildRelationsAmongDBElementsAndMethods.
+			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePath).
 			progBar value: 5.
+	
+			mooseModel buildRelationsAmongDBElementsAndMethods.
+			progBar value: 6.
 		
 			progBar value: 'Creating annotations'.
 	
 			mooseModel instanciateJBeansFromAnnotations.
-			progBar value: 6.
-			
-			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 7.
 			
-			progBar value: 'Performing post import operations'.
-			
-			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePath).
+			mooseModel annotateTheModelForJEEBrowser.
 			progBar value: 8.
+			
+			progBar value: 'Performing post import operations'.
 			
 			MooseModel root add: mooseModel.
 			progBar value: 9.
@@ -97,11 +97,11 @@ MooseJEEImportInformationForEJB30 >> buildWizardPanels [
 	
 	part5 :=  MJCheckboxPart new: 'Open visualizations'.
 	part5 selected: true.
-	pane5 addPart: part4 associatedTo: #openVisualizations.
+	pane5 addPart: part5 associatedTo: #openVisualizations.
 	
 	part6 :=  MJCheckboxPart new: 'Open annotations browser'.
 	part6 selected: true.
-	pane5 addPart: part5 associatedTo: #openBrowsers.
+	pane5 addPart: part6 associatedTo: #openBrowsers.
 	
 	
 	self addPane: pane1.

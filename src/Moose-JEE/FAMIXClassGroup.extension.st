@@ -443,7 +443,7 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
 	view nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
 	view shape curvedLine color darker.
-	view edges: self mooseModel allMaps  from: #mapSource to: #mapTarget.
+	view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
 	
 	"view dominanceTreeLayout."
 	view dominanceGrouppedTreeLayout.

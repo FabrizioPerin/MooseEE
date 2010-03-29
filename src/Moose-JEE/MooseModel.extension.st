@@ -87,21 +87,23 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 
 	| tables entities counter |
 
-	entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
-	tables := self allTables.
-	counter :=  1.
+	self isEJB30 
+	ifTrue:[	
+		entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
+		tables := self allTables.
+		counter :=  1.
 
-	UIManager default
-		displayProgress: 'Building relations among DB and Entities'
-		at: Sensor cursorPoint
-		from: counter
-		to: (entities size * tables size)
-		during: [ :bar |
-			counter := counter+1.
-			bar value: counter.
+		UIManager default
+			displayProgress: 'Building relations among DB and Entities'
+			at: Sensor cursorPoint
+			from: counter
+			to: (entities size * tables size)
+			during: [ :bar |
+				counter := counter+1.
+				bar value: counter.
 			
-			tables do: [:table | 
-				entities do: [:class |
+				tables do: [:table | 
+					entities do: [:class |
 						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
 										mapping := FAMIXMapping new mapTarget: table; mapSource: class.
@@ -110,7 +112,32 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 										self add: mapping.].
 								counter := counter+1.
 								bar value: counter.
-								]]].
+								]]]]
+	ifFalse:[
+		entities := self allClasses select: [:class | class methods anySatisfy: #doesExecuteAQuery].
+		tables := self allTables.
+		counter :=  1.
+
+		UIManager default
+			displayProgress: 'Building relations among DB and Classes'
+			at: Sensor cursorPoint
+			from: counter
+			to: (entities size * tables size)
+			during: [ :bar |
+				counter := counter+1.
+				bar value: counter.
+			
+				tables do: [:table | 
+					entities do: [:class |
+						((class sourceText findString: table name) > 0)
+								ifTrue:[ |mapping|
+										mapping := FAMIXMapping new mapTarget: table; mapSource: class.
+										class addMaps: mapping.
+										table addMappedBy: mapping.
+										self add: mapping.].
+								counter := counter+1.
+								bar value: counter.
+								]]]]
 
 ]
 
@@ -218,7 +245,7 @@ MooseModel >> ejbVersion [
 { #category : #'*Moose-JEE' }
 MooseModel >> ejbVersion: aString [
 	
-	^self privateState attributeSet: #EJBversion value: aString
+	^self privateState attributeSet: #EJBVersion value: aString
 ]
 
 { #category : #'*Moose-JEE' }
