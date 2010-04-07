@@ -218,6 +218,29 @@ FAMIXClass >> viewInterestingTransactionMethodsOn: view [
 ]
 
 { #category : #'*Moose-JEE' }
+FAMIXClass >> viewMethodsIncludeIn: aMethodList ForUnsafeQueriesOn: view [ 
+	| usefulMethods |
+	
+	usefulMethods := self methods intersection: aMethodList.
+	
+	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color yellow) borderColor:  Color yellow darker darker ).
+	view nodes: ( usefulMethods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ ( each doesCall: 'executeUpdate' ) not ] ] ).
+
+	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor:  Color orange darker darker ).
+	view nodes: ( usefulMethods select: [ :each | ( each doesCall: 'executeQuery' ) not and: [ ( each doesCall: 'executeUpdate' )  ] ] ).
+		
+	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color red) borderColor:  Color red darker darker ).
+	view nodes: ( usefulMethods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ each doesCall: 'executeUpdate' ] ] ).
+		
+	view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
+	view nodes: ( usefulMethods select: [ :each | each doesExecuteAQuery not ] ).
+
+	view shape line color darker.
+	view edges: self internalInvocations from: #sender toAll: #candidates.
+	view horizontalTreeLayout 
+]
+
+{ #category : #'*Moose-JEE' }
 FAMIXClass >> withDeepInvokedClasses [
 
 	| cursor result invokedClassesAndTheirSubclasses |

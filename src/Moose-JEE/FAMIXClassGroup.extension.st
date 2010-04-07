@@ -436,13 +436,13 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	].
 
 
-	view shape curvedLine color lighter.
+	view shape line color lighter.
 	view edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.
 	
 	"Show data base tables"
 	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
 	view nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
-	view shape curvedLine color darker.
+	view shape line color darker.
 	view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
 	
 	"view dominanceTreeLayout."
@@ -496,7 +496,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewUnsafeQueries [
-	"<menuItem: 'Unsafe queries' category: 'Mondrian'>"
+	<menuItem: 'Unsafe queries' category: 'Mondrian'>
 
 	| view |
 	view := MOViewRenderer new.
@@ -507,34 +507,25 @@ FAMIXClassGroup >> viewUnsafeQueries [
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewUnsafeQueriesOn: view [ 	
 	
-	| allMethods interestingClasses interestingClassesWithoutLonelyClasses |
+	| allMethods interestingClasses interestingClassesWithoutLonelyClasses interestingClassesWithoutTests |
+	
 	allMethods := ( FAMIXMethodGroup withAll: ( ( self flatCollect: #methodsGroup ) select: #doesExecuteAQuery ) ) deepCalleeMethodsWithoutTransactionPath.
 	interestingClasses := FAMIXClassGroup new addAll: ( self select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ).
-	interestingClassesWithoutLonelyClasses := interestingClasses 
-												reject: [ :class | ( class invokingClasses intersection: interestingClasses ) isEmpty 
-																	and: [ ( class invokedClasses intersection: interestingClasses ) isEmpty ] ].
-
-	view nodes: interestingClassesWithoutLonelyClasses forEach: [:eachClass |
-		| methods |
-
-		methods := eachClass methods intersection: allMethods.
+	(interestingClasses select: [:class | (class invokingClasses intersection: interestingClasses) isEmpty ]) groupClassesConsiderInvokationHierarchy.
 	
-		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color yellow ).
-		view nodes: ( methods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ ( each doesCall: 'executeUpdate' ) not ] ] ).
+	interestingClassesWithoutTests := interestingClasses reject: [ :class | ( class name includesSubString: 'Test') or:[ class name includesSubString: 'test' ] ].
+	"(interestingClassesWithoutTests select: [:class | class incomingReferences isEmpty ]) groupClassesConsiderInvokationHierarchy."
+	
+	interestingClassesWithoutLonelyClasses := interestingClasses select: [ :class | ( class name includesSubString: 'Test') or:[ class name includesSubString: 'test' ] ].
+	"(interestingClassesWithoutLonelyClasses select: [:class | class incomingInvocations isEmpty ]) groupClassesConsiderInvokationHierarchy."
 
-		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color orange ).
-		view nodes: ( methods select: [ :each | ( each doesCall: 'executeQuery' ) not and: [ ( each doesCall: 'executeUpdate' )  ] ] ).
-		
-		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color red ).
-		view nodes: ( methods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ each doesCall: 'executeUpdate' ] ] ).
-		
-		view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
-		view nodes: ( methods select: [ :each | each doesExecuteAQuery not ] ).
+	view shape rectangle withBorder.	
+	view nodes: interestingClassesWithoutTests forEach: [:eachClass |
+		eachClass viewMethodsIncludeIn: allMethods ForUnsafeQueriesOn: view ].
 
-		view shape line color darker.
-		view edges: eachClass internalInvocations from: #sender toAll: #candidates.
-		view horizontalTreeLayout 
-	].
+	view shape rectangle withBorder; borderColor: Color lightGray.
+	view nodes: interestingClassesWithoutLonelyClasses forEach: [:eachClass | 
+			eachClass viewMethodsIncludeIn: allMethods ForUnsafeQueriesOn: view ].
 
 	view shape line color lighter.
 	view edgesFrom: #superclass.
@@ -547,5 +538,5 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 		from: #yourself
 		toAll: #invokedClasses.
 		
-	view dominanceTreeLayout
+	view dominanceGrouppedTreeLayout
 ]
