@@ -2906,6 +2906,7 @@ JEETests >> testFAMIXMappingModelPopulation [
 	| mooseModel annotationType famixAnchor entities tables |
 
 	mooseModel := self sampleMooseModelWithDB.
+	mooseModel ejbVersion: 'EJB3.0'.
 	
 	"define Entity beans"
 	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
@@ -3409,7 +3410,7 @@ JEETests >> testMappedRelationalEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity |
 
 	mooseModel := self sampleMooseModelWithDB.
-	
+	mooseModel ejbVersion: 'EJB3.0'.
 	"define Entity beans"
 	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
 	
@@ -3447,6 +3448,7 @@ JEETests >> testMapsNamedEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity |
 
 	mooseModel := self sampleMooseModelWithDB.
+	mooseModel ejbVersion: 'EJB3.0'.
 	
 	"define Entity beans"
 	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
