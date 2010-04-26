@@ -7,7 +7,7 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> fakeSourceText [
 
 	^'import ch.ipi.esv.activity.bo.workunit.ActivityBaseBO;
@@ -30,7 +30,7 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   private static final long serialVersionUID = "$Revision: 1.7 $".hashCode();'
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> minimalEjbJar [
 
 	^'<?xml version="1.0"?>
@@ -125,7 +125,7 @@ JEETests >> minimalEjbJar [
 '
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> normalEjbJar [
 
 	^'<?xml version="1.0" encoding="UTF-8"?>
@@ -513,7 +513,7 @@ JEETests >> normalEjbJar [
 '
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModel [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean |
@@ -638,7 +638,7 @@ JEETests >> sampleMooseModel [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithDB [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean database dbTable1 dbTable2 dbTable3 tableColumn1 tableColumn2 tableColumn3 tableColumn5 tableColumn6 tableColumn4 |
@@ -837,7 +837,7 @@ JEETests >> sampleMooseModelWithDB [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithInvocation [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod |
@@ -971,7 +971,7 @@ JEETests >> sampleMooseModelWithInvocation [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithTransAndQuery [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute invocation6 |
@@ -1180,7 +1180,7 @@ JEETests >> sampleMooseModelWithTransAndQuery [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithTransAndQueryAndBeans [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute invocation6 class1 class2 class5 class6 inheritance |
@@ -1411,7 +1411,7 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeans [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithTransAndQueryAndBeansAndHierarchi [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute invocation6 class1 class2 class5 class6 inheritance java sql prepareStatement |
@@ -1671,7 +1671,7 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeansAndHierarchi [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithTransAndQueryComplex [
 
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute method5 method6 method7 method9 method10 method11 method12 method13 method14 method8 invocation6 invocation7 invocation8 invocation9 invocation10 invocation11 invocation12 invocation13 invocation14 invocation15 invocation16 invocation17 invocation18 invocation19 |
@@ -1781,7 +1781,6 @@ JEETests >> sampleMooseModelWithTransAndQueryComplex [
 
 	class3	addMethod: (method1);
 			addMethod: (method2);
-			addMethod: (method3);
 			addMethod: (method4);
 			addMethod: (method5);
 			addMethod: (method6);
@@ -1838,6 +1837,7 @@ JEETests >> sampleMooseModelWithTransAndQueryComplex [
 				yourself.
 
 	class4	addMethod: (method8);
+			addMethod: (method3);
 			addMethod: (method9);
 			addMethod: (method10);
 			addMethod: (method11);
@@ -2024,7 +2024,7 @@ JEETests >> sampleMooseModelWithTransAndQueryComplex [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute method5 method6 method7 method9 method10 method11 method12 method13 method14 method8 invocation6 invocation7 invocation8 invocation9 invocation10 invocation11 invocation12 invocation13 invocation14 invocation15 invocation16 invocation17 invocation18 invocation19 java sql prepareStatement |
@@ -2395,7 +2395,7 @@ JEETests >> sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #models }
 JEETests >> sampleMooseModelWithTransaction [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 |
@@ -2592,7 +2592,7 @@ JEETests >> sampleMooseModelWithTransaction [
 	^mooseModel
 ]
 
-{ #category : #testing }
+{ #category : #setup }
 JEETests >> setUp [
 	| parser |
 	parser := OPOpaxHandler on: self minimalEjbJar readStream.
@@ -2602,7 +2602,7 @@ JEETests >> setUp [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testAllInvocationsBetweenHereToAnotherMethod [
 
 	| mooseModel method anotherMethod |
@@ -2612,7 +2612,7 @@ JEETests >> testAllInvocationsBetweenHereToAnotherMethod [
 	mooseModel 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testAllMethodsTouchFromHereTo [
 
 	| mooseModel  methods methodsTouched aMethod method11 |
@@ -2636,7 +2636,7 @@ JEETests >> testAllMethodsTouchFromHereTo [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testAnnotationTypeAndInstancesofTransactionScope [
 
 	| mooseModel annotationTp allInstances annotatedMethods annotatedClasses |
@@ -2661,7 +2661,7 @@ JEETests >> testAnnotationTypeAndInstancesofTransactionScope [
 "	MooseBrowsers new codeWithAnnotationsBrowser openOn: mooseModel."
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testAnnotationTypeAndInstancesofUnsafeQuery [
 
 	| mooseModel annotationTp allInstances annotatedMethods annotatedClasses |
@@ -2684,7 +2684,7 @@ JEETests >> testAnnotationTypeAndInstancesofUnsafeQuery [
 	"MooseBrowsers new codeWithAnnotationsBrowser openOn: mooseModel."
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testCompleteHierarchyInWhichThisResides [
 	
 	
@@ -2703,7 +2703,7 @@ JEETests >> testCompleteHierarchyInWhichThisResides [
 	self assert: (interestingClasses size = 4).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testCompleteHierarchyInWhichThisResides2 [
 	
 	
@@ -2720,7 +2720,7 @@ JEETests >> testCompleteHierarchyInWhichThisResides2 [
 	self assert: (interestingClasses size = 4).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testCompleteHierarchyInWhichThisResides3 [
 	
 	
@@ -2737,7 +2737,7 @@ JEETests >> testCompleteHierarchyInWhichThisResides3 [
 	self assert: (interestingClasses size = 4).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testCompleteHierarchyInWhichThisResidesRight [
 	| mooseModel |
 
@@ -2749,7 +2749,7 @@ JEETests >> testCompleteHierarchyInWhichThisResidesRight [
 	self assert: ( ( ( ( mooseModel allClasses select: [:each | each name = #'Class3' ] ) at: 1 ) completeHierarchyInWhichThisResides ) size = 1 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testDeepCalledMethods [
 	
 	
@@ -2766,7 +2766,7 @@ JEETests >> testDeepCalledMethods [
 	self assert: (interestingClasses size = 4).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testDeepCalledMethods2 [
 	
 	| mooseModel  invocation MG |
@@ -2781,7 +2781,7 @@ JEETests >> testDeepCalledMethods2 [
 	self assert: ( invocation size = 13 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testDoesCall [
 
 	| mooseModel  methods |
@@ -2798,7 +2798,7 @@ JEETests >> testDoesCall [
 	self assert: ( ( methods detect: [ :method | method name = #method4 ] ) doesCall: #method2 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testDoesImplements [
 	
 	| mooseModel |
@@ -2809,7 +2809,7 @@ JEETests >> testDoesImplements [
 	self assert: ( ( ( mooseModel allClasses select: [:each | each name = #Class4 ] ) at: 1 ) doesImplements: #Class2 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testElementCreation [
 
 	self assert: (root allChildren select: [:each | each isMemberOf: EntityElement ]) size = 2.
@@ -2818,7 +2818,7 @@ JEETests >> testElementCreation [
 	self assert: (root allChildren select: [:each | each isMemberOf:  MessageDrivenElement ]) size = 1.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testEntityResolving [
 	
 	| mooseModel aBean |
@@ -2848,7 +2848,7 @@ JEETests >> testEntityResolving [
 	self assert: aBean primaryKeyClass isNil.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testExecuteAQuery [
 
 	| mooseModel  methods temp |
@@ -2877,7 +2877,23 @@ JEETests >> testExecuteAQuery [
 	self deny: ( temp ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
+JEETests >> testFAMIXDataLayerPopulate [
+
+	| mooseModel dataLayer |
+
+	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
+
+	dataLayer := FAMIXDataLayer new.
+	dataLayer populate: mooseModel.
+	
+	
+	self assert: ((mooseModel allWithType: FAMIXDataLayer) size = 1).
+	self assert: ((mooseModel allWithType: FAMIXDataLayer) first  = dataLayer).
+	self assert: dataLayer containedClasses size = 2.
+]
+
+{ #category : #tests }
 JEETests >> testFAMIXMappingCreation [
 	
 	| mooseModel  class table map mapping |
@@ -2901,7 +2917,7 @@ JEETests >> testFAMIXMappingCreation [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testFAMIXMappingModelPopulation [
 	| mooseModel annotationType famixAnchor entities tables |
 
@@ -2942,7 +2958,7 @@ JEETests >> testFAMIXMappingModelPopulation [
 	
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testFAMIXMethodDeepCalledMethods [
 	
 
@@ -2960,7 +2976,7 @@ JEETests >> testFAMIXMethodDeepCalledMethods [
 	self assert: (allMethods size = 13 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testFAMIXMethodDeepCalleeMethods [
 
 	| mooseModel  allMethods methods |
@@ -2975,7 +2991,7 @@ JEETests >> testFAMIXMethodDeepCalleeMethods [
 	self assert: (methods asSet size = 14 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testFAMIXMethodDeepCalleeMethodsWithoutTransactionPath [
 
 	| mooseModel  |
@@ -2984,7 +3000,23 @@ JEETests >> testFAMIXMethodDeepCalleeMethodsWithoutTransactionPath [
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #executeBatch ] ) first deepCalleeMethodsWithoutTransactionPath ) size = 7.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
+JEETests >> testFAMIXServiceLayerPopulate [
+
+	| mooseModel serviceLayer |
+
+	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
+
+	serviceLayer := FAMIXServiceLayer new.
+	serviceLayer populate: mooseModel.
+	
+	
+	self assert: ((mooseModel allWithType: FAMIXServiceLayer) size = 1).
+	self assert: ((mooseModel allWithType: FAMIXServiceLayer) first  = serviceLayer).
+	self assert: serviceLayer containedSessionBeans size = 3.
+]
+
+{ #category : #tests }
 JEETests >> testGroupClassesConsiderInvokationHierarchy [
 	| mooseModel max aStatelessSessionBean aStatefulSessionBean class3 class4 |
 	
@@ -3006,7 +3038,7 @@ JEETests >> testGroupClassesConsiderInvokationHierarchy [
 	self assert: max = 14
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testHasImplementsABean [
 
 	| mooseModel allImplementingClasses |
@@ -3024,7 +3056,7 @@ JEETests >> testHasImplementsABean [
 	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsABean ] ) size = 0 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testHasImplementsAMessageDrivenBean [
 
 	| mooseModel allImplementingClasses |
@@ -3042,7 +3074,7 @@ JEETests >> testHasImplementsAMessageDrivenBean [
 	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAMessageDrivenBean ] ) size = 0 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testHasImplementsASessionBean [
 
 	| mooseModel allImplementingClasses |
@@ -3060,7 +3092,7 @@ JEETests >> testHasImplementsASessionBean [
 	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsASessionBean ] ) size = 0 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testHasImplementsAnEntityBean [
 
 	| mooseModel allImplementingClasses |
@@ -3078,7 +3110,7 @@ JEETests >> testHasImplementsAnEntityBean [
 	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAnEntityBean ] ) size = 0 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testImplementationClassAfterThePopulation [
 	| model entityBeansAnnotations |
 	MooseModel resetMeta.
@@ -3108,7 +3140,7 @@ JEETests >> testImplementationClassAfterThePopulation [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInstanciateAllBeansFromAnnotations [
 	| model entityBeansAnnotations |
 	MooseModel resetMeta.
@@ -3139,7 +3171,7 @@ JEETests >> testInstanciateAllBeansFromAnnotations [
 	
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInstanciateEntityBeansFromAnnotations [
 	| model entityBeansAnnotations |
 	MooseModel resetMeta.
@@ -3166,7 +3198,7 @@ JEETests >> testInstanciateEntityBeansFromAnnotations [
 	
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInstanciateJBeansFromAnnotations [
 	| model entityBeansAnnotations |
 	MooseModel resetMeta.
@@ -3196,7 +3228,7 @@ JEETests >> testInstanciateJBeansFromAnnotations [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInstanciateSessionBeansFromAnnotations [
 	| model entityBeansAnnotations |
 	MooseModel resetMeta.
@@ -3224,7 +3256,7 @@ JEETests >> testInstanciateSessionBeansFromAnnotations [
 	
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInvocationCallChain [
 	
 	| mooseModel  invocation |
@@ -3239,7 +3271,7 @@ JEETests >> testInvocationCallChain [
 	self assert: ( ( invocation at: 2 ) name = #someMethod ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInvocationCalleeChain [
 	
 	| mooseModel  invocation |
@@ -3255,7 +3287,7 @@ JEETests >> testInvocationCalleeChain [
 	self assert: ( ( invocation at: 2 ) name = #aMethod ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInvocationCalleeChainWhitoutTransactionPath [
 	
 	| mooseModel  invocation MG |
@@ -3271,7 +3303,7 @@ JEETests >> testInvocationCalleeChainWhitoutTransactionPath [
 	self assert: (invocation size = 6 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInvocationCalleeChainWithMethodGroup [
 
 	| mooseModel  invocation MG |
@@ -3286,7 +3318,7 @@ JEETests >> testInvocationCalleeChainWithMethodGroup [
 	self assert: ( invocation size = 14 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testInvocations [
 
 	| mooseModel  invocation |
@@ -3304,7 +3336,7 @@ JEETests >> testInvocations [
 	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) name = #someMethod ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testIsADataLayerClass [
 
 	| mooseModel |
@@ -3318,7 +3350,7 @@ JEETests >> testIsADataLayerClass [
 	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADataLayerClass ] ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testIsADomainLayerClass [
 
 	| mooseModel  |
@@ -3327,7 +3359,7 @@ JEETests >> testIsADomainLayerClass [
 	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADomainLayerClass ] ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testIsAPresentationLayerClass [
 
 	| mooseModel  |
@@ -3336,7 +3368,7 @@ JEETests >> testIsAPresentationLayerClass [
 	self deny: ( mooseModel allClasses anySatisfy: [ :each | each isAPresentationLayerClass ] ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testIsPartOfATransaction [
 
 	| mooseModel  methodGroup |
@@ -3347,7 +3379,7 @@ JEETests >> testIsPartOfATransaction [
 	self assert: methodGroup first isPartOfATransaction.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testIsPartOfATransactionVsDeepCalledMethods [
 
 	| mooseModel  allMethods methods |
@@ -3384,7 +3416,7 @@ JEETests >> testIsPartOfATransactionVsDeepCalledMethods [
 	self assert: ( methods size = 0 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testIsPartOfAnUnsafeTransactionPath [
 
 	| mooseModel  |
@@ -3405,7 +3437,7 @@ JEETests >> testIsPartOfAnUnsafeTransactionPath [
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #someMethod ] ) first isPartOfAnUnsafeTransactionPath ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testMappedRelationalEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity |
 
@@ -3443,7 +3475,7 @@ JEETests >> testMappedRelationalEntities [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testMapsNamedEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity |
 
@@ -3480,7 +3512,7 @@ JEETests >> testMapsNamedEntities [
 
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testMessageDrivenResolving [
 	
 	| mooseModel aBean |
@@ -3497,7 +3529,7 @@ JEETests >> testMessageDrivenResolving [
 	self assert: aBean implementationClass notNil.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testNOQM [
 
 	| mooseModel  sum |
@@ -3511,7 +3543,7 @@ JEETests >> testNOQM [
 	
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testNOTM [
 
 	| mooseModel  sum |
@@ -3524,7 +3556,7 @@ JEETests >> testNOTM [
 	self assert: ( sum = 13 ).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testRationNOQMNOM [
 
 
@@ -3539,7 +3571,7 @@ JEETests >> testRationNOQMNOM [
 	self assert: ( mooseModel allClasses RatioNOQMNOM = ( 3.0 / 19.0 )).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testRationNOTMNOM [
 
 	| mooseModel  |
@@ -3551,7 +3583,7 @@ JEETests >> testRationNOTMNOM [
 	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13.0 / 19.0 )).
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testSessionResolving [
 	
 	| mooseModel aStateless aStateful |
@@ -3575,7 +3607,7 @@ JEETests >> testSessionResolving [
 	self assert: aStateful isStateful.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testStartAUselessTransaction [
 
 	| mooseModel  |
@@ -3584,7 +3616,7 @@ JEETests >> testStartAUselessTransaction [
 	self assert: ( mooseModel allMethods select: [:each | each startAUselessTransaction ] ) size = 2.
 ]
 
-{ #category : #testing }
+{ #category : #tests }
 JEETests >> testTransactionType [
 	
 	| mooseModel  |
