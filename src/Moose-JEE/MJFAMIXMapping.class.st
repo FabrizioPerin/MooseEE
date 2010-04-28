@@ -13,7 +13,7 @@ maps
 
 "
 Class {
-	#name : #FAMIXMapping,
+	#name : #MJFAMIXMapping,
 	#superclass : #FAMIXAssociation,
 	#instVars : [
 		'mapSource',
@@ -23,20 +23,20 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXMapping class >> annotation [
+MJFAMIXMapping class >> annotation [
 	<MSEClass: #Mapping super: 'FAMIX.Association'>
 	<package: #FAMIX>
 	^self
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> from [
+MJFAMIXMapping >> from [
 
 	^ self mapSource
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> initialize [
+MJFAMIXMapping >> initialize [
 	super initialize.
 	"maps := FMMultivalueLink on: self opposite: #defines:.
 	mapped := FMMultivalueLink on: self opposite: #definedBy:."
@@ -46,7 +46,7 @@ FAMIXMapping >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> mapSource [
+MJFAMIXMapping >> mapSource [
 
 	<MSEProperty: #mapSource type: #FAMIXNamedEntity opposite: #maps>
 	<MSEComment: 'Named Entity maps a Relational elements.'>
@@ -55,7 +55,7 @@ FAMIXMapping >> mapSource [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> mapSource: aNamedEntity [
+MJFAMIXMapping >> mapSource: aNamedEntity [
 	
 	mapSource := FMMultivalueLink 
 								on: self
@@ -66,15 +66,15 @@ FAMIXMapping >> mapSource: aNamedEntity [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> mapTarget [
-	<MSEProperty: #mapTarget type: #FAMIXRelationalEntity opposite: #mappedBy>
+MJFAMIXMapping >> mapTarget [
+	<MSEProperty: #mapTarget type: #MJFAMIXRelationalEntity opposite: #mappedBy>
 	<MSEComment: 'Relational element mapped into the system by a Named Entity.'>
 	
 	^mapTarget
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> mapTarget: aRelationalEntity [
+MJFAMIXMapping >> mapTarget: aRelationalEntity [
 
 	mapTarget := FMMultivalueLink 
 								on: self
@@ -84,7 +84,7 @@ FAMIXMapping >> mapTarget: aRelationalEntity [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> printOn: aStream [
+MJFAMIXMapping >> printOn: aStream [
 
 	self from isNil	
 		ifFalse: [aStream nextPutAll: self from name].
@@ -95,7 +95,7 @@ FAMIXMapping >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXMapping >> to [
+MJFAMIXMapping >> to [
 
 	^ self mapTarget
 ]

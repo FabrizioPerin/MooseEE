@@ -12,7 +12,7 @@ MessageDrivenElement class >> xmlTags [
 { #category : #accessing }
 MessageDrivenElement >> createBeanFrom: aMooseModel [
 	| bean |
-	bean := FAMIXMessageDrivenBean new.
+	bean := MJFAMIXMessageDrivenBean new.
 	bean transactionType: self transactionType.
 	^bean
 ]

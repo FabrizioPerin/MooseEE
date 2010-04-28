@@ -12,7 +12,7 @@ SessionElement class >> xmlTags [
 { #category : #accessing }
 SessionElement >> createBeanFrom: aMooseModel [	
 	| bean |
-	bean := FAMIXSessionBean new.
+	bean := MJFAMIXSessionBean new.
 	bean sessionType: self sessionType.
 	bean transactionType: self transactionType.
 	^bean

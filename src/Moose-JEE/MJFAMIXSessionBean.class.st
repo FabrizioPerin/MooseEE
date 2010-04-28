@@ -9,8 +9,8 @@ It is a subclass of JEEBean, wich means that it knows about which classes implem
 In addition, it knows whether it is stateless or stateful, and it knows about the transaction type it is to deal with.
 "
 Class {
-	#name : #FAMIXSessionBean,
-	#superclass : #FAMIXEJBean,
+	#name : #MJFAMIXSessionBean,
+	#superclass : #MJFAMIXEJBean,
 	#instVars : [
 		'sessionType',
 		'transactionType'
@@ -19,8 +19,8 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBean class >> annotation [
-	<MSEClass: 'SessionBean' super: #FAMIXEJBean>
+MJFAMIXSessionBean class >> annotation [
+	<MSEClass: 'SessionBean' super: #MJFAMIXEJBean>
 	<package: 'FAMIX'>
 	<MSEComment: 'SessionBean represents a JEE Session Bean.
 	
@@ -34,35 +34,35 @@ In addition, it knows whether it is stateless or stateful, and it knows about th
 ]
 
 { #category : #testing }
-FAMIXSessionBean >> isStateful [
+MJFAMIXSessionBean >> isStateful [
 	<MSEProperty: #isStatefull type: #Boolean> <derived>
 	^self sessionType = #Stateful
 ]
 
 { #category : #testing }
-FAMIXSessionBean >> isStateless [
+MJFAMIXSessionBean >> isStateless [
 	<MSEProperty: #isStateless type: #Boolean> <derived>
 	^self sessionType = #Stateless
 ]
 
 { #category : #accessing }
-FAMIXSessionBean >> sessionType [
+MJFAMIXSessionBean >> sessionType [
 	<MSEProperty: #sessionType type: #String>
 	^sessionType
 ]
 
 { #category : #accessing }
-FAMIXSessionBean >> sessionType: anObject [
+MJFAMIXSessionBean >> sessionType: anObject [
 	sessionType := anObject asSymbol
 ]
 
 { #category : #accessing }
-FAMIXSessionBean >> transactionType [
+MJFAMIXSessionBean >> transactionType [
 	<MSEProperty: #transactionType type: #String>
 	^transactionType
 ]
 
 { #category : #accessing }
-FAMIXSessionBean >> transactionType: anObject [
+MJFAMIXSessionBean >> transactionType: anObject [
 	transactionType := anObject asSymbol
 ]

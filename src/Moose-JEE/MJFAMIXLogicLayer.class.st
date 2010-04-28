@@ -1,10 +1,10 @@
 Class {
-	#name : #FAMIXLogicLayer,
-	#superclass : #FAMIXBusinessLayer,
+	#name : #MJFAMIXLogicLayer,
+	#superclass : #MJFAMIXBusinessLayer,
 	#category : #'Moose-JEE'
 }
 
 { #category : #'as yet unclassified' }
-FAMIXLogicLayer >> populate [
+MJFAMIXLogicLayer >> populate [
 	containedClasses addAll: [ self mooseModel allClasses ].
 ]

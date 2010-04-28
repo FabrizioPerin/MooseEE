@@ -1,6 +1,6 @@
 Class {
-	#name : #FAMIXEntityBean,
-	#superclass : #FAMIXEJBean,
+	#name : #MJFAMIXEntityBean,
+	#superclass : #MJFAMIXEJBean,
 	#instVars : [
 		'persistenceType',
 		'primaryKeyClass'
@@ -9,39 +9,39 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXEntityBean class >> annotation [
-	<MSEClass: 'EntityBean' super: #FAMIXEJBean>
+MJFAMIXEntityBean class >> annotation [
+	<MSEClass: 'EntityBean' super: #MJFAMIXEJBean>
 	<package: 'FAMIX'>
 ]
 
 { #category : #testing }
-FAMIXEntityBean >> isBMP [
+MJFAMIXEntityBean >> isBMP [
 
 	^self persistenceType = #Bean
 ]
 
 { #category : #testing }
-FAMIXEntityBean >> isCMP [
+MJFAMIXEntityBean >> isCMP [
 
 	^self persistenceType = #Container
 ]
 
 { #category : #accessing }
-FAMIXEntityBean >> persistenceType [
+MJFAMIXEntityBean >> persistenceType [
 	^persistenceType
 ]
 
 { #category : #accessing }
-FAMIXEntityBean >> persistenceType: anObject [
+MJFAMIXEntityBean >> persistenceType: anObject [
 	persistenceType := anObject asSymbol
 ]
 
 { #category : #accessing }
-FAMIXEntityBean >> primaryKeyClass [
+MJFAMIXEntityBean >> primaryKeyClass [
 	^primaryKeyClass
 ]
 
 { #category : #accessing }
-FAMIXEntityBean >> primaryKeyClass: anObject [
+MJFAMIXEntityBean >> primaryKeyClass: anObject [
 	primaryKeyClass := anObject
 ]

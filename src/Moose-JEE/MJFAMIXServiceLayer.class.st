@@ -1,6 +1,6 @@
 Class {
-	#name : #FAMIXServiceLayer,
-	#superclass : #FAMIXBusinessLayer,
+	#name : #MJFAMIXServiceLayer,
+	#superclass : #MJFAMIXBusinessLayer,
 	#instVars : [
 		'containedSessionBeans'
 	],
@@ -8,12 +8,12 @@ Class {
 }
 
 { #category : #accessing }
-FAMIXServiceLayer >> containedSessionBeans [
+MJFAMIXServiceLayer >> containedSessionBeans [
 	^containedSessionBeans
 ]
 
 { #category : #initialization }
-FAMIXServiceLayer >> initialize [ 
+MJFAMIXServiceLayer >> initialize [ 
 	super initialize.
 	containedSessionBeans := OrderedCollection new.
 	
@@ -21,7 +21,7 @@ FAMIXServiceLayer >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXServiceLayer >> selectClassesFrom: aMooseModel [
+MJFAMIXServiceLayer >> selectClassesFrom: aMooseModel [
 
 	containedClasses addAll:( aMooseModel allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ]).
 	containedSessionBeans addAll: (aMooseModel allSessionBeans collect: [:bean | bean implementationClass] ).

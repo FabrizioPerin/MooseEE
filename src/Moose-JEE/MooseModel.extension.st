@@ -3,19 +3,19 @@ Extension { #name : #MooseModel }
 { #category : #'*Moose-JEE' }
 MooseModel >> allColumns [
 
-	^self allWithType: FAMIXTablesColumn "asMetaDescription"
+	^self allWithType: MJFAMIXTablesColumn "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> allDatabases [
 
-	^self allWithType: FAMIXDataBase "asMetaDescription"
+	^self allWithType: MJFAMIXDataBase "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> allEntityBeans [
 
-	^self allWithType: FAMIXEntityBean "asMetaDescription"
+	^self allWithType: MJFAMIXEntityBean "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
@@ -28,26 +28,26 @@ MooseModel >> allJEEBeans [
 MooseModel >> allMaps [
 	
 	<navigation: 'All maps'>
-	^self allWithType: FAMIXMapping
+	^self allWithType: MJFAMIXMapping
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> allMessageDrivenBeans [
 
-	^self allWithType: FAMIXMessageDrivenBean "asMetaDescription"
+	^self allWithType: MJFAMIXMessageDrivenBean "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> allSessionBeans [
 	<navigation: 'All session beans'>
 
-	^self allWithType: FAMIXSessionBean "asMetaDescription"
+	^self allWithType: MJFAMIXSessionBean "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> allTables [
 
-	^self allWithType: FAMIXDBTable "asMetaDescription"
+	^self allWithType: MJFAMIXDBTable "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
@@ -106,7 +106,7 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 					entities do: [:class |
 						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
-										mapping := FAMIXMapping new mapTarget: table; mapSource: class.
+										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
 										table addMappedBy: mapping.
 										self add: mapping.].
@@ -131,7 +131,7 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 					entities do: [:class |
 						((class sourceText findString: table name) > 0)
 								ifTrue:[ |mapping|
-										mapping := FAMIXMapping new mapTarget: table; mapSource: class.
+										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
 										table addMappedBy: mapping.
 										self add: mapping.].
@@ -399,7 +399,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 	entityBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
 	entityBeansAnnotations do: [:annotation | 
 		| bean |
-		bean := FAMIXEntityBean new name: annotation mooseName.
+		bean := MJFAMIXEntityBean new name: annotation mooseName.
 		( self allClasses select: [:class |
 			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
 																			each parentEJBBean: bean.
@@ -409,7 +409,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
 	messageDrivenBeansAnnotations do: [:annotation | 
 		| bean |
-		bean := FAMIXMessageDrivenBean new name: annotation mooseName.
+		bean := MJFAMIXMessageDrivenBean new name: annotation mooseName.
 		( self allClasses select: [:class |
 			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
 																			each parentEJBBean: bean.
@@ -421,7 +421,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					each annotationType name = 'Stateful'] ].
 	sessionBeansAnnotations do: [:annotation | 
 		| bean |
-		bean := FAMIXSessionBean new name: annotation mooseName.
+		bean := MJFAMIXSessionBean new name: annotation mooseName.
 		bean sessionType: annotation annotationType name.
 		( self allClasses select: [:class |
 			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 

@@ -1,11 +1,11 @@
 Class {
-	#name : #FAMIXSessionBeanGroup,
+	#name : #MJFAMIXSessionBeanGroup,
 	#superclass : #MooseGroup,
 	#category : #'Moose-JEE'
 }
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup class >> annotation [
+MJFAMIXSessionBeanGroup class >> annotation [
 
 	<MSEClass: #SessionBeanGroup super: #MooseGroup>
 	<package: #FAMIX>
@@ -13,7 +13,7 @@ FAMIXSessionBeanGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> umlLikeShape: aString on: aBlock [
+MJFAMIXSessionBeanGroup >> umlLikeShape: aString on: aBlock [
 
 	| builder |
 
@@ -28,7 +28,7 @@ FAMIXSessionBeanGroup >> umlLikeShape: aString on: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> umlShape: aString [
+MJFAMIXSessionBeanGroup >> umlShape: aString [
 
 	| builder |
 
@@ -66,7 +66,7 @@ FAMIXSessionBeanGroup >> umlShape: aString [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> umlShape: aString with: aCollection [
+MJFAMIXSessionBeanGroup >> umlShape: aString with: aCollection [
 	| builder |
 	builder := MOFormsBuilder new.
 	builder
@@ -93,7 +93,7 @@ FAMIXSessionBeanGroup >> umlShape: aString with: aCollection [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> umlShape: aString with: aCollection on: aView [
+MJFAMIXSessionBeanGroup >> umlShape: aString with: aCollection on: aView [
 	| builder |
 	builder := MOFormsBuilder new.
 	builder
@@ -124,7 +124,7 @@ FAMIXSessionBeanGroup >> umlShape: aString with: aCollection on: aView [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> viewApplicationByLayers [
+MJFAMIXSessionBeanGroup >> viewApplicationByLayers [
 	<menuItem: 'Application by Layers' category: 'Mondrian'>
 
 	| invoked view beans data logic map invocationsMap layerShape aBlock  myShape |
@@ -195,7 +195,7 @@ FAMIXSessionBeanGroup >> viewApplicationByLayers [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> viewAsSelectionOnSystemComplexity [
+MJFAMIXSessionBeanGroup >> viewAsSelectionOnSystemComplexity [
 
 	<menuItem: 'As selection on System Complexity' category: 'Mondrian'>
 
@@ -204,7 +204,7 @@ FAMIXSessionBeanGroup >> viewAsSelectionOnSystemComplexity [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> viewLayerOn: view [
+MJFAMIXSessionBeanGroup >> viewLayerOn: view [
 	
 	view shape umlClass.
 	view interaction popupText.
@@ -215,7 +215,7 @@ FAMIXSessionBeanGroup >> viewLayerOn: view [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXSessionBeanGroup >> viewLayers [
+MJFAMIXSessionBeanGroup >> viewLayers [
 	<menuItem: 'Layers' category: 'Mondrian'>
 
 	| invoked view beans data logic map invocationsMap |

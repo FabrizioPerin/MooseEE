@@ -12,7 +12,7 @@ EntityElement class >> xmlTags [
 { #category : #converting }
 EntityElement >> createBeanFrom: aMooseModel [
 	| bean |
-	bean := FAMIXEntityBean new.
+	bean := MJFAMIXEntityBean new.
 	bean persistenceType: self persistenceType.
 	bean primaryKeyClass: (self primaryKeyClassFrom: aMooseModel).
 	bean primaryKeyClass ifNotNil: [bean primaryKeyClass parentEJBBean: bean].

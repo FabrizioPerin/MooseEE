@@ -1,5 +1,5 @@
 Class {
-	#name : #FAMIXEJBean,
+	#name : #MJFAMIXEJBean,
 	#superclass : #FAMIXNamedEntity,
 	#instVars : [
 		'homeInterface',
@@ -10,46 +10,46 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXEJBean class >> annotation [
+MJFAMIXEJBean class >> annotation [
 	<MSEClass: 'JEEBean' super: #FAMIXNamedEntity>
 	<package: 'FAMIX'>
 	<abstract>
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> belongsTo [ 
+MJFAMIXEJBean >> belongsTo [ 
 	^''
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> homeInterface [
+MJFAMIXEJBean >> homeInterface [
 	<MSEProperty: #homeInterface type: #FAMIXClass>
 	^homeInterface
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> homeInterface: anObject [
+MJFAMIXEJBean >> homeInterface: anObject [
 	homeInterface := anObject
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> implementationClass [
+MJFAMIXEJBean >> implementationClass [
 	<MSEProperty: #implementingClass type: #FAMIXClass>
 	^implementationClass
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> implementationClass: anObject [
+MJFAMIXEJBean >> implementationClass: anObject [
 	implementationClass := anObject
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> remoteInterface [
+MJFAMIXEJBean >> remoteInterface [
 	<MSEProperty: #remoteInterface type: #FAMIXClass>
 	^remoteInterface
 ]
 
 { #category : #accessing }
-FAMIXEJBean >> remoteInterface: anObject [
+MJFAMIXEJBean >> remoteInterface: anObject [
 	remoteInterface := anObject
 ]

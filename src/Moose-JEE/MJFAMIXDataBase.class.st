@@ -1,6 +1,6 @@
 Class {
-	#name : #FAMIXDataBase,
-	#superclass : #FAMIXRelationalEntity,
+	#name : #MJFAMIXDataBase,
+	#superclass : #MJFAMIXRelationalEntity,
 	#instVars : [
 		'tables'
 	],
@@ -8,29 +8,29 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXDataBase class >> annotation [
-	<MSEClass: #DataBase super: #FAMIXRelationalEntity>
+MJFAMIXDataBase class >> annotation [
+	<MSEClass: #DataBase super: #MJFAMIXRelationalEntity>
 	<package: #FAMIX>
 ]
 
 { #category : #accessing }
-FAMIXDataBase >> addTable: aFAMIXDBTable [
+MJFAMIXDataBase >> addTable: aFAMIXDBTable [
 	tables add: aFAMIXDBTable.
 ]
 
 { #category : #initialization }
-FAMIXDataBase >> initialize [
+MJFAMIXDataBase >> initialize [
 	super initialize.
 	tables := OrderedCollection new.
 ]
 
 { #category : #accessing }
-FAMIXDataBase >> tables [
+MJFAMIXDataBase >> tables [
 	^tables
 ]
 
 { #category : #accessing }
-FAMIXDataBase >> tables: aOrderedCollection [
+MJFAMIXDataBase >> tables: aOrderedCollection [
 
 	tables := aOrderedCollection.
 ]

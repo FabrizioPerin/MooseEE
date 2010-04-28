@@ -1,5 +1,5 @@
 Class {
-	#name : #FAMIXRelationalEntity,
+	#name : #MJFAMIXRelationalEntity,
 	#superclass : #FAMIXNamedEntity,
 	#instVars : [
 		'mappedBy'
@@ -8,41 +8,41 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity class >> annotation [
+MJFAMIXRelationalEntity class >> annotation [
 	<MSEClass: #RelationalEntity super: #FAMIXNamedEntity>
 	<package: #FAMIX>
 	<abstract>
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity >> addMappedBy: aMapping [
+MJFAMIXRelationalEntity >> addMappedBy: aMapping [
 
 	mappedBy add: aMapping
 
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity >> initialize [
+MJFAMIXRelationalEntity >> initialize [
 	super initialize.
 	mappedBy := FMMultivalueLink on: self opposite: #mapTarget:.
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity >> mappedBy [
+MJFAMIXRelationalEntity >> mappedBy [
 
-	<MSEProperty: #mappedBy type: #FAMIXMapping opposite: #mapTarget> <multivalued> <derived>
+	<MSEProperty: #mappedBy type: #MJFAMIXMapping opposite: #mapTarget> <multivalued> <derived>
 	<MSEComment: 'Map relationships.'>
 	
 	^mappedBy
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity >> mappedBy: aMapping [
+MJFAMIXRelationalEntity >> mappedBy: aMapping [
 	
 	mappedBy value: aMapping
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXRelationalEntity >> mapsNamedEntities [
+MJFAMIXRelationalEntity >> mapsNamedEntities [
 	^self mapDirection: #mapSource on: self mooseModel allMaps 
 ]

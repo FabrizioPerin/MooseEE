@@ -1,5 +1,5 @@
 Class {
-	#name : #MooseJEEImportInformationForEJB21,
+	#name : #MJImportInformationForEJB21,
 	#superclass : #WizardControl,
 	#instVars : [
 		'progBar',
@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> actionsToPerform [
+MJImportInformationForEJB21 >> actionsToPerform [
 	| sourcePathName mseFilePathName |
 	
 	sourcePathName := wizardInformations at: #sourceDirectoryPath.
@@ -67,7 +67,7 @@ MooseJEEImportInformationForEJB21 >> actionsToPerform [
 ]
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> buildWizardPanels [
+MJImportInformationForEJB21 >> buildWizardPanels [
 	| pane1 pane2 pane3 part1 part2 part3 part4 pane4 part5 |
 	
 	pane1 := WizardFirstPane named: 'Information'.
@@ -104,7 +104,7 @@ MooseJEEImportInformationForEJB21 >> buildWizardPanels [
 ]
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> informationText [
+MJImportInformationForEJB21 >> informationText [
 	^'To properly use all the functionality og Moose JEE on a Java project you need 
 	different information. In the following some panel will required you:
 	
@@ -114,7 +114,7 @@ MooseJEEImportInformationForEJB21 >> informationText [
 ]
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> initialize [
+MJImportInformationForEJB21 >> initialize [
 
 	super initialize.
 	mooseModel := nil.
@@ -126,7 +126,7 @@ MooseJEEImportInformationForEJB21 >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
-MooseJEEImportInformationForEJB21 >> performTerminateButtonAction [
+MJImportInformationForEJB21 >> performTerminateButtonAction [
 	"by default, just close the last current pane. Override this method if you want to create a subclass of WizardControl making a specific action"
 	"^self subclassResponsibility"
 	UIManager default

@@ -1,5 +1,5 @@
 Class {
-	#name : #FAMIXLayer,
+	#name : #MJFAMIXLayer,
 	#superclass : #FAMIXEntity,
 	#instVars : [
 		'containedClasses'
@@ -8,26 +8,26 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXLayer class >> annotation [
+MJFAMIXLayer class >> annotation [
 	<MSEClass: #Layer super: #FAMIXEntity>
 	<package: 'FAMIX'>
 	^self
 ]
 
 { #category : #accessing }
-FAMIXLayer >> containedClasses [
+MJFAMIXLayer >> containedClasses [
 	^containedClasses
 ]
 
 { #category : #initialization }
-FAMIXLayer >> initialize [ 
+MJFAMIXLayer >> initialize [ 
 	super initialize.
 	containedClasses := OrderedCollection new.
 	^self
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXLayer >> populate: aMooseModel [
+MJFAMIXLayer >> populate: aMooseModel [
 
 	| layer |
 
@@ -37,6 +37,6 @@ FAMIXLayer >> populate: aMooseModel [
 ]
 
 { #category : #'as yet unclassified' }
-FAMIXLayer >> selectClassesFrom: aMooseModel [
+MJFAMIXLayer >> selectClassesFrom: aMooseModel [
 	^self subclassResponsibility
 ]

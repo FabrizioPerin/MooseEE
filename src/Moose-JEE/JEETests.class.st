@@ -686,35 +686,35 @@ JEETests >> sampleMooseModelWithDB [
 			).
 	
 	"instanciating relational elements"
-	database := FAMIXDataBase new name: #database1.
+	database := MJFAMIXDataBase new name: #database1.
 
-	dbTable1 := FAMIXDBTable new
+	dbTable1 := MJFAMIXDBTable new
 			name: 'Table1';
 			ownerDataBase: database.
 	
-	dbTable2 := FAMIXDBTable new
+	dbTable2 := MJFAMIXDBTable new
 			name: 'Table2';
 			ownerDataBase: database.
 
-	dbTable3 := FAMIXDBTable new
+	dbTable3 := MJFAMIXDBTable new
 			name: 'Table3';
 			ownerDataBase: database.
 
-	tableColumn1 := FAMIXTablesColumn new
+	tableColumn1 := MJFAMIXTablesColumn new
 						name: #column1;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'integer'.
 	
-	tableColumn2 := FAMIXTablesColumn new
+	tableColumn2 := MJFAMIXTablesColumn new
 						name: #column2;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'string'.
 	
-	tableColumn3 := FAMIXTablesColumn new
+	tableColumn3 := MJFAMIXTablesColumn new
 						name: #column3;
 						isPK: false;
 						isFK: false;
@@ -726,14 +726,14 @@ JEETests >> sampleMooseModelWithDB [
 	dbTable1 addColumn: tableColumn3.
 	
 	
-	tableColumn4 := FAMIXTablesColumn new
+	tableColumn4 := MJFAMIXTablesColumn new
 						name: #column4;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable2;
 						type: 'integer'.
 	
-	tableColumn5 := FAMIXTablesColumn new
+	tableColumn5 := MJFAMIXTablesColumn new
 						name: #column5;
 						isPK: false;
 						isFK: false;
@@ -743,7 +743,7 @@ JEETests >> sampleMooseModelWithDB [
 	dbTable2 addColumn: tableColumn4.
 	dbTable2 addColumn: tableColumn5.
 						
-	tableColumn6 := FAMIXTablesColumn new
+	tableColumn6 := MJFAMIXTablesColumn new
 						name: #column6;
 						isPK: true;
 						isFK: false;
@@ -1345,44 +1345,44 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeans [
 			container: aPackage;
 			yourself
 		);
-		add: (FAMIXSessionBean new
+		add: (MJFAMIXSessionBean new
 			name: #AStatelessSession;
 			implementationClass: aStatelessSessionBean;
 			yourself
 		);
 		add: aStatelessSessionBean;
-		add: (FAMIXSessionBean new
+		add: (MJFAMIXSessionBean new
 			name: #AStatefulSessionHome;
 			implementationClass: aStatefulSessionBean;
 			yourself
 		);
-		add: (FAMIXSessionBean new
+		add: (MJFAMIXSessionBean new
 			name: #AStatefulSession;
 			implementationClass: class3;
 			yourself
 		);
 		add: aStatefulSessionBean;
-		add: (FAMIXEntityBean new
+		add: (MJFAMIXEntityBean new
 			name: #ACMPEntityHome;
 			implementationClass: class4;
 			yourself
 		);
-		add: (FAMIXEntityBean new
+		add: (MJFAMIXEntityBean new
 			name: #ACMPEntity;
 			implementationClass: class1;
 			yourself
 		);
-		add: (FAMIXEntityBean new
+		add: (MJFAMIXEntityBean new
 			name: #ACMPEntityBean;
 			implementationClass: class2;
 			yourself
 		);
-		add: (FAMIXMessageDrivenBean new
+		add: (MJFAMIXMessageDrivenBean new
 			name: #ACMPMessagePK;
 			implementationClass: class5;
 			yourself
 		);
-		add: (FAMIXMessageDrivenBean new
+		add: (MJFAMIXMessageDrivenBean new
 			name: #ABMPMessageHome;
 			implementationClass: class6;
 			yourself
@@ -1606,43 +1606,43 @@ JEETests >> sampleMooseModelWithTransAndQueryAndBeansAndHierarchi [
 			container: aPackage;
 			yourself
 		);
-		add: (FAMIXSessionBean new
+		add: (MJFAMIXSessionBean new
 			name: #AStatelessSession;
 			implementationClass: aStatelessSessionBean;
 			yourself
 		);
 		add: aStatelessSessionBean;
-		add: (FAMIXSessionBean new
+		add: (MJFAMIXSessionBean new
 			name: #AStatefulSessionHome;
 			implementationClass: aStatefulSessionBean;
 			yourself
 		);
-		add: (FAMIXEntityBean new
+		add: (MJFAMIXEntityBean new
 			name: #AStatefulSession;
 			implementationClass: class3;
 			yourself
 		);
 		add: aStatefulSessionBean;
-		add: (FAMIXSessionBean new
+		add: (MJFAMIXSessionBean new
 			name: #ACMPEntityHome;
 			implementationClass: class6;
 			yourself
 		);
-		add: (FAMIXEntityBean new
+		add: (MJFAMIXEntityBean new
 			name: #ACMPEntity;
 			implementationClass: class1;
 			yourself
 		);
-		add: (FAMIXEntityBean new
+		add: (MJFAMIXEntityBean new
 			name: #ACMPEntityBean;
 			yourself
 		);
-		add: (FAMIXMessageDrivenBean new
+		add: (MJFAMIXMessageDrivenBean new
 			name: #ACMPMessagePK;
 			implementationClass: class5;
 			yourself
 		);
-		add: (FAMIXMessageDrivenBean new
+		add: (MJFAMIXMessageDrivenBean new
 			name: #ABMPMessageHome;
 			implementationClass: class4;
 			yourself
@@ -2884,12 +2884,12 @@ JEETests >> testFAMIXDataLayerPopulate [
 
 	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
 
-	dataLayer := FAMIXDataLayer new.
+	dataLayer := MJFAMIXDataLayer new.
 	dataLayer populate: mooseModel.
 	
 	
-	self assert: ((mooseModel allWithType: FAMIXDataLayer) size = 1).
-	self assert: ((mooseModel allWithType: FAMIXDataLayer) first  = dataLayer).
+	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) size = 1).
+	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) first  = dataLayer).
 	self assert: dataLayer containedClasses size = 2.
 ]
 
@@ -2903,7 +2903,7 @@ JEETests >> testFAMIXMappingCreation [
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
 		
-	mapping := FAMIXMapping new mapTarget: table; mapSource: class.
+	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 	
 	class addMaps: mapping.
 	table addMappedBy: mapping.
@@ -3007,12 +3007,12 @@ JEETests >> testFAMIXServiceLayerPopulate [
 
 	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
 
-	serviceLayer := FAMIXServiceLayer new.
+	serviceLayer := MJFAMIXServiceLayer new.
 	serviceLayer populate: mooseModel.
 	
 	
-	self assert: ((mooseModel allWithType: FAMIXServiceLayer) size = 1).
-	self assert: ((mooseModel allWithType: FAMIXServiceLayer) first  = serviceLayer).
+	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
+	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) first  = serviceLayer).
 	self assert: serviceLayer containedSessionBeans size = 3.
 ]
 
@@ -3193,7 +3193,7 @@ JEETests >> testInstanciateEntityBeansFromAnnotations [
 	model instanciateJBeansFromAnnotations.
 	
 	self assert: (model allEntityBeans size = 2).
-	self assert: ((model allEntityBeans detect: [:each | each mooseID = ((model allClasses entityNamed:#AClass) parentEJBBean mooseID) ] ) isKindOf: FAMIXEntityBean).
+	self assert: ((model allEntityBeans detect: [:each | each mooseID = ((model allClasses entityNamed:#AClass) parentEJBBean mooseID) ] ) isKindOf: MJFAMIXEntityBean).
 
 	
 ]
@@ -3251,7 +3251,7 @@ JEETests >> testInstanciateSessionBeansFromAnnotations [
 	
 	self assert: (model allSessionBeans size = 3).
 	self assert: ((model allSessionBeans detect: [:each | 
-			each mooseID = ((model allClasses entityNamed:#AClass) parentEJBBean mooseID) ] ) isKindOf: FAMIXSessionBean).
+			each mooseID = ((model allClasses entityNamed:#AClass) parentEJBBean mooseID) ] ) isKindOf: MJFAMIXSessionBean).
 
 	
 ]

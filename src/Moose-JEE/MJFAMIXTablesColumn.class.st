@@ -1,6 +1,6 @@
 Class {
-	#name : #FAMIXTablesColumn,
-	#superclass : #FAMIXRelationalEntity,
+	#name : #MJFAMIXTablesColumn,
+	#superclass : #MJFAMIXRelationalEntity,
 	#instVars : [
 		'isPK',
 		'isFK',
@@ -12,25 +12,25 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-FAMIXTablesColumn class >> annotation [
-	<MSEClass: #TableColumn super: #FAMIXRelationalEntity>
+MJFAMIXTablesColumn class >> annotation [
+	<MSEClass: #TableColumn super: #MJFAMIXRelationalEntity>
 	<package: #FAMIX>
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> columnReference [
+MJFAMIXTablesColumn >> columnReference [
 
 	^columnReference
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> columnReference: aTablesColumnOrNil [
+MJFAMIXTablesColumn >> columnReference: aTablesColumnOrNil [
 
 	columnReference := aTablesColumnOrNil.
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> initialize [
+MJFAMIXTablesColumn >> initialize [
 	super initialize.
 	
 	isPK := nil.
@@ -41,46 +41,46 @@ FAMIXTablesColumn >> initialize [
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> isFK [
+MJFAMIXTablesColumn >> isFK [
 	^isFK
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> isFK: aBooleanOrNil [
+MJFAMIXTablesColumn >> isFK: aBooleanOrNil [
 
 	isFK := aBooleanOrNil.
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> isPK [
+MJFAMIXTablesColumn >> isPK [
 
 	^isPK
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> isPK: aBooleanOrNil [
+MJFAMIXTablesColumn >> isPK: aBooleanOrNil [
 
 	isPK := aBooleanOrNil.
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> ownerTable [
+MJFAMIXTablesColumn >> ownerTable [
 
 	^ownerTable
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> ownerTable: anObjectOrNil [
+MJFAMIXTablesColumn >> ownerTable: anObjectOrNil [
 
 	ownerTable := anObjectOrNil.
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> type [
+MJFAMIXTablesColumn >> type [
 	^type
 ]
 
 { #category : #accessing }
-FAMIXTablesColumn >> type: aString [
+MJFAMIXTablesColumn >> type: aString [
 	type := aString
 ]

@@ -68,7 +68,7 @@ EJBBeanElement >> usingAnnotationsPopulate: aMooseModel [
 	entityBeansAnnotations do: [:annotation | 
 									| bean |
 									"self haltOnce. "
-									bean := FAMIXEntityBean new.
+									bean := MJFAMIXEntityBean new.
 									aMooseModel allClasses detect: [:class | class name: (annotation annotatedEntities name).] 
 									].
 	

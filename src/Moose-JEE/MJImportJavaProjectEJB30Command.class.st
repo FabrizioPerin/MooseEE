@@ -6,7 +6,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJImportJavaProjectEJB30Command >> execute [
-	MooseJEEImportInformationForEJB30 new open.
+	MJImportInformationForEJB30 new open.
 	self updateModelList.
 ]
 

@@ -1,11 +1,11 @@
 Class {
-	#name : #FAMIXDataLayer,
-	#superclass : #FAMIXLayer,
+	#name : #MJFAMIXDataLayer,
+	#superclass : #MJFAMIXLayer,
 	#category : #'Moose-JEE'
 }
 
 { #category : #'as yet unclassified' }
-FAMIXDataLayer >> selectClassesFrom: aMooseModel [
+MJFAMIXDataLayer >> selectClassesFrom: aMooseModel [
 
 	containedClasses addAll:  (aMooseModel allClasses select: [:class | 
 					(class doesImplements: #Serializable)  or: [ 
