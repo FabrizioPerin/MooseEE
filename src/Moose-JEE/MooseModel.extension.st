@@ -3,7 +3,7 @@ Extension { #name : #MooseModel }
 { #category : #'*Moose-JEE' }
 MooseModel >> allColumns [
 
-	^self allWithType: MJFAMIXTablesColumn "asMetaDescription"
+	^self allWithType: MJFAMIXColumn "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }
@@ -47,7 +47,7 @@ MooseModel >> allSessionBeans [
 { #category : #'*Moose-JEE' }
 MooseModel >> allTables [
 
-	^self allWithType: MJFAMIXDBTable "asMetaDescription"
+	^self allWithType: MJFAMIXTable "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE' }

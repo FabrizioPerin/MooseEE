@@ -688,33 +688,33 @@ JEETests >> sampleMooseModelWithDB [
 	"instanciating relational elements"
 	database := MJFAMIXDataBase new name: #database1.
 
-	dbTable1 := MJFAMIXDBTable new
+	dbTable1 := MJFAMIXTable new
 			name: 'Table1';
 			ownerDataBase: database.
 	
-	dbTable2 := MJFAMIXDBTable new
+	dbTable2 := MJFAMIXTable new
 			name: 'Table2';
 			ownerDataBase: database.
 
-	dbTable3 := MJFAMIXDBTable new
+	dbTable3 := MJFAMIXTable new
 			name: 'Table3';
 			ownerDataBase: database.
 
-	tableColumn1 := MJFAMIXTablesColumn new
+	tableColumn1 := MJFAMIXColumn new
 						name: #column1;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'integer'.
 	
-	tableColumn2 := MJFAMIXTablesColumn new
+	tableColumn2 := MJFAMIXColumn new
 						name: #column2;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'string'.
 	
-	tableColumn3 := MJFAMIXTablesColumn new
+	tableColumn3 := MJFAMIXColumn new
 						name: #column3;
 						isPK: false;
 						isFK: false;
@@ -726,14 +726,14 @@ JEETests >> sampleMooseModelWithDB [
 	dbTable1 addColumn: tableColumn3.
 	
 	
-	tableColumn4 := MJFAMIXTablesColumn new
+	tableColumn4 := MJFAMIXColumn new
 						name: #column4;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable2;
 						type: 'integer'.
 	
-	tableColumn5 := MJFAMIXTablesColumn new
+	tableColumn5 := MJFAMIXColumn new
 						name: #column5;
 						isPK: false;
 						isFK: false;
@@ -743,7 +743,7 @@ JEETests >> sampleMooseModelWithDB [
 	dbTable2 addColumn: tableColumn4.
 	dbTable2 addColumn: tableColumn5.
 						
-	tableColumn6 := MJFAMIXTablesColumn new
+	tableColumn6 := MJFAMIXColumn new
 						name: #column6;
 						isPK: true;
 						isFK: false;

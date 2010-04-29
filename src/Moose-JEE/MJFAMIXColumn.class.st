@@ -1,5 +1,5 @@
 Class {
-	#name : #MJFAMIXTablesColumn,
+	#name : #MJFAMIXColumn,
 	#superclass : #MJFAMIXRelationalEntity,
 	#instVars : [
 		'isPK',
@@ -12,25 +12,25 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MJFAMIXTablesColumn class >> annotation [
+MJFAMIXColumn class >> annotation [
 	<MSEClass: #TableColumn super: #MJFAMIXRelationalEntity>
 	<package: #FAMIX>
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> columnReference [
+MJFAMIXColumn >> columnReference [
 
 	^columnReference
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> columnReference: aTablesColumnOrNil [
+MJFAMIXColumn >> columnReference: aTablesColumnOrNil [
 
 	columnReference := aTablesColumnOrNil.
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> initialize [
+MJFAMIXColumn >> initialize [
 	super initialize.
 	
 	isPK := nil.
@@ -41,46 +41,46 @@ MJFAMIXTablesColumn >> initialize [
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> isFK [
+MJFAMIXColumn >> isFK [
 	^isFK
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> isFK: aBooleanOrNil [
+MJFAMIXColumn >> isFK: aBooleanOrNil [
 
 	isFK := aBooleanOrNil.
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> isPK [
+MJFAMIXColumn >> isPK [
 
 	^isPK
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> isPK: aBooleanOrNil [
+MJFAMIXColumn >> isPK: aBooleanOrNil [
 
 	isPK := aBooleanOrNil.
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> ownerTable [
+MJFAMIXColumn >> ownerTable [
 
 	^ownerTable
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> ownerTable: anObjectOrNil [
+MJFAMIXColumn >> ownerTable: anObjectOrNil [
 
 	ownerTable := anObjectOrNil.
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> type [
+MJFAMIXColumn >> type [
 	^type
 ]
 
 { #category : #accessing }
-MJFAMIXTablesColumn >> type: aString [
+MJFAMIXColumn >> type: aString [
 	type := aString
 ]

@@ -1,5 +1,5 @@
 Class {
-	#name : #MJFAMIXDBTable,
+	#name : #MJFAMIXTable,
 	#superclass : #MJFAMIXRelationalEntity,
 	#instVars : [
 		'columns',
@@ -12,30 +12,30 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MJFAMIXDBTable class >> annotation [
+MJFAMIXTable class >> annotation [
 	<MSEClass: #Table super: #MJFAMIXRelationalEntity>
 	<package: #FAMIX>
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> addColumn: aFAMIXTablesColumn [
+MJFAMIXTable >> addColumn: aFAMIXTablesColumn [
 
 	self columns add: aFAMIXTablesColumn.
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> columns [
+MJFAMIXTable >> columns [
 	^columns
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> columns: aOrderedCollection [
+MJFAMIXTable >> columns: aOrderedCollection [
 
 	columns := aOrderedCollection.
 ]
 
 { #category : #initialization }
-MJFAMIXDBTable >> initialize [
+MJFAMIXTable >> initialize [
 
 	super initialize.
 	columns := OrderedCollection new.
@@ -45,27 +45,27 @@ MJFAMIXDBTable >> initialize [
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> nameAsRegex [
+MJFAMIXTable >> nameAsRegex [
 	^nameAsRegEx isNil  
 		ifTrue: [('.*', self name, '.*') asRegex]
 		ifFalse: [nameAsRegEx]
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> nameAsRegexIgnoringCase [
+MJFAMIXTable >> nameAsRegexIgnoringCase [
 	^nameAsRegExIgCa isNil 
 		ifTrue: [('.*', self name, '.*') asRegexIgnoringCase]
 		ifFalse: [nameAsRegExIgCa]
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> ownerDataBase [
+MJFAMIXTable >> ownerDataBase [
 
 	^ownerDataBase
 ]
 
 { #category : #accessing }
-MJFAMIXDBTable >> ownerDataBase: aFAMIXDataBase [
+MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 
 	ownerDataBase := aFAMIXDataBase.
 ]
