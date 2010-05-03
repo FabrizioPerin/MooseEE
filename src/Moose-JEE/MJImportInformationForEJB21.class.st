@@ -10,7 +10,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJImportInformationForEJB21 >> actionsToPerform [
-	| sourcePathName mseFilePathName |
+	| sourcePathName mseFilePathName appLayers |
 	
 	sourcePathName := wizardInformations at: #sourceDirectoryPath.
 	mseFilePathName := wizardInformations at: #mseFilePathName.
@@ -44,24 +44,28 @@ MJImportInformationForEJB21 >> actionsToPerform [
 			
 			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePathName).
 			progBar value: 6.
+			
+			appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
+			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel].
+			progBar value: 7.
 
 			MooseModel root add: mooseModel.
-			progBar value: 7.
+			progBar value: 8.
 
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
 							mooseModel allModelClasses viewTransactionFlow3.
-							progBar value: 8.
+							progBar value: 9.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
-							progBar value: 9.]
-						ifFalse:[progBar value: 9].
+							progBar value: 10.]
+						ifFalse:[progBar value: 10].
 						
 			(wizardInformations at: #openBrowsers) 
 						ifTrue:[
 							mooseModel browseCodeWithAnnotationsForJEA.
-							progBar value: 10.]
-						ifFalse:[progBar value: 10].
+							progBar value: 11.]
+						ifFalse:[progBar value: 11].
 		]
 			
 ]
@@ -133,7 +137,7 @@ MJImportInformationForEJB21 >> performTerminateButtonAction [
 		displayProgress: 'Processing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 10
+		to: 11
 		during: [ :bar | 
 			progBar := bar. 
 			progBar value: 2.

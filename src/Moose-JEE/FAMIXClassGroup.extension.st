@@ -105,9 +105,10 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlow [
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	
-	| interestingClasses allInterestingMethods internalInvocations otherMethods |
+	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
 	
 	interestingClasses := self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ].
+	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
 	
 	view nodes: interestingClasses
 		forEach:
@@ -182,18 +183,25 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 		from: #yourself
 		toAll: #invokedClasses.
 	
+	"Show data base tables"
+	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
+	view nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
 	view shape line color darker.
-	view edgesFrom: #superclass.
+	view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
 	
-	view dominanceTreeLayout
+"	view shape line color darker.
+	view edgesFrom: #superclass."
+	
+	view dominanceGrouppedTreeLayout.
 ]
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
 	
-	| interestingClasses allInterestingMethods internalInvocations otherMethods |
+	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
 	
 	interestingClasses := self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ].
+	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
 	
 	view nodes: interestingClasses
 		forEach:
@@ -268,7 +276,13 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
 		from: #yourself
 		toAll: #invokedClasses.
 	
-	view dominanceTreeLayout
+	"Show data base tables"
+	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
+	view nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
+	view shape line color darker.
+	view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
+	
+	view dominanceGrouppedTreeLayout.
 ]
 
 { #category : #'*Moose-JEE-mondrianvisualizations' }

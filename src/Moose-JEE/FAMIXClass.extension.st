@@ -150,14 +150,14 @@ FAMIXClass >> numberOfTransactionMethods [
 FAMIXClass >> parentEJBBean [
 	<MSEProperty: #parentEJBBean type: #Object>
 	"self flag: 'annotate with fame meta descriptions'."
-	^self privateState attributeGet: #parentEJBBean default: [nil]
+	^self privateState attributeAt: #parentEJBBean ifAbsent: [nil]
 
 ]
 
 { #category : #'*Moose-JEE' }
 FAMIXClass >> parentEJBBean: aBean [
 
-	^self privateState attributeSet: #parentEJBBean value: aBean
+	^self privateState attributeAt: #parentEJBBean put: aBean
 ]
 
 { #category : #'*Moose-JEE' }

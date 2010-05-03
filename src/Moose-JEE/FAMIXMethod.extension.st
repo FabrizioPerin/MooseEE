@@ -152,14 +152,15 @@ FAMIXMethod >> doesSupportTransaction [
 FAMIXMethod >> ejbTransactionType [
 	"answer if the EJB transaction type is nil or not"
 
-	^ self privateState attributeGet: #ejbTransactionType
-							default: [nil].
+	^ self privateState attributeAt: #ejbTransactionType
+							ifAbsent: [nil].
+
 ]
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> ejbTransactionType: aString [
 
-	self privateState attributeSet: #ejbTransactionType value: aString.
+	self privateState attributeAt: #ejbTransactionType put: aString.
 ]
 
 { #category : #'*Moose-JEE' }
@@ -223,14 +224,14 @@ FAMIXMethod >> isPartOfAnUnsafeTransactionPath [
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> ownedTable [
 	self flag: #TODOTest.
-	^self privateState attributeGet: #ownedTable default: [nil]
+	^self privateState attributeAt: #ownedTable ifAbsent: [nil]
 ]
 
 { #category : #'*Moose-JEE' }
 FAMIXMethod >> ownedTable: anObject [
 
 	self flag: #TODOTest.
-	self privateState attributeSet: #ownedTable value: anObject
+	self privateState attributeAt: #ownedTable put: anObject
 ]
 
 { #category : #'*Moose-JEE' }

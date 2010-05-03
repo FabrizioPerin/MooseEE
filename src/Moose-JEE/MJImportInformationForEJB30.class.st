@@ -10,7 +10,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJImportInformationForEJB30 >> actionsToPerform [
-	| sqlFileNamePath mseFilePathName sourcePath |
+	| sqlFileNamePath mseFilePathName sourcePath appLayers |
 	
 	sqlFileNamePath := wizardInformations at: #SQLFileName.
 	mseFilePathName := wizardInformations at: #mseFilePathName.
@@ -52,23 +52,27 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			
 			progBar value: 'Performing post import operations'.
 			
-			MooseModel root add: mooseModel.
+			appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
+			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel].
 			progBar value: 9.
+			
+			MooseModel root add: mooseModel.
+			progBar value: 10.
 			
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
 							mooseModel allModelClasses viewTransactionFlow3.
-							progBar value: 10.
+							progBar value: 11.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
-							progBar value: 11.]
-						ifFalse:[progBar value: 11].
+							progBar value: 12.]
+						ifFalse:[progBar value: 12].
 						
 			(wizardInformations at: #openBrowsers) 
 						ifTrue:[
 							mooseModel browseCodeWithAnnotationsForJEA.
-							progBar value: 12]
-						ifFalse:[progBar value: 12].
+							progBar value: 13]
+						ifFalse:[progBar value: 13].
 		]
 ]
 
@@ -143,7 +147,7 @@ MJImportInformationForEJB30 >> performTerminateButtonAction [
 		displayProgress: 'Importing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 12
+		to: 13
 		during: [ :bar | 
 			progBar := bar. 
 			progBar value: 2.

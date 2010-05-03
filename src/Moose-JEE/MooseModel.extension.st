@@ -238,14 +238,14 @@ MooseModel >> createAnnotationForUnsafeQuery [
 MooseModel >> ejbVersion [
 	<MSEProperty: #EJBVersion type: #Object>
 	"self flag: 'annotate with fame meta descriptions'."
-	^self privateState attributeGet: #EJBVersion default: [nil]
+	^self privateState attributeAt: #EJBVersion ifAbsent: [nil]
 
 ]
 
 { #category : #'*Moose-JEE' }
 MooseModel >> ejbVersion: aString [
 	
-	^self privateState attributeSet: #EJBVersion value: aString
+	^self privateState attributeAt: #EJBVersion put: aString
 ]
 
 { #category : #'*Moose-JEE' }

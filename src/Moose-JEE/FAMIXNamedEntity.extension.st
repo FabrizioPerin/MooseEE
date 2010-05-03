@@ -32,7 +32,7 @@ FAMIXNamedEntity >> maps [
 	<MSEProperty: #maps type: #MJFAMIXMapping opposite: #mapSource> <multivalued>  <derived>
 	<MSEComment: 'Map relationship.'>
 	
-	^self privateState attributeGet: #maps default:[FMMultivalueLink on: self opposite: #mapSource:].
+	^self privateState attributeAt: #maps ifAbsent: [FMMultivalueLink on: self opposite: #mapSource:].
 ]
 
 { #category : #'*Moose-JEE' }
