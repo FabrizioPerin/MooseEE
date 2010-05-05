@@ -72,23 +72,24 @@ MooseBrowsers >> codeBrowserForJEA: title withNamespaceTags: namespaceTagsBlock 
 		showOn: #details;
 		from: #methods;
 		using:
-				[ browser text display:
-							[ :method | 
+				[ browser text 
+							title: [ :method | method name];
+							display:	[ :method | 
 							text := method sourceText.
 							text isEmpty ifTrue: [ 'No source available' ] ifFalse: [ text ] ] ].
 	browser
 		showOn: #details;
 		from: #classes;
 		using:
-				[ browser text display:
-							[ :cls | 
+				[ browser text 
+							title: [ :cls | cls name];
+							display: [ :cls | 
 							text := cls sourceText.
 							text isEmpty ifTrue: [ 'No source available' ] ifFalse: [ text ] ].
 					(browser mondrian)
 						title: 'Transaction Flow';
 						painting: [ :view :class | 
-										(FAMIXClassGroup withAll: (((class withDeepInvokingClasses) union: (class withDeepInvokedClasses)) select:[:each | each isStub not ])
-										) viewMethodsWithTransactionFlowForBrowserOn: view ] 
+										(FAMIXClassGroup withAll: ((((class withDeepInvokingClasses) union: (class withDeepInvokedClasses)) select:[:each | each isStub not ]) asSet ) ) viewMethodsWithTransactionFlowForBrowserOn: view ] 
 				].
 	^ browser
 ]

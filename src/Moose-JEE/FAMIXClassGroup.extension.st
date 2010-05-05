@@ -56,7 +56,7 @@ FAMIXClassGroup >> groupClassesConsiderInvokationHierarchy [
 
 "I should move away this and just invoke"
 "startSet := self select: [ :class | class hasImplementsASessionBean ]."
-self first mooseModel allClasses resetGroups.
+self isEmpty ifFalse: [self first mooseModel allClasses resetGroups].
 
 "initialize"
 wholeSet := OrderedCollection new.
