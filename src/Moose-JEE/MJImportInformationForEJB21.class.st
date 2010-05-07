@@ -20,7 +20,7 @@ MJImportInformationForEJB21 >> actionsToPerform [
 	mooseModel := MooseModel new.
 	mooseModel name: (mseFilePathName sliceFrom: ((mseFilePathName findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1) to: (mseFilePathName size - 4)  ).
 	mooseModel importFromMSEStream: (StandardFileStream readOnlyFileNamed: mseFilePathName).
-	mooseModel ejbVersion: 'EJB2.1'.
+	mooseModel ejbVersion: #EJB21.
 	progBar value: 3.
 	
 	progBar value: 'Importing from ejb-jar files'.

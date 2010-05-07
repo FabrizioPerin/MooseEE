@@ -21,7 +21,7 @@ MJImportInformationForEJB30 >> actionsToPerform [
 	mooseModel := MooseModel new.
 	mooseModel name: (mseFilePathName sliceFrom: ((mseFilePathName findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1)  to: (mseFilePathName size - 4)  ).
 	mooseModel importFromMSEStream: (StandardFileStream readOnlyFileNamed: mseFilePathName).
-	mooseModel ejbVersion: 'EJB3.0'.
+	mooseModel ejbVersion: #EJB30.
 	progBar value: 3.
 	
 	progBar value: 'Importing from sql file'.
