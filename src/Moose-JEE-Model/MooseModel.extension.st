@@ -1,63 +1,63 @@
 Extension { #name : #MooseModel }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allColumns [
 
 	^self allWithType: MJFAMIXColumn "asMetaDescription"
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allDatabases [
 
 	^self allWithType: MJFAMIXDataBase "asMetaDescription"
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allEntityBeans [
 
 	^self allWithType: MJFAMIXEntityBean "asMetaDescription"
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allJEEBeans [
 
 	^self allSessionBeans, self allEntityBeans, self allMessageDrivenBeans.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allMaps [
 	
 	<navigation: 'All maps'>
 	^self allWithType: MJFAMIXMapping
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allMessageDrivenBeans [
 
 	^self allWithType: MJFAMIXMessageDrivenBean "asMetaDescription"
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allSessionBeans [
 	<navigation: 'All session beans'>
 
 	^self allWithType: MJFAMIXSessionBean "asMetaDescription"
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allTables [
 
 	^self allWithType: MJFAMIXTable "asMetaDescription"
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allTransactionalMethods [
 	<navigation: 'All methods involved in EJB transactions'>
 
 	^self allMethods select: #hasEJBTransactionAttribute
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> annotateTheModelForJEEBrowser [
 
 	<menuItem: 'Annotate the model with JEE informations' category: 'JEE Menu' >
@@ -68,20 +68,20 @@ MooseModel >> annotateTheModelForJEEBrowser [
 	^self
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
 
 	self flag: #toRemove.
 	^self bookmarks detect: [:each | each mooseName = aSymbol ] ifNone: aBlock
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> browseCodeWithAnnotationsForJEA [
 	<menuItem: 'Code Browser For JEA' category: 'JEE Menu'>
 	MooseBrowsers new codeBrowserForJEA openOn: self	
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> buildRelationsAmongDBElementsAndMethods [
 	<menuItem: 'Build Relations Among DB And Methods' category: 'JEE Menu'>
 
@@ -141,7 +141,7 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> createAnnotationForTransactionScope [
 
 	"Creation of the annotation types"
@@ -185,7 +185,7 @@ MooseModel >> createAnnotationForTransactionScope [
 	^self
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> createAnnotationForUnsafeQuery [
 
 	| unsafeQueryType allInterestingMethods interestingClasses interestingClassesWithoutLonelyClasses allNamespaces unsafeQueryTypeGroup |
@@ -234,18 +234,18 @@ MooseModel >> createAnnotationForUnsafeQuery [
 	^self
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> ejbVersion [
 	^self privateState attributeAt: #ejbVersion ifAbsent: [nil]
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> ejbVersion: aSymbol [
 	^self privateState attributeAt: #ejbVersion put: aSymbol
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
@@ -267,7 +267,7 @@ out inspect."
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> importDBFromSQLFileGUI [
 	<menuItem: 'Import database from SQL file' category: 'JEE Menu'>
 	
@@ -282,7 +282,7 @@ MooseModel >> importDBFromSQLFileGUI [
 		ifFalse:[self importDBFromSQLFile: file readStream].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> importEjbJarFromFolder: aString [
 	
 	| fileSystem entries directoryEntries parser root counter |
@@ -326,7 +326,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> importEjbJarFromFolderGUI [
 
 	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEE Menu'>
@@ -339,7 +339,7 @@ MooseModel >> importEjbJarFromFolderGUI [
 	self importEjbJarFromFolder: folderName pathName.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> initAndOpenJEEFromFolder: srcFolderString [
 	
 	| applicationName |
@@ -387,7 +387,7 @@ MoosePanel open.
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> instanciateJBeansFromAnnotations [
 	<menuItem: 'Import beans from annotations' category: 'JEE Menu'>
 	
@@ -442,17 +442,17 @@ MooseModel >> instanciateJBeansFromAnnotations [
 	^self
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> isEJB21 [
 	^self ejbVersion = #EJB21
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> isEJB30 [
 	^self ejbVersion = #EJB30
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 
 	aBlackBoard databases do: [:each | self add: each createRelationalElement ].
@@ -462,7 +462,7 @@ MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 	^self
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
 	| allFileAnchors cursor |
@@ -512,7 +512,7 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsGUI [
 	<menuItem: 'Try to fix links with files' category: 'JEE Menu'>
 

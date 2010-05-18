@@ -1,6 +1,6 @@
 Extension { #name : #FAMIXClassGroup }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> RatioNOQMNOM [
 	
 	"<property: #'R_NOQM_NOM'
@@ -10,7 +10,7 @@ FAMIXClassGroup >> RatioNOQMNOM [
 	^self lookUpPropertyNamed: #'R_NOQM_NOM' computedAs: [ ( ( self sumOfPropertyNamed: #NOQM ) / ( self sumOfPropertyNamed: #NOM) ) asFloat ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> RatioNOTMNOM [
 	"<property: #'R_NOTM_NOM'
 		longName: 'Ratio Number Of Transaction Methods Number Of Methods'
@@ -19,13 +19,13 @@ FAMIXClassGroup >> RatioNOTMNOM [
 	^self lookUpPropertyNamed: #'R_NOTM_NOM' computedAs: [ ( ( self sumOfPropertyNamed: #NOTM ) / ( self sumOfPropertyNamed: #NOM) ) asFloat ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> allClassesOfGroup: anInteger [
 
 	^self select: [:class | class groupNumber = anInteger ].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> determinGroupStartingFrom: groupNum [
 	"This is the algorithm that assigne the group numbers to the elements.
 		anExistingGroups is an OrderedCollection containing an OrderedCollection for each group of classes."
@@ -49,7 +49,7 @@ FAMIXClassGroup >> determinGroupStartingFrom: groupNum [
 	^groupsToChange
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> groupClassesConsiderInvokationHierarchy [
 
 | wholeSet groupNumber |
@@ -71,12 +71,12 @@ wholeSet do: [:classGroup |
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> resetGroups [
 	self do:[:each | each groupNumber: nil].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> updateGroupNumberUsing: anOrderedCollection [
 
 	(anOrderedCollection size = 1)
@@ -93,7 +93,7 @@ FAMIXClassGroup >> updateGroupNumberUsing: anOrderedCollection [
 		].
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlow [
 	<menuItem: 'Transaction Flow with all methods' category: 'Mondrian'>
 	| view |
@@ -102,7 +102,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlow [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
@@ -195,7 +195,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	view dominanceGrouppedTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
 	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
@@ -285,7 +285,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowOn: view [
 	view dominanceGrouppedTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowWithoutEllipseShapesOn: view [
 	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods |
@@ -368,7 +368,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowWithoutEllipseShapesOn: view [
 	view dominanceTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlow3 [
 	<menuItem: 'Transaction Flow' category: 'Mondrian'>
 	| view |
@@ -377,7 +377,7 @@ FAMIXClassGroup >> viewTransactionFlow3 [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlow3On: view [
 
 	| interestingClasses allInterestingMethods otherMethods tables |
@@ -463,7 +463,110 @@ FAMIXClassGroup >> viewTransactionFlow3On: view [
 	view dominanceGrouppedTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+FAMIXClassGroup >> viewTransactionFlow4 [
+	<menuItem: 'Transaction Flow TEST' category: 'Mondrian'>
+	| view |
+	view := MOViewRenderer new.
+	self viewTransactionFlow4On: view.
+	view open
+]
+
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+FAMIXClassGroup >> viewTransactionFlow4On: aView [
+
+	| interestingClasses allInterestingMethods otherMethods tables internalShape |
+
+	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
+	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
+	
+	aView interaction item: 'inspect' action: [:elem | self inspect].
+	aView shape rectangle withBorder.
+	aView nodes: interestingClasses forEach: [:class |
+		
+		aView interaction nodraggable.
+		(aView shape rectangle text: [:each | each name]) smallFont; withBorder.
+		aView node: class.
+		
+		"aView interaction forward."
+		
+		aView interaction nodraggable.
+		aView shape rectangle borderColor: Color transparent.
+		aView node: class forIt:[
+			allInterestingMethods := class methods select: #isPartOfATransaction.
+				otherMethods := class methods difference: allInterestingMethods.
+
+				aView nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter).
+				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
+																	and: [ each hasEJBTransactionAttribute not ] ] ).
+
+				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color white ) ).
+				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
+																	and: [ each hasEJBTransactionAttribute not ] ] ).
+
+				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor:  Color blue darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
+															and: [ each startATransaction 
+																and: [ each couldBeAnEntryPoint ] ] ] ).
+
+				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
+																	and: [ each startATransaction 
+																		and: [ each couldBeAnEntryPoint ] ] ] ).
+
+				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
+																	and: [ each startAUselessTransaction ] ] ).
+
+				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
+																	and: [ each startAUselessTransaction ] ] ).
+
+				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
+																	and: [ each startAUselessTransaction not 
+																		and: [ each couldBeAnEntryPoint not
+																			and: [ each hasEJBTransactionAttribute ] ] ] ] ).
+
+				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker ).
+				aView nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
+																	and: [ each startAUselessTransaction not 
+																		and: [ each couldBeAnEntryPoint not
+																			and: [ each hasEJBTransactionAttribute ] ] ] ] ).
+	
+				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
+																	and: [ each startAUselessTransaction not 
+																		and: [ each couldBeAnEntryPoint
+																			and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
+
+				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
+				aView nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
+																	and: [ each startAUselessTransaction not 
+																		and: [ each couldBeAnEntryPoint
+																			and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
+
+				aView shape line color darker.
+				aView edges: class internalInvocations from: #sender toAll: #candidates.
+				aView horizontalTreeLayout.].
+	
+			aView verticalLineLayout gapSize:0; stretchVertically.
+			].
+		
+	aView shape line color lighter.
+	aView edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.
+	
+	"Show data base tables"
+	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
+	aView nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
+	aView shape line color darker.
+	aView edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
+
+	"aView dominanceTreeLayout."
+	aView dominanceGrouppedTreeLayout.
+]
+
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayers [
 	<menuItem: 'Transaction Flow By Layers' category: 'Mondrian'>
 	| view |
@@ -472,7 +575,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayers [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [ 
 	
 	| beans data logic map invocationsMap invoked |
@@ -508,7 +611,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [
 	view verticalLineLayout verticalGap: 40.
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewUnsafeQueries [
 	<menuItem: 'Unsafe queries' category: 'Mondrian'>
 
@@ -518,7 +621,7 @@ FAMIXClassGroup >> viewUnsafeQueries [
 	view open.
 ]
 
-{ #category : #'*Moose-JEE-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
 FAMIXClassGroup >> viewUnsafeQueriesOn: view [ 	
 	
 	| allMethods interestingClasses interestingClassesWithoutLonelyClasses interestingClassesWithoutTests |

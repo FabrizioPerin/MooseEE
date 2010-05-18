@@ -1,11 +1,11 @@
 Extension { #name : #FAMIXNamedEntity }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> addMaps: aMapping [
 	self maps add: aMapping
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> mapDirection: directionSymbol on: dependencyList [
 
 	"From a list of dependencies of a given type, select the ones going to or coming from receiver"
@@ -22,12 +22,12 @@ FAMIXNamedEntity >> mapDirection: directionSymbol on: dependencyList [
 	SyntaxErrorNotification signal: 'second argument should be #maps or #mapped'.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> mappedRelationalEntities [
 	^self mapDirection:  #mapTarget on: self mooseModel allMaps.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> maps [
 	<MSEProperty: #maps type: #MJFAMIXMapping opposite: #mapSource> <multivalued>  <derived>
 	<MSEComment: 'Map relationship.'>
@@ -35,7 +35,7 @@ FAMIXNamedEntity >> maps [
 	^self privateState attributeAt: #maps ifAbsent: [FMMultivalueLink on: self opposite: #mapSource:].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> maps: aMapping [
 	self maps value: aMapping
 ]

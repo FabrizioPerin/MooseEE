@@ -1,6 +1,6 @@
 Extension { #name : #String }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 String >> withoutLineEndings [
 	"assume the string is textual, and that CR, LF, and CRLF are all 
 	valid line endings.  Replace each occurence with ''"

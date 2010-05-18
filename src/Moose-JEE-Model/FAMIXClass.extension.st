@@ -1,6 +1,6 @@
 Extension { #name : #FAMIXClass }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> completeHierarchyInWhichThisResides [ 
 
 	| collection |
@@ -11,46 +11,46 @@ FAMIXClass >> completeHierarchyInWhichThisResides [
 	^Set new.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> doesImplements: aSymbol [
 	^self implementedInterfaces anySatisfy: [:each | each name = aSymbol ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasImplementsABean [
 	^ ( ( self mooseModel allJEEBeans ) anySatisfy: [:bean | bean implementationClass == self ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasImplementsAMessageDrivenBean [
 	^ ( ( self mooseModel allMessageDrivenBeans ) anySatisfy: [:bean | bean implementationClass == self ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasImplementsASessionBean [
 	^ self mooseModel allSessionBeans anySatisfy: [:bean | bean implementationClass == self ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasImplementsAnEntityBean [
 	^ ( ( self mooseModel allEntityBeans ) anySatisfy: [:bean | bean implementationClass == self ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasMethodsThatExecuteAQuery [
 
 	self flag: #TODO test.
 	^self methods anySatisfy: [ :method | method doesExecuteAQuery ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasUnsafeMethods [
 
 	self flag: #TODO test.
 	^self methods anySatisfy: [ :method | method isPartOfATransaction not ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasUnsafeMethodsThatExecuteAQuery [
 
 	"s| allMethods |
@@ -60,26 +60,26 @@ FAMIXClass >> hasUnsafeMethodsThatExecuteAQuery [
 	^self methods anySatisfy: [ :method | method isPartOfAnUnsafeTransactionPath and: [ method doesExecuteAQuery ] ].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> implementedInterfaces [
 	"returns a collection with all superclasses of this class"
 
 	^self directSuperclasses select: #isInterface.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isADataLayerClass [
 
 	^ ( self methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ) or: [ self doesImplements: #Serializable ].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isADomainLayerClass [
 
 	^ self methods anySatisfy: [ :eachMethod | eachMethod isADomainLayerMethod and: [ eachMethod isConstructor not ] ].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isAPresentationLayerClass [
 	"This method check if a class i part of presentation layer considering:	
 		- the class is a servlet?
@@ -93,7 +93,7 @@ FAMIXClass >> isAPresentationLayerClass [
 	^ self hasImplementsASessionBean.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isARowDataGateway [
 
 	| executeUpdate executeDelete executeInsert |
@@ -115,7 +115,7 @@ FAMIXClass >> isARowDataGateway [
 	^( ( executeUpdate and: [ executeDelete ] ) and: [ executeInsert ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isTestClass [
 
 	| re |
@@ -127,7 +127,7 @@ FAMIXClass >> isTestClass [
 	^( re matches: self name) or: [re matches: self container name]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> numberOfQueryingMethods [
 	<MSEProperty: #NOQM type: #Number>
 	<property: #NOQM	longName: 'Number of querying methods'
@@ -136,7 +136,7 @@ FAMIXClass >> numberOfQueryingMethods [
 	^self lookUpPropertyNamed: #NOQM computedAs: [ ( self methods select: [:method | method doesExecuteAQuery ] ) size ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> numberOfTransactionMethods [
 	<MSEProperty: #NOTM type: #Number>
 	<property: #NOTM
@@ -146,7 +146,7 @@ FAMIXClass >> numberOfTransactionMethods [
 	^self lookUpPropertyNamed: #NOTM computedAs: [ ( self methods select: [:method | method isPartOfATransaction ] ) size ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> parentEJBBean [
 	<MSEProperty: #parentEJBBean type: #Object>
 	"self flag: 'annotate with fame meta descriptions'."
@@ -154,13 +154,13 @@ FAMIXClass >> parentEJBBean [
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> parentEJBBean: aBean [
 
 	^self privateState attributeAt: #parentEJBBean put: aBean
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> viewInterestingTransactionMethodsOn: view [
 	| allInterestingMethods |
 
@@ -217,7 +217,7 @@ FAMIXClass >> viewInterestingTransactionMethodsOn: view [
 		view horizontalDominanceTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> viewMethodsIncludeIn: aMethodList ForUnsafeQueriesOn: view [ 
 	| usefulMethods |
 	
@@ -240,7 +240,7 @@ FAMIXClass >> viewMethodsIncludeIn: aMethodList ForUnsafeQueriesOn: view [
 	view horizontalTreeLayout 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> withDeepInvokedClasses [
 
 	| cursor result invokedClassesAndTheirSubclasses |
@@ -258,7 +258,7 @@ FAMIXClass >> withDeepInvokedClasses [
 	^ result.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> withDeepInvokingClasses [
 
 	| cursor result invokingClassesAndTheirSubclasses |

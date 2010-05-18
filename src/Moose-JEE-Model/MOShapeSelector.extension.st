@@ -1,6 +1,6 @@
 Extension { #name : #MOShapeSelector }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> layerCalled: aString [
 	| builder |
 	builder := MOFormsBuilder new.
@@ -13,7 +13,7 @@ MOShapeSelector >> layerCalled: aString [
 	^ view shape: builder shape
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> layerCalled: aString on: beans [
 	| builder |
 	builder := MOFormsBuilder new.
@@ -26,7 +26,7 @@ MOShapeSelector >> layerCalled: aString on: beans [
 	^ view shape: builder shape
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> layerShape: aString [
 	| builder |
 

@@ -1,11 +1,11 @@
 Extension { #name : #MOViewRenderer }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOViewRenderer >> dominanceGrouppedTreeLayout [
 	^self layout: MJDominanceTreeWithGroupsLayout new.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOViewRenderer >> umlLikeShape: aString on: aBlock [
 
 	| builder |
@@ -19,7 +19,7 @@ MOViewRenderer >> umlLikeShape: aString on: aBlock [
 	^builder shape
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOViewRenderer >> umlPackageShapeWithLabel: aBlock [
 	| builder |
 	builder := MOFormsBuilder new.
@@ -30,7 +30,7 @@ MOViewRenderer >> umlPackageShapeWithLabel: aBlock [
 	^self shape: builder shapes.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOViewRenderer >> umlPackageShapeWithLabel: aBlock with:  aShape [
 	| builder |
 	builder := MOFormsBuilder new.
@@ -41,7 +41,7 @@ MOViewRenderer >> umlPackageShapeWithLabel: aBlock with:  aShape [
 	^self shape: builder shapes.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MOViewRenderer >> umlShape: aString [
 
 	| builder |

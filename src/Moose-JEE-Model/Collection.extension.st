@@ -1,6 +1,6 @@
 Extension { #name : #Collection }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 Collection >> detect: aBlock ifPresent: okayBlock ifNone: exceptionBlock [
 	"detect the element satisfying aBlock1. If we find, we manipulate it based on aBlock2, if not we return the value of aBlock3"
 
@@ -9,7 +9,7 @@ Collection >> detect: aBlock ifPresent: okayBlock ifNone: exceptionBlock [
 	^okayBlock value: element
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 Collection >> flatten [
 	"Recursively collect each non-collection element of the receiver and its descendant
 	collections.  Please note, this implementation assumes that strings are to be treated
@@ -20,7 +20,7 @@ Collection >> flatten [
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 Collection >> recursiveCollect: aBlock [
 	"Recursively collect each non-collection element of the receiver and its descendant
 	collections.  Please note, this implementation assumes that strings are to be treated
@@ -34,7 +34,7 @@ Collection >> recursiveCollect: aBlock [
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 Collection >> recursiveDo: aBlock [
 
 	"Recursively evaluate aBlock for each non-collection element of the receiver and its

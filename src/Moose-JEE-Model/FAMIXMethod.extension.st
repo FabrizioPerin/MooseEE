@@ -1,6 +1,6 @@
 Extension { #name : #FAMIXMethod }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> allInvocationsBetweenHereTo: anotherMethod [
 
 	| invocationChain |
@@ -15,7 +15,7 @@ FAMIXMethod >> allInvocationsBetweenHereTo: anotherMethod [
 	^ OrderedCollection new
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> allMethodsTouchFromHereTo: anotherMethod [
 
 	| methodInvocationChain |
@@ -27,7 +27,7 @@ FAMIXMethod >> allMethodsTouchFromHereTo: anotherMethod [
 	^ methodInvocationChain intersection: ( anotherMethod deepCalleeMethods asOrderedCollection )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> callsJavaSqlPackage [
 
 	| result invokedMethodsCollection |
@@ -43,7 +43,7 @@ FAMIXMethod >> callsJavaSqlPackage [
 	^result
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> couldBeAnEntryPoint [
 	^ self incomingInvocations isEmpty 
 			ifFalse: [ self incomingInvocations 
@@ -51,7 +51,7 @@ FAMIXMethod >> couldBeAnEntryPoint [
 			ifTrue: [true]				
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> deepCalledMethods [
 	"This method starting from this group of method return an OrderedCollection with the method invocation chain that start with methods contained in this group"
 
@@ -69,7 +69,7 @@ FAMIXMethod >> deepCalledMethods [
 	^ result
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> deepCalleeMethods [
 	"This message return an OrderedCollection of methods invoked starting from itself. The collection contained also the starting method "
 	| cursor result |
@@ -86,7 +86,7 @@ FAMIXMethod >> deepCalleeMethods [
 	^ result
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> deepCalleeMethodsWithoutTransactionPath [
 
 	| cursor temp result aMethodGroup |
@@ -113,7 +113,7 @@ FAMIXMethod >> deepCalleeMethodsWithoutTransactionPath [
 	^ result
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesCall: aSymbol [
 	"Return true if self invokes a method called aSymbol"
 
@@ -121,13 +121,13 @@ FAMIXMethod >> doesCall: aSymbol [
 		invokedMethod isNil not and: [ invokedMethod name = aSymbol asSymbol ] ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesExecuteAQuery [
 
 	^( self doesCall: 'executeBatch' ) or: [ ( self doesCall: 'executeQuery' ) or: [ self doesCall: 'executeUpdate' ] ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesOverrideAMethodInvolveInATransaction [
 
 	"this message return true if the method extend a method that is part of a transaction because specified in the deployment descriptor"
@@ -141,14 +141,14 @@ FAMIXMethod >> doesOverrideAMethodInvolveInATransaction [
 	].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesSupportTransaction [
 	^(self ejbTransactionType = 'NotSupported' 
 		or: [ self ejbTransactionType asString asLowercase = 'never'
 			or:[ self ejbTransactionType asString asLowercase = 'not_supported' ] ] ) not
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> ejbTransactionType [
 	"answer if the EJB transaction type is nil or not"
 
@@ -157,48 +157,48 @@ FAMIXMethod >> ejbTransactionType [
 
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> ejbTransactionType: aString [
 
 	self privateState attributeAt: #ejbTransactionType put: aString.
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> hasEJBTransactionAttribute [
 
 	^self ejbTransactionType notNil
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> hasEJBTransactionAttributeThatSupportTransactions [
 
 	^(self ejbTransactionType notNil) and: [self doesSupportTransaction ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isADataLayerMethod [
 	
 	^ self callsJavaSqlPackage notEmpty or: [ self doesExecuteAQuery ].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isADomainLayerMethod [
 	
 	^ ( self isADataLayerMethod or: [ self isAPresentationLayerMethod ] ) not
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isAPresentationLayerMethod [
 	
 	^ self name = #doPost or: [ self name = #doGet ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isInvokedFromAPathThatSupportTransaction [
 	^( self doesSupportTransaction and: [self deepCalleeMethods anySatisfy: [ :method | method ejbTransactionType = 'Supports' ] ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isInvokedFromATransactionMethod [
 
 	^( self doesSupportTransaction 
@@ -209,39 +209,39 @@ FAMIXMethod >> isInvokedFromATransactionMethod [
 					tmp anySatisfy: [ :method | method startATransaction ] ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isPartOfATransaction [
 
 	^ self startATransaction or: [ self doesOverrideAMethodInvolveInATransaction or: [ self isInvokedFromATransactionMethod or: [ self isInvokedFromAPathThatSupportTransaction ] ] ]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isPartOfAnUnsafeTransactionPath [
 
 	^ ( ( self doesSupportTransaction ) and: [self deepCalleeMethodsWithoutTransactionPath anySatisfy: [ :method | method couldBeAnEntryPoint ] ] )
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> ownedTable [
 	self flag: #TODOTest.
 	^self privateState attributeAt: #ownedTable ifAbsent: [nil]
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> ownedTable: anObject [
 
 	self flag: #TODOTest.
 	self privateState attributeAt: #ownedTable put: anObject
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> startATransaction [
 	^ self ejbTransactionType = 'RequiresNew' or: [  self ejbTransactionType = 'Required' 
 														or: [  self ejbTransactionType = 'REQUIRES_NEW'
 															or: [self ejbTransactionType = 'REQUIRED' ] ] ].
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> startAUselessTransaction [
 	^ ( ( ( self ejbTransactionType = 'RequiresNew' ) or: [ self ejbTransactionType = 'REQUIRES_NEW' ] ) 
 		and: [ self isPartOfATransaction 

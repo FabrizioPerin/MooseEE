@@ -1,6 +1,6 @@
 Extension { #name : #MooseBrowsers }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseBrowsers >> codeBrowserForJEA [
 	
 	^ self 
@@ -22,7 +22,7 @@ MooseBrowsers >> codeBrowserForJEA [
 														
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 MooseBrowsers >> codeBrowserForJEA: title withNamespaceTags: namespaceTagsBlock withClassesTags: classTagsBlock withMethodsTags: methodTagsBlock [
 	| browser text |
 	browser := GLMTabulator new.

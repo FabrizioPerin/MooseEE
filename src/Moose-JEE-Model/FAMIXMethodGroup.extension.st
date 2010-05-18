@@ -1,6 +1,6 @@
 Extension { #name : #FAMIXMethodGroup }
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethodGroup >> deepCalledMethods [
 	"This method starting from this group of method return an OrderedCollection with the method invocation chain that start with methods contained in this group"
 
@@ -17,7 +17,7 @@ FAMIXMethodGroup >> deepCalledMethods [
 	^ result
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethodGroup >> deepCalleeMethods [
 	"This method starting from this group of method return an OrderedCollection with the method invocation chain that end with methods contained in this group"
 	| cursor result |
@@ -35,7 +35,7 @@ FAMIXMethodGroup >> deepCalleeMethods [
 	^ result
 ]
 
-{ #category : #'*Moose-JEE' }
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethodGroup >> deepCalleeMethodsWithoutTransactionPath [
 
 	| cursor temp result aMethodGroup |
