@@ -80,9 +80,6 @@ ConfigurationOfMooseJEE >> default: spec [
 				spec requires: 'Merlin'];
 			package: 'XML-Parser' with: [
 				spec repository: 'http://www.squeaksource.com/XMLSupport'];
-			package: 'Opax' with: [
-				spec repository: 'http://www.squeaksource.com/OPAX'.
-				spec requires: 'XML-Parser'];
 			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
 	]
 ]
@@ -99,9 +96,6 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'XML-Parser' with: [
 				spec repository: 'http://www.squeaksource.com/XMLSupport'];
-			package: 'Opax' with: [
-				spec repository: 'http://www.squeaksource.com/OPAX'.
-				spec requires: 'XML-Parser'];
 			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
 	]
 ]
