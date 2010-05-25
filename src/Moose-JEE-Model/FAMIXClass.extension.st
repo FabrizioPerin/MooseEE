@@ -74,6 +74,13 @@ FAMIXClass >> isADataLayerClass [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXClass >> isADataTransferClass [
+
+	self flag: #TODO test.
+	^ (self name contains: 'DTO') or: [ ( ( self name contains: 'VO' ) and: [self name contains: 'test' not] )  or: [ self doesImplements: #Serializable ] ].
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isADomainLayerClass [
 
 	^ self methods anySatisfy: [ :eachMethod | eachMethod isADomainLayerMethod and: [ eachMethod isConstructor not ] ].
