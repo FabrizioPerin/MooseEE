@@ -2704,23 +2704,6 @@ JEETests >> testCompleteHierarchyInWhichThisResides [
 ]
 
 { #category : #tests }
-JEETests >> testCompleteHierarchyInWhichThisResides2 [
-	
-	
-	" I will fill MethodToAnalyze with all the methods that are part of a methods invokations chain that don't have a method that start a transaction"
-	| allMethods interestingClasses mooseModel |
-
-	mooseModel := self sampleMooseModelWithTransAndQueryComplex.
-	allMethods :=  ( ( ( mooseModel allClasses ) flatCollect: [:each | each methods] ) select: #hasEJBTransactionAttribute ).
-	allMethods := (( FAMIXMethodGroup new ) addAll: allMethods) deepCalledMethods.
-
-	"selecting just the classes that contained methods under analysis and the hierarchy that contain those classes."
-	interestingClasses := ( OrderedCollection new addAll: ( (  mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) ) ) collect: [ :each | each completeHierarchyInWhichThisResides ].
-
-	self assert: (interestingClasses size = 4).
-]
-
-{ #category : #tests }
 JEETests >> testCompleteHierarchyInWhichThisResides3 [
 	
 	
@@ -2809,7 +2792,7 @@ JEETests >> testDoesImplements [
 	self assert: ( ( ( mooseModel allClasses select: [:each | each name = #Class4 ] ) at: 1 ) doesImplements: #Class2 ).
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testElementCreation [
 
 	self assert: (root allChildren select: [:each | each isMemberOf: EntityElement ]) size = 2.
@@ -2818,7 +2801,7 @@ JEETests >> testElementCreation [
 	self assert: (root allChildren select: [:each | each isMemberOf:  MessageDrivenElement ]) size = 1.
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testEntityResolving [
 	
 	| mooseModel aBean |
@@ -2877,7 +2860,7 @@ JEETests >> testExecuteAQuery [
 	self deny: ( temp ).
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testFAMIXDataLayerPopulate [
 
 	| mooseModel dataLayer |
@@ -2893,7 +2876,7 @@ JEETests >> testFAMIXDataLayerPopulate [
 	self assert: dataLayer containedClasses size = 2.
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testFAMIXMappingCreation [
 	
 	| mooseModel  class table map mapping |
@@ -2917,7 +2900,7 @@ JEETests >> testFAMIXMappingCreation [
 
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testFAMIXMappingModelPopulation [
 	| mooseModel annotationType famixAnchor entities tables |
 
@@ -3000,7 +2983,7 @@ JEETests >> testFAMIXMethodDeepCalleeMethodsWithoutTransactionPath [
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #executeBatch ] ) first deepCalleeMethodsWithoutTransactionPath ) size = 7.
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testFAMIXServiceLayerPopulate [
 
 	| mooseModel serviceLayer |
@@ -3336,7 +3319,7 @@ JEETests >> testInvocations [
 	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) name = #someMethod ).
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testIsADataLayerClass [
 
 	| mooseModel |
@@ -3350,7 +3333,7 @@ JEETests >> testIsADataLayerClass [
 	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADataLayerClass ] ).
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testIsADomainLayerClass [
 
 	| mooseModel  |
@@ -3359,7 +3342,7 @@ JEETests >> testIsADomainLayerClass [
 	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADomainLayerClass ] ).
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testIsAPresentationLayerClass [
 
 	| mooseModel  |
@@ -3583,7 +3566,7 @@ JEETests >> testRationNOTMNOM [
 	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13.0 / 19.0 )).
 ]
 
-{ #category : #tests }
+{ #category : #testsOnTheModel }
 JEETests >> testSessionResolving [
 	
 	| mooseModel aStateless aStateful |
