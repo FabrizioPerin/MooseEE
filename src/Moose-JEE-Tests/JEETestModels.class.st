@@ -545,7 +545,8 @@ JEETestModels >> dto2 [
 
 { #category : #classes }
 JEETestModels >> dto3 [
-
+	"This DTOs should match because extends serilizable"
+	
 	| class serializableClass method1 method2 method3 method4 method5 |
 	
 	class := FAMIXClass new
@@ -603,7 +604,6 @@ JEETestModels >> mooseModelWithDTOs [
 			name: #aPackage;
 			yourself.
 
-
 	class1 := self class1.
 	class1 container: aPackage.
 	
@@ -623,16 +623,18 @@ JEETestModels >> mooseModelWithDTOs [
 	inheritance := FAMIXInheritance new 
 					superclass: class1; 
 					subclass: class2.
+	mooseModel add: inheritance.
 
-	class1 addSuperInheritance: inheritance.
-	class2 addSubInheritance: inheritance.
+	class2 addSuperInheritance: inheritance.
+	class1 addSubInheritance: inheritance.
 	
 	inheritance := FAMIXInheritance new 
 					superclass: class2; 
 					subclass: class3.
+	mooseModel add: inheritance.
 
-	class2 addSuperInheritance: inheritance.
-	class3 addSubInheritance: inheritance.
+	class3 addSuperInheritance: inheritance.
+	class2 addSubInheritance: inheritance.
 
 	"anotherPackage definition"
 	anotherPackage := FAMIXNamespace new
@@ -658,9 +660,10 @@ JEETestModels >> mooseModelWithDTOs [
 	inheritance := FAMIXInheritance new 
 					superclass: class6; 
 					subclass: class7.
-
-	class6 addSuperInheritance: inheritance.
-	class7 addSubInheritance: inheritance.
+	mooseModel add: inheritance.
+	
+	class7 addSuperInheritance: inheritance.
+	class6 addSubInheritance: inheritance.
 	
 	
 	"DTOs package"
@@ -679,19 +682,21 @@ JEETestModels >> mooseModelWithDTOs [
 
 	dto3 := self dto3.
 	dto3 container: aDtosPackage.
-	
+
 	inheritance := FAMIXInheritance new 
 					superclass: serializableClass; 
 					subclass: dto3.
+	mooseModel add: inheritance.
 
-	serializableClass addSuperInheritance: inheritance.
-	dto3 addSubInheritance: inheritance.
+	dto3 addSuperInheritance: inheritance.
+	serializableClass addSubInheritance: inheritance.
 
 
 
 	"other invocation"
 	sender := (class2 methods select: [:m | m name = #method22]) first.
 	receiver := (class2 methods select: [:m | m name = #method24]) first.
+	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
 	sender addOutgoingInvocation: invocation.
 	receiver addIncomingInvocation: invocation.
@@ -699,6 +704,7 @@ JEETestModels >> mooseModelWithDTOs [
 
 	sender := (class2 methods select: [:m | m name = #method24]) first.
 	receiver := (class5 methods select: [:m | m name = #method54]) first.
+	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
 	sender addOutgoingInvocation: invocation.
 	receiver addIncomingInvocation: invocation.
@@ -706,6 +712,7 @@ JEETestModels >> mooseModelWithDTOs [
 
 	sender := (class5 methods select: [:m | m name = #method54]) first.
 	receiver := (class9 methods select: [:m | m name = #method93]) first.
+	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
 	sender addOutgoingInvocation: invocation.
 	receiver addIncomingInvocation: invocation.
@@ -713,6 +720,7 @@ JEETestModels >> mooseModelWithDTOs [
 
 	sender := (class9 methods select: [:m | m name = #method93]) first.
 	receiver := (dto3 methods select: [:m | m name = #methodDTO31]) first.
+	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
 	sender addOutgoingInvocation: invocation.
 	receiver addIncomingInvocation: invocation.
@@ -808,8 +816,14 @@ JEETestModels >> mooseModelWithDTOs [
 		addAll: class9 methods;
 		addAll: dto1 methods;
 		addAll: dto2 methods;
+		addAll: dto3 methods;
+		add: dto1;
+		add: dto2;
+		add: dto3;
+		add: serializableClass;
 		add: aPackage;
 		add: anotherPackage;
+		add: aDtosPackage;
 		add: (FAMIXClass new
 			name: #AStatelessSessionHome;
 			container: aPackage;
@@ -879,4 +893,64 @@ JEETestModels >> mooseModelWithDTOs [
 		).
 
 	^mooseModel
+]
+
+{ #category : #classes }
+JEETestModels >> testClass [
+
+	| class method1 method2 method3 method4 method5 |
+	
+	class := FAMIXClass new
+			name: #TestClass;
+			yourself.
+
+	method1 := FAMIXMethod new
+				name: #methodTC1;
+				parentType: class;
+				signature: 'methodTC1()';
+				yourself.
+	
+	method2 := FAMIXMethod new
+				name: #methodTC2;
+				parentType: class;
+				signature: 'methodTC2()';
+				yourself.
+
+	method3 := FAMIXMethod new
+				name: #methodTC3;
+				parentType: class;
+				signature: 'methodTC3()';
+				yourself.
+
+	method4 := FAMIXMethod new
+				name: #methodTC4;
+				parentType: class;
+				signature: 'methodTC4()';
+				yourself.
+
+	method5 := FAMIXMethod new
+				name: #methodTC5;
+				parentType: class;
+				signature: 'methodTC5()';
+				yourself.
+
+	class	addMethod: (method1);
+			addMethod: (method2);
+			addMethod: (method3);
+			addMethod: (method4);
+			addMethod: (method5).
+	
+	^class
+]
+
+{ #category : #classes }
+JEETestModels >> testNamespace [
+
+	| namespace |
+
+	namespace := FAMIXNamespace new
+			name: #aTestNamespace;
+			yourself.
+
+	^namespace 
 ]

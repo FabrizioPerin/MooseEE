@@ -2733,18 +2733,6 @@ JEETests >> testCompleteHierarchyInWhichThisResidesRight [
 ]
 
 { #category : #tests }
-JEETests >> testDTOs [
-	
-	| mooseModel  |
-	mooseModel := JEETestModels new mooseModelWithDTOs.
-	
-	self halt.
-
-					
-				
-]
-
-{ #category : #tests }
 JEETests >> testDeepCalledMethods [
 	
 	
