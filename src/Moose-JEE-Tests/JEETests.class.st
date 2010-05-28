@@ -2733,6 +2733,18 @@ JEETests >> testCompleteHierarchyInWhichThisResidesRight [
 ]
 
 { #category : #tests }
+JEETests >> testDTOs [
+	
+	| mooseModel  |
+	mooseModel := JEETestModels new mooseModelWithDTOs.
+	
+	self halt.
+
+					
+				
+]
+
+{ #category : #tests }
 JEETests >> testDeepCalledMethods [
 	
 	
@@ -2792,7 +2804,22 @@ JEETests >> testDoesImplements [
 	self assert: ( ( ( mooseModel allClasses select: [:each | each name = #Class4 ] ) at: 1 ) doesImplements: #Class2 ).
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
+JEETests >> testDoesInvokesMethodsBelongJavaSqlPackage [
+	
+	| mooseModel methodsCollection |
+	
+	mooseModel := self sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	methodsCollection := ( mooseModel allMethods select: [:method | method doesInvokesMethodsBelongJavaSqlPackage ] ).
+	
+	self assert: methodsCollection size = 3.
+	self assert: (methodsCollection anySatisfy: [:each | each name = #method1]).
+	self assert: (methodsCollection anySatisfy: [:each | each name = #method2]).
+	self assert: (methodsCollection anySatisfy: [:each | each name = #method3]).
+]
+
+{ #category : #testsOnJEEModel }
 JEETests >> testElementCreation [
 
 	self assert: (root allChildren select: [:each | each isMemberOf: EntityElement ]) size = 2.
@@ -2801,7 +2828,7 @@ JEETests >> testElementCreation [
 	self assert: (root allChildren select: [:each | each isMemberOf:  MessageDrivenElement ]) size = 1.
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testEntityResolving [
 	
 	| mooseModel aBean |
@@ -2860,7 +2887,7 @@ JEETests >> testExecuteAQuery [
 	self deny: ( temp ).
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testFAMIXDataLayerPopulate [
 
 	| mooseModel dataLayer |
@@ -2876,7 +2903,7 @@ JEETests >> testFAMIXDataLayerPopulate [
 	self assert: dataLayer containedClasses size = 2.
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testFAMIXMappingCreation [
 	
 	| mooseModel  class table map mapping |
@@ -2900,7 +2927,7 @@ JEETests >> testFAMIXMappingCreation [
 
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testFAMIXMappingModelPopulation [
 	| mooseModel annotationType famixAnchor entities tables |
 
@@ -2983,12 +3010,12 @@ JEETests >> testFAMIXMethodDeepCalleeMethodsWithoutTransactionPath [
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #executeBatch ] ) first deepCalleeMethodsWithoutTransactionPath ) size = 7.
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testFAMIXServiceLayerPopulate [
 
 	| mooseModel serviceLayer |
 
-	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
+	mooseModel := self sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
 
 	serviceLayer := MJFAMIXServiceLayer new.
 	serviceLayer populate: mooseModel.
@@ -3026,7 +3053,7 @@ JEETests >> testHasImplementsABean [
 
 	| mooseModel allImplementingClasses |
 	mooseModel := self sampleMooseModelWithTransAndQueryAndBeans.
-	
+
 	self assert: ( mooseModel allJEEBeans size = 8 ).
 	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsABean ] ) size = 8 ).
 	allImplementingClasses := mooseModel allClasses select: [:each | each hasImplementsABean ].
@@ -3319,7 +3346,7 @@ JEETests >> testInvocations [
 	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) name = #someMethod ).
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testIsADataLayerClass [
 
 	| mooseModel |
@@ -3333,7 +3360,7 @@ JEETests >> testIsADataLayerClass [
 	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADataLayerClass ] ).
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testIsADomainLayerClass [
 
 	| mooseModel  |
@@ -3342,7 +3369,7 @@ JEETests >> testIsADomainLayerClass [
 	self assert: ( mooseModel allClasses anySatisfy: [:each | each isADomainLayerClass ] ).
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testIsAPresentationLayerClass [
 
 	| mooseModel  |
@@ -3566,7 +3593,7 @@ JEETests >> testRationNOTMNOM [
 	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13.0 / 19.0 )).
 ]
 
-{ #category : #testsOnTheModel }
+{ #category : #testsOnJEEModel }
 JEETests >> testSessionResolving [
 	
 	| mooseModel aStateless aStateful |
