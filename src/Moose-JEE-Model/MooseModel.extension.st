@@ -483,7 +483,7 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 		during: [ :bar | 
 			allFileAnchors do: [:anchor | 
 				| startingFrom |
-				"Trying to readapt also the path separator in the case that you imported a mse file from another platform"
+				"Trying to readapt also the path separator in the case that the imported mse file has been generated on another platform"
 				OSProcess platformName = 'Win32'
 					ifTrue: [
 						[(anchor fileName indexOf: $/) = 0]
@@ -518,7 +518,7 @@ MooseModel >> tryToFixFAMiXFileAnchorsGUI [
 
 	| folder |
 	
-	folder := UITheme builder chooseDirectory: 'Choose the root folder for the sources of ', self name.
+	folder := UITheme builder chooseDirectory: 'Choose the root folder for ', self name.
 	"folder := FileDirectory on: aPathString"
 	folder ifNotNil: [ self tryToFixFAMiXFileAnchorsFrom: folder].
 ]

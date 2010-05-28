@@ -28,22 +28,6 @@ FAMIXMethod >> allMethodsTouchFromHereTo: anotherMethod [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-FAMIXMethod >> callsJavaSqlPackage [
-
-	| result invokedMethodsCollection |
-	
-	result := OrderedCollection new.
-	invokedMethodsCollection := self invokedCandidates.
-
-	invokedMethodsCollection isEmpty ifFalse: [ 
-		invokedMethodsCollection do: [:invokedMethod | 
-			(invokedMethod isNil not and: [ invokedMethod belongsTo belongsTo name = #sql and: [ invokedMethod belongsTo belongsTo belongsTo name = #java ]] ) ifTrue: [ 
-				result isEmpty ifTrue: [result add: self] ] ]].
-
-	^result
-]
-
-{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> couldBeAnEntryPoint [
 	^ self incomingInvocations isEmpty 
 			ifFalse: [ self incomingInvocations 
@@ -128,6 +112,22 @@ FAMIXMethod >> doesExecuteAQuery [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXMethod >> doesInvokesMethodsBelongJavaSqlPackage [
+
+	| invokedMethodsCollection |
+
+	invokedMethodsCollection := self invokedCandidates.
+	
+	invokedMethodsCollection do: [:invokedMethod | 
+			(invokedMethod isNil not 
+				and: [ invokedMethod belongsTo belongsTo name = #sql 
+					and: [ invokedMethod belongsTo belongsTo belongsTo name = #java] ]) 
+			ifTrue: [ ^true ] ].
+
+	^false
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesOverrideAMethodInvolveInATransaction [
 
 	"this message return true if the method extend a method that is part of a transaction because specified in the deployment descriptor"
@@ -178,7 +178,7 @@ FAMIXMethod >> hasEJBTransactionAttributeThatSupportTransactions [
 { #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> isADataLayerMethod [
 	
-	^ self callsJavaSqlPackage notEmpty or: [ self doesExecuteAQuery ].
+	^ self doesInvokesMethodsBelongJavaSqlPackage or: [ self doesExecuteAQuery ].
 ]
 
 { #category : #'*Moose-JEE-Model' }
