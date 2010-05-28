@@ -76,8 +76,12 @@ FAMIXClass >> isADataLayerClass [
 { #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isADataTransferClass [
 
-	self flag: #TODO test.
-	^ (self name contains: 'DTO') or: [ ( ( self name contains: 'VO' ) and: [self name contains: 'test' not] )  or: [ self doesImplements: #Serializable ] ].
+	^ self isTestClass not 
+		and: 
+			[('.*DTO.*' asRegexIgnoringCase matches: self name) 
+			or: [('.*VO.*' asRegexIgnoringCase matches: self name) 
+			or: [self doesImplements: #Serializable] ] 
+		]
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -126,8 +130,6 @@ FAMIXClass >> isARowDataGateway [
 FAMIXClass >> isTestClass [
 
 	| re |
-	
-	self flag: #TODO test.
 	
 	re := '.*test.*' asRegexIgnoringCase. " '^test.*' "
 	
