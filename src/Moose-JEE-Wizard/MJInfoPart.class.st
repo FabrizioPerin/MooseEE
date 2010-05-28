@@ -13,7 +13,7 @@ MJInfoPart class >> new: aString [
 	^self new initialize: aString; yourself.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 MJInfoPart >> contentMorph [
 	"Answer a new content morph."
 
@@ -35,12 +35,12 @@ MJInfoPart >> infoPanel [
 	^self contentMorph
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 MJInfoPart >> informationText [
 	^informationText
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 MJInfoPart >> initialize: aString [
 
 	super initialize.
@@ -48,7 +48,7 @@ MJInfoPart >> initialize: aString [
 	self populateContents: {( self infoPanel )}.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 MJInfoPart >> outputValue [
 	"this method is an abstract method as only the subclass itself know what is the information to send to the WizardPane which will send it  to the wizarControl "
 	""
