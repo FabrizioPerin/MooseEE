@@ -148,11 +148,12 @@ MJImportInformationForEJB30 >> performTerminateButtonAction [
 		at: Sensor cursorPoint
 		from: 1 
 		to: 13
-		during: [ :bar | 
-			progBar := bar. 
-			progBar value: 2.
-			super performTerminateButtonAction.
-			self actionsToPerform.].
+		during: [ :bar |
+			Cursor wait showWhile:[
+				progBar := bar. 
+				progBar value: 2.
+				super performTerminateButtonAction.
+				self actionsToPerform.]].
 
 	
 ]
