@@ -55,6 +55,7 @@ MJFAMIXClassTests >> testIsTestClass [
 	
 	testClasses := mooseModel allClasses select: [:class | class isTestClass].
 	
+	self assert: (mooseModel allClasses size = 3).
 	self assert: (testClasses size = 2).
 	self assert: (testClasses includes: class2 ).
 	self assert: (testClasses includes: tClass ).

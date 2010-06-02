@@ -693,8 +693,8 @@ JEETestModels >> mooseModelWithDTOs [
 
 
 
-	"other invocation"
-	sender := (class2 methods select: [:m | m name = #method22]) first.
+	"invocation chain returning always the same type of DTO"
+	sender := (class2 methods select: [:m | m name = #method23]) first.
 	receiver := (class2 methods select: [:m | m name = #method24]) first.
 	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
@@ -711,14 +711,14 @@ JEETestModels >> mooseModelWithDTOs [
 	mooseModel add: invocation.
 
 	sender := (class5 methods select: [:m | m name = #method54]) first.
-	receiver := (class9 methods select: [:m | m name = #method93]) first.
+	receiver := (class9 methods select: [:m | m name = #method94]) first.
 	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
 	sender addOutgoingInvocation: invocation.
 	receiver addIncomingInvocation: invocation.
 	mooseModel add: invocation.
 
-	sender := (class9 methods select: [:m | m name = #method93]) first.
+	sender := (class9 methods select: [:m | m name = #method94]) first.
 	receiver := (dto3 methods select: [:m | m name = #methodDTO31]) first.
 	receiver declaredType: dto3.
 	invocation := FAMIXInvocation new sender: sender; addCandidate: receiver; signature: receiver signature; yourself.
@@ -760,7 +760,8 @@ JEETestModels >> mooseModelWithDTOs [
 				signature: #aMethod;
 				yourself.
 
-	aStatelessSessionBean addMethod: (aMethod);
+	aStatelessSessionBean 
+			addMethod: (aMethod);
 			addMethod: (FAMIXMethod new
 				name: #anotherMethod;
 				parentType: aStatelessSessionBean;
