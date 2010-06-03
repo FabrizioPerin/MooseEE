@@ -43,7 +43,7 @@ ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 	Transcript open.
 	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
 	
-	(self project version: 'withoutMoose') load.
+	(self project version: 'defaultWithoutMoose') load.
 
 	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
 
