@@ -86,14 +86,19 @@ ConfigurationOfMooseJEE >> default: spec [
 
 { #category : #baselines }
 ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [ 
-	<version: 'withoutMoose'>
+	<version: 'defaultWithoutMoose'>
+
 	
 	spec for: #common do: [
 		spec blessing: #default.
 		spec 
-			package: 'Moose-JEE' with: [
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
+			package: 'Moose-JEE-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				"spec requires: 'Moose for MooseJEE'"];
+				spec requires: 'Merlin'];
 			package: 'XML-Parser' with: [
 				spec repository: 'http://www.squeaksource.com/XMLSupport'];
 			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
