@@ -1,6 +1,6 @@
 Class {
 	#name : #MooseJEEScripts,
-	#superclass : #Object,
+	#superclass : #MooseScripts,
 	#category : #'Moose-JEE-Wizard'
 }
 
@@ -13,7 +13,7 @@ MooseJEEScripts class >> openDoitWorkspaceWith: anArray [
 	w contents: (anArray 
 			inject: ''
 			into: [ :string :doit | string , doit , $. asString , Character cr asString ]).
-	w openLabel: 'Moose JEE Workspace'
+	w openLabel: 'Moose JEE Workspace'.
 ]
 
 { #category : #workspace }
@@ -21,9 +21,7 @@ MooseJEEScripts class >> openMooseJEEWorkspace [
 	"
 	self openMooseJEEWorkspace
 	"
-
-	self openDoitWorkspaceWith: {
-			'"Moose 4.0
+	self openDoitWorkspaceWith: {'"Moose 4.0
 
 Moose is a platform for software and data analysis.
 More information can be found on: 
@@ -35,44 +33,45 @@ More information can be found on:
 "This Image contains the extension MOOSE JEE to analyze 
 Java Enterprise Applications
 You can start with Moose JEE from the import menu of the Moose panel"'.
-			'
+
+'
+
 "Select and execute:"
-MoosePanel open'
-			}
+MoosePanel open'.}
 ]
 
 { #category : #workspace }
-MooseJEEScripts class >> openMooseReleaseWorkspace [
+MooseJEEScripts class >> openMooseJEEWorkspacePositioned [
 	"
-	self openMooseReleaseWorkspace
+	self openMooseJEEWorkspacePositioned
 	"
+	|message|
+	
+	message := '"Moose 4.0
 
-	self openDoitWorkspaceWith: {
-			'"Moose is a platform for analysis and visualization.
-More information can be found at: http://moose.unibe.ch"'.
-			'
+Moose is a platform for software and data analysis.
+More information can be found on: 
+- the official webpage: http://moosetechnology.org
+- the online book: http://themoosebook.org"
+
+
+"This Image contains the extension MOOSE JEE to analyze 
+Java Enterprise Applications
+You can start with Moose JEE from the import menu of the Moose panel"
+
 "Select and execute:"
-MoosePanel open'
-			}
+MoosePanel open'.
+
+	self openWorkspaceWith: message startingFrom: 180@10 andExtendItUntil: 500@300.
 ]
 
 { #category : #workspace }
-MooseJEEScripts class >> openMooseWorkspace [
-	"
-	self openMooseWorkspace
-	"
+MooseJEEScripts class >> openWorkspaceWith: aString startingFrom: aStartingPoint andExtendItUntil: anEndPoint [ 
 
-	self openDoitWorkspaceWith: {
-			'"Tools"'.
-			'MoosePanel open				"browse Moose models in root"'.
-			'MooseModel browseMeta		"browse metamodel and doc"'.
-			'MOEasel open'.
-			'"Models"'.
-			'MooseScripts browse "some loading scripts, class-side"'.
-			'MooseModel installDefaultModels'.
-			'PackageOrganizerCache resetDefault "reset package cache"'.
-			'"Metacello"'.
-			'MooseDevBrowser open 		"open Moose browser for Metacello"'.
-			}
-
+	(SHWorkspace new
+	acceptContents: aString;
+	embeddedInMorphicWindowLabeled: 'Moose JEE Workspace')
+	position: aStartingPoint;
+ 	extent: anEndPoint;
+   openAsIs
 ]
