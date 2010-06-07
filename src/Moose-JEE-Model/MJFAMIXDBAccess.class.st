@@ -9,19 +9,17 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXDBAccess class >> annotation [
-	<MSEClass: #DBAccess super: 'FAMIX.Association'>
-	<package: #FAMIX>
+	<MSEClass: #DBAccess super: #FAMIXAssociation>
+	<package: #'Moose-JEE-Model'>
 	^self
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXDBAccess >> from [
-
 	^ self accessorEntity
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXDBAccess >> to [
-
-	^ self 
+	^ self
 ]

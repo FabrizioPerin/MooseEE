@@ -24,8 +24,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXMapping class >> annotation [
-	<MSEClass: #Mapping super: 'FAMIX.Association'>
-	<package: #FAMIX>
+	<MSEClass: #Mapping super: #FAMIXAssociation>
+	<package: #'Moose-JEE-Model'>
 	^self
 ]
 

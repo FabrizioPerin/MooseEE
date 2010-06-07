@@ -1,5 +1,31 @@
 Extension { #name : #FAMIXClassGroup }
 
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+FAMIXClassGroup >> DTOsConstellation [
+
+	<menuItem: 'DTOs Constellation' category: 'Visualizations'>
+	| view |
+	view := MOViewRenderer new.
+	self DTOsConstellationOn: view.
+	view open
+]
+
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+FAMIXClassGroup >> DTOsConstellationOn: aView [
+
+	| invoking |
+	invoking := ((self flatCollect: #invokingClasses) reject: [:each |
+		(self includes: each) or: ['*Test*' match: each name ]]) asSet asMooseGroup.
+	"aView shape rectangle size: 20; fillColor: Color lightGray."
+	aView shape label text: #name; fontSize: 10.	
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: self.
+	aView nodes: invoking.
+	aView shape line color: Color veryLightGray.
+	aView edges: self from: #yourself toAll: #clientClasses.
+	aView graphvizLayout neato
+]
+
 { #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> RatioNOQMNOM [
 	

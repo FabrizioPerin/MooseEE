@@ -9,9 +9,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXLayer class >> annotation [
-	<MSEClass: #Layer super: #FAMIXEntity>
-	<package: 'FAMIX'>
-	^self
+	<MSEClass: #MJFAMIXLayer super: #FAMIXEntity>
+	<package: #'Moose-JEE-Model'>
 ]
 
 { #category : #accessing }

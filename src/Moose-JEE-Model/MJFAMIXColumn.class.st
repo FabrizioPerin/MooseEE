@@ -14,7 +14,7 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXColumn class >> annotation [
 	<MSEClass: #TableColumn super: #MJFAMIXRelationalEntity>
-	<package: #FAMIX>
+	<package: #'Moose-JEE-Model'>
 ]
 
 { #category : #accessing }

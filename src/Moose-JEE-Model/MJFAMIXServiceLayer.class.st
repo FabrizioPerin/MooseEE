@@ -7,6 +7,12 @@ Class {
 	#category : #'Moose-JEE-Model'
 }
 
+{ #category : #'as yet unclassified' }
+MJFAMIXServiceLayer class >> annotation [
+	<MSEClass: #MJFAMIXServiceLayer super: #MJFAMIXBusinessLayer>
+	<package: #'Moose-JEE-Model'>
+]
+
 { #category : #accessing }
 MJFAMIXServiceLayer >> containedSessionBeans [
 	^containedSessionBeans

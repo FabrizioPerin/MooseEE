@@ -20,8 +20,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXSessionBean class >> annotation [
-	<MSEClass: 'SessionBean' super: #MJFAMIXEJBean>
-	<package: 'FAMIX'>
+	<MSEClass: #SessionBean super: #MJFAMIXEJBean>
+	<package: #'Moose-JEE-Model'>
 	<MSEComment: 'SessionBean represents a JEE Session Bean.
 	
 It is a subclass of JEEBean, wich means that it knows about which classes implement:

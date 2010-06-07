@@ -8,7 +8,7 @@ Class {
 MJFAMIXSessionBeanGroup class >> annotation [
 
 	<MSEClass: #SessionBeanGroup super: #MooseGroup>
-	<package: #FAMIX>
+	<package: #'Moose-JEE-Model'>
 
 ]
 

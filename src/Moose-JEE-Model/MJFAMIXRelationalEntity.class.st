@@ -10,7 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity class >> annotation [
 	<MSEClass: #RelationalEntity super: #FAMIXNamedEntity>
-	<package: #FAMIX>
+	<package: #'Moose-JEE-Model'>
 	<abstract>
 ]
 

@@ -10,8 +10,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXEntityBean class >> annotation [
-	<MSEClass: 'EntityBean' super: #MJFAMIXEJBean>
-	<package: 'FAMIX'>
+	<MSEClass: #EntityBean super: #MJFAMIXEJBean>
+	<package: #'Moose-JEE-Model'>
 ]
 
 { #category : #testing }
