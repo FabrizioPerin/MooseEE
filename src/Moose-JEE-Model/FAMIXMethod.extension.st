@@ -98,17 +98,24 @@ FAMIXMethod >> deepCalleeMethodsWithoutTransactionPath [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-FAMIXMethod >> doesCall: aSymbol [
-	"Return true if self invokes a method called aSymbol"
+FAMIXMethod >> doesDeclare: aSymbol [
+	"return true if self declare a local variable of the type called aSymbol"
 
-	^ self invokedCandidates anySatisfy: [:invokedMethod | 
-		invokedMethod isNil not and: [ invokedMethod name = aSymbol asSymbol ] ]
+	^ self localVariables anySatisfy: [:var | var declaredType name = aSymbol asSymbol]
 ]
 
 { #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesExecuteAQuery [
 
-	^( self doesCall: 'executeBatch' ) or: [ ( self doesCall: 'executeQuery' ) or: [ self doesCall: 'executeUpdate' ] ]
+	^( self doesInvoke: 'executeBatch' ) or: [ ( self doesInvoke: 'executeQuery' ) or: [ self doesInvoke: 'executeUpdate' ] ]
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXMethod >> doesInvoke: aSymbol [
+	"Return true if self invokes a method called aSymbol"
+
+	^ self invokedCandidates anySatisfy: [:invokedMethod | 
+		invokedMethod isNil not and: [ invokedMethod name = aSymbol asSymbol ] ]
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -142,6 +149,13 @@ FAMIXMethod >> doesOverrideAMethodInvolveInATransaction [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXMethod >> doesReturn: aSymbol [
+	"return true if self return a class type called aSymbol"
+
+	^ self declaredType name = aSymbol asSymbol
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXMethod >> doesSupportTransaction [
 	^(self ejbTransactionType = 'NotSupported' 
 		or: [ self ejbTransactionType asString asLowercase = 'never'
@@ -161,6 +175,13 @@ FAMIXMethod >> ejbTransactionType [
 FAMIXMethod >> ejbTransactionType: aString [
 
 	self privateState attributeAt: #ejbTransactionType put: aString.
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXMethod >> hasAParameterOf: aSymbol [
+	"return true if self has a parameter with a type called aSymbol"
+	
+	^ self parameters anySatisfy: [:param | param declaredType name = aSymbol asSymbol]
 ]
 
 { #category : #'*Moose-JEE-Model' }

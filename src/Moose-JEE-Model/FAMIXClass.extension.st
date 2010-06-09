@@ -117,9 +117,9 @@ FAMIXClass >> isARowDataGateway [
 	
 	"Have to be implemented the rules related to the attributes of the class information from sql nedeed"
 
-	self methods do: [ :eachMethod | ( ( eachMethod doesCall: #executeUpdate ) and: [ ( '.*delete.*' asRegex matches: ( eachMethod name asString ) ) ifTrue: [ executeDelete := true ] ] ). "This implementation have to be improve ( checking inside the method or in the name if is present the keyword delete )" 
-								   ( (eachMethod doesCall: #executeUpdate ) and: [ ( '.*insert.*' asRegex matches: ( eachMethod name asString ) ) ifTrue: [ executeInsert := true ] ] ). "This implementation have to be improve ( checking inside the method or in the name if is present the keyword insert )" 
-								   ( eachMethod doesCall: #executeUpdate )  ifTrue: [ executeUpdate := true ].
+	self methods do: [ :eachMethod | ( ( eachMethod doesInvoke: #executeUpdate ) and: [ ( '.*delete.*' asRegex matches: ( eachMethod name asString ) ) ifTrue: [ executeDelete := true ] ] ). "This implementation have to be improve ( checking inside the method or in the name if is present the keyword delete )" 
+								   ( (eachMethod doesInvoke: #executeUpdate ) and: [ ( '.*insert.*' asRegex matches: ( eachMethod name asString ) ) ifTrue: [ executeInsert := true ] ] ). "This implementation have to be improve ( checking inside the method or in the name if is present the keyword insert )" 
+								   ( eachMethod doesInvoke: #executeUpdate )  ifTrue: [ executeUpdate := true ].
 								   
 	].
 
@@ -233,13 +233,13 @@ FAMIXClass >> viewMethodsIncludeIn: aMethodList ForUnsafeQueriesOn: view [
 	usefulMethods := self methods intersection: aMethodList.
 	
 	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color yellow) borderColor:  Color yellow darker darker ).
-	view nodes: ( usefulMethods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ ( each doesCall: 'executeUpdate' ) not ] ] ).
+	view nodes: ( usefulMethods select: [ :each | ( each doesInvoke: 'executeQuery' ) and: [ ( each doesInvoke: 'executeUpdate' ) not ] ] ).
 
 	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor:  Color orange darker darker ).
-	view nodes: ( usefulMethods select: [ :each | ( each doesCall: 'executeQuery' ) not and: [ ( each doesCall: 'executeUpdate' )  ] ] ).
+	view nodes: ( usefulMethods select: [ :each | ( each doesInvoke: 'executeQuery' ) not and: [ ( each doesInvoke: 'executeUpdate' )  ] ] ).
 		
 	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color red) borderColor:  Color red darker darker ).
-	view nodes: ( usefulMethods select: [ :each | ( each doesCall: 'executeQuery' ) and: [ each doesCall: 'executeUpdate' ] ] ).
+	view nodes: ( usefulMethods select: [ :each | ( each doesInvoke: 'executeQuery' ) and: [ each doesInvoke: 'executeUpdate' ] ] ).
 		
 	view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
 	view nodes: ( usefulMethods select: [ :each | each doesExecuteAQuery not ] ).
