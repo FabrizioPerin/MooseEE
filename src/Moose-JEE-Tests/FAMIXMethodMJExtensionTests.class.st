@@ -233,6 +233,22 @@ FAMIXMethodMJExtensionTests >> testInvocationCallChain [
 ]
 
 { #category : #tests }
+FAMIXMethodMJExtensionTests >> testInvocationCalleeChain [
+	
+	| mooseModel  invocation |
+	mooseModel := JEETestModels new sampleMooseModelWithInvocation.
+
+	mooseModel allMethods do: [:each | each name = #someMethod ifTrue: [ invocation := ( (FAMIXMethodGroup new add: each ) deepCalleeMethods )] ].
+	
+	self assert: ( invocation isKindOf: OrderedCollection ).
+	self assert: ( invocation size = 2 ).
+	self assert: ( ( invocation at: 1 ) isKindOf: FAMIXMethod ).
+	self assert: ( ( invocation at: 1 ) name = #someMethod ).
+	self assert: ( ( invocation at: 2 ) isKindOf: FAMIXMethod ).	
+	self assert: ( ( invocation at: 2 ) name = #aMethod ).
+]
+
+{ #category : #tests }
 FAMIXMethodMJExtensionTests >> testIsPartOfATransaction [
 
 	| mooseModel  methodGroup |
