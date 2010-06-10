@@ -7,6 +7,12 @@ MooseModel >> allColumns [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> allDataLayer [
+	"it should always be one"
+	^self allWithType: MJFAMIXDataLayer "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allDatabases [
 
 	^self allWithType: MJFAMIXDataBase "asMetaDescription"
@@ -25,6 +31,18 @@ MooseModel >> allJEEBeans [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> allLayers [
+
+	^self allPresentationLayer, self allLogicLayer, self allDataLayer, self allServiceLayer
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> allLogicLayer [
+
+	^self allWithType: MJFAMIXLogicLayer "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allMaps [
 	
 	<navigation: 'All maps'>
@@ -35,6 +53,18 @@ MooseModel >> allMaps [
 MooseModel >> allMessageDrivenBeans [
 
 	^self allWithType: MJFAMIXMessageDrivenBean "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> allPresentationLayer [
+
+	^self allWithType: MJFAMIXPresentationLayer "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> allServiceLayer [
+
+	^self allWithType: MJFAMIXServiceLayer "asMetaDescription"
 ]
 
 { #category : #'*Moose-JEE-Model' }

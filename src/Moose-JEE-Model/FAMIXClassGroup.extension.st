@@ -511,7 +511,7 @@ FAMIXClassGroup >> viewTransactionFlow4On: aView [
 	aView nodes: interestingClasses forEach: [:class |
 		
 		aView interaction nodraggable.
-		(aView shape rectangle text: [:each | each name]) smallFont; withBorder.
+		(aView shape rectangle text: [:each | each name]) withBorder.
 		aView node: class.
 		
 		"aView interaction forward."
