@@ -5,6 +5,8 @@ FAMIXMethod >> allInvocationsBetweenHereTo: anotherMethod [
 
 	| invocationChain |
 
+	self flag: #TODO test.
+
 	invocationChain := self deepCalledMethods asOrderedCollection.
 	( invocationChain includes: anotherMethod ) 
 		ifTrue: [ ^ ( ( invocationChain flatCollect: [ :each | each outgoingInvocations ] ) intersection: ( anotherMethod deepCalleeMethods flatCollect: [ :each | each incomingInvocations ] ) ) ]
