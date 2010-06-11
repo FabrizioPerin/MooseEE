@@ -5,6 +5,40 @@ Class {
 }
 
 { #category : #tests }
+FAMIXClassMJExtensionTests >> testCompleteHierarchyInWhichThisResides [
+	" I will fill MethodToAnalyze with all the methods that are part of a methods invokations chain that don't have a method that start a transaction"
+
+	| allMethods interestingClasses mooseModel |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryComplex.
+	
+	allMethods :=  ( ( ( mooseModel allClasses ) flatCollect: [:each | each methods] ) select: #hasEJBTransactionAttribute ).
+	allMethods := (( FAMIXMethodGroup new ) addAll: allMethods) deepCalledMethods.	
+
+
+	"selecting just the classes that contained methods under analysis and the hierarchy that contain those classes."
+	interestingClasses := OrderedCollection new addAll: ( ( mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) collect: [ :each | each completeHierarchyInWhichThisResides ] ) .
+	
+	self assert: (interestingClasses size = 4).
+	
+	interestingClasses := FAMIXClassGroup new addAll: ( ( (  mooseModel allClasses select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ) ) collect: [ :each | each completeHierarchyInWhichThisResides ] ).
+
+	self assert: (interestingClasses size = 4).
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testCompleteHierarchyInWhichThisResidesRight [
+	| mooseModel |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryAndBeans.
+	self assert: ( ( ( ( mooseModel allClasses select: [:each | each name = #'Class3' ] ) at: 1 ) completeHierarchyInWhichThisResides ) size = 2 ).
+	self assert: ( ( ( ( mooseModel allClasses select: [:each | each name = #'Class6' ] ) at: 1 ) completeHierarchyInWhichThisResides ) size = 2 ).
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+	self assert: ( ( ( ( mooseModel allClasses select: [:each | each name = #'Class3' ] ) at: 1 ) completeHierarchyInWhichThisResides ) size = 1 ).
+]
+
+{ #category : #tests }
 FAMIXClassMJExtensionTests >> testDTOs [
 	
 	| mooseModel |
@@ -186,4 +220,31 @@ FAMIXClassMJExtensionTests >> testIsTestClass [
 	self assert: (testClasses includes: class2 ).
 	self assert: (testClasses includes: tClass ).
 	 
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testNOQM [
+
+	| mooseModel  sum |
+	sum := 0.
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+	
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOQM ) = 3).
+	
+	mooseModel allClasses do: [:each | sum := sum + each numberOfQueryingMethods ].
+	self assert: ( sum = 3 ).
+	
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testNOTM [
+
+	| mooseModel  sum |
+	sum := 0.
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
+
+	mooseModel allClasses do: [:each | sum := sum + each numberOfTransactionMethods ].
+	self assert: ( sum = 13 ).
 ]

@@ -5,6 +5,30 @@ Class {
 }
 
 { #category : #tests }
+FAMIXMethodMJExtensionTests >> testAllMethodsTouchFromHereTo [
+
+	| mooseModel  methods methodsTouched aMethod method11 |
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+	methods := mooseModel allMethods.
+
+	aMethod := ( methods detect: [ :method | method name = #aMethod ] ).
+	method11 := ( methods detect: [ :method | method name = #method11 ] ).
+
+	self assert: ( methods isKindOf: FAMIXMethodGroup ).
+	self assert: ( methods size = 19 ).
+	
+	methodsTouched := method11 allMethodsTouchFromHereTo: aMethod.
+	
+	self assert: ( methodsTouched size = 5 ).
+	self assert: ( methodsTouched includes: ( methods detect: [ :method | method name = #method1 ] ) ).
+	self assert: ( methodsTouched includes: ( methods detect: [ :method | method name = #method6 ] ) ).
+	self assert: ( methodsTouched includes: ( methods detect: [ :method | method name = #method2 ] ) ).
+	self assert: ( methodsTouched includes: aMethod ).
+	self assert: ( methodsTouched includes: method11 ).
+
+]
+
+{ #category : #tests }
 FAMIXMethodMJExtensionTests >> testDoesDeclare [
 	| mooseModel jeeTestsModels class2 complexClass methodsDeclaringSomething |
 
@@ -53,6 +77,21 @@ FAMIXMethodMJExtensionTests >> testDoesInvoke [
 	self assert: ( ( methods detect: [ :method | method name = #method1 ] ) doesInvoke: #aMethod ).
 	self assert: ( ( methods detect: [ :method | method name = #method3 ] ) doesInvoke: #method1 ).
 	self assert: ( ( methods detect: [ :method | method name = #method4 ] ) doesInvoke: #method2 ).
+]
+
+{ #category : #testsOnJEEModel }
+FAMIXMethodMJExtensionTests >> testDoesInvokesMethodsBelongJavaSqlPackage [
+	
+	| mooseModel methodsCollection |
+	
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	methodsCollection := ( mooseModel allMethods select: [:method | method doesInvokesMethodsBelongJavaSqlPackage ] ).
+	
+	self assert: methodsCollection size = 3.
+	self assert: (methodsCollection anySatisfy: [:each | each name = #method1]).
+	self assert: (methodsCollection anySatisfy: [:each | each name = #method2]).
+	self assert: (methodsCollection anySatisfy: [:each | each name = #method3]).
 ]
 
 { #category : #tests }
@@ -315,4 +354,13 @@ FAMIXMethodMJExtensionTests >> testIsPartOfAnUnsafeTransactionPath [
 	"method 4 is called from method 8 and 9. the first start a transaction, the second does not"
 	
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #someMethod ] ) first isPartOfAnUnsafeTransactionPath ).
+]
+
+{ #category : #tests }
+FAMIXMethodMJExtensionTests >> testStartAUselessTransaction [
+
+	| mooseModel  |
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+
+	self assert: ( mooseModel allMethods select: [:each | each startAUselessTransaction ] ) size = 2.
 ]

@@ -7,7 +7,7 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class1 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -55,7 +55,7 @@ JEETestModels >> class1 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class2 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -103,7 +103,7 @@ JEETestModels >> class2 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class3 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -151,7 +151,7 @@ JEETestModels >> class3 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class4 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -201,7 +201,7 @@ JEETestModels >> class4 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class5 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -251,7 +251,7 @@ JEETestModels >> class5 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class6 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -300,7 +300,7 @@ JEETestModels >> class6 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class7 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -350,7 +350,7 @@ JEETestModels >> class7 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class8 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -400,7 +400,7 @@ JEETestModels >> class8 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> class9 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -450,7 +450,7 @@ JEETestModels >> class9 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> classWithComplexMethods [
 
 	| class method1 method2 method3 method4 method5 |
@@ -515,7 +515,7 @@ JEETestModels >> classWithComplexMethods [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> dto1 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -563,7 +563,7 @@ JEETestModels >> dto1 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> dto2 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -611,7 +611,7 @@ JEETestModels >> dto2 [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> dto3 [
 	"This DTOs should match because extends serilizable"
 	
@@ -693,7 +693,7 @@ JEETestModels >> initialize [
 
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> localVariableCalled: aString belongsTo: aBehaviouralEntity with: aDeclaredType [
 	|localVariable|
 
@@ -1492,7 +1492,7 @@ JEETestModels >> normalEjbJar [
 '
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> parameterCalled: aString belongsTo: aBehaviouralEntity with: aDeclaredType [
 	|parameter|
 
@@ -3464,7 +3464,7 @@ JEETestModels >> sampleMooseModelWithTransaction [
 	^mooseModel
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> testClass [
 
 	| class method1 method2 method3 method4 method5 |
@@ -3512,7 +3512,7 @@ JEETestModels >> testClass [
 	^class
 ]
 
-{ #category : #classes }
+{ #category : #elements }
 JEETestModels >> testNamespace [
 
 	| namespace |
