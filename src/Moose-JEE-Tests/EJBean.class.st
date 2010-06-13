@@ -1,14 +1,14 @@
 Class {
-	#name : #JEETests,
+	#name : #EJBean,
 	#superclass : #TestCase,
 	#instVars : [
 		'root'
 	],
-	#category : #'Moose-JEE-Tests'
+	#category : #'Moose-JEE-Tests-Opax'
 }
 
 { #category : #tests }
-JEETests >> minimalEjbJar [
+EJBean >> minimalEjbJar [
 
 	^'<?xml version="1.0"?>
 <ejb-jar>
@@ -103,7 +103,7 @@ JEETests >> minimalEjbJar [
 ]
 
 { #category : #models }
-JEETests >> sampleMooseModel [
+EJBean >> sampleMooseModel [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean |
 	mooseModel := MooseModel new.
@@ -228,7 +228,7 @@ JEETests >> sampleMooseModel [
 ]
 
 { #category : #setup }
-JEETests >> setUp [
+EJBean >> setUp [
 	| parser |
 	parser := OPOpaxHandler on: self minimalEjbJar readStream.
 	parser startDocument.
@@ -238,7 +238,7 @@ JEETests >> setUp [
 ]
 
 { #category : #testsOnJEEModel }
-JEETests >> testElementCreation [
+EJBean >> testElementCreation [
 
 	self assert: (root allChildren select: [:each | each isMemberOf: EntityElement ]) size = 2.
 	self assert: (root allChildren select: [:each | each isMemberOf: SessionElement ]) size = 2.
@@ -247,7 +247,7 @@ JEETests >> testElementCreation [
 ]
 
 { #category : #testsOnJEEModel }
-JEETests >> testEntityResolving [
+EJBean >> testEntityResolving [
 	
 	| mooseModel aBean |
 	mooseModel := self sampleMooseModel.
@@ -277,7 +277,7 @@ JEETests >> testEntityResolving [
 ]
 
 { #category : #tests }
-JEETests >> testMessageDrivenResolving [
+EJBean >> testMessageDrivenResolving [
 	
 	| mooseModel aBean |
 	mooseModel := self sampleMooseModel.
@@ -294,7 +294,7 @@ JEETests >> testMessageDrivenResolving [
 ]
 
 { #category : #testsOnJEEModel }
-JEETests >> testSessionResolving [
+EJBean >> testSessionResolving [
 	
 	| mooseModel aStateless aStateful |
 	mooseModel := self sampleMooseModel.
