@@ -15,7 +15,7 @@ Collection >> flatten [
 	collections.  Please note, this implementation assumes that strings are to be treated
 	as objects rather than as collection."
 
-	^self recursiveCollect:  [ :each ]
+	^self recursiveCollect:  [ :each | each]
 
 
 ]
@@ -27,7 +27,7 @@ Collection >> recursiveCollect: aBlock [
 	as objects rather than as collection."
 
 	| stream |
-	stream := self species new writeStream.
+	stream := self species new nsWriteStream.
 	self recursiveDo: [ :each | stream nextPut: (aBlock value: each) ].
 	^stream contents
 
@@ -41,7 +41,7 @@ Collection >> recursiveDo: aBlock [
 	descendant collections.  Please note, this implementation assumes that strings are
 	to be treated as objects rather than as collection."
 
-	self do: [ :each |
+	self do: [ :each | 
 					each isString 
 						ifTrue: [ aBlock value: each ]
 						ifFalse: [ each isCollection
