@@ -61,7 +61,7 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
-							mooseModel allModelClasses viewTransactionFlow3.
+							mooseModel allModelClasses viewTransactionFlow.
 							progBar value: 11.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
