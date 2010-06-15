@@ -597,17 +597,16 @@ FAMIXClassGroup >> viewTransactionFlowByLayers [
 	<menuItem: 'Transaction Flow By Layers' category: 'Mondrian'>
 	| view |
 	view := MOViewRenderer new.
-	self viewTransactionFlowByLayersOn: view.
+	self viewTransactionFlowByLayersOn: view withAllMethods: false.
 	view open
 ]
 
 { #category : #'*Moose-JEE-Model-mondrianvisualizations' }
-FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [ 
+FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean [
 	
 	| beans data logic map invocationsMap invoked |
 
-
-	beans := ( self select: [ :class | class hasImplementsABean ] )asSet asOrderedCollection. 
+	beans := ( self select: [ :class | class hasImplementsASessionBean ] )asSet asOrderedCollection. 
 	"beansWithSuperclassses := (beans flatCollect: [:each | each withSuperclassHierarchy]) asSet asOrderedCollection."
 
 	invoked := ( self select: [ :eachClass | ( eachClass methods select: #isPartOfATransaction ) notEmpty ] ) asSet asOrderedCollection.
@@ -623,18 +622,107 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view [
 	beans do: [:each | map at: each mooseName put: 1].
 	invocationsMap := beans first mooseModel allClasses flatCollect: [:each | each invokedClasses collect: [:x | each -> x]].
 
-	view umlShape: 'Service Layer'.
-	view nodes: beans forEach: [:each | each viewInterestingTransactionMethodsOn: view. view gridLayout. view dominanceTreeLayout.].
-"
-	view newShape line; invisible.
-	view edges: ( invocationsMap reject: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  from: #key to: #value.
+	view interaction nodraggable.
+	view shape rectangle withBorder.
+	view node: 'Service Layer' forIt:[
+		
+			view interaction nodraggable.
+			view shape rectangle text: 'Service Layer'; fontSize: 10; borderColor: Color transparent; textAlignment: #left.
+			view node: 'Service Layer'.
+			
+			view interaction nodraggable.
+			view interaction item: 'inspect' action: [:elem | beans inspect].
+			view shape rectangle withBorder.
+			view node: 'Service Layer Content' forIt:[
+					view interaction nodraggable.
+					view shape rectangle withBorder.
+					view nodes: beans forEach:[:each | 
+							view interaction item: 'inspect' action: [:elem | each inspect].
+							aBoolean 
+								ifTrue: [each viewTransactionalMethodsOn: view.]
+								ifFalse: [
+										each viewMethodsHighlightingTransactionalOn: view
+										view gridLayout.]].
+			].
 
-	view newShape curvedLine; lineColor: #orange asColor.
-	view edges: ( invocationsMap select: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  from: #key to: #value."
-	"view newShape line; lineWidth: 4; lineColor: Color red."
+			view verticalLineLayout gapSize:0; stretchHorizontally.
+	].
+
+	view interaction nodraggable.
+	view shape rectangle withBorder.
+	view node: 'Business Layer' forIt:[
+		
+			view interaction nodraggable.
+			view shape rectangle text: 'Business Layer'; fontSize: 10; borderColor: Color transparent; textAlignment: #left.
+			view node: 'Business Layer'.
+			
+			view interaction nodraggable.
+			view interaction item: 'inspect' action: [:elem | logic inspect].
+			view shape rectangle withBorder.
+			view node: 'Business Layer Content' forIt:[
+					view interaction nodraggable.
+					view shape rectangle withBorder.
+					view nodes: logic forEach:[:each | 
+							view interaction item: 'inspect' action: [:elem | each inspect].
+							aBoolean 
+								ifTrue: [each viewTransactionalMethodsOn: view.]
+								ifFalse: [
+										each viewMethodsHighlightingTransactionalOn: view
+										view gridLayout.]].
+			].
+
+			view verticalLineLayout gapSize:0; stretchHorizontally.
+	].
+
+	view interaction nodraggable.
+	view shape rectangle withBorder.
+	view node: 'Data Layer' forIt:[
+		
+			view interaction nodraggable.
+			view shape rectangle text: 'Data Layer'; fontSize: 10; borderColor: Color transparent; textAlignment: #left.
+			view node: 'Data Layer'.
+			
+			view interaction nodraggable.
+			view interaction item: 'inspect' action: [:elem | data inspect].
+			view shape rectangle withBorder.
+			view node: 'Data Layer Content' forIt:[
+					view interaction nodraggable.
+					view shape rectangle withBorder.
+					view nodes: data forEach:[:each | 
+							view interaction item: 'inspect' action: [:elem | each inspect].
+							aBoolean 
+								ifTrue: [each viewTransactionalMethodsOn: view.]
+								ifFalse: [
+										each viewMethodsHighlightingTransactionalOn: view
+										view gridLayout.]].
+			].
+
+			view verticalLineLayout gapSize:0; stretchHorizontally.
+	].
+	
+
+	view shape line color: Color transparent.
+	view 
+		edges: ( invocationsMap reject: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  
+		from: #key to: #value.
+
+	view shape line color: Color lightGray.
+	view 
+		edges: ( invocationsMap select: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  
+		from: #key to: #value.
+	
 	view shape line color: Color darkGray.
 	view edges: beans first mooseModel allClasses from: #directSuperclasses to: #yourself.
 	view verticalLineLayout verticalGap: 40.
+]
+
+{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+FAMIXClassGroup >> viewTransactionFlowByLayersWithAllMethods [
+	<menuItem: 'Transaction Flow by layers with alla methods' category: 'Mondrian'>
+	| view |
+	view := MOViewRenderer new.
+	self viewTransactionFlowByLayersOn: view withAllMethods: true.
+	view open
 ]
 
 { #category : #'*Moose-JEE-Model-mondrianvisualizations' }
