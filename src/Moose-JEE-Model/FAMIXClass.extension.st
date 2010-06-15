@@ -176,14 +176,14 @@ FAMIXClass >> viewMethodsHighlightingTransactionalOn: view [
 		allInterestingMethods := self methods select: #isPartOfATransaction.
 		otherMethods := self methods difference: allInterestingMethods.
 
-		view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color black).
+		view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
+		view nodes: otherMethods.
+
+		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter) borderColor: Color gray).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
-		view nodeShape: ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter).
-		view nodes: otherMethods.
-
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color white ) ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
@@ -263,11 +263,11 @@ FAMIXClass >> viewTransactionalMethodsOn: view [
 
 		allInterestingMethods := self methods select: #isPartOfATransaction.
 
-		view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color black).
+		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter) borderColor: Color gray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color white ) ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 

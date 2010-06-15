@@ -409,7 +409,7 @@ self annotateTheModelForJEEBrowser.
 
 self install.
 
-self allModelClasses viewTransactionFlow3.
+self allModelClasses viewTransactionFlow.
 self allModelClasses viewUnsafeQueries.
 self browseCodeWithAnnotationsForJEA.
 
