@@ -50,6 +50,18 @@ ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 
 ]
 
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadLastStable [
+
+	Transcript open.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
+	
+	(self project version: 'laststable') load.
+
+	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+]
+
 { #category : #accessing }
 ConfigurationOfMooseJEE class >> project [
 
