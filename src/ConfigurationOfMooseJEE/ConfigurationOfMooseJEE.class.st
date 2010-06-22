@@ -57,6 +57,36 @@ ConfigurationOfMooseJEE class >> project [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> baseline10: spec [ 
+        <version: '1.0-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.squeaksource.com/MooseJEE'.
+		
+		spec project: 'Moose for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMoose';
+				file: 'ConfigurationOfMoose';
+				repository: 'http://www.squeaksource.com/Moose' ].
+		
+		spec 
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'];
+			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
+			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE')];
+			package: 'Moose-JEE-Opax' with: [spec requires: #('XML-Parser')];
+			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
+			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
+			
+			
+		spec group: 'Tests' with: #('Moose-JEE-Tests').
+		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-Opax' 'Moose-JEE-Wizard'). 
+		spec group: 'default' with: #('Core' 'Tests').
+	].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> default: spec [ 
 	<version: 'default'>
 	
@@ -115,4 +145,29 @@ ConfigurationOfMooseJEE >> project [
 		constructor := (Smalltalk at: #MetacelloVersionConstructor) on: self.
 		project := constructor project.
 		project]
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> versionLastStable: spec [
+	<version: 'laststable' imports: #('1.0-baseline')>
+
+	spec for: #common do: [
+		spec blessing: #stable.
+		spec author: 'FabrizioPerin'.
+		spec timestamp: '06/22/2010 15:53'.
+		spec description: 'Stable version of Moose JEE'.
+		
+		spec project: 'Moose for MooseJEE' with: 'default'.
+
+		spec
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.62';
+			package: 'XML-Parser' with: 'XML-Parser-Alexandre_Bergel.81';
+			package: 'PEGSQLParser' with: 'PEGSQLParser-FabrizioPerin.25'.
+		
+		spec
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.12';
+			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.1';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.10';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.6'.
+		].
 ]
