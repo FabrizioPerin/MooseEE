@@ -1,16 +1,17 @@
 Extension { #name : #FAMIXClassGroup }
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> DTOsConstellation [
 
-	<menuItem: 'DTOs Constellation' category: 'JEAs Visualizations'>
+	<menuItem: 'DTOs Constellation' category: 'JEAs Visualizations WORKINGON'>
+	
 	| view |
 	view := MOViewRenderer new.
 	self DTOsConstellationOn: view.
 	view open
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> DTOsConstellationOn: aView [
 
 	| invoking |
@@ -119,7 +120,7 @@ FAMIXClassGroup >> updateGroupNumberUsing: anOrderedCollection [
 		].
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
@@ -128,66 +129,9 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
 	
 	view nodes: interestingClasses
-		forEach:
-			[ :eachClass | 
-			allInterestingMethods := eachClass methods select: #isPartOfATransaction.
-			otherMethods := eachClass methods difference: allInterestingMethods.
+		forEach: [ :eachClass | 
 			
-			view nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color white).
-		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
-															and: [ each hasEJBTransactionAttribute not ] ] ).
-
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color white ) ).
-		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
-															and: [ each hasEJBTransactionAttribute not ] ] ).
-
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color white ).
-		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
-													and: [ each startATransaction 
-														and: [ each couldBeAnEntryPoint ] ] ] ).
-
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker ).
-		view nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
-															and: [ each startATransaction 
-																and: [ each couldBeAnEntryPoint ] ] ] ).
-
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color white ).
-		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
-															and: [ each startAUselessTransaction ] ] ).
-
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker ).
-		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
-															and: [ each startAUselessTransaction ] ] ).
-					
-			view nodeShape: ((MOEllipseShape width: 7 height: 7 fillColor: Color cyan) borderColor: Color blue lighter).
-			view nodes: (allInterestingMethods select: [ :each | each doesExecuteAQuery
-																and: [ each startAUselessTransaction not 
-																	and: [ each couldBeAnEntryPoint not
-																		and: [ each hasEJBTransactionAttribute ] ] ] ] ).
-									
-			view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color cyan) borderColor: Color blue lighter).
-			view nodes: (allInterestingMethods select: [ :each | each doesExecuteAQuery not
-																and: [ each startAUselessTransaction not 
-																	and: [ each couldBeAnEntryPoint not
-																		and: [ each hasEJBTransactionAttribute ] ] ] ] ).
-									
-									
-			view nodeShape: ((MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange).
-			view nodes: (allInterestingMethods select: [ :each | each doesExecuteAQuery 																and: [ each startAUselessTransaction not 
-																	and: [ each couldBeAnEntryPoint
-																		and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
-							
-			view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker).
-			view nodes: (allInterestingMethods select: [ :each | each doesExecuteAQuery not
-																and: [ each startAUselessTransaction not 
-																	and: [ each couldBeAnEntryPoint
-																		and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
-							
-			view nodeShape: ((MOEllipseShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
-			view nodes: (otherMethods select: [ :each | each doesExecuteAQuery ] ).
-			
-			view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
-			view nodes: (otherMethods select: [ :each | each doesExecuteAQuery not ]).
+			eachClass viewMethodsHighlightingTransactionalOn: view.
 			
 			view shape line color darker.
 			view edges: eachClass internalInvocations
@@ -212,7 +156,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	view dominanceGrouppedTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewSystemComplexityByLayerOn: view [
 
 	| beans data logic map invocationsMap invoked aBoolean |
@@ -327,7 +271,7 @@ FAMIXClassGroup >> viewSystemComplexityByLayerOn: view [
 	view verticalLineLayout verticalGap: 40.
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlow [
 	<menuItem: 'Transaction Flow' category: 'JEAs Visualizations'>
 	| view |
@@ -336,16 +280,16 @@ FAMIXClassGroup >> viewTransactionFlow [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlow4 [
-	<menuItem: 'Transaction Flow TEST' category: 'JEAs Visualizations'>
+	<menuItem: 'Transaction Flow TEST' category: 'JEAs Visualizations WORKINGON'>
 	| view |
 	view := MOViewRenderer new.
 	self viewTransactionFlow4On: view.
 	view open
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlow4On: aView [
 
 	| interestingClasses allInterestingMethods otherMethods tables internalShape |
@@ -439,7 +383,7 @@ FAMIXClassGroup >> viewTransactionFlow4On: aView [
 	aView dominanceGrouppedTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayers [
 	<menuItem: 'Transaction Flow By Layers' category: 'JEAs Visualizations'>
 	| view |
@@ -448,7 +392,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayers [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean [
 	
 	| beans data logic map invocationsMap invoked |
@@ -563,7 +507,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 	view verticalLineLayout verticalGap: 40.
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlowByLayersWithAllMethods [
 	<menuItem: 'Transaction Flow by layers with alla methods' category: 'JEAs Visualizations'>
 	| view |
@@ -572,7 +516,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersWithAllMethods [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlowOn: view withAllMethods: aBoolean [
 
 	| interestingClasses allInterestingMethods otherMethods tables |
@@ -583,13 +527,10 @@ FAMIXClassGroup >> viewTransactionFlowOn: view withAllMethods: aBoolean [
 	"interestingClasses := ((self select: #hasImplementsASessionBean) flatCollect: #withDeepInvokedClasses) asSet asMooseGroup.
 	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy."
 	
-	view nodes: interestingClasses forEach: [:eachClass |
-		
+	view nodes: interestingClasses forEach: [:eachClass |		
 			aBoolean 
 				ifTrue:[eachClass viewMethodsHighlightingTransactionalOn: view]
-				ifFalse: [eachClass  viewTransactionalMethodsOn: view].
-	].
-
+				ifFalse: [eachClass  viewTransactionalMethodsOn: view] ].
 
 	view shape line color lighter.
 	view edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.
@@ -604,7 +545,7 @@ FAMIXClassGroup >> viewTransactionFlowOn: view withAllMethods: aBoolean [
 	view dominanceGrouppedTreeLayout.
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlowWithAllMethods [
 	<menuItem: 'Transaction Flow with all methods' category: 'JEAs Visualizations'>
 	| view |
@@ -613,7 +554,7 @@ FAMIXClassGroup >> viewTransactionFlowWithAllMethods [
 	view open
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewUnsafeQueries [
 	<menuItem: 'Unsafe queries' category: 'JEAs Visualizations'>
 
@@ -623,7 +564,7 @@ FAMIXClassGroup >> viewUnsafeQueries [
 	view open.
 ]
 
-{ #category : #'*Moose-JEE-Model-mondrianvisualizations' }
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewUnsafeQueriesOn: view [ 	
 	
 	| allMethods interestingClasses interestingClassesWithoutLonelyClasses interestingClassesWithoutTests |
