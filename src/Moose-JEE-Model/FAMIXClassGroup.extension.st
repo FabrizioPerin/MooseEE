@@ -5,10 +5,12 @@ FAMIXClassGroup >> DTOsConstellation [
 
 	<menuItem: 'DTOs Constellation' category: 'JEAs Visualizations WORKINGON'>
 	
-	| view |
+	| view regexe |
 	view := MOViewRenderer new.
-	self DTOsConstellationOn: view.
-	view open
+	regexe := '.*BO' asRegexIgnoringCase.
+	(self select: [:each | regexe matches: each name ]) DTOsConstellationOn: view.
+	^ view openWithStatusbar title: 'DTOs Constellation'
+	
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
@@ -18,13 +20,24 @@ FAMIXClassGroup >> DTOsConstellationOn: aView [
 	invoking := ((self flatCollect: #invokingClasses) reject: [:each |
 		(self includes: each) or: ['.*Test.*' asRegexIgnoringCase matches: each name ]]) asSet asMooseGroup.
 	"aView shape rectangle size: 20; fillColor: Color lightGray."
-	aView shape label text: #name; fontSize: 10.	
+	aView shape label text: #name; fontSize: 8.	
 	aView interaction menu: #mooseMenuMorph.
 	aView nodes: self.
 	aView nodes: invoking.
 	aView shape line color: Color veryLightGray.
 	aView edges: self from: #yourself toAll: #clientClasses.
 	aView graphvizLayout neato
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> DTOsConstellationOnSelection [
+
+	<menuItem: 'DTOs Constellation On Selection' category: 'JEAs Visualizations WORKINGON'>
+	
+	| view |
+	view := MOViewRenderer new.
+	self DTOsConstellationOn: view.
+	^view openWithStatusbar title: 'DTOs Constellation On Selection'
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -277,7 +290,7 @@ FAMIXClassGroup >> viewTransactionFlow [
 	| view |
 	view := MOViewRenderer new.
 	self viewTransactionFlowOn: view withAllMethods: false.
-	view open
+	^view openWithStatusbar title: 'Transaction Flow'
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
@@ -389,7 +402,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayers [
 	| view |
 	view := MOViewRenderer new.
 	self viewTransactionFlowByLayersOn: view withAllMethods: false.
-	view open
+	^view openWithStatusbar title: 'Transaction Flow By Layers'.
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
@@ -513,7 +526,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersWithAllMethods [
 	| view |
 	view := MOViewRenderer new.
 	self viewTransactionFlowByLayersOn: view withAllMethods: true.
-	view open
+	^view openWithStatusbar title: 'Transaction Flow By Layers with all methods'.
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
@@ -551,7 +564,7 @@ FAMIXClassGroup >> viewTransactionFlowWithAllMethods [
 	| view |
 	view := MOViewRenderer new.
 	self viewTransactionFlowOn: view withAllMethods: true.
-	view open
+	^view openWithStatusbar title: 'Transaction Flow with all methods'.
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
@@ -561,7 +574,7 @@ FAMIXClassGroup >> viewUnsafeQueries [
 	| view |
 	view := MOViewRenderer new.
 	self viewUnsafeQueriesOn: view.
-	view open.
+	^view openWithStatusbar title: 'Unsafe queries'.
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
