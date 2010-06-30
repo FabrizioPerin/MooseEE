@@ -3,7 +3,7 @@ Extension { #name : #FAMIXClassGroup }
 { #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> DTOsConstellation [
 
-	<menuItem: 'DTOs Constellation' category: 'JEAs Visualizations WORKINGON'>
+	"<menuItem: 'DTOs Constellation' category: 'JEAs Visualizations WORKINGON'>"
 	
 	| view regexe |
 	view := MOViewRenderer new.
@@ -24,7 +24,7 @@ FAMIXClassGroup >> DTOsConstellationOn: aView [
 	aView interaction menu: #mooseMenuMorph.
 	aView nodes: self.
 	aView nodes: invoking.
-	aView shape line color: Color veryLightGray.
+	aView shape arrowedLine color: Color veryLightGray; arrowSize: 4.
 	aView edges: self from: #yourself toAll: #clientClasses.
 	aView graphvizLayout neato
 ]
@@ -32,7 +32,7 @@ FAMIXClassGroup >> DTOsConstellationOn: aView [
 { #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> DTOsConstellationOnSelection [
 
-	<menuItem: 'DTOs Constellation On Selection' category: 'JEAs Visualizations WORKINGON'>
+	"<menuItem: 'DTOs Constellation On Selection' category: 'JEAs Visualizations WORKINGON'>"
 	
 	| view |
 	view := MOViewRenderer new.
@@ -295,7 +295,7 @@ FAMIXClassGroup >> viewTransactionFlow [
 
 { #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewTransactionFlow4 [
-	<menuItem: 'Transaction Flow TEST' category: 'JEAs Visualizations WORKINGON'>
+	"<menuItem: 'Transaction Flow TEST' category: 'JEAs Visualizations WORKINGON'>"
 	| view |
 	view := MOViewRenderer new.
 	self viewTransactionFlow4On: view.
@@ -446,7 +446,8 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 								ifTrue: [each viewTransactionalMethodsOn: view.]
 								ifFalse: [
 										each viewMethodsHighlightingTransactionalOn: view.
-										view gridLayout.]].
+										view gridLayout]].
+					view dominanceTreeLayout.
 			].
 
 			view verticalLineLayout gapSize:0; stretchHorizontally.
@@ -473,6 +474,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 								ifFalse: [
 										each viewMethodsHighlightingTransactionalOn: view.
 										view gridLayout.]].
+					view dominanceTreeLayout.
 			].
 
 			view verticalLineLayout gapSize:0; stretchHorizontally.
@@ -499,23 +501,25 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 								ifFalse: [
 										each viewMethodsHighlightingTransactionalOn: view.
 										view gridLayout.]].
+					view dominanceTreeLayout. 
 			].
 
 			view verticalLineLayout gapSize:0; stretchHorizontally.
 	].
 	
 
-	view shape line color: Color transparent.
+	"view shape line color: Color transparent.
 	view 
 		edges: ( invocationsMap reject: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  
-		from: #key to: #value.
+		from: #key to: #value."
 
 	view shape line color: Color lightGray.
 	view 
 		edges: ( invocationsMap select: [:assoc | ((map at: (assoc key mooseName) ifAbsent:[3]) - (map at: (assoc value mooseName) ifAbsent:[2])) abs = 2 ])  
 		from: #key to: #value.
 	
-	view shape line color: Color darkGray.
+	"view shape line color: Color darkGray."
+	view shape line color: Color transparent.
 	view edges: beans first mooseModel allClasses from: #directSuperclasses to: #yourself.
 	view verticalLineLayout verticalGap: 40.
 ]

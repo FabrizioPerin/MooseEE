@@ -90,7 +90,7 @@ MooseModel >> allTransactionalMethods [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> annotateTheModelForJEEBrowser [
 
-	<menuItem: 'Annotate the model with JEE informations' category: 'JEE Menu' >
+	<menuItem: 'Annotate the model with JEE informations' category: 'JEAs Menu' >
 
 	self createAnnotationForTransactionScope.
 	self createAnnotationForUnsafeQuery.
@@ -107,13 +107,13 @@ MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> browseCodeWithAnnotationsForJEA [
-	<menuItem: 'Code Browser For JEA' category: 'JEE Menu'>
+	<menuItem: 'Code Browser For JEA' category: 'JEAs Menu'>
 	MooseBrowsers new codeBrowserForJEA openOn: self	
 ]
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> buildRelationsAmongDBElementsAndMethods [
-	<menuItem: 'Build Relations Among DB And Methods' category: 'JEE Menu'>
+	<menuItem: 'Build Relations Among DB And Methods' category: 'JEAs Menu'>
 
 	| tables entities counter |
 
@@ -299,7 +299,7 @@ out inspect."
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> importDBFromSQLFileGUI [
-	<menuItem: 'Import database from SQL file' category: 'JEE Menu'>
+	<menuItem: 'Import database from SQL file' category: 'JEAs Menu'>
 	
 	| file |
 	
@@ -359,7 +359,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> importEjbJarFromFolderGUI [
 
-	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEE Menu'>
+	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEAs Menu'>
 
 	| folderName |
 	
@@ -419,7 +419,7 @@ MoosePanel open.
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> instanciateJBeansFromAnnotations [
-	<menuItem: 'Import beans from annotations' category: 'JEE Menu'>
+	<menuItem: 'Import beans from annotations' category: 'JEAs Menu'>
 	
 	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes |
 	
@@ -544,7 +544,7 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsGUI [
-	<menuItem: 'Try to fix links with files' category: 'JEE Menu'>
+	<menuItem: 'Try to fix links with files' category: 'JEAs Menu'>
 
 	| folder |
 	

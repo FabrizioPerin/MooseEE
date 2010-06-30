@@ -70,7 +70,9 @@ FAMIXClass >> implementedInterfaces [
 { #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isADataLayerClass [
 
-	^ ( self methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ) or: [ self doesImplements: #Serializable ].
+	^ ( self methods anySatisfy: [ :eachMethod | 
+			eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ) 
+			or: [ (self doesImplements: #Serializable) "and: [ self propertyNamed: #DataClass ifNil: [true] ]" ].
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -176,53 +178,69 @@ FAMIXClass >> viewMethodsHighlightingTransactionalOn: view [
 		allInterestingMethods := self methods select: #isPartOfATransaction.
 		otherMethods := self methods difference: allInterestingMethods.
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
 		view nodes: otherMethods.
 
+
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter) borderColor: Color gray).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
+
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor:  Color blue darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 													and: [ each startATransaction 
 														and: [ each couldBeAnEntryPoint ] ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker darker).
 		view nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
 															and: [ each startATransaction 
 																and: [ each couldBeAnEntryPoint ] ] ] ).
 
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
+
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
+		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color magenta ) borderColor: Color magenta darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color magenta ) borderColor: Color magenta darker darker).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction ] ] ).
 
+
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker ).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 	
+	
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint
 																	and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
@@ -263,50 +281,64 @@ FAMIXClass >> viewTransactionalMethodsOn: view [
 
 		allInterestingMethods := self methods select: #isPartOfATransaction.
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter) borderColor: Color gray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
+
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor:  Color blue darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 													and: [ each startATransaction 
 														and: [ each couldBeAnEntryPoint ] ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker darker).
 		view nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
 															and: [ each startATransaction 
 																and: [ each couldBeAnEntryPoint ] ] ] ).
 
-		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
+
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
+		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color magenta ) borderColor: Color magenta darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction ] ] ).
 
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color magenta ) borderColor: Color magenta darker darker).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction ] ] ).
 
+		
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker ).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint not
 																	and: [ each hasEJBTransactionAttribute ] ] ] ] ).
 	
+	
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
 															and: [ each startAUselessTransaction not 
 																and: [ each couldBeAnEntryPoint
 																	and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
 
+		view interaction item: 'inspect' action: [:elem | elem inspect ].
 		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
 		view nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
 															and: [ each startAUselessTransaction not 
