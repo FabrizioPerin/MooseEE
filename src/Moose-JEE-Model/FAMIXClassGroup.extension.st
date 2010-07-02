@@ -586,7 +586,7 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 	
 	| allMethods interestingClasses interestingClassesWithoutLonelyClasses interestingClassesWithoutTests |
 	
-	allMethods := ( FAMIXMethodGroup withAll: ( ( self flatCollect: #methodsGroup ) select: #doesExecuteAQuery ) ) deepCalleeMethodsWithoutTransactionPath.
+	allMethods := ( FAMIXMethodGroup withAll: ( ( ( self flatCollect: #methodsGroup ) select: #doesExecuteAQuery ) reject: #startATransaction ) ) deepCalleeMethodsWithoutTransactionPath.
 	interestingClasses := FAMIXClassGroup new addAll: ( self select: [ :eachClass | (eachClass methods intersection: allMethods) notEmpty ] ).
 	(interestingClasses select: [:class | (class invokingClasses intersection: interestingClasses) isEmpty ]) groupClassesConsiderInvokationHierarchy.
 	
