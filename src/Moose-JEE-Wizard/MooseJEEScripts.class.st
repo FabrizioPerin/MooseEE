@@ -26,12 +26,10 @@ MooseJEEScripts class >> openMooseJEEWorkspace [
 Moose is a platform for software and data analysis.
 More information can be found on: 
 - the official webpage: http://moosetechnology.org
-- the online book: http://themoosebook.org"'.
+- the online book: http://themoosebook.org.
 
-'
-
-"This Image contains the extension MOOSE JEE to analyze 
-Java Enterprise Applications
+This Image contains the extension MOOSE JEE to analyze 
+Java Enterprise Applications.
 You can start with Moose JEE from the import menu of the Moose panel"'.
 
 '
