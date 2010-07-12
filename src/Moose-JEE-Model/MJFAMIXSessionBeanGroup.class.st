@@ -1,13 +1,13 @@
 Class {
 	#name : #MJFAMIXSessionBeanGroup,
-	#superclass : #MJGroup,
+	#superclass : #MJAbstractGroup,
 	#category : #'Moose-JEE-Model'
 }
 
 { #category : #'as yet unclassified' }
 MJFAMIXSessionBeanGroup class >> annotation [
 
-	<MSEClass: #SessionBeanGroup super: #MooseGroup>
+	<MSEClass: #SessionBeanGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 
 ]
@@ -52,7 +52,7 @@ MJFAMIXSessionBeanGroup >> umlShape: aString [
 
 { #category : #'as yet unclassified' }
 MJFAMIXSessionBeanGroup >> viewApplicationByLayers [
-	<menuItem: 'Application by Layers' category: 'JEAs Visualizations'>
+	"<menuItem: 'Application by Layers' category: 'JEAs Visualizations'>"
 
 	| invoked view beans data logic map invocationsMap layerShape aBlock  myShape allModelClasse |
 
@@ -113,7 +113,7 @@ MJFAMIXSessionBeanGroup >> viewLayerOn: view [
 
 { #category : #'as yet unclassified' }
 MJFAMIXSessionBeanGroup >> viewLayers [
-	<menuItem: 'Layers' category: 'JEAs Visualizations'>
+	"<menuItem: 'Layers' category: 'JEAs Visualizations'>"
 
 	| invoked view beans data logic map invocationsMap |
 	view := MOViewRenderer new.

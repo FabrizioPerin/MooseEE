@@ -1,11 +1,11 @@
 Class {
-	#name : #MJGroup,
+	#name : #MJAbstractGroup,
 	#superclass : #MooseGroup,
 	#category : #'Moose-JEE-Model'
 }
 
 { #category : #'as yet unclassified' }
-MJGroup class >> annotation [
+MJAbstractGroup class >> annotation [
 
 	<MSEClass: #Group super: #MooseGroup>
 	<package: #'Moose-JEE-Model'>

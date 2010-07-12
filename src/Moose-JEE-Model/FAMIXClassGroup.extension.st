@@ -5,10 +5,11 @@ FAMIXClassGroup >> DTOsConstellation [
 
 	"<menuItem: 'DTOs Constellation' category: 'JEAs Visualizations WORKINGON'>"
 	
-	| view regexe |
+	| view boregexe dummyregex |
 	view := MOViewRenderer new.
-	regexe := '.*BO' asRegexIgnoringCase.
-	(self select: [:each | regexe matches: each name ]) DTOsConstellationOn: view.
+	boregexe := '.*BO' asRegex.
+	dummyregex := '.*Dummy.*' asRegex.
+	( ( self select: [:each | boregexe matches: each name ] ) reject: [:each | each isTestClass or: [dummyregex matches: each name ] ] ) DTOsConstellationOn: view.
 	^ view openWithStatusbar title: 'DTOs Constellation'
 	
 ]
@@ -18,15 +19,23 @@ FAMIXClassGroup >> DTOsConstellationOn: aView [
 
 	| invoking |
 	invoking := ((self flatCollect: #invokingClasses) reject: [:each |
-		(self includes: each) or: ['.*Test.*' asRegexIgnoringCase matches: each name ]]) asSet asMooseGroup.
-	"aView shape rectangle size: 20; fillColor: Color lightGray."
-	aView shape label text: #name; fontSize: 8.	
+		(self includes: each) or: [('.*Test.*' asRegexIgnoringCase matches: each name) or: ['.*Dummy.*' asRegexIgnoringCase matches: each name ]]]) asSet asMooseGroup.
+	aView shape rectangle size: 8; fillColor: Color lightGray.
+	"aView shape label text: #name; fontSize: 8.	"
 	aView interaction menu: #mooseMenuMorph.
 	aView nodes: self.
+	aView interaction menu: #mooseMenuMorph.
 	aView nodes: invoking.
-	aView shape arrowedLine color: Color veryLightGray; arrowSize: 4.
+	"aView shape arrowedLine color: Color veryLightGray; arrowSize: 4."
+	aView shape line color: Color veryLightGray.
 	aView edges: self from: #yourself toAll: #clientClasses.
-	aView graphvizLayout neato
+	aView graphvizLayout neato.
+	
+aView shape line color: Color black; width: 2..
+	aView 
+		edges: self mooseModel allDuplications 
+		from: [:each | each referenceCode entity] 
+		to: [:each | each duplicateCode entity].	
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
@@ -38,6 +47,56 @@ FAMIXClassGroup >> DTOsConstellationOnSelection [
 	view := MOViewRenderer new.
 	self DTOsConstellationOn: view.
 	^view openWithStatusbar title: 'DTOs Constellation On Selection'
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> DTOsConstellationTestVO [
+
+	"<menuItem: 'DTOs Constellation test VO' category: 'JEAs Visualizations WORKINGON'>"
+	
+	| view regexe |
+	view := MOViewRenderer new.
+	regexe := '.*VO' asRegexIgnoringCase.
+	(self select: [:each | regexe matches: each name ]) DTOsConstellationOn: view.
+	^ view openWithStatusbar title: 'DTOs Constellation test VO'
+	
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> DTOsDuplicationConstellation [
+
+	"<menuItem: 'DTOs Duplication Constellation' category: 'JEAs Visualizations WORKINGON'>"
+	
+	| view regexe |
+	view := MOViewRenderer new.
+	regexe := '.*BO' asRegexIgnoringCase.
+	(self select: [:each | regexe matches: each name ]) DTOsDuplicationsConstellationOn: view.
+	^ view openWithStatusbar title: 'DTOs Duplication Constellation'
+	
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> DTOsDuplicationsConstellationOn: aView [
+
+	| invoking |
+	invoking := ((self flatCollect: #invokingClasses) reject: [:each |
+		(self includes: each) or: [('.*Test.*' asRegexIgnoringCase matches: each name) or: ['.*Dummy.*' asRegexIgnoringCase matches: each name ]]]) asSet asMooseGroup.
+	"aView shape rectangle size: 8; fillColor: Color lightGray."
+	aView shape label text: #name; fontSize: 8.
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: self.
+	aView nodes: invoking.
+	"aView shape arrowedLine color: Color veryLightGray; arrowSize: 4."
+	aView shape line color: Color veryLightGray.
+	aView edges: self from: #yourself toAll: #clientClasses.
+	
+	aView graphvizLayout neato.
+	
+	aView shape line color: Color red.
+	aView 
+		edges: self mooseModel allDuplications 
+		from: [:each | each referenceCode entity] 
+		to: [:each | each duplicateCode entity].	
 ]
 
 { #category : #'*Moose-JEE-Model' }

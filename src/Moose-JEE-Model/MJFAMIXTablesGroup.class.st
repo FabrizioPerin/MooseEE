@@ -1,12 +1,12 @@
 Class {
 	#name : #MJFAMIXTablesGroup,
-	#superclass : #MJGroup,
+	#superclass : #MJAbstractGroup,
 	#category : #'Moose-JEE-Model'
 }
 
 { #category : #'as yet unclassified' }
 MJFAMIXTablesGroup class >> annotation [
 
-	<MSEClass: #TablesGroup super: #MJGroup>
+	<MSEClass: #TablesGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 ]
