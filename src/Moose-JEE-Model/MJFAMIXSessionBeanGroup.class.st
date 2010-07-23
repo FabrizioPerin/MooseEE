@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXSessionBeanGroup class >> annotation [
 
-	<MSEClass: #SessionBeanGroup super: #MJAbstractGroup>
+	<MSEClass: #MJFAMIXSessionBeanGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 
 ]

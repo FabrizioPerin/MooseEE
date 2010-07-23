@@ -69,3 +69,20 @@ MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 
 	ownerDataBase := aFAMIXDataBase.
 ]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTable >> viewUMLTable [
+	<menuItem: 'Table UML class diagram like' category: 'MooseJEE Visualizations'> 
+	
+	| view |
+	view := MOViewRenderer new.
+	self viewUMLTableOn: view.
+	view open
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTable >> viewUMLTableOn: view [
+	view shape umlClassDiagramLikeForTable.
+	view interaction popupText.
+	view node: self.
+]

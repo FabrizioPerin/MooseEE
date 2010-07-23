@@ -7,7 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 MJAbstractGroup class >> annotation [
 
-	<MSEClass: #Group super: #MooseGroup>
+	<MSEClass: #MJAbstractGroup super: #MooseGroup>
 	<package: #'Moose-JEE-Model'>
 	<abstract>
 ]

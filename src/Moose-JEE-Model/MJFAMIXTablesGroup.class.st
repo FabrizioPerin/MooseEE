@@ -7,6 +7,26 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXTablesGroup class >> annotation [
 
-	<MSEClass: #TablesGroup super: #MJAbstractGroup>
+	<MSEClass: #MJFAMIXTablesGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTablesGroup >> viewUMLTables [
+	<menuItem: 'Tables UML class diagram like' category: 'Visualize'> 
+
+	| view |
+	view := MOViewRenderer new.
+	self viewUMLTablesOn: view.
+	view open.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTablesGroup >> viewUMLTablesOn: view [
+	
+	view shape umlClassDiagramLikeForTable. 
+	view interaction popupText.
+	view nodes: self entities.
+	
 ]

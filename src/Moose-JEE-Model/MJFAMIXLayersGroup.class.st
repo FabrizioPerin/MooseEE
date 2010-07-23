@@ -7,6 +7,6 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXLayersGroup class >> annotation [
 
-	<MSEClass: #LayersGroup super: #MJAbstractGroup>
+	<MSEClass: #MJFAMIXLayersGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 ]
