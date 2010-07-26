@@ -112,28 +112,28 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-MooseModel >> buildRelationsAmongDBElementsAndMethods [
-	<menuItem: 'Build Relations Among DB And Methods' category: 'JEAs Menu'>
+MooseModel >> buildRelationsAmongDBTablesAndClasses [
+	<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Menu'>
 
-	| tables entities counter |
+	| tables tableEntities counter |
 
 	self isEJB30 
 	ifTrue:[	
-		entities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
-		tables := self allTables.
+		tableEntities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
+		tables := self allTables.	
 		counter :=  1.
 
 		UIManager default
 			displayProgress: 'Building relations among DB and Entities'
 			at: Sensor cursorPoint
 			from: counter
-			to: (entities size * tables size)
+			to: (tableEntities size * tables size)
 			during: [ :bar |
 				counter := counter+1.
 				bar value: counter.
 			
 				tables do: [:table | 
-					entities do: [:class |
+					tableEntities do: [:class |
 						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
 										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
@@ -144,7 +144,7 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 								bar value: counter.
 								]]]]
 	ifFalse:[
-		entities := self allClasses select: [:class | class methods anySatisfy: #doesExecuteAQuery].
+		tableEntities := self allClasses select: [:class | class methods anySatisfy: #doesExecuteAQuery].
 		tables := self allTables.
 		counter :=  1.
 
@@ -152,13 +152,13 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 			displayProgress: 'Building relations among DB and Classes'
 			at: Sensor cursorPoint
 			from: counter
-			to: (entities size * tables size)
+			to: (tableEntities size * tables size)
 			during: [ :bar |
 				counter := counter+1.
 				bar value: counter.
 			
 				tables do: [:table | 
-					entities do: [:class |
+					tableEntities do: [:class |
 						((class sourceText findString: table name) > 0)
 								ifTrue:[ |mapping|
 										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
@@ -167,8 +167,60 @@ MooseModel >> buildRelationsAmongDBElementsAndMethods [
 										self add: mapping.].
 								counter := counter+1.
 								bar value: counter.
-								]]]]
+								]]]].
+]
 
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> buildRelationsAmongTableColumnsAndMethods [
+	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
+
+	| tables entities counter columns indexOfColumns source indexOfEntities dictionaryOfColumns dictionaryOfEntities |
+
+	self isEJB30 
+	ifTrue:[	
+		entities := (self allAnnotationTypes select: [:each | each name = #Column]) first annotatedEntities.
+		columns := self allColumns.
+		dictionaryOfColumns := Dictionary new.
+		dictionaryOfEntities := Dictionary new.
+		source := entities first parentType sourceText.
+		counter :=  1.
+
+		UIManager default
+			displayProgress: 'Building relations among DB and Entities'
+			at: Sensor cursorPoint
+			from: counter
+			to: (entities size * columns size)
+			during: [ :bar |
+				counter := counter+1.
+				bar value: counter.
+				
+				columns do: [:column | 
+					| ind |
+					ind := (source findString: ('@Column(name = "',column name,'"')).
+					(ind = 0) ifFalse: [dictionaryOfColumns at: ind put: column]].
+				
+				entities do: [:attr |
+					| ind |
+					ind := (source findString: attr name).
+					(ind = 0) ifFalse: [dictionaryOfEntities at: ind put: attr]].
+				
+				indexOfColumns := dictionaryOfColumns keys sorted.
+				indexOfEntities := dictionaryOfEntities keys sorted.
+				
+				indexOfColumns do: [:ic |
+					| notAssigned |
+					notAssigned := true.
+					indexOfEntities do: [:ie |
+						| mapping |
+						(notAssigned and: [ie > ic])
+							ifTrue:  [mapping := MJFAMIXMapping new mapTarget: (dictionaryOfColumns at: ic); mapSource: (dictionaryOfEntities at: ie).
+										(dictionaryOfEntities at: ie) addMaps: mapping.
+										 (dictionaryOfColumns at: ic) addMappedBy: mapping.
+										self add: mapping.
+										notAssigned := false].
+							counter := counter+1.
+							bar value: counter.]
+						]]].
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -485,9 +537,11 @@ MooseModel >> isEJB30 [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 
-	aBlackBoard databases do: [:each | self add: each createRelationalElement ].
-	aBlackBoard tables  do: [:each | self add: each createRelationalElement ].
-	aBlackBoard attributes do: [:each | self add: each createRelationalElement ].
+	| dataBases |
+	dataBases := aBlackBoard databases collect: [:each | each createRelationalElement ].
+	self addAll: dataBases.
+	self addAll: (dataBases flatCollect: [:each | each tables ]).
+	self addAll: (self allTables flatCollect: [:each | each columns]).
 	
 	^self
 ]

@@ -6,7 +6,8 @@ Class {
 		'isFK',
 		'ownerTable',
 		'columnReference',
-		'type'
+		'type',
+		'used'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -30,6 +31,16 @@ MJFAMIXColumn >> columnReference: aTablesColumnOrNil [
 ]
 
 { #category : #accessing }
+MJFAMIXColumn >> inUse [
+	^used
+]
+
+{ #category : #accessing }
+MJFAMIXColumn >> inUse: aBooleanOrNil [
+	used := aBooleanOrNil.
+]
+
+{ #category : #accessing }
 MJFAMIXColumn >> initialize [
 	super initialize.
 	
@@ -38,6 +49,7 @@ MJFAMIXColumn >> initialize [
 	columnReference := nil.
 	ownerTable := nil.
 	type := nil.
+	used := nil.
 ]
 
 { #category : #accessing }
