@@ -39,7 +39,8 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePath).
 			progBar value: 5.
 	
-			mooseModel buildRelationsAmongDBElementsAndMethods.
+			mooseModel buildRelationsAmongDBTablesAndClasses.
+			mooseModel buildRelationsAmongTableColumnsAndMethods.
 			progBar value: 6.
 		
 			progBar value: 'Creating annotations'.
