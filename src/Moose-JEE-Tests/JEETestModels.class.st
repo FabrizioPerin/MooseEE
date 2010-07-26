@@ -8,6 +8,19 @@ Class {
 }
 
 { #category : #elements }
+JEETestModels >> attributeCalled: aString belongsTo: aType withClassScope: aBoolean [
+	|attribute|
+
+	attribute := FAMIXAttribute new
+		name: aString;
+		parentType: aType;
+		declaredType: aBoolean;
+		yourself.
+	
+	^attribute
+]
+
+{ #category : #elements }
 JEETestModels >> class1 [
 
 	| class method1 method2 method3 method4 method5 |
@@ -663,16 +676,13 @@ JEETestModels >> dto3 [
 { #category : #files }
 JEETestModels >> fakeSourceText [
 
-	^'import ch.ipi.esv.activity.bo.workunit.ActivityBaseBO;
-
+	^'import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 /**
- * WorkUnit Authorization.
- * <p>
- * Copyright (c) 2009, Swiss Federal Institute of Intellectual Property
- * </p>
  * @author roth_ch
- * @version $Id: WorkUnitAuthorization.java,v 1.7 2009/10/06 14:44:28 roth_ch Exp $
  */
+
 @Entity
 @Table(name = "Table1", schema = "ESV")
 public class WorkUnitAuthorization extends ActivityBaseBO {
@@ -680,7 +690,51 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   /**
    * The serialization version. Note that this changes with every version of this class!
    */
-  private static final long serialVersionUID = "$Revision: 1.7 $".hashCode();'
+  private static final long serialVersionUID = "$Revision: 1.7 $".hashCode();
+  /**
+   * Excluded fields for equality compare.
+   */
+  private static final String[] EXCLUDED_FIELDS = { "workUnitAuthId", "version" };
+  /**
+   * technical primary key.
+   */
+  @Id
+  @SequenceGenerator(name = "seqWothId", sequenceName = "ESV.SEQ_NAME", allocationSize = 1, initialValue = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seqWothId")
+  @Column(name = "Column1")
+  private Integer workUnitAuthId;
+
+  // workunit operation
+  @Column(name = "Column2")
+  @Enumerated(EnumType.STRING)
+  private WorkUnitAuthOperation Att1;
+
+  // all & any conditions
+  @Column(name = "Column3")
+  private String allConditions;
+
+  @Column(name = "Column4")
+  private String Att2;
+
+  // all & any conditions, operation conditions
+  @Column(name = "Column5")
+  private String allOperations;
+
+  @Column(name = "Column6")
+  private String Att3;
+
+  @Column(name = "Column7")
+  private String operationConditions;
+
+  // all & any resources, resource conditions
+  @Column(name = "Column8")
+  private String allResources;
+
+  @Column(name = "Column9")
+  private String anyResources;
+
+  @Column(name = "Column10")
+  private String resourceConditions;'
 ]
 
 { #category : #initialize }
@@ -1513,7 +1567,7 @@ JEETestModels >> root [
 { #category : #models }
 JEETestModels >> sampleMooseModelWithDB [
 	
-	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean database dbTable1 dbTable2 dbTable3 tableColumn1 tableColumn2 tableColumn3 tableColumn5 tableColumn6 tableColumn4 |
+	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean database dbTable1 dbTable2 dbTable3 tableColumn1 tableColumn2 tableColumn3 tableColumn5 tableColumn6 tableColumn4 acmpEntity |
 	mooseModel := MooseModel new.
 	aPackage := FAMIXNamespace new
 			name: #aPackage;
@@ -1557,6 +1611,38 @@ JEETestModels >> sampleMooseModelWithDB [
 				yourself
 			).
 	
+	acmpEntity := FAMIXClass new
+			name: #ACMPEntityBean;
+			container: anotherPackage;
+			yourself.
+	
+	acmpEntity 
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att1';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		);
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att2';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		);
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att3';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		);
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att4';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		).
+
+	
 	"instanciating relational elements"
 	database := MJFAMIXDataBase new name: #database1.
 
@@ -1573,21 +1659,21 @@ JEETestModels >> sampleMooseModelWithDB [
 			ownerDataBase: database.
 
 	tableColumn1 := MJFAMIXColumn new
-						name: #column1;
+						name: #Column1;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'integer'.
 	
 	tableColumn2 := MJFAMIXColumn new
-						name: #column2;
+						name: #Column2;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'string'.
 	
 	tableColumn3 := MJFAMIXColumn new
-						name: #column3;
+						name: #Column3;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
@@ -1599,14 +1685,14 @@ JEETestModels >> sampleMooseModelWithDB [
 	
 	
 	tableColumn4 := MJFAMIXColumn new
-						name: #column4;
+						name: #Column4;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable2;
 						type: 'integer'.
 	
 	tableColumn5 := MJFAMIXColumn new
-						name: #column5;
+						name: #Column5;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable2;
@@ -1616,7 +1702,7 @@ JEETestModels >> sampleMooseModelWithDB [
 	dbTable2 addColumn: tableColumn5.
 						
 	tableColumn6 := MJFAMIXColumn new
-						name: #column6;
+						name: #Column6;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable3;
@@ -1660,13 +1746,10 @@ JEETestModels >> sampleMooseModelWithDB [
 			container: anotherPackage;
 			yourself
 		);
+		add: acmpEntity;
+		addAll: acmpEntity attributes; 
 		add: (FAMIXClass new
 			name: #ACMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ACMPEntityBean;
 			container: anotherPackage;
 			yourself
 		);

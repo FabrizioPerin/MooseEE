@@ -33,7 +33,7 @@ MJFAMIXRelationalEntityTests >> testMapsNamedEntities [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 	
-	mooseModel buildRelationsAmongDBElementsAndMethods.
+	mooseModel buildRelationsAmongDBTablesAndClasses.
 	
 	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
 	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
