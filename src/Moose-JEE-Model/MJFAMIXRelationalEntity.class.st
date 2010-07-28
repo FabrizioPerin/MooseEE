@@ -43,6 +43,6 @@ MJFAMIXRelationalEntity >> mappedBy: aMapping [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXRelationalEntity >> mapsNamedEntities [
+MJFAMIXRelationalEntity >> mappedNamedEntities [
 	^self mapDirection: #mapSource on: self mooseModel allMaps 
 ]

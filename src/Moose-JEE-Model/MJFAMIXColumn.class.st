@@ -32,6 +32,8 @@ MJFAMIXColumn >> columnReference: aTablesColumnOrNil [
 
 { #category : #accessing }
 MJFAMIXColumn >> inUse [
+	used isNil 
+		ifTrue: [self inUse: self mappedNamedEntities isNil not].
 	^used
 ]
 

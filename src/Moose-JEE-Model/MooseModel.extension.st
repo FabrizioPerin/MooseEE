@@ -204,13 +204,13 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 					ind := (source findString: attr name).
 					(ind = 0) ifFalse: [dictionaryOfEntities at: ind put: attr]].
 				
-				indexOfColumns := dictionaryOfColumns keys sorted.
-				indexOfEntities := dictionaryOfEntities keys sorted.
-				
-				indexOfColumns do: [:ic |
+				indexOfColumns := dictionaryOfColumns keys sorted: [:a :b | a > b].
+				indexOfEntities := dictionaryOfEntities keys sorted: [:a :b | a > b].
+
+				indexOfEntities do: [:ie |
 					| notAssigned |
 					notAssigned := true.
-					indexOfEntities do: [:ie |
+					indexOfColumns do: [:ic |
 						| mapping |
 						(notAssigned and: [ie > ic])
 							ifTrue:  [mapping := MJFAMIXMapping new mapTarget: (dictionaryOfColumns at: ic); mapSource: (dictionaryOfEntities at: ie).
