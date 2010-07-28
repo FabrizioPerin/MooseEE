@@ -15,6 +15,52 @@ FAMIXClassGroup >> DTOsConstellation [
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> DTOsConstellationHighlightingEntity [
+
+	<menuItem: 'DTOs Constellation Highlighting Entity' category: 'JEAs Visualizations WORKINGON'>
+	
+	| view regexe |
+	view := MOViewRenderer new.
+	regexe := '.*BO' asRegexIgnoringCase.
+	(self select: [:each | regexe matches: each name ]) DTOsConstellationHighlightingEntityOn: view.
+	^ view openWithStatusbar title: 'DTOs Constellation'
+	
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> DTOsConstellationHighlightingEntityOn: aView [
+
+	| invoking entity dtos |
+	
+	dtos := self reject: [:each | ('.*Test.*' asRegexIgnoringCase matches: each name) or: ['.*Dummy.*' asRegexIgnoringCase matches: each name]].
+	
+	invoking := ((dtos flatCollect: #invokingClasses) reject: [:each |
+		(dtos includes: each) or: ['.*Test.*' asRegexIgnoringCase matches: each name ]]) asSet asMooseGroup.
+	entity := invoking first mooseModel allEntityBeans collect: [:each | each implementationClass ].
+	
+	"aView shape rectangle size: 20; fillColor: Color lightGray."
+	aView shape rectangle text: #name; fontSize: 8; borderColor: Color blue.	
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: (dtos intersect: entity).
+	
+	aView shape label text: #name; fontSize: 8.
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: (dtos difference: entity).
+	
+	aView shape rectangle borderColor: Color blue.
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: (invoking intersect: entity).
+	
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: (invoking difference: entity).
+	
+	"aView shape arrowedLine color: Color veryLightGray; arrowSize: 4."
+	aView shape line color: Color veryLightGray.
+	aView edges: self from: #yourself toAll: #clientClasses.
+	aView graphvizLayout neato
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> DTOsConstellationOn: aView [
 
 	| invoking |
