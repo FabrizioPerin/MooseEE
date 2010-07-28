@@ -34,7 +34,7 @@ MJFAMIXMappingTests >> testFAMIXMappingCreation [
 
 { #category : #testsOnJEEModel }
 MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulation [
-	| mooseModel annotationType famixAnchor entities tables jEETestModel root annotationTypeColumn columns table1 |
+	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
 
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithDB.
@@ -78,23 +78,22 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulation [
 	mooseModel buildRelationsAmongDBTablesAndClasses.
 	mooseModel buildRelationsAmongTableColumnsAndMethods.
 
-	entities := mooseModel allEntityBeans.
-	tables := mooseModel allTables.
-	columns := mooseModel allColumns.
-
-
-	self assert: (entities size = 2).
-	self assert: (tables size = 3).
-	self assert: (columns size = 6).
+	self assert: (mooseModel allEntityBeans size = 2).
+	self assert: (mooseModel allTables size = 3).
+	self assert: (mooseModel allColumns size = 6).
 	
 	self assert: ((mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]) size = 3).
-	"FARE VERIFICA DEI TIPI"
 	
+	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]).
+	
+	self assert: (maps anySatisfy: [:map | (map mapTarget name = #Column6) and: [map mapSource name = 'Att3']]).
+	self assert: (maps anySatisfy: [:map | (map mapTarget name  = #Column4) and: [map mapSource name = 'Att2']]).
+	self assert: (maps anySatisfy: [:map | (map mapTarget name = #Column2) and: [map mapSource name = 'Att1']]).
 ]
 
 { #category : #testsOnJEEModel }
 MJFAMIXMappingTests >> testFAMIXMappingModelPopulation [
-	| mooseModel annotationType famixAnchor entities tables jEETestModel root |
+	| mooseModel annotationType famixAnchor jEETestModel root |
 
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithDB.
@@ -122,15 +121,9 @@ MJFAMIXMappingTests >> testFAMIXMappingModelPopulation [
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 
 	mooseModel buildRelationsAmongDBTablesAndClasses.
-	
 
-	entities := mooseModel allEntityBeans.
-	tables := mooseModel allTables.
-
-
-	self assert: (entities size = 2).
-	self assert: (tables size = 3).
-	
+	self assert: (mooseModel allEntityBeans size = 2).
+	self assert: (mooseModel allTables size = 3).
 	self assert: (mooseModel allMaps size = 1).
 	
 ]

@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #tests }
-MJFAMIXRelationalEntityTests >> testMapsNamedEntities [
+MJFAMIXRelationalEntityTests >> testMappedNamedEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity root jEETestModel |
 
 	jEETestModel := JEETestModels new.
@@ -38,7 +38,7 @@ MJFAMIXRelationalEntityTests >> testMapsNamedEntities [
 	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
 	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
 
-	self assert: (table1 mapsNamedEntities size = 1).
-	self assert: (table1 mapsNamedEntities first = aCMPEntity ).
+	self assert: (table1 mappedNamedEntities size = 1).
+	self assert: (table1 mappedNamedEntities first = aCMPEntity ).
 
 ]
