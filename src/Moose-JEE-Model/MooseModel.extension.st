@@ -124,7 +124,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 		counter :=  1.
 
 		UIManager default
-			displayProgress: 'Building relations among DB and Entities'
+			displayProgress: 'Building relations among Tables and Classes'
 			at: Sensor cursorPoint
 			from: counter
 			to: (tableEntities size * tables size)
@@ -174,53 +174,69 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
-	| tables entities counter columns indexOfColumns source indexOfEntities dictionaryOfColumns dictionaryOfEntities |
+	| attributes columns classes counter allIndexes |
 
 	self isEJB30 
 	ifTrue:[	
-		entities := (self allAnnotationTypes select: [:each | each name = #Column]) first annotatedEntities.
+		attributes := (self allAnnotationTypes select: [:each | each name = #Column]) first annotatedEntities.
 		columns := self allColumns.
-		dictionaryOfColumns := Dictionary new.
-		dictionaryOfEntities := Dictionary new.
-		source := entities first parentType sourceText.
-		counter :=  1.
+		classes := (attributes collect: [:each | each parentType ]) asSet.
 
+		counter :=  1.
+		
 		UIManager default
-			displayProgress: 'Building relations among DB and Entities'
+			displayProgress: 'Building relations among Columns and Attributes'
 			at: Sensor cursorPoint
 			from: counter
-			to: (entities size * columns size)
+			to: (attributes size * columns size)
 			during: [ :bar |
 				counter := counter+1.
 				bar value: counter.
-				
-				columns do: [:column | 
-					| ind |
-					ind := (source findString: ('@Column(name = "',column name,'"')).
-					(ind = 0) ifFalse: [dictionaryOfColumns at: ind put: column]].
-				
-				entities do: [:attr |
-					| ind |
-					ind := (source findString: attr name).
-					(ind = 0) ifFalse: [dictionaryOfEntities at: ind put: attr]].
-				
-				indexOfColumns := dictionaryOfColumns keys sorted: [:a :b | a > b].
-				indexOfEntities := dictionaryOfEntities keys sorted: [:a :b | a > b].
 
-				indexOfEntities do: [:ie |
-					| notAssigned |
-					notAssigned := true.
-					indexOfColumns do: [:ic |
+				classes do: [:class |
+					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes|
+					source := class sourceText.
+					dictionaryOfColumns := Dictionary new.
+					dictionaryOfAttributes := Dictionary new.
+					
+					classAttributes := class attributes intersection: attributes.
+					
+					columns do: [:column | 
+						| ind |
+						ind := (source findString: ('@Column(name = "',column name,'"')).
+						(ind = 0) ifFalse: [dictionaryOfColumns at: ind put: column]].
+				
+					classAttributes do: [:attr |
+						| ind |
+						ind := (source findString: attr name).
+						(ind = 0) ifFalse: [dictionaryOfAttributes at: ind put: attr]].
+					
+					allIndexes := OrderedCollection withAll: (dictionaryOfColumns keys).
+					allIndexes addAll: dictionaryOfAttributes keys.
+					allIndexes := allIndexes sorted.
+					
+					currentAtt := currentCol := nil.
+									
+					allIndexes do: [:ind |
 						| mapping |
-						(notAssigned and: [ie > ic])
-							ifTrue:  [mapping := MJFAMIXMapping new mapTarget: (dictionaryOfColumns at: ic); mapSource: (dictionaryOfEntities at: ie).
-										(dictionaryOfEntities at: ie) addMaps: mapping.
-										 (dictionaryOfColumns at: ic) addMappedBy: mapping.
-										self add: mapping.
-										notAssigned := false].
-							counter := counter+1.
-							bar value: counter.]
-						]]].
+						
+						dictionaryOfColumns at: ind ifPresent: [:col | 
+							currentCol := col].
+					
+						dictionaryOfAttributes at: ind ifPresent: [:att |
+							currentAtt := att].
+						
+						(currentCol isNil not and: [currentAtt isNil not]) 
+							ifTrue: [
+								mapping := MJFAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
+								currentAtt addMaps: mapping.
+								currentCol addMappedBy: mapping.
+								self add: mapping.
+								currentAtt := currentCol := nil.].
+
+						counter := counter+1.
+						bar value: counter].
+				]]].
 ]
 
 { #category : #'*Moose-JEE-Model' }
