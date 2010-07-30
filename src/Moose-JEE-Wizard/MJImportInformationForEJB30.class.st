@@ -39,41 +39,45 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePath).
 			progBar value: 5.
 	
+			progBar value: 'Creationg relations among the DB and the software elements'.
+	
 			mooseModel buildRelationsAmongDBTablesAndClasses.
-			mooseModel buildRelationsAmongTableColumnsAndMethods.
 			progBar value: 6.
+			
+			mooseModel buildRelationsAmongTableColumnsAndMethods.
+			progBar value: 7.
 		
 			progBar value: 'Creating annotations'.
 	
 			mooseModel instanciateJBeansFromAnnotations.
-			progBar value: 7.
+			progBar value: 8.
 			
 			mooseModel annotateTheModelForJEEBrowser.
-			progBar value: 8.
+			progBar value: 9.
 			
 			progBar value: 'Performing post import operations'.
 			
 			appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
 			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel].
-			progBar value: 9.
+			progBar value: 10.
 			
 			MooseModel root add: mooseModel.
-			progBar value: 10.
+			progBar value: 11.
 			
 			(wizardInformations at: #openVisualizations) 
 						ifTrue:[
 							mooseModel allModelClasses viewTransactionFlow.
-							progBar value: 11.
+							progBar value: 12.
 			
 							mooseModel allModelClasses viewUnsafeQueries.
-							progBar value: 12.]
-						ifFalse:[progBar value: 12].
+							progBar value: 13.]
+						ifFalse:[progBar value: 13].
 						
 			(wizardInformations at: #openBrowsers) 
 						ifTrue:[
 							mooseModel browseCodeWithAnnotationsForJEA.
-							progBar value: 13]
-						ifFalse:[progBar value: 13].
+							progBar value: 14]
+						ifFalse:[progBar value: 14].
 		]
 ]
 
@@ -148,7 +152,7 @@ MJImportInformationForEJB30 >> performTerminateButtonAction [
 		displayProgress: 'Importing'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 13
+		to: 14
 		during: [ :bar |
 			Cursor wait showWhile:[
 				progBar := bar. 
