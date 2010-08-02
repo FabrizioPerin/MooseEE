@@ -26,7 +26,7 @@ MJFAMIXTablesGroup >> viewUMLTables [
 MJFAMIXTablesGroup >> viewUMLTablesOn: view [
 	
 	view shape umlClassDiagramLikeForTable. 
-	view interaction popupText.
+	view interaction menu: #mooseMenuMorph.
 	view nodes: self entities.
 	
 ]

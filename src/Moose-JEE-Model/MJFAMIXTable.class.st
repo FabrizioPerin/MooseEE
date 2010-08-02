@@ -6,7 +6,8 @@ Class {
 		'dataBase',
 		'ownerDataBase',
 		'nameAsRegExIgCa',
-		'nameAsRegEx'
+		'nameAsRegEx',
+		'used'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -34,6 +35,18 @@ MJFAMIXTable >> columns: aOrderedCollection [
 	columns := aOrderedCollection.
 ]
 
+{ #category : #accessing }
+MJFAMIXTable >> inUse [
+	used isNil 
+		ifTrue: [self inUse: self mappedNamedEntities isEmpty not].
+	^used
+]
+
+{ #category : #accessing }
+MJFAMIXTable >> inUse: aBooleanOrNil [
+	used := aBooleanOrNil.
+]
+
 { #category : #initialization }
 MJFAMIXTable >> initialize [
 
@@ -56,6 +69,13 @@ MJFAMIXTable >> nameAsRegexIgnoringCase [
 	^nameAsRegExIgCa isNil 
 		ifTrue: [('.*', self name, '.*') asRegexIgnoringCase]
 		ifFalse: [nameAsRegExIgCa]
+]
+
+{ #category : #accessing }
+MJFAMIXTable >> nameWithAnnotationAsRegex [
+	^nameAsRegEx isNil  
+		ifTrue: [nameAsRegEx := ('.*@Table\(name = "',self name,'".*') asRegex]
+		ifFalse: [nameAsRegEx]
 ]
 
 { #category : #accessing }

@@ -120,7 +120,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 	self isEJB30 
 	ifTrue:[	
 		tableEntities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
-		tables := self allTables.	
+		tables := self allTables.
 		counter :=  1.
 
 		UIManager default
@@ -134,7 +134,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 			
 				tables do: [:table | 
 					tableEntities do: [:class |
-						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
+						(table nameWithAnnotationAsRegex matches: class sourceText)
 								ifTrue:[ |mapping|
 										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
