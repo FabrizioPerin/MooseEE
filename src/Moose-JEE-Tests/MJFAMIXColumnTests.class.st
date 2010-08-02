@@ -47,6 +47,11 @@ MJFAMIXColumnTests >> testInUse [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
 	mooseModel allEntityBeans first implementationClass sourceAnchor: famixAnchor.
 	
+	mooseModel allAttributes do: [:attr |
+		attr name = 'Att1' ifTrue: [attr declaredType: (FAMIXClass new	name: 'WorkUnitAuthOperation'; yourself)].
+		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
+		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
+	
 	mooseModel buildRelationsAmongDBTablesAndClasses.
 	mooseModel buildRelationsAmongTableColumnsAndMethods.
 
