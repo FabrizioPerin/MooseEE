@@ -134,7 +134,8 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 			
 				tables do: [:table | 
 					tableEntities do: [:class |
-						(table nameWithAnnotationAsRegex matches: class sourceText)
+						"(table nameWithAnnotationAsRegex matches: class sourceText)"
+						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
 										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
@@ -174,12 +175,11 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
-	| attributes columns classes counter allIndexes |
+	| attributes classes counter allIndexes |
 
 	self isEJB30 
 	ifTrue:[	
-		attributes := (self allAnnotationTypes select: [:each | each name = #Column]) first annotatedEntities.
-		columns := self allColumns.
+		attributes := (self allAnnotationTypes select: [:each | each name = #Column or: [each name = #GeneratedValue]]) flatCollect: [:each | each annotatedEntities ].
 		classes := (attributes collect: [:each | each parentType ]) asSet.
 
 		counter :=  1.
@@ -188,27 +188,31 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 			displayProgress: 'Building relations among Columns and Attributes'
 			at: Sensor cursorPoint
 			from: counter
-			to: (attributes size * columns size)
+			to: (attributes size * self allColumns size)
 			during: [ :bar |
 				counter := counter+1.
 				bar value: counter.
 
 				classes do: [:class |
-					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes|
+					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns |
 					source := class sourceText.
 					dictionaryOfColumns := Dictionary new.
 					dictionaryOfAttributes := Dictionary new.
 					
 					classAttributes := class attributes intersection: attributes.
+					tableColumns := OrderedCollection new.
+					class mappedRelationalEntities isEmpty ifFalse: [tableColumns := class mappedRelationalEntities first columns ].
 					
-					columns do: [:column | 
+					tableColumns do: [:column | 
 						| ind |
+						"(class name = 'CustomerClass' and: [column name = 'CM_CLASS_ID']) ifTrue: [self halt.]."
 						ind := (source findString: ('@Column(name = "',column name,'"')).
 						(ind = 0) ifFalse: [dictionaryOfColumns at: ind put: column]].
 				
 					classAttributes do: [:attr |
 						| ind |
-						ind := (source findString: attr name).
+						ind := (source findString: (attr declaredType name,' ',attr name)).
+						"ind := (('.* ',attr name,'.*') asRegex matches: source)."
 						(ind = 0) ifFalse: [dictionaryOfAttributes at: ind put: attr]].
 					
 					allIndexes := OrderedCollection withAll: (dictionaryOfColumns keys).
@@ -216,9 +220,11 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 					allIndexes := allIndexes sorted.
 					
 					currentAtt := currentCol := nil.
-									
+					
 					allIndexes do: [:ind |
 						| mapping |
+						
+						"(class name = 'CustomerClass') ifTrue:[self halt]. "
 						
 						dictionaryOfColumns at: ind ifPresent: [:col | 
 							currentCol := col].
