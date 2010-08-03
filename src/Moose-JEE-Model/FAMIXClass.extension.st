@@ -1,6 +1,25 @@
 Extension { #name : #FAMIXClass }
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXClass >> accessATable [
+	<MSEProperty: #accessATable type: #Boolean>
+	"self flag: 'annotate with fame meta descriptions'."
+	^self privateState 
+		attributeAt: #accessATable 
+		ifAbsent: [
+			| val |
+			val := self mappedRelationalEntities size > 0.
+			self accessATable: val.
+			val.]
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXClass >> accessATable: aBooleanOrNil [
+	
+	^self privateState attributeAt: #accessATable put: aBooleanOrNil
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> completeHierarchyInWhichThisResides [ 
 
 	| collection |

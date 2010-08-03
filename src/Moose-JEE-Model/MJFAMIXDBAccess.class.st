@@ -7,7 +7,7 @@ Class {
 	#category : #'Moose-JEE-Model'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'fame annotation' }
 MJFAMIXDBAccess class >> annotation [
 	<MSEClass: #DBAccess super: #FAMIXAssociation>
 	<package: #'Moose-JEE-Model'>

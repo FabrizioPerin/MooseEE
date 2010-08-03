@@ -42,3 +42,43 @@ MOShapeSelector >> umlClassDiagramLikeForTable [
 	
 	^ view shape: builder shape
 ]
+
+{ #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> umlClassWithAll [
+	| builder |
+	builder := MOFormsBuilder new.
+	builder column; fill.
+	builder row; fill; row; fill; row; fill.
+	builder x: 1 y: 1 add: ((MORectangleShape new withText) text: [ :cls | cls name ]; fontSize: 10; textPadding: 2; textAlignment: #center).
+	builder x: 1 y: 2 add: (MORectangleShape new text: [ :cls | 
+		cls attributes asArray inject: '' into: [ :sum :el | sum , el name , String cr ] ]; fontSize: 6; textVerticalPadding: 2; textAlignment: #left).
+	builder x: 1 y: 3 add: (MORectangleShape new text: [ :cls | 
+		cls methods asArray inject: '' into: [ :sum :el | sum , el name , String cr ] ]; fontSize: 6; textVerticalPadding: 2; textAlignment: #left).
+	^ view shape: builder shape
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> umlClassWithAttributes [
+	| builder |
+	builder := MOFormsBuilder new.
+	builder column; fill.
+	builder row; fill; row; fill; row; fill.
+	builder x: 1 y: 1 add: ((MORectangleShape new withText) text: [ :cls | cls name ]; fontSize: 10; textPadding: 2; textAlignment: #center).
+	builder x: 1 y: 2 add: (MORectangleShape new text: [ :cls | 
+		cls attributes asArray inject: '' into: [ :sum :el | sum , el name , String cr ] ]; fontSize: 6; textVerticalPadding: 2; textAlignment: #left).
+	builder x: 1 y: 3 add: (MORectangleShape new).
+	^ view shape: builder shape
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> umlClassWithMethods [
+	| builder |
+	builder := MOFormsBuilder new.
+	builder column; fill.
+	builder row; fill; row; fill; row; fill.
+	builder x: 1 y: 1 add: ((MORectangleShape new withText) text: [ :cls | cls name ]; fontSize: 10; textPadding: 2; textAlignment: #center).
+	builder x: 1 y: 2 add: (MORectangleShape new).
+	builder x: 1 y: 3 add: (MORectangleShape new text: [ :cls | 
+		cls methods asArray inject: '' into: [ :sum :el | sum , el name , String cr ] ]; fontSize: 6; textVerticalPadding: 2; textAlignment: #left).
+	^ view shape: builder shape
+]

@@ -3,13 +3,13 @@ Extension { #name : #MooseModel }
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allColumns [
 
-	^self allWithType: MJFAMIXColumn "asMetaDescription"
+	^self allWithType: MJFAMIXColumn.
 ]
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allDataLayer [
 	"it should always be one"
-	^self allWithType: MJFAMIXDataLayer "asMetaDescription"
+	^self allWithType: MJFAMIXDataLayer
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -20,8 +20,13 @@ MooseModel >> allDatabases [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allEntityBeans [
+	<navigation: 'All Entity Beans'>
 
-	^self allWithType: MJFAMIXEntityBean "asMetaDescription"
+	| group |
+	
+	group :=  self allWithType: MJFAMIXEntityBean ofGroupClass: MJFAMIXEntityBeanGroup.
+	group description: 'All Entity Beans'.
+	^group
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -44,15 +49,24 @@ MooseModel >> allLogicLayer [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allMaps [
+	<navigation: 'All Maps'>
+
+	| group |
 	
-	<navigation: 'All maps'>
-	^self allWithType: MJFAMIXMapping
+	group :=  self allWithType: MJFAMIXMapping.
+	group description: 'All Maps'.
+	^group
 ]
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allMessageDrivenBeans [
 
-	^self allWithType: MJFAMIXMessageDrivenBean "asMetaDescription"
+	
+	| group |
+	
+	group :=  self allWithType: MJFAMIXMessageDrivenBean ofGroupClass: MJFAMIXMDBeanGroup.
+	group description: 'All Message Driven Beans'.
+	^group
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -69,21 +83,28 @@ MooseModel >> allServiceLayer [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allSessionBeans [
-	<navigation: 'All session beans'>
+	<navigation: 'All Session Beans'>
 
-	^self allWithType: MJFAMIXSessionBean "asMetaDescription"
+	| group |
+	
+	group :=  self allWithType: MJFAMIXSessionBean ofGroupClass: MJFAMIXSessionBeanGroup.
+	group description: 'All Session Beans'.
+	^group
 ]
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allTables [
-
-	^self allWithType: MJFAMIXTable "asMetaDescription"
+	<navigation: 'All Tables'>
+	| group |
+	
+	group :=  self allWithType: MJFAMIXTable ofGroupClass: MJFAMIXTablesGroup.
+	group description: 'All Tables'.
+	^group
 ]
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allTransactionalMethods [
-	<navigation: 'All methods involved in EJB transactions'>
-
+	
 	^self allMethods select: #hasEJBTransactionAttribute
 ]
 
