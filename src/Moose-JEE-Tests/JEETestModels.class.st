@@ -1659,21 +1659,21 @@ JEETestModels >> sampleMooseModelWithDB [
 			ownerDataBase: database.
 
 	tableColumn1 := MJFAMIXColumn new
-						name: #Column1;
+						name: #Column2;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'integer'.
 	
 	tableColumn2 := MJFAMIXColumn new
-						name: #Column2;
+						name: #Column4;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
 						type: 'string'.
 	
 	tableColumn3 := MJFAMIXColumn new
-						name: #Column3;
+						name: #Column6;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
@@ -1685,14 +1685,14 @@ JEETestModels >> sampleMooseModelWithDB [
 	
 	
 	tableColumn4 := MJFAMIXColumn new
-						name: #Column4;
+						name: #Column1;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable2;
 						type: 'integer'.
 	
 	tableColumn5 := MJFAMIXColumn new
-						name: #Column5;
+						name: #Column3;
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable2;
@@ -1702,7 +1702,7 @@ JEETestModels >> sampleMooseModelWithDB [
 	dbTable2 addColumn: tableColumn5.
 						
 	tableColumn6 := MJFAMIXColumn new
-						name: #Column6;
+						name: #Column5;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable3;

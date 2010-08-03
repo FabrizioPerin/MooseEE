@@ -25,7 +25,7 @@ MJFAMIXColumnTests >> testInUse [
 	mooseModel add: annotationTypeColumn.
 	
 	"Creating the Table instances"
-	mooseModel allEntityBeans  do: [:bean | 
+	mooseModel allEntityBeans do: [:bean | 
 							| instance |
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: annotationType.
@@ -45,7 +45,8 @@ MJFAMIXColumnTests >> testInUse [
 						
 	"adding a fake sourceText to the Entities"
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
-	mooseModel allEntityBeans first implementationClass sourceAnchor: famixAnchor.
+	mooseModel allEntityBeans do: [:bean | 
+			bean implementationClass sourceAnchor: famixAnchor.].
 	
 	mooseModel allAttributes do: [:attr |
 		attr name = 'Att1' ifTrue: [attr declaredType: (FAMIXClass new	name: 'WorkUnitAuthOperation'; yourself)].
