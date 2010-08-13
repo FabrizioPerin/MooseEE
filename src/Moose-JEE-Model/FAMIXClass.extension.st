@@ -150,11 +150,7 @@ FAMIXClass >> isARowDataGateway [
 { #category : #'*Moose-JEE-Model' }
 FAMIXClass >> isTestClass [
 
-	| re |
-	
-	re := '.*test.*' asRegexIgnoringCase. " '^test.*' "
-	
-	^( re matches: self name) or: [re matches: self container name]
+	^( '.*Test.*' asRegex matches: self name) or: ['.*test.*' asRegex matches: self container name]
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -198,17 +194,17 @@ FAMIXClass >> viewMethodsHighlightingTransactionalOn: view [
 		otherMethods := self methods difference: allInterestingMethods.
 
 		view interaction item: 'inspect' action: [:elem | elem inspect ].
-		view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
+		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
 		view nodes: otherMethods.
 
 
 		view interaction item: 'inspect' action: [:elem | elem inspect ].
-		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter) borderColor: Color gray).
+		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
 		view interaction item: 'inspect' action: [:elem | elem inspect ].
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
+		view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
@@ -301,12 +297,12 @@ FAMIXClass >> viewTransactionalMethodsOn: view [
 		allInterestingMethods := self methods select: #isPartOfATransaction.
 
 		view interaction item: 'inspect' action: [:elem | elem inspect ].
-		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter) borderColor: Color gray ).
+		view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
 		view interaction item: 'inspect' action: [:elem | elem inspect ].
-		view nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color lightGray lighter ) borderColor: Color gray ).
+		view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray ).
 		view nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
 															and: [ each hasEJBTransactionAttribute not ] ] ).
 
