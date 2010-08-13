@@ -3601,7 +3601,7 @@ JEETestModels >> testNamespace [
 	| namespace |
 
 	namespace := FAMIXNamespace new
-			name: #aTestNamespace;
+			name: #testNamespace;
 			yourself.
 
 	^namespace 
