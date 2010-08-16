@@ -52,14 +52,28 @@ ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadLastStable [
-
+	
 	Transcript open.
 	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
 	
 	(self project version: 'laststable') load.
-
+	
 	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
 	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+
+]
+
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadVersion10 [
+	
+	Transcript open.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
+	
+	(self project version: '1.0') load.
+	
+	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+
 ]
 
 { #category : #accessing }
@@ -81,13 +95,18 @@ ConfigurationOfMooseJEE >> baseline10: spec [
 				className: 'ConfigurationOfMoose';
 				file: 'ConfigurationOfMoose';
 				repository: 'http://www.squeaksource.com/Moose' ].
+			
+		spec  project: 'XMLSupport for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfXMLSupport';
+				file: 'ConfigurationOfXMLSupport';
+				repository: 'http://www.squeaksource.com/XMLSupport' ].
 		
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
-			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'];
 			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
 			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE')];
-			package: 'Moose-JEE-Opax' with: [spec requires: #('XML-Parser')];
+			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE')];
 			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
 			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
 			
@@ -160,11 +179,35 @@ ConfigurationOfMooseJEE >> project [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> version10: spec [
+	<version: '1.0' imports: #('1.0-baseline')>
+
+	spec for: #common do: [
+		spec blessing: #release.
+		spec author: 'FabrizioPerin'.
+		spec timestamp: '16/08/2010 15:00'.
+		
+		spec project: 'Moose for MooseJEE' with: 'default'.
+		spec project: 'XMLSupport for MooseJEE' with: '1.0.5'.
+
+		spec
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71';
+			package: 'PEGSQLParser' with: 'PEGSQLParser-FabrizioPerin.28'.
+		
+		spec
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.32';
+			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.16';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9'.
+		].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> versionLastStable: spec [
 	<version: 'laststable' imports: #('1.0-baseline')>
 
 	spec for: #common do: [
-		spec blessing: #stable.
+		spec blessing: #development.
 		spec author: 'FabrizioPerin'.
 		spec timestamp: '06/22/2010 15:53'.
 		spec description: 'Stable version of Moose JEE'.
