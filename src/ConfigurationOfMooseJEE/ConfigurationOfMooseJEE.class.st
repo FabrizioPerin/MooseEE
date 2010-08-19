@@ -118,6 +118,42 @@ ConfigurationOfMooseJEE >> baseline10: spec [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> baseline11: spec [ 
+        <version: '1.1-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.squeaksource.com/MooseJEE'.
+		
+		spec project: 'Moose for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMoose';
+				file: 'ConfigurationOfMoose';
+				repository: 'http://www.squeaksource.com/Moose' ].
+			
+		spec  project: 'XMLSupport for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfXMLSupport';
+				file: 'ConfigurationOfXMLSupport';
+				repository: 'http://www.squeaksource.com/XMLSupport' ].
+		
+		spec 
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE')];
+			package: 'Moose-JEE-SQL' with: [spec requires: #( 'Moose for MooseJEE')];
+			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE')];
+			package: 'Moose-JEE-PetitSQLParser' with: [spec requires: #( 'Moose-JEE-SQL')];
+			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
+			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
+			
+			
+		spec group: 'Tests' with: #('Moose-JEE-Tests').
+		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-Opax' 'Moose-JEE-Wizard' 'Moose-JEE-SQL' 'Moose-JEE-PetitSQLParser'). 
+		spec group: 'default' with: #('Core' 'Tests').
+	].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> default: spec [ 
 	<version: 'default'>
 	
@@ -135,13 +171,16 @@ ConfigurationOfMooseJEE >> default: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-PetitSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
-			package: 'XML-Parser' with: [
-				spec repository: 'http://www.squeaksource.com/XMLSupport'];
-			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
+			
+			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
+			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'].
 	]
 ]
 
@@ -149,21 +188,26 @@ ConfigurationOfMooseJEE >> default: spec [
 ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [ 
 	<version: 'defaultWithoutMoose'>
 
-	
 	spec for: #common do: [
 		spec blessing: #default.
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
-			package: 'Moose-JEE-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-PetitSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
-			package: 'XML-Parser' with: [
-				spec repository: 'http://www.squeaksource.com/XMLSupport'];
-			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'].
+			
+			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
+			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'].
 	]
+
 ]
 
 { #category : #accessing }
@@ -203,8 +247,34 @@ ConfigurationOfMooseJEE >> version10: spec [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> version11: spec [
+	<version: '1.1' imports: #('1.1-baseline')>
+
+	spec for: #common do: [
+		spec blessing: #release.
+		spec author: 'FabrizioPerin'.
+		spec timestamp: '16/08/2010 15:00'.
+		
+		spec project: 'Moose for MooseJEE' with: 'default'.
+		spec project: 'XMLSupport for MooseJEE' with: '1.0.5'.
+
+		spec
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71'.
+		
+		spec
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.32';
+			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.16';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
+			package: 'Moose-JEE-PetitSQLParser' with: 'Moose-JEE-PetitSQLParser-FabrizioPerin.1';
+			package: 'Moose-JEE-SQL' with: 'Moose-JEE-SQL-FabrizioPerin.1'.
+			
+		].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> versionLastStable: spec [
-	<version: 'laststable' imports: #('1.0-baseline')>
+	<version: 'laststable' imports: #('1.1-baseline')>
 
 	spec for: #common do: [
 		spec blessing: #development.
@@ -216,13 +286,14 @@ ConfigurationOfMooseJEE >> versionLastStable: spec [
 
 		spec
 			package: 'Merlin' with: 'Merlin-cyrille_delaunay.62';
-			package: 'XML-Parser' with: 'XML-Parser-Alexandre_Bergel.81';
-			package: 'PEGSQLParser' with: 'PEGSQLParser-FabrizioPerin.25'.
+			package: 'XML-Parser' with: 'XML-Parser-Alexandre_Bergel.81'.
 		
 		spec
-			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.12';
-			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.1';
-			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.10';
-			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.6'.
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.33';
+			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.16';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
+			package: 'Moose-JEE-PetitSQLParser' with: 'Moose-JEE-PEGSQLParser-FabrizioPerin.1';
+			package: 'Moose-JEE-SQL' with: 'Moose-JEE-SQL-FabrizioPerin.1'.
 		].
 ]
