@@ -182,7 +182,7 @@ ConfigurationOfMooseJEE >> default: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
 			
-			package: 'PEGParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
+			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
 			
 			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
@@ -211,7 +211,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
 			
-			package: 'PEGParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
+			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
 			
 			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
