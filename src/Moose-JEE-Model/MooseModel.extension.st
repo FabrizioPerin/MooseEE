@@ -375,7 +375,7 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
 
-	parser := PGSQLParser new stream: aFileStream.
+	parser := MJPEGSQLParser new stream: aFileStream.
 	result := parser run.
 	
 	self populateWithRelationalElementsFrom: parser blackBoard.
@@ -581,7 +581,7 @@ MooseModel >> isEJB30 [
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 
 	| dataBases |
-	dataBases := aBlackBoard databases collect: [:each | each createRelationalElement ].
+	dataBases := aBlackBoard databases collect: [:each | each createRelationalElements ].
 	self addAll: dataBases.
 	self addAll: (dataBases flatCollect: [:each | each tables ]).
 	self addAll: (self allTables flatCollect: [:each | each columns]).
