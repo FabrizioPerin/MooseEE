@@ -76,6 +76,19 @@ ConfigurationOfMooseJEE class >> loadVersion10 [
 
 ]
 
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadVersion11 [
+	
+	Transcript open.
+	Transcript show: 'Loading Moose JEE v.1.1 configuration ...'; cr; show: '--------'; cr; cr.
+	
+	(self project version: '1.1') load.
+	
+	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+	Transcript show: ''; cr; show: 'Moose JEE v.1.1 configuration loaded. Have fun!'; cr.
+
+]
+
 { #category : #accessing }
 ConfigurationOfMooseJEE class >> project [
 
@@ -137,21 +150,25 @@ ConfigurationOfMooseJEE >> baseline11: spec [
 				file: 'ConfigurationOfXMLSupport';
 				repository: 'http://www.squeaksource.com/XMLSupport' ].
 		
+		spec  project: 'PetitSQLParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitSQLParser';
+				file: 'ConfigurationOfPetitSQLParser';
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
+		
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];			
-			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
-			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			
-			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE')];
-			package: 'Moose-JEE-SQL' with: [spec requires: #( 'Moose for MooseJEE')];
+			
+			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE')];
+			package: 'Moose-JEE-Importers-SQL' with: [spec requires: #( 'Moose for MooseJEE')];
 			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE')];
-			package: 'Moose-JEE-PetitSQLParser' with: [spec requires: #( 'Moose-JEE-SQL' 'Petit-SQL-Core')];
 			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
 			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
 			
 			
 		spec group: 'Tests' with: #('Moose-JEE-Tests').
-		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-Opax' 'Moose-JEE-Wizard' 'Moose-JEE-SQL' 'Moose-JEE-PetitSQLParser'). 
+		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-Opax' 'Moose-JEE-Wizard' 'Moose-JEE-Importers-SQL'). 
 		spec group: 'default' with: #('Core' 'Tests').
 	].
 ]
@@ -264,23 +281,21 @@ ConfigurationOfMooseJEE >> version11: spec [
 	spec for: #common do: [
 		spec blessing: #release.
 		spec author: 'FabrizioPerin'.
-		spec timestamp: '16/08/2010 15:00'.
+		spec timestamp: '27/08/2010 15:00'.
 		
 		spec project: 'Moose for MooseJEE' with: 'default'.
 		spec project: 'XMLSupport for MooseJEE' with: '1.0.5'.
-
-		spec
-			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71';
-			package: 'Petit-SQL-Core' with: 'Petit-SQL-Core-FabrizioPerin.1';
-			package: 'Petit-SQL-Tests-Core' with: 'Petit-SQL-Tests-Core-FabrizioPerin.1'.
+		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
 		
 		spec
-			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.32';
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71'.
+		
+		spec
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.34';
 			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
-			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.16';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.19';
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
-			package: 'Moose-JEE-PetitSQLParser' with: 'Moose-JEE-PetitSQLParser-FabrizioPerin.1';
-			package: 'Moose-JEE-SQL' with: 'Moose-JEE-SQL-FabrizioPerin.1'.
+			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.1'.
 			
 		].
 ]
