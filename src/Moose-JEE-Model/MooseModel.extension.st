@@ -375,19 +375,14 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
 
-	parser := MJPEGSQLParser new stream: aFileStream.
-	result := parser run.
+	PPParserResource reset.
+	parser := PPParserResource current parserAt: PetitSQLiteParser.
+
+	result := parser parse: ([ aFileStream contentsOfEntireFile ]
+							ensure: [ aFileStream close ]).
 	
 	self populateWithRelationalElementsFrom: parser blackBoard.
-	
-	"| tables entities out |
-out := OrderedCollection new.
-entities := (MooseModel root first allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
 
-tables := MooseModel root first allTables.
-tables do: [:table | out add: (entities select: [:each | table nameAsRegex matches: each sourceText withoutLineEndings  ]) ].
-out inspect."
-		
 	^self
 
 ]
@@ -580,13 +575,17 @@ MooseModel >> isEJB30 [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 
-	| dataBases |
+	MJSQLImporter new populate: self withRelationalElementsFrom: aBlackBoard.
+	
+	^self
+	
+	"| dataBases |
 	dataBases := aBlackBoard databases collect: [:each | each createRelationalElements ].
 	self addAll: dataBases.
 	self addAll: (dataBases flatCollect: [:each | each tables ]).
 	self addAll: (self allTables flatCollect: [:each | each columns]).
 	
-	^self
+	^self"
 ]
 
 { #category : #'*Moose-JEE-Model' }
