@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDominanceTreeWithGroupsLayout,
-	#superclass : #MOAbstractNormalTreeLayout,
+	#superclass : #MOAbstractRegularTreeLayout,
 	#category : #'Moose-JEE-Model'
 }
 
