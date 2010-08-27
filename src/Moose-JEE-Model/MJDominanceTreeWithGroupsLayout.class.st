@@ -1,8 +1,13 @@
 Class {
 	#name : #MJDominanceTreeWithGroupsLayout,
-	#superclass : #MOAbstractRegularTreeLayout,
+	#superclass : #MOAbstractVerticalTreeLayout,
 	#category : #'Moose-JEE-Model'
 }
+
+{ #category : #'as yet unclassified' }
+MJDominanceTreeWithGroupsLayout >> computeChildrenFor: aNode [
+	^ self childrenWithHighestNestingLevelFor: aNode
+]
 
 { #category : #'as yet unclassified' }
 MJDominanceTreeWithGroupsLayout >> doExecute: aGraph [
@@ -57,7 +62,6 @@ MJDominanceTreeWithGroupsLayout >> layout: aNodeCollection atPoint: aPoint atLay
 				nodeCollectionToUse addAll: nilGroup.]
 		ifFalse:[ nodeCollectionToUse := OrderedCollection withAll: aNodeCollection ].
 
-	self atLayer: aNumber add: aNodeCollection.
 	x := aPoint x.
 	y := aPoint y.
 	nodeCollectionToUse
