@@ -291,7 +291,7 @@ ConfigurationOfMooseJEE >> version11: spec [
 			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71'.
 		
 		spec
-			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.35';
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.36';
 			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
 			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.19';
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
