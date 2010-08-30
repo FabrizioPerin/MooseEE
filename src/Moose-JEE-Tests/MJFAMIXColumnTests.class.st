@@ -67,3 +67,25 @@ MJFAMIXColumnTests >> testInUse [
 	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column6 and: [map mapTarget inUse]]).
 
 ]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testOwnerTable [
+	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	mooseModel ejbVersion: #EJB30.
+	root := jEETestModel root.
+	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
+	
+	self assert: (mooseModel allColumns size = 6).
+	self assert: (table1 columns size = 3).
+	self assert: (table1 columns allSatisfy: [:column | column ownerTable = table1]).
+	
+	"Clean up the references with the table"
+	table1 columns do: [:column | column ownerTable: nil].
+	
+	self assert: (mooseModel allColumns size = 6).
+	self assert: (table1 columns size = 3).
+	self assert: (table1 columns allSatisfy: [:column | column ownerTable = table1]).
+]
