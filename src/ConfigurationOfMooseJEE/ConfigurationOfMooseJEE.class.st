@@ -202,7 +202,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
-			package: 'Petit-SQL-Tests- Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-Tests-Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-DraftObjects' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			
 			
@@ -234,7 +234,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
-			package: 'Petit-SQL-Tests- Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-Tests-Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-DraftObjects' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			
 			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'].
