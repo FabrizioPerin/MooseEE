@@ -83,8 +83,7 @@ ConfigurationOfMooseJEE class >> loadVersion11 [
 	Transcript show: 'Loading Moose JEE v.1.1 configuration ...'; cr; show: '--------'; cr; cr.
 	
 	(self project version: '1.1') load.
-	
-	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+
 	Transcript show: ''; cr; show: 'Moose JEE v.1.1 configuration loaded. Have fun!'; cr.
 
 ]
@@ -191,9 +190,8 @@ ConfigurationOfMooseJEE >> default: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-PetitSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
@@ -203,6 +201,10 @@ ConfigurationOfMooseJEE >> default: spec [
 			
 			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-Tests- Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-DraftObjects' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			
 			
 			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'].
 	]
@@ -220,9 +222,8 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-PetitSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
@@ -232,6 +233,9 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			
 			package: 'Petit-SQL-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			package: 'Petit-SQL-Tests-Core' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-Tests- Parser' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
+			package: 'Petit-SQL-DraftObjects' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser'];
 			
 			package: 'XML-Parser' with: [spec repository: 'http://www.squeaksource.com/XMLSupport'].
 	]
