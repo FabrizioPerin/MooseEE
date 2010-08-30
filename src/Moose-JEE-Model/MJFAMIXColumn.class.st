@@ -80,6 +80,12 @@ MJFAMIXColumn >> isPK: aBooleanOrNil [
 { #category : #accessing }
 MJFAMIXColumn >> ownerTable [
 
+	ownerTable isNil ifTrue: [
+		ownerTable := self mooseModel allTables detect: [:table | 
+			(table columns select: [:column | column = self]) isEmpty 
+				ifTrue: [false]
+				ifFalse: [true]]].
+
 	^ownerTable
 ]
 
