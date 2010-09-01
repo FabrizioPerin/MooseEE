@@ -80,6 +80,16 @@ FAMIXClass >> hasUnsafeMethodsThatExecuteAQuery [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXClass >> implementedEntityBean [
+	| bean |
+	
+	bean := ( ( self mooseModel allEntityBeans ) select: [:implementor | implementor implementationClass == self ] ).
+	bean isEmpty 
+		ifTrue: [^nil] 
+		ifFalse: [^bean first].
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> implementedInterfaces [
 	"returns a collection with all superclasses of this class"
 

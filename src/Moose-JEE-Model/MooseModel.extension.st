@@ -95,6 +95,7 @@ MooseModel >> allSessionBeans [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allTables [
 	<navigation: 'All Tables'>
+	
 	| group |
 	
 	group :=  self allWithType: MJFAMIXTable ofGroupClass: MJFAMIXTablesGroup.

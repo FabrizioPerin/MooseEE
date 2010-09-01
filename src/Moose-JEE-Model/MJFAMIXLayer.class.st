@@ -14,6 +14,11 @@ MJFAMIXLayer class >> annotation [
 ]
 
 { #category : #accessing }
+MJFAMIXLayer >> belongsTo [ 
+	^''
+]
+
+{ #category : #accessing }
 MJFAMIXLayer >> containedClasses [
 	^containedClasses
 ]

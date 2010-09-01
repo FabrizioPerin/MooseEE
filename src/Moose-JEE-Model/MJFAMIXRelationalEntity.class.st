@@ -22,6 +22,11 @@ MJFAMIXRelationalEntity >> addMappedBy: aMapping [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> belongsTo [ 
+	^''
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> initialize [
 	super initialize.
 	mappedBy := FMMultivalueLink on: self opposite: #mapTarget:.
