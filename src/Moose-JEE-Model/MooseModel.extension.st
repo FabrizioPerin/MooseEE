@@ -60,7 +60,7 @@ MooseModel >> allMaps [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allMessageDrivenBeans [
-
+	<navigation: 'All Message Driven Beans'>
 	
 	| group |
 	
@@ -94,7 +94,7 @@ MooseModel >> allSessionBeans [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allTables [
-	<navigation: 'All Tables'>
+	<navigation: 'All Data Base Tables'>
 	
 	| group |
 	
