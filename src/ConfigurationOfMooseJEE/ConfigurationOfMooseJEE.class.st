@@ -292,12 +292,12 @@ ConfigurationOfMooseJEE >> version11: spec [
 		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
 		
 		spec
-			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71'.
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.72'.
 		
 		spec
-			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.36';
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.39';
 			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
-			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.19';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.20';
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
 			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.1'.
 			
