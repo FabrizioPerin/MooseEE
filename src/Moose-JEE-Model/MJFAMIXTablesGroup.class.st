@@ -9,6 +9,7 @@ MJFAMIXTablesGroup class >> annotation [
 
 	<MSEClass: #MJFAMIXTablesGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -27,13 +28,15 @@ MJFAMIXTablesGroup >> viewUMLTablesOn: view [
 	
 	view shape rectangle withoutBorder.
 	view interaction nodraggable.
-	view nodes: (self sorted: [:a :b | a name < b name ]) forEach: [:table | table viewUMLTableOn: view.].
-	view gridLayout.
+	view node: #tables forIt: [ 
+		(self sorted: [:a :b | a name < b name ])  do: [:table | 
+				table viewUMLTableOn: view.].
+			view gridLayout].
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXTablesGroup >> viewUMLTablesWithEJBeans [
-	<menuItem: 'Tables and Entity Bean UML class diagram' category: 'JEAs Visualizations'> 
+	<menuItem: 'Tables with Entity Beans UML class diagram' category: 'JEAs Visualizations'> 
 
 	| view |
 	view := MOViewRenderer new.

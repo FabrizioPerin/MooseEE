@@ -47,17 +47,17 @@ MJFAMIXEntityBean >> primaryKeyClass: anObject [
 ]
 
 { #category : #accessing }
-MJFAMIXEntityBean >> viewUMLOfImplementors [
+MJFAMIXEntityBean >> viewUMLOfImplementor [
 	<menuItem: 'UML class diagram of the implementor' category: 'JEAs Visualizations'> 
 
 	| view |
 	view := MOViewRenderer new.
-	self viewUMLOfImplementorsOn: view.
+	self viewUMLOfImplementorOn: view.
 	view open.
 ]
 
 { #category : #accessing }
-MJFAMIXEntityBean >> viewUMLOfImplementorsOn: view [
+MJFAMIXEntityBean >> viewUMLOfImplementorOn: view [
 	
 	view shape umlClassWithAll.
 	view interaction menu: #mooseMenuMorph.

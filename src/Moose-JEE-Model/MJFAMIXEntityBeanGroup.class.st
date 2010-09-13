@@ -34,10 +34,12 @@ MJFAMIXEntityBeanGroup >> viewUMLOfImplementors [
 { #category : #'as yet unclassified' }
 MJFAMIXEntityBeanGroup >> viewUMLOfImplementorsOn: view [
 	
-	view shape rectangle withoutBorder.
+	view shape rectangle withoutBorder fillColor: Color transparent.
 	view interaction nodraggable.
-	view nodes: (self sorted: [:a :b | a implementationClass name < b implementationClass name ]) forEach: [:entity | entity viewUMLOfImplementorsOn: view.].
-	view gridLayout.
+	view node: #entityBeans forIt: [ 
+			(self sorted: [:a :b | a implementationClass name < b implementationClass name ]) do: [:entity | 
+				entity viewUMLOfImplementorOn: view.].
+			view gridLayout].
 ]
 
 { #category : #'as yet unclassified' }
@@ -54,36 +56,38 @@ MJFAMIXEntityBeanGroup >> viewUMLOfImplementorsWithTables [
 { #category : #'as yet unclassified' }
 MJFAMIXEntityBeanGroup >> viewUMLOfImplementorsWithTablesOn: view [
 	
-	| lonelyBeansClasses notLonelyBeansClasses |
+	| lonelyBeans notLonelyBeans |
 	
-	lonelyBeansClasses := (self reject: [:each | each implementationClass accessATable ]) sorted: [:a :b | a implementationClass name < b implementationClass name ].
-	notLonelyBeansClasses := (self select: [:each | each implementationClass accessATable]) sorted: [:a :b | a implementationClass name < b implementationClass name ].
-	
-	notLonelyBeansClasses isEmpty ifFalse: [
-		view interaction nodraggable.
-		view shape rectangle withoutBorder.
-		view node: #notLonelyBeans forIt: [
-			"Show Entity Beans"
-			view interaction nodraggable.
-			view shape rectangle withoutBorder.
-			view nodes: notLonelyBeansClasses forEach: [:entity | 
-					entity viewUMLOfImplementorsOn: view.
-					entity implementationClass mappedRelationalEntities first viewUMLTableOn: view.
-					view shape line.
-					view edges: entity mooseModel allMaps from: #mapSource to: #mapTarget.
-					view treeLayout.].
-			view gridLayout.]].
+	lonelyBeans := (self reject: [:each | each implementationClass accessATable ]) sorted: [:a :b | a implementationClass name < b implementationClass name ].
+	notLonelyBeans := (self select: [:each | each implementationClass accessATable]) sorted: [:a :b | a implementationClass name < b implementationClass name ].
 
-	lonelyBeansClasses isEmpty ifFalse: [
+	notLonelyBeans isEmpty ifFalse: [
 		view shape rectangle withoutBorder.
 		view interaction nodraggable.
+		view node: #notLonelyBeans forIt: [ 
+			notLonelyBeans do: [:entity | 
+				entity viewUMLOfImplementorOn: view.
+				entity implementationClass mappedRelationalEntities first viewUMLTableOn: view.
+					view shape line.
+					view edges: entity mooseModel allMaps from: #mapSource to: #mapTarget.].
+				view treeLayout.
+			]].
+
+	lonelyBeans isEmpty ifFalse: [
+		view shape rectangle withoutBorder fillColor: Color transparent.
 		view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
 		view interaction popupText: [:group | 'Lonely Beans' ].
-		view node: lonelyBeansClasses forIt: [ 
-			view shape rectangle withoutBorder.
+		view node: #lonelyBeans forIt: [ 
 			view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-			view interaction nodraggable.
-			view nodes: lonelyBeansClasses forEach: [:entity | entity viewUMLOfImplementorsOn: view.].
+			view nodes: (lonelyBeans collect: [:each | each implementationClass]) using: view shape umlClassWithAll.
 			view flowLayout maxWidth: 600; gapSize: 2.
 		]].
+	
+	"lonelyBeans isEmpty ifFalse: [
+		view shape rectangle withoutBorder fillColor: Color transparent..
+		view interaction nodraggable.
+		view node: #lonelyBeans forIt:[
+			lonelyBeans do: [:entity | 
+				entity viewUMLOfImplementorOn: view.].
+			view gridLayout.]]."
 ]
