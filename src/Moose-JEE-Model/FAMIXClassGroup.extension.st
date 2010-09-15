@@ -506,7 +506,9 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 								ifTrue: [
 									each viewMethodsHighlightingTransactionalOn: view.
 									view gridLayout]].
-					view dominanceTreeLayout.
+					view shape line color: Color transparent.
+					view edges: beans from: #yourself toAll: #invokedClasses.
+					view treeLayout. 
 			].
 
 			view verticalLineLayout gapSize:0; stretchHorizontally.
@@ -533,7 +535,9 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 								ifTrue: [
 									each viewMethodsHighlightingTransactionalOn: view.
 									view gridLayout]].
-					view dominanceTreeLayout.
+					view shape line color: Color transparent.
+					view edges: logic from: #yourself toAll: #invokedClasses.
+					view treeLayout. 
 			].
 
 			view verticalLineLayout gapSize:0; stretchHorizontally.
@@ -560,6 +564,9 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 								ifTrue: [
 									each viewMethodsHighlightingTransactionalOn: view.
 									view gridLayout]].
+					
+					view shape line color: Color transparent.
+					view edges: data from: #yourself toAll: #invokedClasses.
 					view dominanceTreeLayout. 
 			].
 
@@ -578,8 +585,8 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 		from: #key to: #value.
 	
 	"view shape line color: Color darkGray."
-	view shape line color: Color transparent.
-	view edges: beans first mooseModel allClasses from: #directSuperclasses to: #yourself.
+	"view shape line color: Color transparent.
+	view edges: beans first mooseModel allClasses from: #directSuperclasses to: #yourself"
 	view verticalLineLayout verticalGap: 40.
 ]
 
