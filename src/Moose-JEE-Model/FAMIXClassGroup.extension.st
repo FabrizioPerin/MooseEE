@@ -502,10 +502,10 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 					view nodes: beans forEach:[:each | 
 							view interaction item: 'inspect' action: [:elem | each inspect].
 							aBoolean 
-								ifTrue: [each viewTransactionalMethodsOn: view.]
-								ifFalse: [
-										each viewMethodsHighlightingTransactionalOn: view.
-										view gridLayout]].
+								ifFalse: [each viewTransactionalMethodsOn: view]
+								ifTrue: [
+									each viewMethodsHighlightingTransactionalOn: view.
+									view gridLayout]].
 					view dominanceTreeLayout.
 			].
 
@@ -529,10 +529,10 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 					view nodes: logic forEach:[:each | 
 							view interaction item: 'inspect' action: [:elem | each inspect].
 							aBoolean 
-								ifTrue: [each viewTransactionalMethodsOn: view.]
-								ifFalse: [
-										each viewMethodsHighlightingTransactionalOn: view.
-										view gridLayout.]].
+								ifFalse: [each viewTransactionalMethodsOn: view]
+								ifTrue: [
+									each viewMethodsHighlightingTransactionalOn: view.
+									view gridLayout]].
 					view dominanceTreeLayout.
 			].
 
@@ -556,10 +556,10 @@ FAMIXClassGroup >> viewTransactionFlowByLayersOn: view withAllMethods: aBoolean 
 					view nodes: data forEach:[:each | 
 							view interaction item: 'inspect' action: [:elem | each inspect].
 							aBoolean 
-								ifTrue: [each viewTransactionalMethodsOn: view.]
-								ifFalse: [
-										each viewMethodsHighlightingTransactionalOn: view.
-										view gridLayout.]].
+								ifFalse: [each viewTransactionalMethodsOn: view]
+								ifTrue: [
+									each viewMethodsHighlightingTransactionalOn: view.
+									view gridLayout]].
 					view dominanceTreeLayout. 
 			].
 
@@ -655,11 +655,11 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 	interestingClassesWithoutLonelyClasses := interestingClasses select: [ :class | ( class name includesSubString: 'Test') or:[ class name includesSubString: 'test' ] ].
 	"(interestingClassesWithoutLonelyClasses select: [:class | class incomingInvocations isEmpty ]) groupClassesConsiderInvokationHierarchy."
 
-	view shape rectangle withBorder.	
+	view shape rectangle withBorder; borderColor: Color lightGray.	
 	view nodes: interestingClassesWithoutTests forEach: [:eachClass |
 		eachClass viewMethodsIncludeIn: allMethods ForUnsafeQueriesOn: view ].
 
-	view shape rectangle withBorder; borderColor: Color lightGray.
+	view shape rectangle withBorder.
 	view nodes: interestingClassesWithoutLonelyClasses forEach: [:eachClass | 
 			eachClass viewMethodsIncludeIn: allMethods ForUnsafeQueriesOn: view ].
 

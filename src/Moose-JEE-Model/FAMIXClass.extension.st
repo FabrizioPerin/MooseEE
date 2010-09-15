@@ -283,13 +283,13 @@ FAMIXClass >> viewMethodsIncludeIn: aMethodList ForUnsafeQueriesOn: view [
 	
 	usefulMethods := self methods intersection: aMethodList.
 	
-	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color yellow) borderColor:  Color yellow darker darker ).
+	view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color yellow) borderColor:  Color yellow darker darker ).
 	view nodes: ( usefulMethods select: [ :each | ( each doesInvoke: 'executeQuery' ) and: [ ( each doesInvoke: 'executeUpdate' ) not ] ] ).
 
-	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor:  Color orange darker darker ).
+	view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor:  Color orange darker darker ).
 	view nodes: ( usefulMethods select: [ :each | ( each doesInvoke: 'executeQuery' ) not and: [ ( each doesInvoke: 'executeUpdate' )  ] ] ).
 		
-	view nodeShape: ( (MORectangleShape width: 7 height: 7 fillColor: Color red) borderColor:  Color red darker darker ).
+	view nodeShape: ( (MOEllipseShape width: 7 height: 7 fillColor: Color red) borderColor:  Color red darker darker ).
 	view nodes: ( usefulMethods select: [ :each | ( each doesInvoke: 'executeQuery' ) and: [ each doesInvoke: 'executeUpdate' ] ] ).
 		
 	view nodeShape: ((MORectangleShape width: 7 height: 7 fillColor: Color white) borderColor: Color lightGray).
