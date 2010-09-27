@@ -64,3 +64,11 @@ FAMIXMethodGroup >> deepCalleeMethodsWithoutTransactionPath [
 
 	^ result
 ]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXMethodGroup >> ranked [
+	^(((PageRank new
+	referenced: #invokingMethods;
+	runOn: self entities) associations 
+	asSortedCollection: [ :a :b | a value >= b value ]) collect: [ :ea | ea key ]) asMooseGroup
+]

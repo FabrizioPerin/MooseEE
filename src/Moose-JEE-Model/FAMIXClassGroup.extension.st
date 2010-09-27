@@ -171,6 +171,14 @@ wholeSet do: [:classGroup |
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXClassGroup >> ranked [
+	^(((PageRank new
+	referenced: #clientClasses;
+	runOn: self entities) associations 
+	asSortedCollection: [ :a :b | a value >= b value ]) collect: [ :ea | ea key ]) asMooseGroup
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClassGroup >> resetGroups [
 	self do:[:each | each groupNumber: nil].
 ]
@@ -190,6 +198,27 @@ FAMIXClassGroup >> updateGroupNumberUsing: anOrderedCollection [
 						self do: [:class | ( class groupNumber = groupNm ) ifTrue: [ class groupNumber: valueToAssign ] ]
 					]	
 		].
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewClassRank [
+	<menuItem: 'Class Rank' category: 'Visualize'>
+	| view |
+	view := MOViewRenderer new.
+	self viewClassRankOn: view.
+	^ view openWithStatusbar title: 'Class Rank'
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewClassRankOn: view [ 
+	| objects |
+	
+	objects := (self reject: #isTestClass) ranked.
+	view shape label
+		text: [:each | each name].
+	
+	view nodes: objects.
+	view bottomFlowLayout maxWidth: 600
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
