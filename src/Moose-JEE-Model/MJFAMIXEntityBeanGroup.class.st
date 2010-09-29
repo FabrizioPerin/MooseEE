@@ -62,32 +62,18 @@ MJFAMIXEntityBeanGroup >> viewUMLOfImplementorsWithTablesOn: view [
 	notLonelyBeans := (self select: [:each | each implementationClass accessATable]) sorted: [:a :b | a implementationClass name < b implementationClass name ].
 
 	notLonelyBeans isEmpty ifFalse: [
-		view shape rectangle withoutBorder.
+		view shape rectangle withoutBorder fillColor: Color transparent.
 		view interaction nodraggable.
 		view node: #notLonelyBeans forIt: [ 
 			notLonelyBeans do: [:entity | 
 				entity viewUMLOfImplementorOn: view.
-				entity implementationClass mappedRelationalEntities first viewUMLTableOn: view.
-					view shape line.
-					view edges: entity mooseModel allMaps from: #mapSource to: #mapTarget.].
-				view treeLayout.
-			]].
+				entity implementationClass mappedRelationalEntities first viewUMLTableOn: view.].
+			
+			view shape line.
+			view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
+			view treeLayout.]].
 
 	lonelyBeans isEmpty ifFalse: [
-		view shape rectangle withoutBorder fillColor: Color transparent.
-		view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-		view interaction popupText: [:group | 'Lonely Beans' ].
-		view node: #lonelyBeans forIt: [ 
-			view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-			view nodes: (lonelyBeans collect: [:each | each implementationClass]) using: view shape umlClassWithAll.
-			view flowLayout maxWidth: 600; gapSize: 2.
-		]].
+		view nodes: (lonelyBeans collect: [:each | each implementationClass ]) using: view shape umlClassWithAll.]
 	
-	"lonelyBeans isEmpty ifFalse: [
-		view shape rectangle withoutBorder fillColor: Color transparent..
-		view interaction nodraggable.
-		view node: #lonelyBeans forIt:[
-			lonelyBeans do: [:entity | 
-				entity viewUMLOfImplementorOn: view.].
-			view gridLayout.]]."
 ]
