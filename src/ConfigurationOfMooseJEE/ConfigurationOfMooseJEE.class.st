@@ -287,7 +287,7 @@ ConfigurationOfMooseJEE >> version11: spec [
 		spec author: 'FabrizioPerin'.
 		spec timestamp: '27/08/2010 15:00'.
 		
-		spec project: 'Moose for MooseJEE' with: 'default'.
+		spec project: 'Moose for MooseJEE' with: '4.1'.
 		spec project: 'XMLSupport for MooseJEE' with: '1.0.5'.
 		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
 		
@@ -295,7 +295,7 @@ ConfigurationOfMooseJEE >> version11: spec [
 			package: 'Merlin' with: 'Merlin-cyrille_delaunay.72'.
 		
 		spec
-			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.39';
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.44';
 			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
 			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.20';
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
