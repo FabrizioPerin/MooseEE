@@ -156,10 +156,13 @@ ConfigurationOfMooseJEE >> baseline11: spec [
 				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
 		
 		spec 
-			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];			
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'pagerank' with: [spec repository: 'http://www.squeaksource.com/pagerank;'];			
 			
 			
 			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE')];
+			
+			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE' 'pagerank' )];
 			package: 'Moose-JEE-Importers-SQL' with: [spec requires: #( 'Moose for MooseJEE')];
 			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE')];
 			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
@@ -292,7 +295,9 @@ ConfigurationOfMooseJEE >> version11: spec [
 		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
 		
 		spec
-			package: 'Merlin' with: 'Merlin-cyrille_delaunay.72'.
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.72';
+			package: 'pagerank' with: 'PageRank-lr.6'.
+			
 		
 		spec
 			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.44';
