@@ -1,19 +1,19 @@
 Class {
-	#name : #MJFAMIXTablesGroup,
+	#name : #MJFAMIXTableGroup,
 	#superclass : #MJAbstractGroup,
 	#category : #'Moose-JEE-Model'
 }
 
 { #category : #meta }
-MJFAMIXTablesGroup class >> annotation [
+MJFAMIXTableGroup class >> annotation [
 
-	<MSEClass: #MJFAMIXTablesGroup super: #MJAbstractGroup>
+	<MSEClass: #MJFAMIXTableGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTablesGroup >> viewUMLTables [
+MJFAMIXTableGroup >> viewUMLTables [
 	<menuItem: 'Tables UML class diagram like' category: 'JEAs Visualizations'> 
 
 	| view |
@@ -24,7 +24,7 @@ MJFAMIXTablesGroup >> viewUMLTables [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTablesGroup >> viewUMLTablesOn: view [
+MJFAMIXTableGroup >> viewUMLTablesOn: view [
 	
 	view shape rectangle withoutBorder.
 	view interaction nodraggable.
@@ -35,7 +35,7 @@ MJFAMIXTablesGroup >> viewUMLTablesOn: view [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTablesGroup >> viewUMLTablesWithEJBeans [
+MJFAMIXTableGroup >> viewUMLTablesWithEJBeans [
 	<menuItem: 'Tables with Entity Beans UML class diagram' category: 'JEAs Visualizations'> 
 
 	| view |
@@ -46,7 +46,7 @@ MJFAMIXTablesGroup >> viewUMLTablesWithEJBeans [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTablesGroup >> viewUMLTablesWithEJBeansOn: view [
+MJFAMIXTableGroup >> viewUMLTablesWithEJBeansOn: view [
 	
 	| lonelyTables notLonelyTables |	
 	

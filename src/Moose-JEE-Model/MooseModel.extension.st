@@ -98,7 +98,7 @@ MooseModel >> allTables [
 	
 	| group |
 	
-	group :=  self allWithType: MJFAMIXTable ofGroupClass: MJFAMIXTablesGroup.
+	group :=  self allWithType: MJFAMIXTable ofGroupClass: MJFAMIXTableGroup.
 	group description: 'All Data Base Tables'.
 	^group
 ]
