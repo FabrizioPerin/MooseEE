@@ -74,14 +74,3 @@ MJFAMIXTableTests >> testNameWithAnnotationAsRegex [
 	self assert: (mooseModel allTables size = 3).
 	self assert: (table1 nameWithAnnotationAsRegex matches: jEETestModel fakeSourceText).
 ]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableTests >> testTableGroup [
-	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
-
-	jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	mooseModel ejbVersion: #EJB30.
-	
-	mooseModel openInMoose.
-]
