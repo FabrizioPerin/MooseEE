@@ -30,13 +30,21 @@ MJSQLImporter >> instanciateADataBaseFrom: aDraftObject [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObject [
+MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	
 	| tab |
 	
 	tab := MJFAMIXTable new.
-	tab name: aDraftObject name.
-	tab columns: (aDraftObject attributes collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	tab name: aDraftObjectTable name.
+	tab columns: (aDraftObjectTable attributes collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	aDraftObjectTable constraints isEmpty
+		ifFalse: [
+			aDraftObjectTable constraints do: [:constraint | 
+				constraint isPKConstraint ifTrue: [constraint pkAttributeNames do: [:attNames |
+						(tab columns select: [:col | col name = attNames]) first isPK: true]
+				].
+			].
+		].
 	
 	^tab
 ]
