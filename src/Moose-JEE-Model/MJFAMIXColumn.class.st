@@ -5,9 +5,9 @@ Class {
 		'isPK',
 		'isFK',
 		'ownerTable',
-		'columnReference',
 		'type',
-		'used'
+		'used',
+		'referencedColumn'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -16,18 +16,6 @@ Class {
 MJFAMIXColumn class >> annotation [
 	<MSEClass: #TableColumn super: #MJFAMIXRelationalEntity>
 	<package: #'Moose-JEE-Model'>
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> columnReference [
-
-	^columnReference
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> columnReference: aTablesColumnOrNil [
-
-	columnReference := aTablesColumnOrNil.
 ]
 
 { #category : #accessing }
@@ -48,7 +36,7 @@ MJFAMIXColumn >> initialize [
 	
 	isPK := nil.
 	isFK := nil.
-	columnReference := nil.
+	referencedColumn := nil.
 	ownerTable := nil.
 	type := nil.
 	used := nil.
@@ -93,6 +81,18 @@ MJFAMIXColumn >> ownerTable [
 MJFAMIXColumn >> ownerTable: anObjectOrNil [
 
 	ownerTable := anObjectOrNil.
+]
+
+{ #category : #accessing }
+MJFAMIXColumn >> references [
+
+	^referencedColumn
+]
+
+{ #category : #accessing }
+MJFAMIXColumn >> references: aTablesColumnOrNil [
+
+	referencedColumn := aTablesColumnOrNil.
 ]
 
 { #category : #accessing }
