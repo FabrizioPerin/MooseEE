@@ -2,7 +2,8 @@ Class {
 	#name : #MJSQLImporterTests,
 	#superclass : #TestCase,
 	#instVars : [
-		'blackBoard'
+		'blackBoard',
+		'importer'
 	],
 	#category : #'Moose-JEE-Tests-Importers-SQL'
 }
@@ -28,9 +29,9 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDB1 [
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	col13 isPK: true.
 	
-	tab1 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestAttributesGroup.
+	tab1 columns addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
+	blackBoard clearLatestColumnsGroup.
 	
 	
 	"DEFINITION OF TABLE 2"
@@ -43,9 +44,9 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDB1 [
 	
 	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'VarChar'.
 	
-	tab2 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab2 ].
-	blackBoard clearLatestAttributesGroup.
+	tab2 columns addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab2 ].
+	blackBoard clearLatestColumnsGroup.
 	
 	"add tables to the db"
 	blackBoard tables do: [:tab | testDB addTable: tab].
@@ -54,7 +55,7 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDB1 [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKsAndFKs [
+MJSQLImporterTests >> createNewBlackBoardWithTestDBWithFKs [
 	| testDB tab1 col11 col12 col13 tab2 col21 col22 col23 tab3 col31 col32 col33 constr |
 	
 	testDB := PetitSQLDataBase new name: 'testDB1'.
@@ -74,9 +75,9 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKsAndFKs [
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	col13 isPK: true.
 	
-	tab1 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestAttributesGroup.
+	tab1 columns addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
+	blackBoard clearLatestColumnsGroup.
 	
 	
 	"DEFINITION OF TABLE 2"
@@ -89,9 +90,9 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKsAndFKs [
 	
 	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'Integer'.
 	
-	tab2 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab2 ].
-	blackBoard clearLatestAttributesGroup.
+	tab2 columns addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab2 ].
+	blackBoard clearLatestColumnsGroup.
 	
 	
 	"DEFINITION OF TABLE 3"
@@ -105,9 +106,9 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKsAndFKs [
 	col33 :=  self createNewColumnNamed: 'Col3Tab3' whichTypeIs: 'Integer'.
 
 	
-	tab3 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab3].
-	blackBoard clearLatestAttributesGroup.
+	tab3 columns addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab3].
+	blackBoard clearLatestColumnsGroup.
 
 	"add tables to the db"
 	blackBoard tables do: [:tab | testDB addTable: tab].
@@ -123,6 +124,42 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKsAndFKs [
 ]
 
 { #category : #'as yet unclassified' }
+MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKs [
+	| testDB tab1 col11 col12 col13 tab2 col21 col22 col23 tab3 col31 col32 col33 constr |
+	
+	testDB := PetitSQLDataBase new name: 'testDB1'.
+	"add the database"
+	blackBoard addDatabase: testDB.
+	
+
+	"DEFINITION OF TABLE 1"
+	tab1 := self createNewTableNamed: 'Tab1'.
+	
+	col11 := self createNewColumnNamed: 'Col1Tab1' whichTypeIs: 'Integer'.
+	col11 defaultValue: 0.
+	
+	col12 := self createNewColumnNamed: 'Col2Tab1' whichTypeIs: 'Integer'.
+	
+	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
+	
+	tab1 columns addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
+	blackBoard clearLatestColumnsGroup.
+	
+	"add tables to the db"
+	blackBoard tables do: [:tab | testDB addTable: tab].
+
+	"Creating foreign keys references"
+	constr := self 
+		createNewPKConstraintNamed: 'Constr1' 
+		for: tab1
+		and:  (OrderedCollection with: col12 with: col13 ).
+
+	
+	
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterTests >> createNewColumnNamed: aString whichTypeIs: aTypeName [
 	| column |
 
@@ -130,8 +167,8 @@ MJSQLImporterTests >> createNewColumnNamed: aString whichTypeIs: aTypeName [
 					name: aString;
 					type: aTypeName.
 					
-	blackBoard addAttribute: column.
-	blackBoard addToRecentAttributeGroup: column.
+	blackBoard addColumn: column.
+	blackBoard addToRecentColumnGroup: column.
 								
 	^column
 				"colDef third second do: [:colConstraint |
@@ -158,17 +195,32 @@ MJSQLImporterTests >> createNewFKConstraintNamed: aString between: aCollectionWi
 		(aCollectionWithaTableAndOfColumns first = each) 
 			ifTrue: [aCollectionWithaTableAndOfColumns first addConstraint: constr]
 			ifFalse: [
-				constr addFKAttributeName: each name.
+				constr addFKColumnName: each name.
 				each isFK: true.]
 	].
 	
 	anotherCollectionWithaTableAndOfColumns do: [:each |
 		(anotherCollectionWithaTableAndOfColumns first = each) 
 			ifTrue: [constr referencedTableName: anotherCollectionWithaTableAndOfColumns first name.]
-			ifFalse: [constr addPKAttributeName: each name.]
+			ifFalse: [constr addPKColumnName: each name.]
 	].
 
 	^constr
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterTests >> createNewPKConstraintNamed: aString for: aTable and: aCollectionOfColumns [
+	| constr |
+	constr := PetitSQLConstraints new name: aString.
+	
+	constr isFKConstraint: false.
+	constr isPKConstraint: true.
+	
+	aTable addConstraint: constr.
+	
+	aCollectionOfColumns do: [:each | constr addPKColumnName: each name].
+	
+	^constr 
 ]
 
 { #category : #'as yet unclassified' }
@@ -204,9 +256,9 @@ MJSQLImporterTests >> createNewTestDB1 [
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	col13 isPK: true.
 	
-	tab1 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestAttributesGroup.
+	tab1 attributes addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
+	blackBoard clearLatestColumnsGroup.
 	
 	
 	"DEFINITION OF TABLE 2"
@@ -219,9 +271,9 @@ MJSQLImporterTests >> createNewTestDB1 [
 	
 	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'Integer'.
 	
-	tab2 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab2 ].
-	blackBoard clearLatestAttributesGroup.
+	tab2 attributes addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab2 ].
+	blackBoard clearLatestColumnsGroup.
 	
 	"DEFINITION OF TABLE 3"
 	tab3 := self createNewTableNamed: 'Tab3'.
@@ -234,9 +286,9 @@ MJSQLImporterTests >> createNewTestDB1 [
 	col33 :=  self createNewColumnNamed: 'Col3Tab3' whichTypeIs: 'Integer'.
 
 	
-	tab3 attributes addAll: blackBoard latestAttributesGroup.
-	blackBoard latestAttributesGroup do: [:each | each table: tab3].
-	blackBoard clearLatestAttributesGroup.
+	tab3 attributes addAll: blackBoard latestColumnsGroup.
+	blackBoard latestColumnsGroup do: [:each | each table: tab3].
+	blackBoard clearLatestColumnsGroup.
 
 	"Creating foreign keys references"
 	
@@ -257,12 +309,12 @@ MJSQLImporterTests >> createNewTestDB1 [
 MJSQLImporterTests >> setUp [
 
 	blackBoard := PetitSQLiteParserBlackBoard new.
-	
+	importer := MJSQLImporter new.
 ]
 
 { #category : #'as yet unclassified' }
 MJSQLImporterTests >> testInstanciateAColumnFrom [
-	| col1 colInstance importer |
+	| col1 colInstance |
 	
 	col1 := self createNewColumnNamed: 'Col1' whichTypeIs: 'Integer'.
 	
@@ -270,8 +322,6 @@ MJSQLImporterTests >> testInstanciateAColumnFrom [
 	self assert: (col1 name = 'Col1').
 	self assert: (col1 type = 'Integer').
 		
-	importer := MJSQLImporter new.
-	
 	colInstance := importer instanciateAColumnFrom: col1.
 	
 	self assert: (colInstance isKindOf: MJFAMIXColumn ).
@@ -284,7 +334,7 @@ MJSQLImporterTests >> testInstanciateAColumnFrom [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterTests >> testInstanciateADataBaseFrom1 [
+MJSQLImporterTests >> testInstanciateADataBaseFrom [
 
 	| dbDraftObj db |
 	
@@ -295,7 +345,7 @@ MJSQLImporterTests >> testInstanciateADataBaseFrom1 [
 	
 	dbDraftObj := blackBoard databases first.
 	
-	db := MJSQLImporter new instanciateADataBaseFrom: dbDraftObj.
+	db := importer instanciateADataBaseFrom: dbDraftObj.
 	
 	self assert: (db isKindOf: MJFAMIXDataBase).
 	self assert: (db name = 'testDB1').
@@ -308,18 +358,18 @@ MJSQLImporterTests >> testInstanciateADataBaseFrom1 [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterTests >> testInstanciateADataBaseFrom2 [
+MJSQLImporterTests >> testInstanciateADataBaseFromWithConstraints [
 
 	| dbDraftObj db tabelWithConstraint referencedTable constr famixGeneratedTable |
 	
-	self createNewBlackBoardWithTestDBWithPKsAndFKs.
+	self createNewBlackBoardWithTestDBWithFKs.
 		
 	self assert: (blackBoard databases size = 1).
 	self assert: (blackBoard databases first name = 'testDB1').
 	
 	dbDraftObj := blackBoard databases first.
 	
-	db := MJSQLImporter new instanciateADataBaseFrom: dbDraftObj.
+	db := importer instanciateADataBaseFrom: dbDraftObj.
 	
 	self assert: (db isKindOf: MJFAMIXDataBase).
 	self assert: (db name = 'testDB1').
@@ -339,31 +389,29 @@ MJSQLImporterTests >> testInstanciateADataBaseFrom2 [
 	self assert: ((famixGeneratedTable columns select: [:col | col name = 'Col3Tab3']) first isFK ).
 	self assert: ((famixGeneratedTable columns select: [:col | col name = 'Col2Tab3']) first isFK ).
 	self assert: (constr referencedTableName = 'Tab1').
-	self assert: (constr pkAttributeNames size = 2).
+	self assert: (constr pkColumnsName size = 2).
 
 	referencedTable := (db tables select: [:tab | tab name = constr referencedTableName ]) first.
 	
-	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkAttributeNames first.]).
-	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkAttributeNames second]).
+	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkColumnsName first.]).
+	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkColumnsName second]).
 	
-	self assert: ((referencedTable columns select: [:col | col name = constr pkAttributeNames first ]) first isPK).
-	self assert: ((referencedTable columns select: [:col | col name = constr pkAttributeNames second ]) first isPK).
+	self assert: ((referencedTable columns select: [:col | col name = constr pkColumnsName first ]) first isPK).
+	self assert: ((referencedTable columns select: [:col | col name = constr pkColumnsName  second ]) first isPK).
 
 ]
 
 { #category : #'as yet unclassified' }
 MJSQLImporterTests >> testInstanciateADataBaseTableFrom [
 
-	| tab importer tabInstance |
+	| tab  tabInstance |
 	
 	blackBoard addDatabase: (PetitSQLDataBase new name: 'testDB1').
 	tab := self createNewTableNamed: 'table1'.
 	
 	self assert: (tab isKindOf: PetitSQLTable).
 	self assert: (tab name = 'table1').
-	
-	importer := MJSQLImporter new.
-	
+		
 	tabInstance := importer instanciateADataBaseTableFrom: tab.
 
 	self assert: (tabInstance isKindOf: MJFAMIXTable).
@@ -374,4 +422,45 @@ MJSQLImporterTests >> testInstanciateADataBaseTableFrom [
 	
 	
 	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterTests >> testInstanciateADataBaseTableFromWithPKConstraints [
+
+	| tab  tabInstance |
+	
+	self createNewBlackBoardWithTestDBWithPKs.
+	
+	self assert: (blackBoard tables size = 1).
+	self assert: (blackBoard tables first constraints size = 1).
+	self assert: (blackBoard columns size = 3).	
+		
+	tabInstance := importer instanciateADataBaseTableFrom: (blackBoard tables first).
+
+	self assert: (tabInstance isKindOf: MJFAMIXTable).
+	self assert: (tabInstance name = 'Tab1').
+	self assert: (tabInstance columns size = 3).
+	
+	self assert: ((tabInstance columns select: [:col | col name = 'Col2Tab1'] ) first isPK).
+	self assert: ((tabInstance columns select: [:col | col name = 'Col3Tab1'] ) first isPK).
+	
+	
+	
+	
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterTests >> testPopulateWithRelationalElementsFrom [
+
+	| model |
+	model := MooseModel new.
+	
+	self createNewBlackBoardWithTestDBWithFKs.
+	
+	importer populate: model withRelationalElementsFrom: blackBoard.
+	
+	
+" Nothing more expected ->"
+
 ]
