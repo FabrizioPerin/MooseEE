@@ -15,11 +15,11 @@ MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 						| referencedTable |
 						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
 						"set as foreign key the columns of the table having the constraint"
-						(1 to: (constr pkAttributeNames size)) do: [:index |
+						(1 to: (constr pkColumnsName size)) do: [:index |
 							| tableColumn |
-							tableColumn := 	(table columns select: [:col | col name = (constr fkAttributeNames at: index)]) first.
+							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
 							tableColumn isFK: true.
-							tableColumn references: (referencedTable columns select: [:col | col name = (constr pkAttributeNames at: index)] )first.
+							tableColumn references: (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
 						]
 					]
 				]
@@ -65,13 +65,13 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	
 	tab := MJFAMIXTable new.
 	tab name: aDraftObjectTable name.
-	tab columns: (aDraftObjectTable attributes collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
 	
 	"setting up the primary keys"
 	aDraftObjectTable constraints isEmpty
 		ifFalse: [
 			aDraftObjectTable constraints do: [:constraint | 
-				constraint isPKConstraint ifTrue: [constraint pkAttributeNames do: [:attNames |
+				constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
 						(tab columns select: [:col | col name = attNames]) first isPK: true]
 				].
 			].
