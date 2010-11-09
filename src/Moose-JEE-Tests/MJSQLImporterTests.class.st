@@ -163,7 +163,7 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKs [
 MJSQLImporterTests >> createNewColumnNamed: aString whichTypeIs: aTypeName [
 	| column |
 
-	column := PetitSQLAttributes new 
+	column := PetitSQLColumn new 
 					name: aString;
 					type: aTypeName.
 					
@@ -171,15 +171,6 @@ MJSQLImporterTests >> createNewColumnNamed: aString whichTypeIs: aTypeName [
 	blackBoard addToRecentColumnGroup: column.
 								
 	^column
-				"colDef third second do: [:colConstraint |
-							(colConstraint first match: 'default') ifTrue: [column defaultValue: colConstraint second first].
-							(colConstraint first match: 'primary key') ifTrue: [column isPK: true].
-							(colConstraint first match: 'not null') ifTrue: [column canBeNull: false.].
-							(colConstraint first match: 'unique') ifTrue: [column isUnique: true].
-									].
-				blackBoard addAttribute: column.
-				blackBoard addToRecentAttributeGroup: column.
-				column.]]]"
 ]
 
 { #category : #'as yet unclassified' }
@@ -318,7 +309,7 @@ MJSQLImporterTests >> testInstanciateAColumnFrom [
 	
 	col1 := self createNewColumnNamed: 'Col1' whichTypeIs: 'Integer'.
 	
-	self assert: (col1 isKindOf: PetitSQLAttributes).
+	self assert: (col1 isKindOf: PetitSQLColumn).
 	self assert: (col1 name = 'Col1').
 	self assert: (col1 type = 'Integer').
 		
@@ -327,7 +318,6 @@ MJSQLImporterTests >> testInstanciateAColumnFrom [
 	self assert: (colInstance isKindOf: MJFAMIXColumn ).
 	self assert: (colInstance name = 'Col1').
 	self assert: (colInstance type = 'Integer').
-	
 	
 	
 	
