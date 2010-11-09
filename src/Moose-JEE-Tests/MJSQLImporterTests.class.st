@@ -304,6 +304,13 @@ MJSQLImporterTests >> setUp [
 ]
 
 { #category : #'as yet unclassified' }
+MJSQLImporterTests >> tearDown [
+
+	blackBoard := nil.
+	importer := nil.
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterTests >> testInstanciateAColumnFrom [
 	| col1 colInstance |
 	
@@ -434,6 +441,9 @@ MJSQLImporterTests >> testInstanciateADataBaseTableFromWithPKConstraints [
 	self assert: ((tabInstance columns select: [:col | col name = 'Col2Tab1'] ) first isPK).
 	self assert: ((tabInstance columns select: [:col | col name = 'Col3Tab1'] ) first isPK).
 	
+	self assert: ((tabInstance columns select: [:col | col name = 'Col2Tab1'] ) first isFK isNil).
+	self assert: ((tabInstance columns select: [:col | col name = 'Col3Tab1'] ) first isFK isNil).
+	
 	
 	
 	
@@ -443,14 +453,47 @@ MJSQLImporterTests >> testInstanciateADataBaseTableFromWithPKConstraints [
 { #category : #'as yet unclassified' }
 MJSQLImporterTests >> testPopulateWithRelationalElementsFrom [
 
-	| model |
+	| model dbInst table3 col2Tab1 col2Tab3 col3Tab1 col3Tab3 table1|
+	
 	model := MooseModel new.
 	
 	self createNewBlackBoardWithTestDBWithFKs.
 	
 	importer populate: model withRelationalElementsFrom: blackBoard.
 	
+	self assert: (model allDatabases size = 1).
+	self assert: (model allDatabases first name = 'testDB1').
+	self assert: (model allTables size = 3).
+	self assert: (model allColumns size = 9).
 	
-" Nothing more expected ->"
+	dbInst := model allDatabases first.
+	self assert: (dbInst tables size = 3).
+	self assert: (dbInst tables allSatisfy: [:tab | tab isKindOf: MJFAMIXTable]).	
+	
+	table1 := (dbInst tables select: [:tab | tab name = 'Tab1']) first.
+	table3 := (dbInst tables select: [:tab | tab name = 'Tab3']) first.
+	
+	self assert: (table3 columns size = 3).
+	self assert: (table3 columns allSatisfy: [:col | col isKindOf: MJFAMIXColumn]).
+	self assert: (table1 columns size = 3).
+	self assert: (table1 columns allSatisfy: [:col | col isKindOf: MJFAMIXColumn]).
+	
+	col2Tab3 := (table3 columns select: [:col | col name = 'Col2Tab3']) first.
+	col3Tab3 := (table3 columns select: [:col | col name = 'Col3Tab3']) first.
+	
+	self assert: col2Tab3 isFK.
+	self assert: col3Tab3 isFK.
+	
+	col2Tab1 := (table1 columns select: [:col | col name = 'Col2Tab1']) first.
+	col3Tab1 := (table1 columns select: [:col | col name = 'Col3Tab1']) first.
+	
+	self assert: col2Tab1 isPK.
+	self assert: col3Tab1 isPK.
+	
+	self assert: col2Tab3 references equals: col2Tab1. 
+	self assert: col3Tab3 references equals: col3Tab1. 
+	
+	
+	
 
 ]
