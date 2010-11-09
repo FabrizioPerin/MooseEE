@@ -157,7 +157,7 @@ ConfigurationOfMooseJEE >> baseline11: spec [
 		
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
-			package: 'pagerank' with: [spec repository: 'http://www.squeaksource.com/pagerank;'];			
+			package: 'pagerank' with: [spec repository: 'http://www.squeaksource.com/pagerank'];			
 			
 			
 			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE')];
