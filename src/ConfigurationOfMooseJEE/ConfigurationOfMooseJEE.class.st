@@ -196,7 +196,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
-				version: '1.0.6'
+				version: '1.0.6';
 				repository: 'http://www.squeaksource.com/XMLSupport' ].
 		
 		spec 
@@ -237,7 +237,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
-				version: '1.0.6'
+				version: '1.0.6';
 				repository: 'http://www.squeaksource.com/XMLSupport' ].
 		
 		spec 
