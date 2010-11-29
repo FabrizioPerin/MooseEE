@@ -211,7 +211,7 @@ ConfigurationOfMooseJEE >> default: spec [
 				className: 'ConfigurationOfPetitJSPParser';
 				file: 'ConfigurationOfPetitJSPParser';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitJSPParser' ].
+				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 			
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
@@ -266,7 +266,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 				className: 'ConfigurationOfPetitJSPParser';
 				file: 'ConfigurationOfPetitJSPParser';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitJSPParser' ].
+				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 		
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
