@@ -223,10 +223,13 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 		spec blessing: #default.
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
+			package: 'Opax' with: [spec repository: 'http://www.squeaksource.com/OPAX']; 
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
-			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Opax' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Opax'];
 			package: 'Moose-JEE-PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
