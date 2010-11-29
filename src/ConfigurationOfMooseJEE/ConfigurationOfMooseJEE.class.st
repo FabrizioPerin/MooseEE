@@ -116,9 +116,10 @@ ConfigurationOfMooseJEE >> baseline10: spec [
 		
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'Opax' with: [spec repository: 'http://www.squeaksource.com/OPAX'];
 			package: 'PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/PEGSQLParser'];
 			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE')];
-			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE')];
+			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE' 'Opax')];
 			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
 			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
 			
@@ -157,14 +158,12 @@ ConfigurationOfMooseJEE >> baseline11: spec [
 		
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
-			package: 'pagerank' with: [spec repository: 'http://www.squeaksource.com/pagerank'];			
-			
-			
-			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE')];
-			
+			package: 'pagerank' with: [spec repository: 'http://www.squeaksource.com/pagerank'];
+			package: 'Opax' with: [spec repository: 'http://www.squeaksource.com/OPAX'];		
+
 			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE' 'pagerank' )];
 			package: 'Moose-JEE-Importers-SQL' with: [spec requires: #( 'Moose for MooseJEE')];
-			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE')];
+			package: 'Moose-JEE-Opax' with: [spec requires: #('XMLSupport for MooseJEE' 'Opax')];
 			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
 			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
 			
@@ -188,11 +187,14 @@ ConfigurationOfMooseJEE >> default: spec [
 					version: 'default';
 					repository: 'http://www.squeaksource.com/Moose' ].
 		spec 
-			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'Opax' with: [spec repository: 'http://www.squeaksource.com/OPAX']; 
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
-			package: 'Moose-JEE-Opax' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Opax' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Opax'];
 			package: 'Moose-JEE-PEGSQLParser' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
@@ -271,6 +273,7 @@ ConfigurationOfMooseJEE >> version10: spec [
 
 		spec
 			package: 'Merlin' with: 'Merlin-cyrille_delaunay.71';
+			package: 'Opax' with: 'Opax-FabrizioPerin.15';
 			package: 'PEGSQLParser' with: 'PEGSQLParser-FabrizioPerin.28'.
 		
 		spec
@@ -296,8 +299,8 @@ ConfigurationOfMooseJEE >> version11: spec [
 		
 		spec
 			package: 'Merlin' with: 'Merlin-cyrille_delaunay.72';
-			package: 'pagerank' with: 'PageRank-lr.6'.
-			
+			package: 'pagerank' with: 'PageRank-lr.6';
+			package: 'Opax' with: 'Opax-FabrizioPerin.15'.			
 		
 		spec
 			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.44';
