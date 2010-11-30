@@ -121,19 +121,12 @@ MooseModel >> annotateTheModelForJEEBrowser [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-MooseModel >> bookmarkNamed: aSymbol ifAbsent: aBlock [
-
-	self flag: #toRemove.
-	^self bookmarks detect: [:each | each mooseName = aSymbol ] ifNone: aBlock
-]
-
-{ #category : #'*Moose-JEE-Model' }
 MooseModel >> browseCodeWithAnnotationsForJEA [
 	<menuItem: 'Code Browser For JEA' category: 'JEAs Menu'>
 	MooseBrowsers new codeBrowserForJEA openOn: self	
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> buildRelationsAmongDBTablesAndClasses [
 	<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Menu'>
 
@@ -193,7 +186,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 								]]]].
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
@@ -371,7 +364,7 @@ MooseModel >> ejbVersion: aSymbol [
 	^self privateState attributeAt: #ejbVersion put: aSymbol
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
@@ -388,7 +381,7 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFileGUI [
 	<menuItem: 'Import database from SQL file' category: 'JEAs Menu'>
 	
@@ -403,7 +396,7 @@ MooseModel >> importDBFromSQLFileGUI [
 		ifFalse:[self importDBFromSQLFile: file readStream].
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importEjbJarFromFolder: aString [
 	
 	| fileSystem entries directoryEntries parser root counter |
@@ -447,7 +440,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importEjbJarFromFolderGUI [
 
 	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEAs Menu'>
@@ -460,7 +453,7 @@ MooseModel >> importEjbJarFromFolderGUI [
 	self importEjbJarFromFolder: folderName pathName.
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> initAndOpenJEEFromFolder: srcFolderString [
 	
 	| applicationName |
@@ -508,7 +501,7 @@ MoosePanel open.
 
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> instanciateJBeansFromAnnotations [
 	<menuItem: 'Import beans from annotations' category: 'JEAs Menu'>
 	
@@ -573,20 +566,12 @@ MooseModel >> isEJB30 [
 	^self ejbVersion = #EJB30
 ]
 
-{ #category : #'*Moose-JEE-Model' }
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 
 	MJSQLImporter new populate: self withRelationalElementsFrom: aBlackBoard.
 	
 	^self
-	
-	"| dataBases |
-	dataBases := aBlackBoard databases collect: [:each | each createRelationalElements ].
-	self addAll: dataBases.
-	self addAll: (dataBases flatCollect: [:each | each tables ]).
-	self addAll: (self allTables flatCollect: [:each | each columns]).
-	
-	^self"
 ]
 
 { #category : #'*Moose-JEE-Model' }
