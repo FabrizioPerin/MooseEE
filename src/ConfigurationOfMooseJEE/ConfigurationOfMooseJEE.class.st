@@ -249,14 +249,14 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			spec
 				className: 'ConfigurationOfPetitSQLParser';
 				file: 'ConfigurationOfPetitSQLParser';
-				version: 'default';
+				version: 'defaultWithoutPetit';
 				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
 
 		spec  project: 'PetitJSPParser for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfPetitJSPParser';
 				file: 'ConfigurationOfPetitJSPParser';
-				version: 'default';
+				version: 'defaultWithoutPetit';
 				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 		
 		spec 
