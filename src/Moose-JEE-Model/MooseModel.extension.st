@@ -454,6 +454,45 @@ MooseModel >> importEjbJarFromFolderGUI [
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
+MooseModel >> importJSPagesContainedInto: aFolderPath [
+	
+	| parser result fileSystem entries fileEntries counter |
+
+	PPParserResource reset.
+	parser := PPParserResource current parserAt: PetitJSPParser.
+	
+	fileSystem := FSDiskFilesystem current referenceTo: aFolderPath.
+	entries := FSCollectVisitor breadthFirst: fileSystem.
+	
+	fileEntries := entries select: [:entry | '^.*.jsp$' asRegexIgnoringCase matches: entry reference name ].
+
+	counter := 1.			
+	UIManager default
+		displayProgress: 'Importing From jsp files'
+		at: Sensor cursorPoint
+		from: 1 
+		to: fileEntries size
+		during: [ :bar | 
+			bar  value: counter.
+			
+			fileEntries do: [:entry |
+					
+					 | fileStream |
+					
+					fileStream := StandardFileStream readOnlyFileNamed: (entry reference name).
+					result := parser parse: ([ fileStream contentsOfEntireFile ]
+							ensure: [ fileStream close ]).
+					
+					self halt.
+					
+					self populateWithRelationalElementsFrom: parser blackBoard.
+					
+					counter := counter + 1.
+					bar value: counter.
+				]].
+]
+
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> initAndOpenJEEFromFolder: srcFolderString [
 	
 	| applicationName |
