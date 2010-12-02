@@ -480,16 +480,29 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 					 | fileStream |
 					
 					fileStream := StandardFileStream readOnlyFileNamed: (entry reference name).
-					result := parser parse: ([ fileStream contentsOfEntireFile ]
+					result := parser matchesIn: ([ fileStream contentsOfEntireFile ]
 							ensure: [ fileStream close ]).
 					
 					self halt.
 					
-					self populateWithRelationalElementsFrom: parser blackBoard.
+					"self populateWithRelationalElementsFrom: parser blackBoard."
 					
 					counter := counter + 1.
 					bar value: counter.
 				]].
+]
+
+{ #category : #'*Moose-JEE-Model-Importers' }
+MooseModel >> importJSPagesContainedIntoAFolderGUI [
+
+	<menuItem: 'Import JS Pages from folder' category: 'JEAs Menu'>
+
+	| folderName |
+	
+	folderName := UIManager default chooseDirectory: 'Folder Name:'.
+	folderName = '' ifTrue: [^self].
+
+	self importJSPagesContainedInto: folderName pathName.
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
