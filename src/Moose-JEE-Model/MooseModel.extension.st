@@ -456,11 +456,8 @@ MooseModel >> importEjbJarFromFolderGUI [
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importJSPagesContainedInto: aFolderPath [
 	
-	| parser result fileSystem entries fileEntries counter |
+	| result fileSystem entries fileEntries counter |
 
-	PPParserResource reset.
-	parser := PPParserResource current parserAt: PetitJSPParser.
-	
 	fileSystem := FSDiskFilesystem current referenceTo: aFolderPath.
 	entries := FSCollectVisitor breadthFirst: fileSystem.
 	
@@ -475,15 +472,16 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 		during: [ :bar | 
 			bar  value: counter.
 			
-			fileEntries do: [:entry |
+			fileEntries do: [:entry |					
+					 | fileStream parser |
 					
-					 | fileStream |
+					PPParserResource reset.
+					parser := PPParserResource current parserAt: PetitJSPParser.
 					
 					fileStream := StandardFileStream readOnlyFileNamed: (entry reference name).
-					result := parser matchesIn: ([ fileStream contentsOfEntireFile ]
-							ensure: [ fileStream close ]).
-					
-					self halt.
+					result := parser parseJSPFrom: fileStream.
+					"result := parser matchesIn: ([ fileStream contentsOfEntireFile ]
+							ensure: [ fileStream close ])."
 					
 					"self populateWithRelationalElementsFrom: parser blackBoard."
 					
