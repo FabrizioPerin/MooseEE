@@ -480,11 +480,9 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 					
 					fileStream := StandardFileStream readOnlyFileNamed: (entry reference name).
 					result := parser parseJSPFrom: fileStream.
-					"result := parser matchesIn: ([ fileStream contentsOfEntireFile ]
-							ensure: [ fileStream close ])."
 					
-					"self populateWithRelationalElementsFrom: parser blackBoard."
-					
+					self populateWithJSPsFrom:  parser blackboard.
+
 					counter := counter + 1.
 					bar value: counter.
 				]].
@@ -614,6 +612,14 @@ MooseModel >> isEJB21 [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> isEJB30 [
 	^self ejbVersion = #EJB30
+]
+
+{ #category : #'*Moose-JEE-Model-Importers' }
+MooseModel >> populateWithJSPsFrom: aBlackBoard [
+
+	MJJSPImporter new populate: self withJSPsFrom: aBlackBoard.
+	
+	^self
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
