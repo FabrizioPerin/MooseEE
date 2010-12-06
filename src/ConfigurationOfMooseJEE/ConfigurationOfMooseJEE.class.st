@@ -242,7 +242,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
-				version: '1.1.1';
+				version: '1.1.0';
 				repository: 'http://www.squeaksource.com/XMLSupport' ].
 		
 		spec  project: 'PetitSQLParser for MooseJEE' with: [
