@@ -20,6 +20,12 @@ FAMIXClass >> accessATable: aBooleanOrNil [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXClass >> addIncomingJspInvocation: aJSPInvocation [
+		
+	^self incomingJspInvocation add: aJSPInvocation
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> completeHierarchyInWhichThisResides [ 
 
 	| collection |
@@ -94,6 +100,20 @@ FAMIXClass >> implementedInterfaces [
 	"returns a collection with all superclasses of this class"
 
 	^self directSuperclasses select: #isInterface.
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXClass >> incomingJspInvocation [
+	<MSEProperty: #incomingJspInvocation type: #MJFAMIXJSPInvocation opposite: #invocationTarget> <multivalued>  <derived>
+	<MSEComment: 'Map relationship.'>
+	
+	^self privateState attributeAt: #incomingJspInvocation ifAbsent: [FMMultivalueLink on: self opposite: #invocationTarget:].
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXClass >> incomingJspInvocation: aJSPInvocation [
+		
+	^self incomingJspInvocation value: aJSPInvocation
 ]
 
 { #category : #'*Moose-JEE-Model' }

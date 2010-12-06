@@ -36,6 +36,17 @@ MooseModel >> allJEEBeans [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> allJSPInvocations [
+	<navigation: 'All JSPage Invocations'>
+
+	| group |
+	
+	group :=  self allWithType: MJFAMIXJSPInvocation.
+	group description: 'JSPage Invocations'.
+	^group
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allLayers [
 
 	^self allPresentationLayer, self allLogicLayer, self allDataLayer, self allServiceLayer

@@ -9,6 +9,11 @@ Class {
 }
 
 { #category : #accessing }
+MJFAMIXJSPPage >> addOutgoingJspInvocations: aMapping [
+	outgoingJspInvocations add: aMapping.
+]
+
+{ #category : #accessing }
 MJFAMIXJSPPage >> filedIn [
 	^ filedIn
 ]
@@ -21,18 +26,14 @@ MJFAMIXJSPPage >> filedIn: aFilePath [
 { #category : #accessing }
 MJFAMIXJSPPage >> initialize [
 	super initialize.
-	
-	outgoingJspInvocations := FMMultivalueLink on: self opposite: #mapTarget:.
-	
-
-	^self
+	outgoingJspInvocations := FMMultivalueLink on: self opposite: #invocationSource:.
 ]
 
 { #category : #accessing }
 MJFAMIXJSPPage >> outgoingJspInvocations [
 
-	<MSEProperty: #mappedBy type: #MJFAMIXJSPInvocation opposite: #mapTarget> <multivalued> <derived>
-	<MSEComment: 'Map relationships.'>
+	<MSEProperty: #outgoingJspInvocations type: #MJFAMIXJSPInvocation opposite: #invocationSource> <multivalued> <derived>
+	<MSEComment: 'invocation relationships.'>
 	
 	^outgoingJspInvocations
 ]

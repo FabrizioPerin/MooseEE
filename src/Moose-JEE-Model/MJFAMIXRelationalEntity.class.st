@@ -43,7 +43,7 @@ MJFAMIXRelationalEntity >> mappedBy [
 
 { #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> mappedBy: aMapping [
-	
+	self flag: #toRemove.
 	mappedBy value: aMapping
 ]
 

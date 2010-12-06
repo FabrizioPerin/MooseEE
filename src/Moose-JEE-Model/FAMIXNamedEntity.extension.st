@@ -37,5 +37,6 @@ FAMIXNamedEntity >> maps [
 
 { #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> maps: aMapping [
+	self flag: #toRemove.
 	self maps value: aMapping
 ]
