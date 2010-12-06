@@ -17,11 +17,26 @@ MJJSPImporter >> populate: aMooseModel withJSPsFrom: aBlackBoard [
 	jsPage name: draftJSPage name.
 	jsPage filedIn: draftJSPage filedIn.
 	
-	self halt.
-	
 	aMooseModel add: jsPage.
-	"aMooseModel addAll: (dataBases flatCollect: [:each | each tables ]).
-	aMooseModel addAll: (aMooseModel allTables flatCollect: [:table | table columns ])."
 	
+	draftJSPage containedTags do: [:each | 
+		
+			(each name = 'useBean') 
+				ifTrue: [
+					| att class jspInvocation |
+					
+					att := (each attributes select: [:attr | attr name = 'class']) first.
+					
+					class := aMooseModel entityNamed: (att value copyReplaceAll: '.' with: '::').
+					self halt.
+					jspInvocation := MJFAMIXJSPInvocation new invocationSource: jsPage; invocationTarget: class.
+					
+					class addIncomingJspInvocation: jspInvocation.
+					jsPage addOutgoingJspInvocations: jspInvocation.
+					
+					aMooseModel add: jspInvocation.
+					]
+	].
+
 	^aMooseModel
 ]
