@@ -1565,6 +1565,159 @@ JEETestModels >> root [
 ]
 
 { #category : #models }
+JEETestModels >> sampleMooseModel [
+	
+	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean acmpEntity |
+	
+	mooseModel := MooseModel new.
+	aPackage := FAMIXNamespace new
+			name: #aPackage;
+			yourself.
+	anotherPackage := FAMIXNamespace new
+			name: #anotherPackage;
+			yourself.
+
+	aStatelessSessionBean := FAMIXClass new
+			name: #AStatelessSessionBean;
+			container: aPackage;
+			yourself.
+
+	aStatelessSessionBean addMethod: (FAMIXMethod new
+				name: #aMethod;
+				parentType: aStatelessSessionBean;
+				signature: #aMethod asString;
+				yourself
+			);
+			addMethod: (FAMIXMethod new
+				name: #anotherMethod;
+				parentType: aStatelessSessionBean;
+				signature: #anotherMethod asString;
+				yourself
+			).
+	aStatefulSessionBean := FAMIXClass new
+			name: #AStatefulSessionBean;
+			container: aPackage;
+			yourself.
+	aStatefulSessionBean
+			addMethod: (FAMIXMethod new
+				name: #someMethod;
+				parentType: aStatefulSessionBean;
+				signature: #someMethod asString;
+				yourself
+			);
+			addMethod: (FAMIXMethod new
+				name: #someOtherMethod;
+				parentType: aStatefulSessionBean;
+				signature: #someOtherMethod asString;
+				yourself
+			).
+	
+	acmpEntity := FAMIXClass new
+			name: #ACMPEntityBean;
+			container: anotherPackage;
+			yourself.
+	
+	acmpEntity 
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att1';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		);
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att2';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		);
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att3';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		);
+		addAttribute: (FAMIXAttribute new 
+			name: 'Att4';
+			parentType: acmpEntity;
+			hasClassScope: true;
+			yourself
+		).
+
+		
+	mooseModel
+		addAll: aStatelessSessionBean methods;
+		addAll: aStatefulSessionBean methods;
+		add: aPackage;
+		add: anotherPackage;
+		add: (FAMIXClass new
+			name: #AStatelessSessionHome;
+			container: aPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AStatelessSession;
+			container: aPackage;
+			yourself
+		);
+		add: aStatelessSessionBean;
+		add: (FAMIXClass new
+			name: #AStatefulSessionHome;
+			container: aPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AStatefulSession;
+			container: aPackage;
+			yourself
+		);
+		add: aStatefulSessionBean;
+		add: (FAMIXClass new
+			name: #ACMPEntityHome;
+			container: anotherPackage;
+			yourself
+		);
+		add: acmpEntity;
+		addAll: acmpEntity attributes; 
+		add: (FAMIXClass new
+			name: #ACMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntityPK;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntityHome;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntityBean;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AMessageBean;
+			container: aPackage;
+			yourself
+		).
+
+	^mooseModel
+]
+
+{ #category : #models }
 JEETestModels >> sampleMooseModelWithDB [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean database dbTable1 dbTable2 dbTable3 tableColumn1 tableColumn2 tableColumn3 tableColumn5 tableColumn6 tableColumn4 acmpEntity |

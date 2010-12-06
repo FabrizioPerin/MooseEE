@@ -17,7 +17,7 @@ MJFAMIXMappingTests >> testFAMIXMappingCreation [
 	
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
-		
+	
 	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 	
 	class addMaps: mapping.
