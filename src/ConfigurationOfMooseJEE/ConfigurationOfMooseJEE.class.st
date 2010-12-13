@@ -192,12 +192,12 @@ ConfigurationOfMooseJEE >> default: spec [
 					version: 'default';
 					repository: 'http://www.squeaksource.com/Moose' ].
 		
-		spec  project: 'XMLSupport for MooseJEE' with: [
+		"spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
-				version: '1.0.6';
-				repository: 'http://www.squeaksource.com/XMLSupport' ].
+				version: '1.1.1';
+				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
 		spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
@@ -243,12 +243,12 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 	spec for: #common do: [
 		spec blessing: #default.
 		
-		spec  project: 'XMLSupport for MooseJEE' with: [
+		"spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
 				version: '1.1.1';
-				repository: 'http://www.squeaksource.com/XMLSupport' ].
+				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
 		spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
@@ -268,7 +268,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
 			package: 'Opax' with: [
 				spec repository: 'http://www.squeaksource.com/OPAX'.
-				spec requires: 'XMLSupport for MooseJEE']; 
+				"spec requires: 'XMLSupport for MooseJEE'"]; 
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
@@ -336,7 +336,7 @@ ConfigurationOfMooseJEE >> version11: spec [
 		spec timestamp: '27/08/2010 15:00'.
 		
 		spec project: 'Moose for MooseJEE' with: '4.1'.
-		spec project: 'XMLSupport for MooseJEE' with: '1.0.6'.
+		spec project: 'XMLSupport for MooseJEE' with: '1.1.1'.
 		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
 		
 		spec
