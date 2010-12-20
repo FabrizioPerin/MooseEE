@@ -60,7 +60,7 @@ MJFAMIXTableGroup >> viewUMLTablesWithEJBeansOn: view [
 			view interaction nodraggable.
 			view shape rectangle withoutBorder.
 			view nodes: notLonelyTables forEach: [:table |
-						table mappedNamedEntities first implementedEntityBean viewUMLOfImplementorsOn: view.
+						table mappedNamedEntities first implementedEntityBean viewUMLOfImplementorOn: view.
 						table viewUMLTableOn: view.
 						view shape line.
 						view edges: table mooseModel allMaps from: #mapSource to: #mapTarget.

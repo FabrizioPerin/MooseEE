@@ -156,31 +156,32 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 
 	self isEJB30 
 	ifTrue:[	
-		tableEntities := (self allAnnotationTypes select: [:each | each name = 'Table']) first annotatedEntities.
-		tables := self allTables.
-		counter :=  1.
+		tableEntities := (self allAnnotationTypes select: [:each | each name = 'Table']).
+		tableEntities isEmpty ifFalse: [
+			tableEntities := tableEntities first annotatedEntities.
+			tables := self allTables.
+			counter :=  1.
 
-		UIManager default
-			displayProgress: 'Building relations among Tables and Classes'
-			at: Sensor cursorPoint
-			from: counter
-			to: (tableEntities size * tables size)
-			during: [ :bar |
-				counter := counter+1.
-				bar value: counter.
-			
-				tables do: [:table | 
-					tableEntities do: [:class |
-						"(table nameWithAnnotationAsRegex matches: class sourceText)"
-						((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
+			UIManager default
+				displayProgress: 'Building relations among Tables and Classes'
+				at: Sensor cursorPoint
+				from: counter
+				to: (tableEntities size * tables size)
+				during: [ :bar |
+					counter := counter+1.
+					bar value: counter.
+				
+					tables do: [:table | 
+						tableEntities do: [:class |
+							"(table nameWithAnnotationAsRegex matches: class sourceText)"
+							((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
-										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
-										class addMaps: mapping.
-										table addMappedBy: mapping.
-										self add: mapping.].
+									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+									class addMaps: mapping.
+									table addMappedBy: mapping.
+									self add: mapping.].
 								counter := counter+1.
-								bar value: counter.
-								]]]]
+								bar value: counter.]]]]]
 	ifFalse:[
 		tableEntities := self allClasses select: [:class | class methods anySatisfy: #doesExecuteAQuery].
 		tables := self allTables.
