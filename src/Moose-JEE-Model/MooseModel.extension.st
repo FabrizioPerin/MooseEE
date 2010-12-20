@@ -392,14 +392,24 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result |
 
-	PPParserResource reset.
-	parser := PPParserResource current parserAt: PetitSQLiteParser.
-
-	result := parser parse: ([ aFileStream contentsOfEntireFile ]
-							ensure: [ aFileStream close ]).
+	UIManager default
+		displayProgress: 'Importing DB From an SQL file'
+		at: Sensor cursorPoint
+		from: 1 
+		to: 4
+		during: [ :bar | 
+			PPParserResource reset.
+			parser := PPParserResource current parserAt: PetitSQLiteParser.
 	
-	self populateWithRelationalElementsFrom: parser blackBoard.
+			bar value: 2.
+			bar value: 'Parsing SQL file'.
+			result := parser parse: ([ aFileStream contentsOfEntireFile ]
+										ensure: [ aFileStream close ]).
+			bar value: 3.
+			bar value: 'Populate the model'.
+			self populateWithRelationalElementsFrom: parser blackBoard.
 
+			bar value: 4.].
 	^self
 
 ]
