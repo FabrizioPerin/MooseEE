@@ -84,12 +84,31 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 
 	| dataBases |
-
-	dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
-
-	aMooseModel addAll: dataBases.
-	aMooseModel addAll: (dataBases flatCollect: [:each | each tables ]).
-	aMooseModel addAll: (aMooseModel allTables flatCollect: [:table | table columns ]).
+	
+	UIManager default
+		displayProgress: 'Importing DB From an SQL file'
+		at: Sensor cursorPoint
+		from: 1 
+		to: 5
+		during: [ :bar | 
+		
+			bar value: 2.
+			bar value: 'Instantiating  the data base'.
+			
+			dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
+			aMooseModel addAll: dataBases.
+			
+			bar value: 3.
+			bar value: 'Instantiating the tables'.
+			
+			aMooseModel addAll: (dataBases flatCollect: [:each | each tables ]).
+	
+			bar value: 4.
+			bar value: 'Instantiating the attributes'.
+	
+			aMooseModel addAll: (aMooseModel allTables flatCollect: [:table | table columns ]).
+			
+			bar value: 5].
 	
 	^aMooseModel
 ]
