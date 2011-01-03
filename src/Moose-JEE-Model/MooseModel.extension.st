@@ -390,13 +390,13 @@ MooseModel >> ejbVersion: aSymbol [
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFile: aFileStream [
 	
-	| parser result |
+	| parser result ejbVer |
 
 	UIManager default
 		displayProgress: 'Importing DB From an SQL file'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 4
+		to: 5
 		during: [ :bar | 
 			PPParserResource reset.
 			parser := PPParserResource current parserAt: PetitSQLiteParser.
@@ -408,10 +408,19 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 			bar value: 3.
 			bar value: 'Populate the model'.
 			self populateWithRelationalElementsFrom: parser blackBoard.
+			
+			ejbVer := UITheme builder 
+							chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
+			self ejbVersion: ejbVer.
 
-			bar value: 4.].
+			bar value: 4.
+			bar value: 'Building relations'.
+			
+			self buildRelationsAmongDBTablesAndClasses.			
+			self buildRelationsAmongTableColumnsAndMethods.
+			
+			bar value: 5].
 	^self
-
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
