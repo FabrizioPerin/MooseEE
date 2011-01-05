@@ -1847,7 +1847,7 @@ JEETestModels >> sampleMooseModelWithDB [
 	tableColumn5 := MJFAMIXColumn new
 						name: #Column3;
 						isPK: false;
-						isFK: false;
+						isFK: true;
 						ownerTable:  dbTable2;
 						type: 'integer'.
 	
