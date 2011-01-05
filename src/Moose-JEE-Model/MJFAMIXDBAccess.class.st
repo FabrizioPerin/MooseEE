@@ -3,7 +3,7 @@ A FAMIXDBAccess represents accesses to a database Table by a behavioural entity.
 "
 Class {
 	#name : #MJFAMIXDBAccess,
-	#superclass : #FAMIXAssociation,
+	#superclass : #MJAssociation,
 	#category : #'Moose-JEE-Model'
 }
 

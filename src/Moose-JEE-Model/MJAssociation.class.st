@@ -1,13 +1,13 @@
 Class {
-	#name : #MJAssociations,
+	#name : #MJAssociation,
 	#superclass : #FAMIXAssociation,
 	#category : #'Moose-JEE-Model'
 }
 
 { #category : #'as yet unclassified' }
-MJAssociations class >> annotation [
+MJAssociation class >> annotation [
 
-	<MSEClass: #MJAssociations super: #FAMIXAssociation>
+	<MSEClass: #MJAssociation super: #FAMIXAssociation>
 	<package: #'Moose-JEE-Model'>
 
 ]

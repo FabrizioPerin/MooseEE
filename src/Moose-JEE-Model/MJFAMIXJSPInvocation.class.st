@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXJSPInvocation,
-	#superclass : #MJAssociations,
+	#superclass : #MJAssociation,
 	#instVars : [
 		'invocationSource',
 		'invocationTarget'

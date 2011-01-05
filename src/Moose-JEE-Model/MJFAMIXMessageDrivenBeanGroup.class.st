@@ -1,18 +1,18 @@
 Class {
-	#name : #MJFAMIXMDBeanGroup,
+	#name : #MJFAMIXMessageDrivenBeanGroup,
 	#superclass : #MJAbstractGroup,
 	#category : #'Moose-JEE-Model'
 }
 
 { #category : #meta }
-MJFAMIXMDBeanGroup class >> annotation [
+MJFAMIXMessageDrivenBeanGroup class >> annotation [
 
-	<MSEClass: #MJFAMIXMDBeanGroup super: #MJAbstractGroup>
+	<MSEClass: #MJFAMIXMessageDrivenBeanGroup super: #MJAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXMDBeanGroup >> viewAsSelectionOnSystemComplexity [
+MJFAMIXMessageDrivenBeanGroup >> viewAsSelectionOnSystemComplexity [
 
 	<menuItem: 'As selection on System Complexity' category: 'JEAs Visualizations'>
 

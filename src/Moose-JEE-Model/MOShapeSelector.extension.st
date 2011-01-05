@@ -1,6 +1,32 @@
 Extension { #name : #MOShapeSelector }
 
 { #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> DBTableShape [
+	| builder |
+	builder := MOFormsBuilder new.
+	builder column; fill.
+	builder row; center; row; left.
+	
+	builder 
+		x: 1 
+		y: 1 
+		add: (MORectangleShape new 
+				text: [ :table | table name];
+				fontSize: 10;
+				textHorizontalPadding: 1).
+	builder 
+		x: 1 
+		y: 2 
+		add: (MORectangleShape new 
+				text: [ :table | 
+						(table columns sort:[:a :b | a name < b name]) asArray 
+							inject: '' into: [ :sum :el | sum, el name, String cr]];
+						textHorizontalPadding: 1).
+	
+	^ view shape: builder shape
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> umlClassDiagramLikeForTable [
 	| builder |
 	builder := MOFormsBuilder new.
@@ -11,12 +37,12 @@ MOShapeSelector >> umlClassDiagramLikeForTable [
 	builder x: 1 y: 1 add: (MORectangleShape new text: [ :table | 
 		table inUse 
 			ifTrue: ['']
-			ifFalse: [table name]]; fillColor: Color transparent; fontColor: Color red; fontSize: 10; textAlignment: #center; textHorizontalPadding: 2; textVerticalPadding: 2).
+			ifFalse: [table name]]; fillColor: Color transparent; fontColor: Color red; fontSize: 10; textAlignment: #center"; textHorizontalPadding: 2; textVerticalPadding: 2").
 	
 	builder x: 1 y: 1 add: (MORectangleShape new text: [ :table | 
 		table inUse 
 			ifTrue: [table name]
-			ifFalse: ['']]; fillColor: Color transparent; fontSize: 10; textAlignment: #center; textHorizontalPadding: 2; textVerticalPadding: 2).
+			ifFalse: ['']]; fillColor: Color transparent; fontSize: 10; textAlignment: #center"; textHorizontalPadding: 2; textVerticalPadding: 2").
 			
 			
 	builder x: 1 y: 2 add: ((MORectangleShape new withBorder) text: [ :table |
@@ -28,7 +54,7 @@ MOShapeSelector >> umlClassDiagramLikeForTable [
 			]).
 		localText isNil 
 			ifTrue: [' ']
-			ifFalse: [localText] ]; fontColor: Color red; fontSize: 6; textAlignment: #left; textVerticalPadding: 2 ).
+			ifFalse: [localText] ]; fontColor: Color red; "fontSize: 6;" textAlignment: #left"; textVerticalPadding: 2" ).
 		
 		
 	builder x: 1 y: 3 add: ((MORectangleShape new withBorder) text: [ :table | 
@@ -40,7 +66,7 @@ MOShapeSelector >> umlClassDiagramLikeForTable [
 			]).
 		localText isNil 
 			ifTrue: [' ']
-			ifFalse: [localText] ]; fontSize: 6; textAlignment: #left; textVerticalPadding: 2 ).
+			ifFalse: [localText] ]; "fontSize: 6;" textAlignment: #left"; textVerticalPadding: 2" ).
 	
 	^ view shape: builder shape
 ]

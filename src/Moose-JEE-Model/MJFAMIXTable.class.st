@@ -91,6 +91,13 @@ MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTable >> viewDBTableOn: view [
+	view shape DBTableShape.
+	view interaction popupText.
+	view node: self.
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTable >> viewUMLTable [
 	<menuItem: 'Table UML class diagram like' category: 'MooseJEE Visualizations'> 
 	

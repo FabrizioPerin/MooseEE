@@ -86,7 +86,7 @@ MooseModel >> allMessageDrivenBeans [
 	
 	| group |
 	
-	group :=  self allWithType: MJFAMIXMessageDrivenBean ofGroupClass: MJFAMIXMDBeanGroup.
+	group :=  self allWithType: MJFAMIXMessageDrivenBean ofGroupClass: MJFAMIXMessageDrivenBeanGroup.
 	group description: 'All Message Driven Beans'.
 	^group
 ]

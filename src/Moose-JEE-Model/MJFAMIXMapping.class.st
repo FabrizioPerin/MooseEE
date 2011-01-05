@@ -14,7 +14,7 @@ maps
 "
 Class {
 	#name : #MJFAMIXMapping,
-	#superclass : #MJAssociations,
+	#superclass : #MJAssociation,
 	#instVars : [
 		'mapSource',
 		'mapTarget'
@@ -24,7 +24,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXMapping class >> annotation [
-	<MSEClass: #MJFAMIXMapping super: #MJAssociations>
+	<MSEClass: #MJFAMIXMapping super: #MJAssociation>
 	<package: #'Moose-JEE-Model'>
 	^self
 ]

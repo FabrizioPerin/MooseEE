@@ -13,6 +13,28 @@ MJFAMIXTableGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewDBTables [
+	<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> 
+
+	| view |
+	view := MOViewRenderer new.
+	self viewDBTablesOn: view.
+	view open.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewDBTablesOn: view [
+	
+	view shape rectangle withoutBorder.
+	view interaction nodraggable.
+	view node: #tables forIt: [ 
+		(self sorted: [:a :b | a name < b name ])  do: [:table | 
+				table viewDBTableOn: view.].
+			view gridLayout].
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewUMLTables [
 	<menuItem: 'Tables UML class diagram like' category: 'JEAs Visualizations'> 
 
