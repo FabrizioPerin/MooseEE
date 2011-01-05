@@ -2,7 +2,9 @@ Class {
 	#name : #MJFAMIXRelationalEntity,
 	#superclass : #FAMIXNamedEntity,
 	#instVars : [
-		'mappedBy'
+		'mappedBy',
+		'references',
+		'referencedBy'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -22,6 +24,20 @@ MJFAMIXRelationalEntity >> addMappedBy: aMapping [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> addReferencedBy: aForeignKeyAssoc [
+
+	referencedBy add: aForeignKeyAssoc
+
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> addReferences: aForeignKeyAssoc [
+
+	references add: aForeignKeyAssoc
+
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> belongsTo [ 
 	^''
 ]
@@ -30,6 +46,8 @@ MJFAMIXRelationalEntity >> belongsTo [
 MJFAMIXRelationalEntity >> initialize [
 	super initialize.
 	mappedBy := FMMultivalueLink on: self opposite: #mapTarget:.
+	references := FMMultivalueLink on: self opposite: #sourceTable:.
+	referencedBy := FMMultivalueLink on: self opposite: #targetTable:.
 ]
 
 { #category : #'as yet unclassified' }
@@ -50,4 +68,22 @@ MJFAMIXRelationalEntity >> mappedBy: aMapping [
 { #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> mappedNamedEntities [
 	^self mapDirection: #mapSource on: self mooseModel allMaps 
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> referencedBy [
+
+	<MSEProperty: #referencedBy type: #MJFAMIXFKAssociation opposite: #targetTable> <multivalued> <derived>
+	<MSEComment: 'Foreign Key constrait.'>
+	
+	^referencedBy 
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> references [
+
+	<MSEProperty: #references type: #MJFAMIXFKAssociation opposite: #sourceTable> <multivalued> <derived>
+	<MSEComment: 'Foreign Key constrait.'>
+	
+	^references
 ]
