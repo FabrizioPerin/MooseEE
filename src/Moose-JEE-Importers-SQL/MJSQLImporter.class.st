@@ -7,25 +7,38 @@ Class {
 { #category : #'as yet unclassified' }
 MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 
+	| fkAssociations |
+	
+	fkAssociations := OrderedCollection new.
+
 	dbTables do: [:table |
 		aDraftObjectTableGroup do: [:draftTable |
-			(table name = draftTable name) ifTrue: [
+			(table name = draftTable name) ifTrue: [ " table contain the db table with the foreign keys"
 				draftTable constraints do: [:constr |
 					constr isFKConstraint ifTrue: [
 						| referencedTable |
 						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
 						"set as foreign key the columns of the table having the constraint"
 						(1 to: (constr pkColumnsName size)) do: [:index |
-							| tableColumn |
+							| tableColumn referencedTableColumn fkAssoc |
 							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
+							referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
 							tableColumn isFK: true.
-							tableColumn references: (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
+							
+							"creation of the association"	
+							fkAssoc := MJFAMIXFKAssociation new targetTable: referencedTableColumn; sourceTable: tableColumn.
+							referencedTableColumn addReferencedBy: fkAssoc.
+							tableColumn addReferences: fkAssoc.
+							
+							fkAssociations add: fkAssoc.							
 						]
 					]
 				]
 			]
 		]
-	]
+	].
+
+	^fkAssociations.
 ]
 
 { #category : #'as yet unclassified' }
@@ -45,16 +58,14 @@ MJSQLImporter >> instanciateAColumnFrom: aDraftObject [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporter >> instanciateADataBaseFrom: aDraftObject [
+MJSQLImporter >> instanciateADataBaseFrom: aDraftDataBaseObject [
 		
 	| dB |
 	
 	dB := MJFAMIXDataBase new.
-	dB name: aDraftObject name.
-	dB tables: (aDraftObject tables collect: [:aTableRepresentation | self instanciateADataBaseTableFrom: aTableRepresentation ]).
+	dB name: aDraftDataBaseObject name.
+	dB tables: (aDraftDataBaseObject tables collect: [:aTableRepresentation | self instanciateADataBaseTableFrom: aTableRepresentation ]).
 	
-	self computeForeignKeysFor: dB tables from: aDraftObject tables.
-		
 	^dB
 ]
 
@@ -68,14 +79,9 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
 	
 	"setting up the primary keys"
-	aDraftObjectTable constraints isEmpty
-		ifFalse: [
-			aDraftObjectTable constraints do: [:constraint | 
-				constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
-						(tab columns select: [:col | col name = attNames]) first isPK: true]
-				].
-			].
-		].
+	aDraftObjectTable constraints do: [:constraint | 
+		constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
+				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
 	
 	^tab
 ]
@@ -89,7 +95,7 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 		displayProgress: 'Importing DB From an SQL file'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 5
+		to: 6
 		during: [ :bar | 
 		
 			bar value: 2.
@@ -108,7 +114,13 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 	
 			aMooseModel addAll: (aMooseModel allTables flatCollect: [:table | table columns ]).
 			
-			bar value: 5].
+			bar value: 5.
+			bar value: 'Computing foreign keys constraints'.
+			
+			aBlackBoard databases do: [:aDBRepresentation | 
+				aMooseModel addAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )].
+			
+			bar value: 6].
 	
 	^aMooseModel
 ]
