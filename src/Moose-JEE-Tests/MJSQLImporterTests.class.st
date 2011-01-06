@@ -490,10 +490,15 @@ MJSQLImporterTests >> testPopulateWithRelationalElementsFrom [
 	self assert: col2Tab1 isPK.
 	self assert: col3Tab1 isPK.
 	
-	self assert: col2Tab3 references equals: col2Tab1. 
-	self assert: col3Tab3 references equals: col3Tab1. 
+	self assert: (col2Tab3 references size = 1).
+	self assert: ( col2Tab3 references first isKindOf: MJFAMIXFKAssociation).
+	self assert: (col2Tab3 references first targetTable = col2Tab1).
 	
+	self assert: (col3Tab3 references size = 1).
+	self assert: (col3Tab3 references first isKindOf: MJFAMIXFKAssociation).
+	self assert: (col3Tab3 references first targetTable = col3Tab1).
 	
-	
-
+	self assert: (model allFKAssociations size = 2).
+	self assert: ((model allWithType: MJFAMIXFKAssociation) size = model allFKAssociations size).
+	 
 ]
