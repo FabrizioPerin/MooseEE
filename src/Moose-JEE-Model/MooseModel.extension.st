@@ -30,6 +30,17 @@ MooseModel >> allEntityBeans [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> allFKAssociations [
+	<navigation: 'All FK associations'>
+
+	| group |
+	
+	group :=  self allWithType: MJFAMIXFKAssociation.
+	group description: 'All FK associations'.
+	^group
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allJEEBeans [
 
 	^self allSessionBeans, self allEntityBeans, self allMessageDrivenBeans.
