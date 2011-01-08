@@ -8,6 +8,55 @@ Class {
 }
 
 { #category : #elements }
+JEETestModels >> aTableThatReferencesItselfsThroughAForeignKey [
+
+^'CREATE TABLE A_Asset(
+    A_Asset_ID                   NUMBER(10, 0)      NOT NULL,
+    AD_Client_ID                 NUMBER(10, 0)      NOT NULL,
+    AD_Org_ID                    NUMBER(10, 0)      NOT NULL,
+    Created                      DATE               DEFAULT SYSDATE NOT NULL,
+    CreatedBy                    NUMBER(10, 0)      NOT NULL,
+    Updated                      DATE               DEFAULT SYSDATE NOT NULL,
+    UpdatedBy                    NUMBER(10, 0)      NOT NULL,
+    Value                        NVARCHAR2(40)      NOT NULL,
+    Name                         NVARCHAR2(60)      NOT NULL,
+    Description                  NVARCHAR2(255),
+    Help                         NVARCHAR2(2000),
+    A_Asset_Group_ID             NUMBER(10, 0)      NOT NULL,
+    Parent_Asset_ID              NUMBER(10, 0),
+    M_Product_ID                 NUMBER(10, 0),
+    M_AttributeSetInstance_ID    NUMBER(10, 0),
+    C_UOM_ID                     NUMBER(10, 0),
+    SerNo                        NVARCHAR2(40),
+    Lot                          NVARCHAR2(40),
+    VersionNo                    NVARCHAR2(40),
+    GuaranteeDate                DATE               NOT NULL,
+    AssetServiceDate             DATE               NOT NULL,
+    AssetDisposalDate            DATE               NOT NULL,
+    LocationComment              NVARCHAR2(255),
+    M_Locator_ID                 NUMBER(10, 0),
+    C_BPartner_ID                NUMBER(10, 0),
+    C_BPartner_Location_ID       NUMBER(10, 0),
+    AD_User_ID                   NUMBER(10, 0),
+    C_Location_ID                NUMBER(10, 0),
+    LastMaintenanceDate          DATE               NOT NULL,
+    NextMaintenanceDate          DATE               NOT NULL,
+    LastMaintenanceUseUnit       NUMBER             DEFAULT 0 NOT NULL,
+    NextMaintenanceUseUnit       NUMBER             DEFAULT 0 NOT NULL,
+    Lease_BPartner_ID            NUMBER(10, 0),
+    LeaseTerminationDate         DATE               NOT NULL,
+    Processing                   CHAR(1),
+    CONSTRAINT A_Asset_Key PRIMARY KEY (A_Asset_ID)
+);
+
+
+ALTER TABLE A_Asset ADD CONSTRAINT AAsset_Parent 
+    FOREIGN KEY (Parent_Asset_ID)
+    REFERENCES A_Asset(A_Asset_ID);'
+
+]
+
+{ #category : #elements }
 JEETestModels >> attributeCalled: aString belongsTo: aType withClassScope: aBoolean [
 	|attribute|
 
@@ -1715,6 +1764,24 @@ JEETestModels >> sampleMooseModel [
 		).
 
 	^mooseModel
+]
+
+{ #category : #models }
+JEETestModels >> sampleMooseModelContainingJustADB [
+	
+	| mooseModel parser |
+
+	mooseModel := MooseModel new.
+	mooseModel name: 'testDataBase'.
+	
+	PPParserResource reset.
+	parser := PPParserResource current parserAt: PetitSQLiteParser.
+	
+	parser parse: self threeTablesConnectedThroughForeignKey.
+
+	mooseModel populateWithRelationalElementsFrom: parser blackBoard.
+	
+	^mooseModel 
 ]
 
 { #category : #models }
@@ -3758,4 +3825,104 @@ JEETestModels >> testNamespace [
 			yourself.
 
 	^namespace 
+]
+
+{ #category : #elements }
+JEETestModels >> threeTablesConnectedThroughForeignKey [
+
+^'CREATE TABLE A_Asset(
+    A_Asset_ID                   NUMBER(10, 0)      NOT NULL,
+    AD_Client_ID                 NUMBER(10, 0)      NOT NULL,
+    AD_Org_ID                    NUMBER(10, 0)      NOT NULL,
+    Created                      DATE               DEFAULT SYSDATE NOT NULL,
+    CreatedBy                    NUMBER(10, 0)      NOT NULL,
+    Updated                      DATE               DEFAULT SYSDATE NOT NULL,
+    UpdatedBy                    NUMBER(10, 0)      NOT NULL,
+    Value                        NVARCHAR2(40)      NOT NULL,
+    Name                         NVARCHAR2(60)      NOT NULL,
+    Description                  NVARCHAR2(255),
+    Help                         NVARCHAR2(2000),
+    A_Asset_Group_ID             NUMBER(10, 0)      NOT NULL,
+    Parent_Asset_ID              NUMBER(10, 0),
+    M_Product_ID                 NUMBER(10, 0),
+    M_AttributeSetInstance_ID    NUMBER(10, 0),
+    C_UOM_ID                     NUMBER(10, 0),
+    SerNo                        NVARCHAR2(40),
+    Lot                          NVARCHAR2(40),
+    VersionNo                    NVARCHAR2(40),
+    GuaranteeDate                DATE               NOT NULL,
+    AssetServiceDate             DATE               NOT NULL,
+    AssetDisposalDate            DATE               NOT NULL,
+    LocationComment              NVARCHAR2(255),
+    M_Locator_ID                 NUMBER(10, 0),
+    C_BPartner_ID                NUMBER(10, 0),
+    C_BPartner_Location_ID       NUMBER(10, 0),
+    AD_User_ID                   NUMBER(10, 0),
+    C_Location_ID                NUMBER(10, 0),
+    LastMaintenanceDate          DATE               NOT NULL,
+    NextMaintenanceDate          DATE               NOT NULL,
+    LastMaintenanceUseUnit       NUMBER             DEFAULT 0 NOT NULL,
+    NextMaintenanceUseUnit       NUMBER             DEFAULT 0 NOT NULL,
+    Lease_BPartner_ID            NUMBER(10, 0),
+    LeaseTerminationDate         DATE               NOT NULL,
+    Processing                   CHAR(1),
+    CONSTRAINT A_Asset_Key PRIMARY KEY (A_Asset_ID)
+);
+
+CREATE TABLE A_Asset_Group(
+    A_Asset_Group_ID    NUMBER(10, 0)      NOT NULL,
+    AD_Client_ID        NUMBER(10, 0)      NOT NULL,
+    AD_Org_ID           NUMBER(10, 0)      NOT NULL,
+    Created             DATE               DEFAULT SYSDATE NOT NULL,
+    CreatedBy           NUMBER(10, 0)      NOT NULL,
+    Updated             DATE               DEFAULT SYSDATE NOT NULL,
+    UpdatedBy           NUMBER(10, 0)      NOT NULL,
+    Name                NVARCHAR2(60)      NOT NULL,
+    Description         NVARCHAR2(255),
+    Help                NVARCHAR2(2000),
+    CONSTRAINT A_Asset_Group_Key PRIMARY KEY (A_Asset_Group_ID)
+);
+
+CREATE TABLE AD_User(
+    AD_User_ID                NUMBER(10, 0)      NOT NULL,
+    AD_Client_ID              NUMBER(10, 0)      NOT NULL,
+    AD_Org_ID                 NUMBER(10, 0)      NOT NULL,
+    Created                   DATE               DEFAULT SYSDATE NOT NULL,
+    CreatedBy                 NUMBER(10, 0)      NOT NULL,
+    Updated                   DATE               DEFAULT SYSDATE NOT NULL,
+    UpdatedBy                 NUMBER(10, 0)      NOT NULL,
+    Name                      NVARCHAR2(60)      NOT NULL,
+    Title                     NVARCHAR2(40)      NOT NULL,
+    C_Greeting_ID             NUMBER(10, 0),
+    Description               NVARCHAR2(255),
+    Comments                  NVARCHAR2(2000),
+    C_BPartner_ID             NUMBER(10, 0),
+    C_BPartner_Location_ID    NUMBER(10, 0),
+    Password                  NVARCHAR2(40)      NOT NULL,
+    EMail                     NVARCHAR2(60),
+    EMailVerify               NVARCHAR2(40)      NOT NULL,
+    Phone                     NVARCHAR2(40)      NOT NULL,
+    Phone2                    NVARCHAR2(40)      NOT NULL,
+    EMailUser                 NVARCHAR2(20)      NOT NULL,
+    EMailUserPW               NVARCHAR2(20)      NOT NULL,
+    Fax                       NVARCHAR2(40)      NOT NULL,
+    Birthday                  DATE               NOT NULL,
+    Supervisor_ID             NUMBER(10, 0),
+    AD_OrgTrx_ID              NUMBER(10, 0),
+    PA_Goal_ID                NUMBER(10, 0),
+    PA_GoalPrivate_ID         NUMBER(10, 0),
+    LastContact               DATE               NOT NULL,
+    LastResult                NVARCHAR2(255),
+    Processing                CHAR(1),
+    CONSTRAINT AD_User_Key PRIMARY KEY (AD_User_ID)
+);
+
+ALTER TABLE A_Asset ADD CONSTRAINT AAssetGroup_AAsset 
+    FOREIGN KEY (A_Asset_Group_ID)
+    REFERENCES A_Asset_Group(A_Asset_Group_ID);
+
+ALTER TABLE A_Asset ADD CONSTRAINT ADUser_AAsset 
+    FOREIGN KEY (AD_User_ID)
+    REFERENCES AD_User(AD_User_ID);'
+
 ]
