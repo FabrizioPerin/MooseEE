@@ -2,8 +2,14 @@ Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allColumns [
-
-	^self allWithType: MJFAMIXColumn.
+	<navigation: 'All Table Columns'>
+	
+	| group |
+	
+	
+	group := self allWithType: MJFAMIXColumn ofGroupClass: MJFAMIXColumnGroup.
+	group description: 'All Table Columns'.
+	^group
 ]
 
 { #category : #'*Moose-JEE-Model' }

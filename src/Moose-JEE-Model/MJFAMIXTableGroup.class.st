@@ -13,6 +13,36 @@ MJFAMIXTableGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFields [
+	
+	| aLevenshteinDistanceStrategy columns resultMatrix |
+	
+	columns := self flatCollect: [:table | table columns].
+	
+	"init matrix"
+	resultMatrix := MalArrayMatrix new: (columns size+1). "+1 because at the first row and column i want to have the column name"
+	
+	(2 to: resultMatrix rowSize) asArray do: [:rowIndex |
+			resultMatrix at: rowIndex and: 1 put: (columns at: (rowIndex - 1))].
+	
+	(2 to: resultMatrix columnSize) asArray do: [:colIndex |
+			resultMatrix at: 1 and: colIndex put: (columns at: (colIndex - 1))].
+	
+	"init "
+	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
+	
+	(2 to: resultMatrix rowSize) asArray do: [:rowIndex |
+		(2 to: resultMatrix columnSize) asArray do: [:colIndex |
+			resultMatrix 
+				at: rowIndex 
+				and: colIndex 
+				put: (aLevenshteinDistanceStrategy levenshteinDistanceSource: (resultMatrix at: 1  and: rowIndex) name target: (resultMatrix at: 1 and: colIndex) name).]].
+	
+	^resultMatrix
+
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewDBTables [
 	<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> 
 
