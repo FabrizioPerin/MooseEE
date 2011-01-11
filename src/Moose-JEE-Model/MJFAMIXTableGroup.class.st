@@ -15,7 +15,7 @@ MJFAMIXTableGroup class >> annotation [
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFields [
 	
-	| aLevenshteinDistanceStrategy columns resultMatrix |
+	| aLevenshteinDistanceStrategy columns resultMatrix progr |
 	
 	columns := self flatCollect: [:table | table columns].
 	
@@ -28,18 +28,25 @@ MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFields [
 	(2 to: resultMatrix columnSize) asArray do: [:colIndex |
 			resultMatrix at: 1 and: colIndex put: (columns at: (colIndex - 1))].
 	
-	"init "
 	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
+	progr := 1.
 	
-	(2 to: resultMatrix rowSize) asArray do: [:rowIndex |
-		(2 to: resultMatrix columnSize) asArray do: [:colIndex |
-			resultMatrix 
-				at: rowIndex 
-				and: colIndex 
-				put: (aLevenshteinDistanceStrategy levenshteinDistanceSource: (resultMatrix at: 1  and: rowIndex) name target: (resultMatrix at: 1 and: colIndex) name).]].
-	
+	UIManager default
+		displayProgress: 'Computing levenshtein distances'
+		at: Sensor cursorPoint
+		from: 1 
+		to: (resultMatrix rowSize * resultMatrix columnSize)
+		during: [ :bar | 
+			(2 to: resultMatrix rowSize) asArray do: [:rowIndex |
+				((rowIndex + 1) to: resultMatrix columnSize) asArray do: [:colIndex |
+					resultMatrix 
+						at: rowIndex 
+						and: colIndex 
+						put: (aLevenshteinDistanceStrategy levenshteinDistanceSource: (resultMatrix at: 1  and: rowIndex) name target: (resultMatrix at: colIndex and: 1) name).
+						progr := progr+1.
+						bar value: progr]]].
+		
 	^resultMatrix
-
 ]
 
 { #category : #'as yet unclassified' }
