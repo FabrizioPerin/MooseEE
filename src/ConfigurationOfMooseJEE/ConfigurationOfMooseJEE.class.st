@@ -215,7 +215,6 @@ ConfigurationOfMooseJEE >> default: spec [
 			
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
-			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
 			package: 'Opax' with: [spec repository: 'http://www.squeaksource.com/OPAX']; 
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
@@ -233,7 +232,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
-
+		spec group: 'Tests' with: #( 'Moose-JEE-Tests').
 	]
 ]
 
@@ -266,8 +265,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 		
 		spec 
-			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
-			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin']; 
 			package: 'Opax' with: [
 				spec repository: 'http://www.squeaksource.com/OPAX'.
 				"spec requires: 'XMLSupport for MooseJEE'"]; 
