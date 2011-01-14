@@ -5,37 +5,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupTests >> testComputeLevenshteinDistancesAmongTheFields [
-
-	| mooseModel matrix transposed |
-	
-	
-	mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
-	
-	self assert: (mooseModel allTables size = 3).
-	self assert: (mooseModel allFKAssociations size = 2).
-	self assert: (mooseModel allColumns size = 75).
-
-	matrix := mooseModel allTables computeLevenshteinDistancesAmongTheFields.
-	
-	self assert: (matrix size = (76*76)).
-	 
-	transposed := matrix transposed. 
-	
-	(2 to: transposed rowSize) asArray do: [:rowIndex |
-		(rowIndex to: transposed columnSize) asArray do: [:colIndex | 
-			self assert: ((transposed at: rowIndex and: colIndex) = nil)]].
-	
-	
-	self assert: ((matrix at: 1 and: 5) name = 'Created').
-	self assert: ((matrix at: 6 and: 1) name = 'CreatedBy').	
-	self assert: ((matrix at: 5 and: 6) = 2).
-
-	self assert: ((matrix at: 6 and: 5) = nil).
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroupTests >> testRenderr [
+MJFAMIXTableGroupTests >> renderr [
 
 	| mooseModel matrix matrixRenderer toShow names |
 	
@@ -74,4 +44,34 @@ MJFAMIXTableGroupTests >> testRenderr [
 	].
 		
 	matrixRenderer render
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupTests >> testComputeLevenshteinDistancesAmongTheFields [
+
+	| mooseModel matrix transposed |
+	
+	
+	mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
+	
+	self assert: (mooseModel allTables size = 3).
+	self assert: (mooseModel allFKAssociations size = 2).
+	self assert: (mooseModel allColumns size = 75).
+
+	matrix := mooseModel allTables computeLevenshteinDistancesAmongTheFields.
+	
+	self assert: (matrix size = (76*76)).
+	 
+	transposed := matrix transposed. 
+	
+	(2 to: transposed rowSize) asArray do: [:rowIndex |
+		(rowIndex to: transposed columnSize) asArray do: [:colIndex | 
+			self assert: ((transposed at: rowIndex and: colIndex) = nil)]].
+	
+	
+	self assert: ((matrix at: 1 and: 5) name = 'Created').
+	self assert: ((matrix at: 6 and: 1) name = 'CreatedBy').	
+	self assert: ((matrix at: 5 and: 6) = 2).
+
+	self assert: ((matrix at: 6 and: 5) = nil).
 ]
