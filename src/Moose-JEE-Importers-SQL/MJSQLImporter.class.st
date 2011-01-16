@@ -91,8 +91,9 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 
 	| dataBases columns tables counter |
 	
+	dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
 	tables := dataBases flatCollect: [:each | each tables ].
-	columns := aMooseModel allTables flatCollect: [:table | table columns ].
+	columns := tables flatCollect: [:table | table columns ].
 	
 	counter := 0.
 	
@@ -107,7 +108,6 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 			bar value: counter.
 			bar value: 'Instantiating  the data base'.
 			
-			dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
 			aMooseModel addAll: dataBases.
 
 			bar value: ('Instantiating ', tables size asString ,' tables').
