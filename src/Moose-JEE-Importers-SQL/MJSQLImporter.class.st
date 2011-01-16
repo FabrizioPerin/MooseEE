@@ -15,7 +15,7 @@ MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 		aDraftObjectTableGroup do: [:draftTable |
 			(table name = draftTable name) ifTrue: [ " table contain the db table with the foreign keys"
 				draftTable constraints do: [:constr |
-					constr isFKConstraint ifTrue: [
+					(constr isArray not and: [constr isFKConstraint]) ifTrue: [
 						| referencedTable |
 						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
 						"set as foreign key the columns of the table having the constraint"
