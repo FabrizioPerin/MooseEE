@@ -620,6 +620,8 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																				each annotationType name = 'Stateless' or: [
 																					each annotationType name = 'Stateful'] ].
 	transactionAttributes := self allAnnotationTypes select: [:each | each name = 'TransactionAttribute'].
+	
+	counter := 1.
 																					
 	UIManager default
 		displayProgress: 'Importing DB From an SQL file'
@@ -627,6 +629,8 @@ MooseModel >> instanciateJBeansFromAnnotations [
 		from: 1 
 		to: (entityBeansAnnotations size + messageDrivenBeansAnnotations size + sessionBeansAnnotations size + transactionAttributes size)
 		during: [ :bar | 
+	
+			bar value: counter.
 	
 			bar value: 'Importing Entity Beans'.
 			entityBeansAnnotations do: [:annotation | 
