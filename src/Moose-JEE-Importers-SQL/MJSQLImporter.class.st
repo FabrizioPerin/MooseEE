@@ -95,7 +95,7 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 	tables := dataBases flatCollect: [:each | each tables ].
 	columns := tables flatCollect: [:table | table columns ].
 	
-	counter := 0.
+	counter := 1.
 	
 	UIManager default
 		displayProgress: 'Importing DB From an SQL file'
@@ -106,17 +106,17 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 		
 			counter := counter + 1.
 			bar value: counter.
-			bar value: 'Instantiating  the data base'.
+			bar value: 'Adding data base'.
 			
 			aMooseModel addAll: dataBases.
 
-			bar value: ('Instantiating ', tables size asString ,' tables').
+			bar value: ('Adding ', tables size asString ,' tables').
 			tables do: [:table | 
 				aMooseModel add: table.
 				counter := counter + 1.
 				bar value: counter].
 			
-			bar value: ('Instantiating' , columns size asString , 'attributes').
+			bar value: ('Adding' , columns size asString , 'attributes').
 	
 			columns do: [:col |
 				aMooseModel add: col.
