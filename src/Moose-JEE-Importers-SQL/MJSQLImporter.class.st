@@ -80,7 +80,7 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	
 	"setting up the primary keys"
 	aDraftObjectTable constraints do: [:constraint | 
-		constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
+		((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnsName do: [:attNames |
 				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
 	
 	^tab
