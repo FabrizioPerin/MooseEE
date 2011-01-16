@@ -612,53 +612,73 @@ MoosePanel open.
 MooseModel >> instanciateJBeansFromAnnotations [
 	<menuItem: 'Import beans from annotations' category: 'JEAs Menu'>
 	
-	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes |
+	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes counter |
 	
 	entityBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
-	entityBeansAnnotations do: [:annotation | 
-		| bean |
-		bean := MJFAMIXEntityBean new name: annotation mooseName.
-		( self allClasses select: [:class |
-			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
-																			each parentEJBBean: bean.
-																			bean implementationClass: each.].
-		self add: bean ].
-
 	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
-	messageDrivenBeansAnnotations do: [:annotation | 
-		| bean |
-		bean := MJFAMIXMessageDrivenBean new name: annotation mooseName.
-		( self allClasses select: [:class |
-			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
-																			each parentEJBBean: bean.
-																			bean implementationClass: each.].
-		self add: bean ].
-	
 	sessionBeansAnnotations := self allAnnotationInstances entities select: [:each | 
 																				each annotationType name = 'Stateless' or: [
 																					each annotationType name = 'Stateful'] ].
-	sessionBeansAnnotations do: [:annotation | 
-		| bean |
-		bean := MJFAMIXSessionBean new name: annotation mooseName.
-		bean sessionType: annotation annotationType name.
-		( self allClasses select: [:class |
-			class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
-																			each parentEJBBean: bean.
-																			bean implementationClass: each.].
-		self add: bean 
-	].
-	
 	transactionAttributes := self allAnnotationTypes select: [:each | each name = 'TransactionAttribute'].
-	transactionAttributes do: [:annotation |
-		"maintain the order: classes have to be analized before methods because annotations at method level they override the class one"
-		| classes methods |
-
-		classes := annotation annotatedEntities select: [:each | each isKindOf: FAMIXClass].
-		methods := annotation annotatedEntities select: [:each | each isKindOf: FAMIXMethod].
+																					
+	UIManager default
+		displayProgress: 'Importing DB From an SQL file'
+		at: Sensor cursorPoint
+		from: 1 
+		to: (entityBeansAnnotations size + messageDrivenBeansAnnotations size + sessionBeansAnnotations size + transactionAttributes size)
+		during: [ :bar | 
 	
-		classes do: [:class | class methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ] ].
-		methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ].		
-	].
+			bar value: 'Importing Entity Beans'.
+			entityBeansAnnotations do: [:annotation | 
+				| bean |
+				bean := MJFAMIXEntityBean new name: annotation mooseName.
+				( self allClasses select: [:class |
+					class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
+																					each parentEJBBean: bean.
+																					bean implementationClass: each.].
+				counter := counter +1.
+				bar value: counter.
+				self add: bean ].
+
+			bar value: 'Importing Message Driven Beans'.
+			messageDrivenBeansAnnotations do: [:annotation | 
+				| bean |
+				bean := MJFAMIXMessageDrivenBean new name: annotation mooseName.
+				( self allClasses select: [:class |
+					class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
+																					each parentEJBBean: bean.
+																					bean implementationClass: each.].
+				counter := counter +1.
+				bar value: counter.
+				self add: bean ].
+	
+			bar value: 'Importing Session Beans'.
+			sessionBeansAnnotations do: [:annotation | 
+				| bean |
+				bean := MJFAMIXSessionBean new name: annotation mooseName.
+				bean sessionType: annotation annotationType name.
+				( self allClasses select: [:class |
+					class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
+																					each parentEJBBean: bean.
+																					bean implementationClass: each.].
+				counter := counter +1.
+				bar value: counter.
+				self add: bean].
+	
+			bar value: 'Importing Transaction Attributes'.
+			transactionAttributes do: [:annotation |
+				"maintain the order: classes have to be analized before methods because annotations at method level they override the class one"
+				| classes methods |
+
+				classes := annotation annotatedEntities select: [:each | each isKindOf: FAMIXClass].
+				methods := annotation annotatedEntities select: [:each | each isKindOf: FAMIXMethod].
+	
+				classes do: [:class | class methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ] ].
+				methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ].	
+					
+				counter := counter +1.
+				bar value: counter.	
+			]].
 	
 	^self
 ]
