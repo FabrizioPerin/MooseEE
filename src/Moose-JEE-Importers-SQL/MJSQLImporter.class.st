@@ -89,38 +89,45 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 { #category : #'as yet unclassified' }
 MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 
-	| dataBases |
+	| dataBases columns tables counter |
+	
+	tables := dataBases flatCollect: [:each | each tables ].
+	columns := aMooseModel allTables flatCollect: [:table | table columns ].
+	
+	counter := 0.
 	
 	UIManager default
 		displayProgress: 'Importing DB From an SQL file'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 6
+		to: (tables size + columns size)
 		during: [ :bar | 
 		
-			bar value: 2.
+			counter := counter + 1.
+			bar value: counter.
 			bar value: 'Instantiating  the data base'.
 			
 			dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
 			aMooseModel addAll: dataBases.
+
+			bar value: ('Instantiating ', tables size asString ,' tables').
+			tables do: [:table | 
+				aMooseModel add: table.
+				counter := counter + 1.
+				bar value: counter].
 			
-			bar value: 3.
-			bar value: 'Instantiating the tables'.
-			
-			aMooseModel addAll: (dataBases flatCollect: [:each | each tables ]).
+			bar value: ('Instantiating' , columns size asString , 'attributes').
 	
-			bar value: 4.
-			bar value: 'Instantiating the attributes'.
-	
-			aMooseModel addAll: (aMooseModel allTables flatCollect: [:table | table columns ]).
-			
-			bar value: 5.
+			columns do: [:col |
+				aMooseModel add: col.
+				counter := counter + 1.
+				bar value: counter].	
+				
 			bar value: 'Computing foreign keys constraints'.
 			
 			aBlackBoard databases do: [:aDBRepresentation | 
 				aMooseModel addAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )].
-			
-			bar value: 6].
+			].
 	
 	^aMooseModel
 ]
