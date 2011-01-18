@@ -8,12 +8,18 @@ Class {
 MJFAMIXTableGroupReports >> browser [
   | browser |
   browser := GLMTabulator new.
-  browser column: #map.
+  browser column: #code; column: #map.
   browser transmit to: #map; andShow: [:a | 
     a mondrian
       title: 'FK Relations';
       painting: [:view :tables | 
-        self viewFKRelationsAmong: tables On: view]].
+        self viewLevenshteinDistancesAmong: tables On: view]].
+  browser transmit to: #code; andShow: [:a | 
+    a list 
+      title: 'Facade class';
+      display: [ :tables |
+       tables computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge collect: [:each |
+		(each from ownerTable name , '::' , each from name , '   --- ', each weight asString , ' --->   ' , each to ownerTable name , '::' , each to name) ]]].
   ^ browser startOn: self result
 ]
 
@@ -57,6 +63,28 @@ aView edges: tuples from: #first to: #second.
 aView shape line color: Color transparent.
 aView edges: tuples from: [:each | each first ownerTable] to: [:each | each second ownerTable].
 aView horizontalTreeLayout.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupReports >> viewLevenshteinDistancesAmong: aTableGroup On: aView [
+	| mooseModel edges |
+
+	"mooseModel := JEETestModels new sampleMooseModelContainingJustADB."
+
+	edges := aTableGroup computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge.
+	
+	aView nodes: aTableGroup forEach: [:each |
+		aView shape rectangle borderWidth: 0; text: [:col | col name].
+		aView nodes: each columns.
+		aView verticalLineLayout ].
+	
+	aView shape line width: [:edge| (4 - edge weight) ]; color: Color red.
+	aView edges: edges from: #from to: #to.
+
+	aView shape line color: Color transparent.
+	aView edges: edges from: [:each | each from ownerTable] to: [:each | each to ownerTable].
+
+	aView horizontalTreeLayout.
 ]
 
 { #category : #'as yet unclassified' }

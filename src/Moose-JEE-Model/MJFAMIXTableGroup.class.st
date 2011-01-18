@@ -13,6 +13,43 @@ MJFAMIXTableGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge [
+	
+	| aLevenshteinDistanceStrategy progr tableLeftGroup tableRightGroup result |
+	
+	tableLeftGroup := self asArray.
+	tableRightGroup := self asArray.
+	result := OrderedCollection new.
+	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
+	progr := 1.
+	
+	UIManager default
+		displayProgress: 'Computing levenshtein distances'
+		at: Sensor cursorPoint
+		from: 1 
+		to: ((tableLeftGroup size * tableRightGroup size)/2) asInteger
+		during: [ :bar | 
+			bar value: progr.
+			
+			(1 to: tableLeftGroup size) asArray do: [:rowIndex |
+				| columnsPKGroup |
+				
+				columnsPKGroup := (tableLeftGroup at: rowIndex) columns select: [:col | col isPK notNil and: [col isPK] ].
+				
+				((rowIndex + 1) to: tableRightGroup size) asArray do: [:colIndex |
+					| distance columnsGroup |
+					
+					columnsGroup := (tableRightGroup at: colIndex) columns.
+					columnsPKGroup do: [:pk | 
+						columnsGroup do: [:col |
+							distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: pk name target: col name.
+							(distance < 4)  ifTrue: [result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]].
+				progr := progr+1.
+				bar value: progr]]].
+	^result
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFields [
 	
 	| aLevenshteinDistanceStrategy columns resultMatrix progr |

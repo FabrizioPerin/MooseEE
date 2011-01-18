@@ -721,6 +721,19 @@ MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 	^self
 ]
 
+{ #category : #'*Moose-JEE-Model-Reports' }
+MooseModel >> tableGroupReport [
+	<menuItem: 'Table Group Report' category: 'JEAs Reports'>
+
+	|spec|
+	spec := REPConcernSpecification on: MooseModel root allModels first.
+	spec label: 'Table Group Report'.
+
+	spec composite: 'FK potential matches' with: [
+ 		 spec concern: MJFAMIXTableGroupReports new ].
+	spec open
+]
+
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
