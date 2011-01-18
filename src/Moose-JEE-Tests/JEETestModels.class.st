@@ -3831,9 +3831,9 @@ JEETestModels >> testNamespace [
 JEETestModels >> threeTablesConnectedThroughForeignKey [
 
 ^'CREATE TABLE A_Asset(
-    A_Asset_ID                   NUMBER(10, 0)      NOT NULL,
-    AD_Client_ID                 NUMBER(10, 0)      NOT NULL,
-    AD_Org_ID                    NUMBER(10, 0)      NOT NULL,
+    A_Asset_ID                   NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    AD_Client_ID                 NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    AD_Org_ID                    NUMBER(10, 0)      NOT NULL PRIMARY KEY,
     Created                      DATE               DEFAULT SYSDATE NOT NULL,
     CreatedBy                    NUMBER(10, 0)      NOT NULL,
     Updated                      DATE               DEFAULT SYSDATE NOT NULL,
@@ -3865,12 +3865,11 @@ JEETestModels >> threeTablesConnectedThroughForeignKey [
     NextMaintenanceUseUnit       NUMBER             DEFAULT 0 NOT NULL,
     Lease_BPartner_ID            NUMBER(10, 0),
     LeaseTerminationDate         DATE               NOT NULL,
-    Processing                   CHAR(1),
-    CONSTRAINT A_Asset_Key PRIMARY KEY (A_Asset_ID)
+    Processing                   CHAR(1)
 );
 
 CREATE TABLE A_Asset_Group(
-    A_Asset_Group_ID    NUMBER(10, 0)      NOT NULL,
+    A_Asset_Group_ID    NUMBER(10, 0)      NOT NULL PRIMARY KEY,
     AD_Client_ID        NUMBER(10, 0)      NOT NULL,
     AD_Org_ID           NUMBER(10, 0)      NOT NULL,
     Created             DATE               DEFAULT SYSDATE NOT NULL,
@@ -3884,9 +3883,9 @@ CREATE TABLE A_Asset_Group(
 );
 
 CREATE TABLE AD_User(
-    AD_User_ID                NUMBER(10, 0)      NOT NULL,
-    AD_Client_ID              NUMBER(10, 0)      NOT NULL,
-    AD_Org_ID                 NUMBER(10, 0)      NOT NULL,
+    AD_User_ID                NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    AD_Client_ID              NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    AD_Org_ID                 NUMBER(10, 0)      NOT NULL PRIMARY KEY,
     Created                   DATE               DEFAULT SYSDATE NOT NULL,
     CreatedBy                 NUMBER(10, 0)      NOT NULL,
     Updated                   DATE               DEFAULT SYSDATE NOT NULL,
