@@ -57,6 +57,34 @@ view shape rectangle borderWidth: 0.
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroupTests >> renderWithArrays [
+
+	| mooseModel tuples matrixRenderer names left right |
+	
+	
+	mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
+
+	tuples := mooseModel allTables computeLevenshteinDistancesAmongTheFieldsUsingArrays.
+	
+	left := (tuples collect: [:each | each first name]) asArray sorted: [:a :b | a name < b name].
+	right := (tuples collect: [:each | each second name]) asArray sorted: [:a :b | a name < b name].
+	
+	
+	
+	matrixRenderer := MOMatrixRenderer new.
+	
+	matrixRenderer cellSize: 20.
+	matrixRenderer cellPadding: 5.
+	
+	"matrixRenderer cellFunction: [:row :col |
+		|tuple |
+		tuple := matrix detect: [:tup| (tup first name = row) and: [(tup first name = col)]] ifNone: [nil].
+	]."
+		
+	matrixRenderer render
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroupTests >> renderr [
 
 	| mooseModel matrix matrixRenderer toShow names |
@@ -126,32 +154,4 @@ MJFAMIXTableGroupTests >> testComputeLevenshteinDistancesAmongTheFields [
 	self assert: ((matrix at: 5 and: 6) = 2).
 
 	self assert: ((matrix at: 6 and: 5) = nil).
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroupTests >> testRenderWithArrays [
-
-	| mooseModel tuples matrixRenderer names left right |
-	
-	
-	mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
-
-	tuples := mooseModel allTables computeLevenshteinDistancesAmongTheFieldsUsingArrays.
-	
-	left := (tuples collect: [:each | each first name]) asArray sorted: [:a :b | a name < b name].
-	right := (tuples collect: [:each | each second name]) asArray sorted: [:a :b | a name < b name].
-	
-	
-	
-	matrixRenderer := MOMatrixRenderer new.
-	
-	matrixRenderer cellSize: 20.
-	matrixRenderer cellPadding: 5.
-	
-	"matrixRenderer cellFunction: [:row :col |
-		|tuple |
-		tuple := matrix detect: [:tup| (tup first name = row) and: [(tup first name = col)]] ifNone: [nil].
-	]."
-		
-	matrixRenderer render
 ]
