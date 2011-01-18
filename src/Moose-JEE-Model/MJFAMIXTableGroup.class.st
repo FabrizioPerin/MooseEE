@@ -50,6 +50,40 @@ MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFields [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFieldsUsingArrays [
+	
+	| aLevenshteinDistanceStrategy progr rows columns result |
+	
+	columns := self flatCollect: [:table | table columns].
+	columns := columns select: [:col | col isPK notNil and: [col isPK]].
+	
+	rows := columns asArray.
+	columns := columns asArray.	
+	result := OrderedCollection new.
+
+	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
+
+	progr := 1.
+	
+	UIManager default
+		displayProgress: 'Computing levenshtein distances'
+		at: Sensor cursorPoint
+		from: 1 
+		to: ((rows size * columns size)/2) asInteger
+		during: [ :bar | 
+			bar value: progr.
+			(1 to: rows size) asArray do: [:rowIndex |
+				((rowIndex + 1) to: columns size) asArray do: [:colIndex |
+					| distance |
+					distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: (rows at: rowIndex) name target: (columns at: colIndex) name.
+					(distance < 4)  ifTrue: [result add: {(rows at: rowIndex) . (columns at: colIndex) . distance}] .
+					progr := progr+1.
+					bar value: progr]]].
+		
+	^result
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewDBTables [
 	<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> 
 

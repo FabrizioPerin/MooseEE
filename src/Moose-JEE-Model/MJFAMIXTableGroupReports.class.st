@@ -11,25 +11,25 @@ MJFAMIXTableGroupReports >> browser [
   browser column: #map.
   browser transmit to: #map; andShow: [:a | 
     a mondrian
-      title: 'matrix';
-      painting: [:view :aMatrix | 
-        self viewMatrix: aMatrix on: view ]].
+      title: 'FK Relations';
+      painting: [:view :tables | 
+        self viewFKRelationsAmong: tables On: view]].
   ^ browser startOn: self result
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroupReports >> computeResult [
-  ^ self model allTables computeLevenshteinDistancesAmongTheFields.
+  ^ self model allTables.
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroupReports >> explanation [ 
-  ^ 'Map of packages containing Facade classes'
+  ^ 'Analyses on a table group '
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroupReports >> label [ 
-  ^ 'Facade watcher'
+  ^ 'Foreign Key recovery'
 ]
 
 { #category : #'as yet unclassified' }
@@ -40,6 +40,23 @@ MJFAMIXTableGroupReports >> viewCell: aMatrix on: view [
 						ifTrue: [(each < 4)
 								ifTrue: [Color blue]
 								ifFalse: [Color gray]]].
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupReports >> viewFKRelationsAmong: aTableGroup On: aView [
+
+| mooseModel tuples left right grouped map |
+mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
+tuples := mooseModel allTables computeLevenshteinDistancesAmongTheFieldsUsingArrays select: [:each | each third < 3].
+aView nodes: mooseModel allTables forEach: [:each |
+	aView shape rectangle borderWidth: 0; text: [:col | col name].
+	aView nodes: each columns.
+	aView horizontalTreeLayout ].
+aView shape line width: #third.
+aView edges: tuples from: #first to: #second.
+aView shape line color: Color transparent.
+aView edges: tuples from: [:each | each first ownerTable] to: [:each | each second ownerTable].
+aView horizontalTreeLayout.
 ]
 
 { #category : #'as yet unclassified' }
