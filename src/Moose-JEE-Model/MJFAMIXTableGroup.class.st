@@ -72,6 +72,29 @@ MJFAMIXTableGroup >> viewDBTablesOn: view [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewTables [
+	<menuItem: 'DB Tables' category: 'JEAs Visualizations'> 
+
+	| view |
+	view := MOViewRenderer new.
+	self viewTablesOn: view.
+	view open.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewTablesOn: view [
+	
+	self do: [:table |
+		view shape: table tableShape.
+		view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+		view interaction popupText.
+		view node: table].
+	view edges: self mooseModel allFKAssociations from: #sourceTable to: #targetTable.
+	view horizontalDominanceTreeLayout.
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewUMLTables [
 	<menuItem: 'Tables UML class diagram like' category: 'JEAs Visualizations'> 
 
@@ -95,7 +118,7 @@ MJFAMIXTableGroup >> viewUMLTablesOn: view [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewUMLTablesWithEJBeans [
-	<menuItem: 'Tables with Entity Beans UML class diagram' category: 'JEAs Visualizations'> 
+	"<menuItem: 'Tables with Entity Beans UML class diagram' category: 'JEAs Visualizations'> "
 
 	| view |
 	view := MOViewRenderer new.

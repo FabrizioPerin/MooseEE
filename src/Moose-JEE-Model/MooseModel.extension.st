@@ -169,13 +169,19 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 MooseModel >> buildRelationsAmongDBTablesAndClasses [
 	<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Menu'>
 
-	| tables tableEntities counter |
+	| tables tableEntities counter annotationTypeTable |
 
 	self isEJB30 
 	ifTrue:[	
-		tableEntities := (self allAnnotationTypes select: [:each | each name = 'Table']).
-		tableEntities isEmpty ifFalse: [
-			tableEntities := tableEntities first annotatedEntities.
+		annotationTypeTable := (self allAnnotationTypes select: [:each | each name = 'Table']).
+		annotationTypeTable isEmpty 
+			ifFalse: [
+				(annotationTypeTable size > 1)
+					ifTrue: [
+						tableEntities := UITheme builder 
+								chooseDropList: 'Choose which element you want' list: annotationTypeTable asArray.
+						tableEntities := tableEntities annotatedEntities]
+					ifFalse: [tableEntities := annotationTypeTable first annotatedEntities.].
 			tables := self allTables.
 			counter :=  1.
 
@@ -426,9 +432,11 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 			bar value: 'Populate the model'.
 			self populateWithRelationalElementsFrom: parser blackBoard.
 			
-			ejbVer := UITheme builder 
-							chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
-			self ejbVersion: ejbVer.
+			self ejbVersion isNil 
+				ifFalse: [
+					ejbVer := UITheme builder 
+								chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
+					self ejbVersion: ejbVer.].
 
 			bar value: 4.
 			bar value: 'Building relations'.

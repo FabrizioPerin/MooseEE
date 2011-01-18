@@ -18,6 +18,26 @@ MJFAMIXColumn class >> annotation [
 ]
 
 { #category : #accessing }
+MJFAMIXColumn >> columnShape [
+
+	| shape |
+	(self isPK isNil not and: [self isPK])
+				ifTrue: [shape := MORectangleShape new withoutBorder
+					text: [:table | self name];
+					textAlignment: #left; 
+					textHorizontalPadding: 1;
+					fillColor: Color transparent;
+					fontColor: Color blue.]
+				ifFalse: [shape := MORectangleShape new withoutBorder
+					text: [:table | self name];
+					textAlignment: #left; 
+					textHorizontalPadding: 1;
+					fillColor: Color transparent].
+				
+	^shape
+]
+
+{ #category : #accessing }
 MJFAMIXColumn >> inUse [
 	used isNil 
 		ifTrue: [self inUse: self mappedNamedEntities isEmpty not].

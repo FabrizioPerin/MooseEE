@@ -91,10 +91,62 @@ MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTable >> tableShape [
+	| builder index |
+ 
+	index := self columns size.
+		
+	builder := MOFormsBuilder new.
+	builder column; pref.
+	builder row; center.
+	index timesRepeat: [ builder row; left. ].
+	
+	builder 
+		x: 1 
+		y: 1 
+		add: (MORectangleShape new withoutBorder
+				text: [ :table | table name];
+				fontSize: 10;
+				fillColor: Color transparent;
+				textAlignment: #center;
+				textPadding: 1).
+
+	(1 to: index) asArray do: [:count |
+		builder 
+			x: 1 
+			y: (count + 1)
+			add: (self columns at: count) columnShape.].
+	
+	^builder shape
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTable >> viewDBTableOn: view [
 	view shape DBTableShape.
 	view interaction popupText.
 	view node: self.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTable >> viewTable [
+	<menuItem: 'Table' category: 'MooseJEE Visualizations'> 
+	
+	| view |
+	view := MOViewRenderer new.
+	self viewTableOn: view.
+	view open
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTable >> viewTableOn: view [
+
+	view shape rectangle.
+	view interaction nodraggable.
+	view node: self forIt: [
+		view shape: self tableShape.
+		view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+		view interaction popupText.
+		view node: self.]
 ]
 
 { #category : #'as yet unclassified' }
