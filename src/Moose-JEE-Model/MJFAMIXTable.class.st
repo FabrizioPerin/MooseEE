@@ -98,7 +98,7 @@ MJFAMIXTable >> tableShape [
 		
 	builder := MOFormsBuilder new.
 	builder column; pref.
-	builder row; center.
+	builder row; pref.
 	index timesRepeat: [ builder row; left. ].
 	
 	builder 

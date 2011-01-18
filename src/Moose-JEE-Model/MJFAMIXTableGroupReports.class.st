@@ -73,8 +73,10 @@ MJFAMIXTableGroupReports >> viewLevenshteinDistancesAmong: aTableGroup On: aView
 
 	edges := aTableGroup computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge.
 	
+	aView interaction menuMorphBlock: [ :col | col mooseMenuMorph ].
 	aView nodes: aTableGroup forEach: [:each |
 		aView shape rectangle borderWidth: 0; text: [:col | col name].
+		aView interaction menuMorphBlock: [ :col | col mooseMenuMorph ].
 		aView nodes: each columns.
 		aView verticalLineLayout ].
 	
