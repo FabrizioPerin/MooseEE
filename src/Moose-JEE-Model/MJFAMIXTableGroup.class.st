@@ -39,11 +39,15 @@ MJFAMIXTableGroup >> computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge [
 				((rowIndex + 1) to: tableRightGroup size) asArray do: [:colIndex |
 					| distance columnsGroup |
 					
-					columnsGroup := (tableRightGroup at: colIndex) columns.
+					columnsGroup := (tableRightGroup at: colIndex) columns reject: [:col | col isFK notNil and:[col isFK]].
 					columnsPKGroup do: [:pk | 
 						columnsGroup do: [:col |
 							distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: pk name target: col name.
-							(distance < 4)  ifTrue: [result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]].
+							(distance < 4)  ifTrue: [
+								| normalization |
+								normalization := (distance asFloat / (pk name size max: col name size)).
+								normalization < 0.43 ifTrue: [ 
+									result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]]].
 				progr := progr+1.
 				bar value: progr]]].
 	^result

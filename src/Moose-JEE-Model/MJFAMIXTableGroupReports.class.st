@@ -8,18 +8,26 @@ Class {
 MJFAMIXTableGroupReports >> browser [
   | browser |
   browser := GLMTabulator new.
-  browser column: #code; column: #map.
-  browser transmit to: #map; andShow: [:a | 
+  browser column: #code"; column: #map".
+  "browser transmit to: #map; andShow: [:a | 
     a mondrian
       title: 'FK Relations';
       painting: [:view :tables | 
-        self viewLevenshteinDistancesAmong: tables On: view]].
+        self viewLevenshteinDistancesAmong: tables On: view]]."
   browser transmit to: #code; andShow: [:a | 
     a list 
       title: 'Facade class';
       display: [ :tables |
-       tables computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge collect: [:each |
-		(each from ownerTable name , '::' , each from name , '   --- ', each weight asString , ' --->   ' , each to ownerTable name , '::' , each to name) ]]].
+      | res stream distances |
+		stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
+		res := OrderedCollection new.
+		distances := tables computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge sorted: [:first :second | first weight < second weight ].		
+		distances do: [:each |
+			res add: (each from ownerTable name , '::' , each from name , '   --- ', each weight asString , ' --->   ' , each to ownerTable name , '::' , each to name , String cr).
+			stream nextPutAll: res last].
+		stream close.
+		res.
+	]].
   ^ browser startOn: self result
 ]
 
