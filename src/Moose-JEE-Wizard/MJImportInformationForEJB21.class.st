@@ -35,9 +35,9 @@ MJImportInformationForEJB21 >> actionsToPerform [
 					mooseModel importEjbJarFromFolder: sourcePathName.].
 			progBar value: 4.
 			
-			progBar value: 'Creating annotations'.
+			"progBar value: 'Creating annotations'.
 		
-			mooseModel annotateTheModelForJEEBrowser.
+			mooseModel annotateTheModelForJEEBrowser."
 			progBar value: 5.
 			
 			progBar value: 'Performing post import operations'.

@@ -52,7 +52,7 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			mooseModel instanciateJBeansFromAnnotations.
 			progBar value: 8.
 			
-			mooseModel annotateTheModelForJEEBrowser.
+			"mooseModel annotateTheModelForJEEBrowser."
 			progBar value: 9.
 			
 			progBar value: 'Performing post import operations'.
