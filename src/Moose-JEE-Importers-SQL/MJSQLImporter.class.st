@@ -112,21 +112,21 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 
 			bar value: ('Adding ', tables size asString ,' tables').
 			tables do: [:table | 
-				aMooseModel add: table.
+				aMooseModel withoutAnnounceAdd: table.
 				counter := counter + 1.
 				bar value: counter].
 			
 			bar value: ('Adding' , columns size asString , 'attributes').
 	
 			columns do: [:col |
-				aMooseModel add: col.
+				aMooseModel withoutAnnounceAdd: col.
 				counter := counter + 1.
 				bar value: counter].	
 				
 			bar value: 'Computing foreign keys constraints'.
 			
 			aBlackBoard databases do: [:aDBRepresentation | 
-				aMooseModel addAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )].
+				aMooseModel withoutAnnounceAddAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )].
 			].
 	
 	^aMooseModel
