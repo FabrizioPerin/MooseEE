@@ -13,7 +13,7 @@ MJFAMIXTableGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroup >> computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge [
+MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
 	
 	| aLevenshteinDistanceStrategy progr tableLeftGroup tableRightGroup result |
 	
@@ -50,77 +50,6 @@ MJFAMIXTableGroup >> computeLevenshteinDistancesAmongFieldsWithMalWeightedEdge [
 									result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]]].
 				progr := progr+1.
 				bar value: progr]]].
-	^result
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFields [
-	
-	| aLevenshteinDistanceStrategy columns resultMatrix progr |
-	
-	columns := self flatCollect: [:table | table columns].
-	
-	"init matrix"
-	resultMatrix := MalArrayMatrix new: (columns size+1). "+1 because at the first row and column i want to have the column name"
-	
-	(2 to: resultMatrix rowSize) asArray do: [:rowIndex |
-			resultMatrix at: rowIndex and: 1 put: (columns at: (rowIndex - 1))].
-	
-	(2 to: resultMatrix columnSize) asArray do: [:colIndex |
-			resultMatrix at: 1 and: colIndex put: (columns at: (colIndex - 1))].
-	
-	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
-	progr := 1.
-	
-	UIManager default
-		displayProgress: 'Computing levenshtein distances'
-		at: Sensor cursorPoint
-		from: 1 
-		to: (resultMatrix rowSize * resultMatrix columnSize)
-		during: [ :bar | 
-			(2 to: resultMatrix rowSize) asArray do: [:rowIndex |
-				((rowIndex + 1) to: resultMatrix columnSize) asArray do: [:colIndex |
-					resultMatrix 
-						at: rowIndex 
-						and: colIndex 
-						put: (aLevenshteinDistanceStrategy levenshteinDistanceSource: (resultMatrix at: 1  and: rowIndex) name target: (resultMatrix at: colIndex and: 1) name).
-						progr := progr+1.
-						bar value: progr]]].
-		
-	^resultMatrix
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFieldsUsingArrays [
-	
-	| aLevenshteinDistanceStrategy progr rows columns result |
-	
-	columns := self flatCollect: [:table | table columns].
-	columns := columns select: [:col | col isPK notNil and: [col isPK]].
-	
-	rows := columns asArray.
-	columns := columns asArray.	
-	result := OrderedCollection new.
-
-	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
-
-	progr := 1.
-	
-	UIManager default
-		displayProgress: 'Computing levenshtein distances'
-		at: Sensor cursorPoint
-		from: 1 
-		to: ((rows size * columns size)/2) asInteger
-		during: [ :bar | 
-			bar value: progr.
-			(1 to: rows size) asArray do: [:rowIndex |
-				((rowIndex + 1) to: columns size) asArray do: [:colIndex |
-					| distance |
-					distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: (rows at: rowIndex) name target: (columns at: colIndex) name.
-					(distance < 4)  ifTrue: [result add: {(rows at: rowIndex) . (columns at: colIndex) . distance}] .
-					progr := progr+1.
-					bar value: progr]]].
-		
 	^result
 ]
 

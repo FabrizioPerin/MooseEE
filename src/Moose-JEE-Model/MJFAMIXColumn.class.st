@@ -82,6 +82,15 @@ MJFAMIXColumn >> ownerTable: anObjectOrNil [
 ]
 
 { #category : #accessing }
+MJFAMIXColumn >> printOn: aStream [
+
+	self ownerTable isNil ifFalse: [aStream nextPutAll: self ownerTable name].
+	aStream nextPutAll: '>>'.
+	aStream nextPutAll: self name.
+	aStream nextPutAll: ' (Column)'.
+]
+
+{ #category : #accessing }
 MJFAMIXColumn >> type [
 	^type
 ]
