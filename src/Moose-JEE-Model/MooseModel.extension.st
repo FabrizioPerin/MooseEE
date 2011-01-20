@@ -734,6 +734,19 @@ MooseModel >> tableGroupReport [
 	spec open
 ]
 
+{ #category : #'*Moose-JEE-Model-Reports' }
+MooseModel >> tableGroupReportTry [
+	<menuItem: 'Table Group Report try' category: 'JEAs Reports'>
+
+	|spec|
+	spec := REPConcernSpecification on: MooseModel root allModels first.
+	spec label: 'Table Group Report try'.
+
+	spec composite: 'FK potential matches' with: [
+ 		 spec concern: MJFAMIXTableGroupReportsTry new ].
+	spec open
+]
+
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
@@ -793,4 +806,19 @@ MooseModel >> tryToFixFAMiXFileAnchorsGUI [
 	folder := UITheme builder chooseDirectory: 'Choose the root folder for ', self name.
 	"folder := FileDirectory on: aPathString"
 	folder ifNotNil: [ self tryToFixFAMiXFileAnchorsFrom: folder].
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> withoutAnnounceAdd: anElement [ 
+	 
+	super add: anElement. 
+	anElement privateSetMooseModel: self.
+	^anElement
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> withoutAnnounceAddAll: entities [ 
+	 
+	entities do: [:each | self withoutAnnounceAdd: each].
+	^entities
 ]
