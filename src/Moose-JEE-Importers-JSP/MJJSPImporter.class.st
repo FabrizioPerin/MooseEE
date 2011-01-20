@@ -34,7 +34,7 @@ MJJSPImporter >> populate: aMooseModel withJSPsFrom: aBlackBoard [
 					class addIncomingJspInvocation: jspInvocation.
 					jsPage addOutgoingJspInvocations: jspInvocation.
 					
-					aMooseModel add: jspInvocation.
+					aMooseModel withoutAnnounceAdd: jspInvocation.
 					]
 	].
 
