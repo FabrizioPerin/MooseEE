@@ -27,6 +27,24 @@ MOShapeSelector >> DBTableShape [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> tableShape [
+	| builder |
+		
+	builder := MOFormsBuilder new.
+	
+	builder column; fill; pref; grow.
+	builder row; fill; pref; grow; row; fill; pref; grow.
+	builder x: 1 y: 1 add: (MORectangleShape new text: [:table | table name]; fontSize: 10).
+	builder x: 1 y: 2 add: MORectangleShape new.
+	builder x: 1 y: 2 add: MOChildrenShape new.
+	
+	^view shape: builder shape
+	
+	
+	
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> umlClassDiagramLikeForTable [
 	| builder |
 	builder := MOFormsBuilder new.

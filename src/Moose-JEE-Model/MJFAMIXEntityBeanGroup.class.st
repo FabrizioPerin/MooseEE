@@ -67,7 +67,7 @@ MJFAMIXEntityBeanGroup >> viewUMLOfImplementorsWithTablesOn: view [
 		view node: #notLonelyBeans forIt: [ 
 			notLonelyBeans do: [:entity | 
 				entity viewUMLOfImplementorOn: view.
-				entity implementationClass mappedRelationalEntities first viewUMLTableOn: view.].
+				entity implementationClass mappedRelationalEntities first viewTableUsageOn: view.].
 			
 			view shape line.
 			view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.

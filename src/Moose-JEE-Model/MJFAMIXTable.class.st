@@ -91,36 +91,6 @@ MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTable >> tableShape [
-	| builder index |
- 
-	index := self columns size.
-		
-	builder := MOFormsBuilder new.
-	builder column; pref.
-	builder row; pref.
-	index timesRepeat: [ builder row; left. ].
-	
-	builder 
-		x: 1 
-		y: 1 
-		add: (MORectangleShape new withoutBorder
-				text: [ :table | table name];
-				fontSize: 10;
-				fillColor: Color transparent;
-				textAlignment: #center;
-				textPadding: 1).
-
-	(1 to: index) asArray do: [:count |
-		builder 
-			x: 1 
-			y: (count + 1)
-			add: (self columns at: count) columnShape.].
-	
-	^builder shape
-]
-
-{ #category : #'as yet unclassified' }
 MJFAMIXTable >> viewDBTableOn: view [
 	view shape DBTableShape.
 	view interaction popupText.
@@ -134,33 +104,42 @@ MJFAMIXTable >> viewTable [
 	| view |
 	view := MOViewRenderer new.
 	self viewTableOn: view.
+	view root applyLayout.
 	view open
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXTable >> viewTableOn: view [
 
-	view shape rectangle.
-	view interaction nodraggable.
+	view shape tableShape.
+	view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+	view interaction popupText.
 	view node: self forIt: [
-		view shape: self tableShape.
+		view shape rectangle 
+			withoutBorder; 
+			text: [:col | col name];
+			fontColor: [:col | 
+				(col isPK notNil and:[col isPK]) 
+				ifTrue: [Color blue] 
+				ifFalse: [Color black]].
 		view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
 		view interaction popupText.
-		view node: self.]
+		view nodes: self columns.
+		view verticalLineLayout. ].
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTable >> viewUMLTable [
-	<menuItem: 'Table UML class diagram like' category: 'MooseJEE Visualizations'> 
+MJFAMIXTable >> viewTableUsage [
+	<menuItem: 'Table''s used elements' category: 'MooseJEE Visualizations'> 
 	
 	| view |
 	view := MOViewRenderer new.
-	self viewUMLTableOn: view.
+	self viewTableUsageOn: view.
 	view open
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTable >> viewUMLTableOn: view [
+MJFAMIXTable >> viewTableUsageOn: view [
 	view shape umlClassDiagramLikeForTable.
 	view interaction popupText.
 	view node: self.

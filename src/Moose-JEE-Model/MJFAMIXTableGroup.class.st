@@ -126,7 +126,7 @@ MJFAMIXTableGroup >> computeLevenshteinDistancesAmongTheFieldsUsingArrays [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewDBTables [
-	<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> 
+	"<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> "
 
 	| view |
 	view := MOViewRenderer new.
@@ -148,47 +148,48 @@ MJFAMIXTableGroup >> viewDBTablesOn: view [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewTables [
-	<menuItem: 'DB Tables' category: 'JEAs Visualizations'> 
+	<menuItem: 'View Tables' category: 'JEAs Visualizations'> 
 
 	| view |
 	view := MOViewRenderer new.
 	self viewTablesOn: view.
+	view root applyLayout.
 	view open.
 	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewTablesFKs [
+	<menuItem: 'View Tables with FK Relations' category: 'JEAs Visualizations'> 
+
+	| view |
+	view := MOViewRenderer new.
+	self viewTablesFKsOn: view.
+	view root applyLayout.
+	view open.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewTablesFKsOn: view [
+	
+	self viewTablesOn: view.
+
+	view shape line color: Color red.
+	"view edges: self mooseModel allFKAssociations from: [:each | each sourceTable]  to: [:each | each targetTable].
+
+	view shape line color: Color transparent."
+	view edges: self mooseModel allFKAssociations from: [:each | each sourceTable ownerTable ]  to: [:each | each targetTable ownerTable].
+	
+	view horizontalTreeLayout  horizontalGap: 150.
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewTablesOn: view [
 	
 	self do: [:table |
-		view shape: table tableShape.
-		view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-		view interaction popupText.
-		view node: table].
-	view edges: self mooseModel allFKAssociations from: #sourceTable to: #targetTable.
-	view horizontalDominanceTreeLayout.
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroup >> viewUMLTables [
-	<menuItem: 'Tables UML class diagram like' category: 'JEAs Visualizations'> 
-
-	| view |
-	view := MOViewRenderer new.
-	self viewUMLTablesOn: view.
-	view open.
-	
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroup >> viewUMLTablesOn: view [
-	
-	view shape rectangle withoutBorder.
-	view interaction nodraggable.
-	view node: #tables forIt: [ 
-		(self sorted: [:a :b | a name < b name ])  do: [:table | 
-				table viewUMLTableOn: view.].
-			view gridLayout].
+		table viewTableOn: view].
+	view gridLayout.
 ]
 
 { #category : #'as yet unclassified' }
@@ -218,7 +219,7 @@ MJFAMIXTableGroup >> viewUMLTablesWithEJBeansOn: view [
 			view shape rectangle withoutBorder.
 			view nodes: notLonelyTables forEach: [:table |
 						table mappedNamedEntities first implementedEntityBean viewUMLOfImplementorOn: view.
-						table viewUMLTableOn: view.
+						table viewTableUsageOn: view.
 						view shape line.
 						view edges: table mooseModel allMaps from: #mapSource to: #mapTarget.
 						view treeLayout.].
@@ -233,7 +234,7 @@ MJFAMIXTableGroup >> viewUMLTablesWithEJBeansOn: view [
 			view shape rectangle withoutBorder.
 			view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
 			view interaction nodraggable.
-			view nodes: lonelyTables forEach: [:table | table viewUMLTableOn: view.]. "using: view shape umlClassDiagramLikeForTable."
+			view nodes: lonelyTables forEach: [:table | table viewTableUsageOn: view.]. "using: view shape umlClassDiagramLikeForTable."
 			view flowLayout maxWidth: 600; gapSize: 2.
 		]].
 
