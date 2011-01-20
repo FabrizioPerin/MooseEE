@@ -27,7 +27,7 @@ MJFAMIXTableGroupReports >> browser [
 		distances := edges select: [:each | each weight < self cleanUpThreshold].
 		distances := distances sorted: [:first :second | first weight < second weight ].
 		distances do: [:each |
-			stream nextPutAll: (each from ownerTable name , '::' , each from name , '   --- ', each weight asString , ' --->   ' , each to ownerTable name , '::' , each to name , String cr).].
+			stream nextPutAll: (each from ownerTable name , '::' , each from name , String tab , '--- ', each weight asString , ' --->' , String tab , each to ownerTable name , '::' , each to name , String cr).].
 		stream close.
 		distances.
 	];
