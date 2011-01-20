@@ -202,7 +202,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 									class addMaps: mapping.
 									table addMappedBy: mapping.
-									self add: mapping.].
+									self withoutAnnounceAdd: mapping.].
 								counter := counter+1.
 								bar value: counter.]]]]]
 	ifFalse:[
@@ -226,7 +226,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
 										table addMappedBy: mapping.
-										self add: mapping.].
+										self withoutAnnounceAdd: mapping.].
 								counter := counter+1.
 								bar value: counter.
 								]]]].
@@ -298,7 +298,7 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 								mapping := MJFAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
 								currentAtt addMaps: mapping.
 								currentCol addMappedBy: mapping.
-								self add: mapping.
+								self withoutAnnounceAdd: mapping.
 								currentAtt := currentCol := nil.].
 
 						counter := counter+1.
@@ -315,7 +315,7 @@ MooseModel >> createAnnotationForTransactionScope [
 	( transactionScopeTypeGroup isNil or: [ transactionScopeTypeGroup isEmpty ] )
 			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope]
 			ifFalse: [transactionScopeType := transactionScopeTypeGroup first].
-	self add: transactionScopeType.
+	self withoutAnnounceAdd: transactionScopeType.
 
 	
 	"Creation of the annotation istances for method and classes for transactionScope"
@@ -328,7 +328,7 @@ MooseModel >> createAnnotationForTransactionScope [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: transactionScopeType.
 							instance annotatedEntity: namespace.
-							self add: instance.
+							self withoutAnnounceAdd: instance.
 							 ].
 	
 	interestingClasses do: [:class | 
@@ -336,7 +336,7 @@ MooseModel >> createAnnotationForTransactionScope [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: transactionScopeType.
 							instance annotatedEntity: class.
-							self add: instance.
+							self withoutAnnounceAdd: instance.
 							 ].		
 
 	allInterestingMethods do: [:method | 
@@ -344,7 +344,7 @@ MooseModel >> createAnnotationForTransactionScope [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: transactionScopeType.
 							instance annotatedEntity: method.
-							self add: instance.
+							self withoutAnnounceAdd: instance.
 							 ].	
 
 	^self
@@ -360,7 +360,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 	( unsafeQueryTypeGroup isNil or: [ unsafeQueryTypeGroup isEmpty ] )
 			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery]
 			ifFalse: [unsafeQueryType := unsafeQueryTypeGroup first].
-	self add: unsafeQueryType.
+	self withoutAnnounceAdd: unsafeQueryType.
 
 	
 	"Creation of annotation instances on methods and classes for Unsafe Query "
@@ -377,7 +377,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: namespace.
-							self add: instance.
+							self withoutAnnounceAdd: instance.
 							 ].	
 
 	interestingClassesWithoutLonelyClasses do: [:class | 
@@ -385,7 +385,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: class.
-							self add: instance.
+							self withoutAnnounceAdd: instance.
 							 ].		
 	
 	allInterestingMethods do: [:method | 
@@ -393,7 +393,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: method.
-							self add: instance.
+							self withoutAnnounceAdd: instance.
 							 ].	
 
 	^self
@@ -650,7 +650,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					bean implementationClass: each.].
 				counter := counter +1.
 				bar value: counter.
-				self add: bean ].
+				self withoutAnnounceAdd: bean ].
 
 			bar value: 'Importing Message Driven Beans'.
 			messageDrivenBeansAnnotations do: [:annotation | 
@@ -662,7 +662,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					bean implementationClass: each.].
 				counter := counter +1.
 				bar value: counter.
-				self add: bean ].
+				self withoutAnnounceAdd: bean ].
 	
 			bar value: 'Importing Session Beans'.
 			sessionBeansAnnotations do: [:annotation | 
@@ -675,7 +675,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					bean implementationClass: each.].
 				counter := counter +1.
 				bar value: counter.
-				self add: bean].
+				self withoutAnnounceAdd: bean].
 	
 			bar value: 'Importing Transaction Attributes'.
 			transactionAttributes do: [:annotation |
