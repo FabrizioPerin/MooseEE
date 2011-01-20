@@ -49,7 +49,9 @@ MJImportInformationForEJB21 >> actionsToPerform [
 			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel].
 			progBar value: 7.
 
-			MooseModel root add: mooseModel.
+			mooseModel install.
+
+			"MooseModel root add: mooseModel."
 			progBar value: 8.
 
 			(wizardInformations at: #openVisualizations) 
