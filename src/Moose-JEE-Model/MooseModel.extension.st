@@ -734,19 +734,6 @@ MooseModel >> tableGroupReport [
 	spec open
 ]
 
-{ #category : #'*Moose-JEE-Model-Reports' }
-MooseModel >> tableGroupReportTry [
-	<menuItem: 'Table Group Report try' category: 'JEAs Reports'>
-
-	|spec|
-	spec := REPConcernSpecification on: MooseModel root allModels first.
-	spec label: 'Table Group Report try'.
-
-	spec composite: 'FK potential matches' with: [
- 		 spec concern: MJFAMIXTableGroupReportsTry new ].
-	spec open
-]
-
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
