@@ -19,11 +19,9 @@ MJImportDatabaseIntoEmptyModel >> execute [
 			mooseModel := MooseModel new.
 			mooseModel name: (file name sliceFrom: ((file name findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1)  to: file name size ).
 	
-			mooseModel importDBFromSQLFile: (StandardFileStream readOnlyFileNamed: file name)].
-		
-			MooseModel root add: mooseModel.
+			mooseModel importDBFromSQLFile: (StandardFileStream readOnlyFileNamed: file name).
 			
-	self updateModelList.
+			mooseModel install].
 ]
 
 { #category : #'as yet unclassified' }
