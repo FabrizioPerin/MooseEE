@@ -5,8 +5,8 @@ MooseModel >> buildRelationsAmongTablesAndClassesByClassName [
 	<menuItem: 'Build Relations Among Tables And Classes by class name' category: 'JEAs Menu'>
 
 	| interfaces tables counter |
-	interfaces := self allInterfaces.
-	tables := self allTables.
+	interfaces := (self allClasses select: #isInterface)sorted: [:a :b | a name > b name].
+	tables := self allTables sorted: [:a :b | a name > b name].
 	counter :=  1.
 
 	UIManager default
@@ -17,15 +17,14 @@ MooseModel >> buildRelationsAmongTablesAndClassesByClassName [
 		during: [ :bar |
 			counter := counter+1.
 			bar value: counter.
-		
 			tables do: [:table | 
 				interfaces do: [:interface |
-						((interface name findString: table name) > 0)
+						(('.*',table name,'$') asRegex matches: interface name)
 							ifTrue:[ |mapping|
 									mapping := MJFAMIXMapping new mapTarget: table; mapSource: interface.
 									interface addMaps: mapping.
 									table addMappedBy: mapping.
-									self add: mapping.].
+									self withoutAnnounceAdd: mapping.].
 							counter := counter+1.
 							bar value: counter.
 							]]].
