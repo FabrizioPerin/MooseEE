@@ -220,6 +220,9 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
+			package: 'Moose-JEE-Reports' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-Model'];
 			package: 'Moose-JEE-Opax' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Opax'];
@@ -274,6 +277,9 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
+			package: 'Moose-JEE-Reports' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-Model'];
 			package: 'Moose-JEE-Opax' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Opax'];
