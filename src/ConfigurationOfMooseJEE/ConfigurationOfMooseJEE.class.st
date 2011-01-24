@@ -64,6 +64,19 @@ ConfigurationOfMooseJEE class >> loadLastStable [
 ]
 
 { #category : #loading }
+ConfigurationOfMooseJEE class >> loadPXDefaultWithoutMoose [
+
+	Transcript open.
+	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
+	
+	(self project version: 'pXDefaultWithoutMoose') load.
+
+	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+
+
+]
+
+{ #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion10 [
 	
 	Transcript open.
@@ -85,19 +98,6 @@ ConfigurationOfMooseJEE class >> loadVersion11 [
 	(self project version: '1.1') load.
 
 	Transcript show: ''; cr; show: 'Moose JEE v.1.1 configuration loaded. Have fun!'; cr.
-
-]
-
-{ #category : #loading }
-ConfigurationOfMooseJEE class >> loadpXDefaultWithoutMoose [
-
-	Transcript open.
-	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
-	
-	(self project version: 'pXDefaultWithoutMoose') load.
-
-	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
-
 
 ]
 
