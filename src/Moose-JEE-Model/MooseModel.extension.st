@@ -493,13 +493,13 @@ MooseModel >> importEjbJarFromFolder: aString [
 					parser parseDocument.
 					root := parser stack first.
 							
-					(root allChildren select: [:eachElement | eachElement class = SessionElement])  do: [:eachElement |
+					(root allChildren select: [:eachElement | eachElement class = MJSessionElement])  do: [:eachElement |
 							eachElement populate: self].
-					(root allChildren select: [:eachElement | eachElement class = EntityElement])  do: [:eachElement |
+					(root allChildren select: [:eachElement | eachElement class = MJEntityElement])  do: [:eachElement |
 							eachElement populate: self].
-					(root allChildren select: [:eachElement | eachElement class = MessageDrivenElement])  do: [:eachElement |
+					(root allChildren select: [:eachElement | eachElement class = MJMessageDrivenElement])  do: [:eachElement |
 							eachElement populate: self].
-					(root allChildren select: [:eachElement | eachElement class = ContainerTransactionElement]) do: [:eachElement |
+					(root allChildren select: [:eachElement | eachElement class = MJContainerTransactionElement]) do: [:eachElement |
 							eachElement populate: self].
 					counter := counter + 1.
 					bar value: counter.
