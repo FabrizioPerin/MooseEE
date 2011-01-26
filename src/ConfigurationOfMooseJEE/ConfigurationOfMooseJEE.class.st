@@ -193,6 +193,43 @@ ConfigurationOfMooseJEE >> baseline11: spec [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> baseline12: spec [ 
+        <version: '1.2-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.squeaksource.com/MooseJEE'.
+		
+		spec project: 'Moose for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMoose';
+				file: 'ConfigurationOfMoose';
+				repository: 'http://www.squeaksource.com/Moose' ].
+		
+		spec  project: 'PetitSQLParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitSQLParser';
+				file: 'ConfigurationOfPetitSQLParser';
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
+		
+		spec 
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'pagerank' with: [spec repository: 'http://www.squeaksource.com/pagerank'];	
+
+			package: 'Moose-JEE-Model' with: [spec requires: #( 'Moose for MooseJEE' 'PetitSQLParser for MooseJEE' 'pagerank' )];
+			package: 'Moose-JEE-Importers-SQL' with: [spec requires: #( 'Moose for MooseJEE')];
+			package: 'Moose-JEE-EJBDraftObjs' with: [spec requires: #('Opax')];
+			package: 'Moose-JEE-Tests' with: [spec requires: #('Moose-JEE-Model').];
+			package: 'Moose-JEE-Wizard' with: [spec requires: #('Merlin')].
+			
+			
+		spec group: 'Tests' with: #('Moose-JEE-Tests').
+		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-EJBDraftObjs' 'Moose-JEE-Wizard' 'Moose-JEE-Importers-SQL'). 
+		spec group: 'default' with: #('Core' 'Tests').
+	].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> default: spec [ 
 	<version: 'default'>
 	
@@ -229,16 +266,14 @@ ConfigurationOfMooseJEE >> default: spec [
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
-			package: 'Opax' with: [spec repository: 'http://www.squeaksource.com/OPAX']; 
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Reports' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Opax' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Opax'];
+			package: 'Moose-JEE-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitSQLParser for MooseJEE'];
@@ -284,18 +319,15 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
-			package: 'Opax' with: [
-				spec repository: 'http://www.squeaksource.com/OPAX'.
-				"spec requires: 'XMLSupport for MooseJEE'"]; 
+
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Reports' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Opax' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Opax'];
+			package: 'Moose-JEE-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitSQLParser for MooseJEE'];
@@ -426,6 +458,34 @@ ConfigurationOfMooseJEE >> version11: spec [
 			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.20';
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
 			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.1'.
+			
+		].
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> version12: spec [
+	<version: '1.2' imports: #('1.1-baseline')>
+
+	spec for: #common do: [
+		spec blessing: #unstable.
+		spec author: 'FabrizioPerin'.
+		spec timestamp: '27/08/2010 15:00'.
+		
+		spec project: 'Moose for MooseJEE' with: '4.1'.
+		spec project: 'XMLSupport for MooseJEE' with: '1.1.1'.
+		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
+		
+		spec
+			package: 'Merlin' with: 'Merlin-cyrille_delaunay.72';
+			package: 'pagerank' with: 'PageRank-lr.6';
+			package: 'Opax' with: 'Opax-FabrizioPerin.18'.			
+		
+		spec
+			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.80';
+			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
+			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.39';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.13';
+			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.12'.
 			
 		].
 ]
