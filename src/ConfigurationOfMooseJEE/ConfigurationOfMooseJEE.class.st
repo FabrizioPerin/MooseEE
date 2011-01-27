@@ -368,18 +368,15 @@ ConfigurationOfMooseJEE >> pXdefaultWithoutMoose: spec [
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank'];
 			package: 'Petit-SQL-Parametrix' with: [spec repository: 'http://www.squeaksource.com/PetitSQLParser']; 
-			package: 'Opax' with: [
-				spec repository: 'http://www.squeaksource.com/OPAX'.
-				"spec requires: 'XMLSupport for MooseJEE'"]; 
+
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Reports' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Opax' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Opax'];
+			package: 'Moose-JEE-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitSQLParser for MooseJEE'];
