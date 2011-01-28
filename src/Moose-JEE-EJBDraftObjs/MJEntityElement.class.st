@@ -22,7 +22,7 @@ MJEntityElement >> createBeanFrom: aMooseModel [
 { #category : #accessing }
 MJEntityElement >> persistenceType [
 
-	^(self elements detect: [:each | each tag = 'persistence-type']) strings first.
+	^(self elements detect: [:each | each name = 'persistence-type']) strings first.
 ]
 
 { #category : #accessing }

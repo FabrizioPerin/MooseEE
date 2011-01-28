@@ -13,7 +13,7 @@ MJEJBeanElement >> createBeanFrom: aMooseModel [
 { #category : #accessing }
 MJEJBeanElement >> ejbName [
 
-	^(self elements detect: [:each | each tag = 'ejb-name']) strings first.
+	^(self elements detect: [:each | each name = 'ejb-name']) strings first.
 ]
 
 { #category : #accessing }
@@ -27,7 +27,7 @@ MJEJBeanElement >> homeInterfaceFrom: aMooseModel [
 { #category : #accessing }
 MJEJBeanElement >> implementationClassFrom: aMooseModel [
 
-	^self elements detect: [:x | x tag = 'ejb-class'] 
+	^self elements detect: [:x | x name = 'ejb-class'] 
 			ifOne: [:x | aMooseModel allClasses entityNamed: ((x strings first copyReplaceAll: '.' with: '::') asSymbol)]
 			ifNone: [nil]
 ]
