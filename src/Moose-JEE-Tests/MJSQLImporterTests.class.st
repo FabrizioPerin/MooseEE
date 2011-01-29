@@ -29,9 +29,8 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDB1 [
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	col13 isPK: true.
 	
-	tab1 columns addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestColumnsGroup.
+	tab1 columns addAll: blackBoard columns.
+	blackBoard columns do: [:each | each table: tab1 ].
 	
 	
 	"DEFINITION OF TABLE 2"
@@ -39,14 +38,18 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDB1 [
 	
 	col21 := self createNewColumnNamed: 'Col1Tab2' whichTypeIs: 'Integer'.
 	col21 defaultValue: 0.
+	col21 table: tab2.
 	
 	col22 := self createNewColumnNamed: 'Col2Tab2' whichTypeIs: 'String'.
+	col21 table: tab2.
 	
 	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'VarChar'.
-	
-	tab2 columns addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab2 ].
-	blackBoard clearLatestColumnsGroup.
+	col21 table: tab2.
+
+	tab2 columns add: col21.
+	tab2 columns add: col22.
+	tab2 columns add: col23.
+	blackBoard columns do: [:each | each table: tab2 ].
 	
 	"add tables to the db"
 	blackBoard tables do: [:tab | testDB addTable: tab].
@@ -75,40 +78,43 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithFKs [
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	col13 isPK: true.
 	
-	tab1 columns addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestColumnsGroup.
-	
+	tab1 columns addAll: blackBoard columns.
+	blackBoard columns do: [:each | each table: tab1 ].	
 	
 	"DEFINITION OF TABLE 2"
 	tab2 := self createNewTableNamed: 'Tab2'.
 	
 	col21 := self createNewColumnNamed: 'Col1Tab2' whichTypeIs: 'Integer'.
 	col21 defaultValue: 0.
+	col21 table: tab2.
 	
-	col22 := self createNewColumnNamed: 'Col2Tab2' whichTypeIs: 'Integer'.
+	col22 := self createNewColumnNamed: 'Col2Tab2' whichTypeIs: 'String'.
+	col22 table: tab2.
 	
-	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'Integer'.
-	
-	tab2 columns addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab2 ].
-	blackBoard clearLatestColumnsGroup.
-	
+	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'VarChar'.
+	col23 table: tab2.
+
+	tab2 columns add: col21.
+	tab2 columns add: col22.
+	tab2 columns add: col23.
+	blackBoard columns do: [:each | each table: tab2 ].
 	
 	"DEFINITION OF TABLE 3"
 	tab3 := self createNewTableNamed: 'Tab3'.
 	
 	col31 := self createNewColumnNamed: 'Col1Tab3' whichTypeIs: 'Integer'.
 	col31 defaultValue: 0.
+	col31 table: tab3.
 	
 	col32 := self createNewColumnNamed: 'Col2Tab3' whichTypeIs: 'Integer'.
+	col32 table: tab3.
 	
 	col33 :=  self createNewColumnNamed: 'Col3Tab3' whichTypeIs: 'Integer'.
-
+	col33 table: tab3.
 	
-	tab3 columns addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab3].
-	blackBoard clearLatestColumnsGroup.
+	tab3 columns add: col31.
+	tab3 columns add: col32.
+	tab3 columns add: col33.
 
 	"add tables to the db"
 	blackBoard tables do: [:tab | testDB addTable: tab].
@@ -142,9 +148,9 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKs [
 	
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	
-	tab1 columns addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestColumnsGroup.
+	tab1 columns addAll: blackBoard columns.
+	blackBoard columns do: [:each | each table: tab1 ].
+
 	
 	"add tables to the db"
 	blackBoard tables do: [:tab | testDB addTable: tab].
@@ -155,8 +161,6 @@ MJSQLImporterTests >> createNewBlackBoardWithTestDBWithPKs [
 		for: tab1
 		and:  (OrderedCollection with: col12 with: col13 ).
 
-	
-	
 ]
 
 { #category : #'as yet unclassified' }
@@ -168,7 +172,7 @@ MJSQLImporterTests >> createNewColumnNamed: aString whichTypeIs: aTypeName [
 					type: aTypeName.
 					
 	blackBoard addColumn: column.
-	blackBoard addToRecentColumnGroup: column.
+	"blackBoard addToRecentColumnGroup: column."
 								
 	^column
 ]
@@ -247,40 +251,45 @@ MJSQLImporterTests >> createNewTestDB1 [
 	col13 :=  self createNewColumnNamed: 'Col3Tab1' whichTypeIs: 'Integer'.
 	col13 isPK: true.
 	
-	tab1 attributes addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab1 ].
-	blackBoard clearLatestColumnsGroup.
-	
+	tab1 attributes addAll: blackBoard columns.
+	blackBoard columns do: [:each | each table: tab1 ].
+
 	
 	"DEFINITION OF TABLE 2"
 	tab2 := self createNewTableNamed: 'Tab2'.
 	
 	col21 := self createNewColumnNamed: 'Col1Tab2' whichTypeIs: 'Integer'.
 	col21 defaultValue: 0.
+	col21 table: tab2.
 	
-	col22 := self createNewColumnNamed: 'Col2Tab2' whichTypeIs: 'Integer'.
+	col22 := self createNewColumnNamed: 'Col2Tab2' whichTypeIs: 'String'.
+	col22 table: tab2.
 	
-	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'Integer'.
-	
-	tab2 attributes addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab2 ].
-	blackBoard clearLatestColumnsGroup.
+	col23 :=  self createNewColumnNamed: 'Col3Tab2' whichTypeIs: 'VarChar'.
+	col23 table: tab2.
+
+	tab2 columns add: col21.
+	tab2 columns add: col22.
+	tab2 columns add: col23.
+	blackBoard columns do: [:each | each table: tab2 ].
 	
 	"DEFINITION OF TABLE 3"
 	tab3 := self createNewTableNamed: 'Tab3'.
 	
 	col31 := self createNewColumnNamed: 'Col1Tab3' whichTypeIs: 'Integer'.
 	col31 defaultValue: 0.
+	col31 table: tab3.
 	
 	col32 := self createNewColumnNamed: 'Col2Tab3' whichTypeIs: 'Integer'.
+	col32 table: tab3.
 	
 	col33 :=  self createNewColumnNamed: 'Col3Tab3' whichTypeIs: 'Integer'.
-
+	col33 table: tab3.
 	
-	tab3 attributes addAll: blackBoard latestColumnsGroup.
-	blackBoard latestColumnsGroup do: [:each | each table: tab3].
-	blackBoard clearLatestColumnsGroup.
-
+	tab3 columns add: col31.
+	tab3 columns add: col32.
+	tab3 columns add: col33.
+	
 	"Creating foreign keys references"
 	
 	col33 isFK: true.

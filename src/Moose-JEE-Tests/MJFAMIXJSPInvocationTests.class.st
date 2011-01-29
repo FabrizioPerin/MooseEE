@@ -13,7 +13,7 @@ MJFAMIXJSPInvocationTests >> testFAMIXMappingCreation [
 	mooseModel := jEETestModel sampleMooseModel.
 	root := jEETestModel root.
 	
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
 	
 	class := mooseModel entityNamed: #'aPackage::AStatelessSessionBean'.
 	jsPage := MJFAMIXJSPPage new name: 'JSPageTest'.

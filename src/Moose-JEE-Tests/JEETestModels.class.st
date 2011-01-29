@@ -788,20 +788,12 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
 
 { #category : #initialize }
 JEETestModels >> initialize [
-	| parser factory doc |
+	| parser |
+	parser := OPOpaxHandler on: self minimalEjbJar readStream.
+	parser startDocument.
+	parser parseDocument.
+	root := parser stack first.
 
-	parser := XMLDOMParser on: self minimalEjbJar readStream.
-	factory := XMLPluggableElementFactory new
-				elementClass: MJEJBeanElement;
-				handleElement: 'entity' withClass: MJEntityElement;
-				handleElement: 'message-driven' withClass: MJMessageDrivenElement;
-				handleElement: 'session' withClass: MJSessionElement;
-				handleElement: 'container-transaction' withClass: MJContainerTransactionElement.
-
-	parser nodeFactory: factory.  
-
-	doc := parser parseDocument.
-	root := doc root.
 ]
 
 { #category : #elements }

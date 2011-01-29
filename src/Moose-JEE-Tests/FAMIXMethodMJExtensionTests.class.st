@@ -240,9 +240,9 @@ FAMIXMethodMJExtensionTests >> testHasEJBTransactionAttribute [
 	mooseModel := jEETestModel sampleMooseModelWithDB.
 	root := jEETestModel root.
 	
-	(root allElements select: [:each | each class = MJSessionElement]) do: [:each |
+	(root allChildren select: [:each | each class = SessionElement]) do: [:each |
 		each populate: mooseModel].
-	(root allElements select: [:each | each class = MJContainerTransactionElement]) do: [:each |
+	(root allChildren select: [:each | each class = ContainerTransactionElement]) do: [:each |
 		each populate: mooseModel].
 
 	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
