@@ -13,7 +13,7 @@ MJFAMIXMappingTests >> testFAMIXMappingCreation [
 	mooseModel := jEETestModel sampleMooseModelWithDB.
 	root := jEETestModel root.
 	
-	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
 	
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
@@ -43,7 +43,7 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulation [
 	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
 	
 	"define Entity beans"
-	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
 	
 	"Creating the annotation type Table"
 	annotationType := FAMIXAnnotationType new name: #Table.
@@ -105,7 +105,7 @@ MJFAMIXMappingTests >> testFAMIXMappingModelPopulation [
 	root := jEETestModel root.
 	
 	"define Entity beans"
-	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
 	
 	"Creating the annotation type Table"
 	annotationType := FAMIXAnnotationType new name: #Table.

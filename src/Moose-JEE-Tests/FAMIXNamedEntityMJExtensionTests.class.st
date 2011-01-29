@@ -14,7 +14,7 @@ FAMIXNamedEntityMJExtensionTests >> testMappedRelationalEntities [
 	
 	mooseModel ejbVersion: #EJB30.
 	"define Entity beans"
-	(root allChildren select: [:each | each class = EntityElement]) do: [:each | each populate: mooseModel].
+	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
 	
 	"Creating the annotation type Table"
 	annotationType := FAMIXAnnotationType new name: #Table.

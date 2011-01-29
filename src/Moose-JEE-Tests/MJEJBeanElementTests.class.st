@@ -1,14 +1,14 @@
 Class {
-	#name : #EJBean,
+	#name : #MJEJBeanElementTests,
 	#superclass : #TestCase,
 	#instVars : [
 		'root'
 	],
-	#category : #'Moose-JEE-Tests-Opax'
+	#category : #'Moose-JEE-Tests-EJBDraftObjs'
 }
 
 { #category : #tests }
-EJBean >> minimalEjbJar [
+MJEJBeanElementTests >> minimalEjbJar [
 
 	^'<?xml version="1.0"?>
 <ejb-jar>
@@ -103,7 +103,7 @@ EJBean >> minimalEjbJar [
 ]
 
 { #category : #models }
-EJBean >> sampleMooseModel [
+MJEJBeanElementTests >> sampleMooseModel [
 	
 	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean |
 	mooseModel := MooseModel new.
@@ -228,31 +228,39 @@ EJBean >> sampleMooseModel [
 ]
 
 { #category : #setup }
-EJBean >> setUp [
-	| parser |
-	parser := OPOpaxHandler on: self minimalEjbJar readStream.
-	parser startDocument.
-	parser parseDocument.
-	root := parser stack first.
+MJEJBeanElementTests >> setUp [
+	| parser factory doc |
+	parser := XMLDOMParser on: self minimalEjbJar readStream.
+	factory := XMLPluggableElementFactory new
+				elementClass: MJEJBeanElement;
+				handleElement: 'entity' withClass: MJEntityElement;
+				handleElement: 'message-driven' withClass: MJMessageDrivenElement;
+				handleElement: 'session' withClass: MJSessionElement;
+				handleElement: 'container-transaction' withClass: MJContainerTransactionElement.
+
+	parser nodeFactory: factory.  
+
+	doc := parser parseDocument.
+	root := doc root.
 
 ]
 
 { #category : #testsOnJEEModel }
-EJBean >> testElementCreation [
+MJEJBeanElementTests >> testElementCreation [
 
-	self assert: (root allChildren select: [:each | each isMemberOf: EntityElement ]) size = 2.
-	self assert: (root allChildren select: [:each | each isMemberOf: SessionElement ]) size = 2.
-	self assert: (root allChildren select: [:each | each isMemberOf: ContainerTransactionElement ]) size = 3.
-	self assert: (root allChildren select: [:each | each isMemberOf:  MessageDrivenElement ]) size = 1.
+	self assert: (root allElements select: [:each | each isMemberOf: MJEntityElement ]) size = 2.
+	self assert: (root allElements select: [:each | each isMemberOf: MJSessionElement ]) size = 2.
+	self assert: (root allElements select: [:each | each isMemberOf: MJContainerTransactionElement ]) size = 3.
+	self assert: (root allElements select: [:each | each isMemberOf:  MJMessageDrivenElement ]) size = 1.
 ]
 
 { #category : #testsOnJEEModel }
-EJBean >> testEntityResolving [
+MJEJBeanElementTests >> testEntityResolving [
 	
 	| mooseModel aBean |
 	mooseModel := self sampleMooseModel.
 
-	(root allChildren select: [:each | each class = EntityElement ]) do: [:each | each populate: mooseModel].
+	(root allElements select: [:each | each class = MJEntityElement ]) do: [:each | each populate: mooseModel].
 
 	self assert: mooseModel allEntityBeans size = 2.
 	self assert: (mooseModel allEntityBeans contains: [:each | each name = #ACMPEntity]).
@@ -277,12 +285,12 @@ EJBean >> testEntityResolving [
 ]
 
 { #category : #tests }
-EJBean >> testMessageDrivenResolving [
+MJEJBeanElementTests >> testMessageDrivenResolving [
 	
 	| mooseModel aBean |
 	mooseModel := self sampleMooseModel.
 
-	(root allChildren select: [:each | each class = MessageDrivenElement]) do: [:each | each populate: mooseModel].
+	(root allElements select: [:each | each class = MJMessageDrivenElement]) do: [:each | each populate: mooseModel].
 
 	self assert: mooseModel allMessageDrivenBeans size = 1.
 	self assert: (mooseModel allMessageDrivenBeans contains: [:each | each name = #AMessageDriven]).
@@ -294,11 +302,11 @@ EJBean >> testMessageDrivenResolving [
 ]
 
 { #category : #testsOnJEEModel }
-EJBean >> testSessionResolving [
+MJEJBeanElementTests >> testSessionResolving [
 	
 	| mooseModel aStateless aStateful |
 	mooseModel := self sampleMooseModel.
-	(root allChildren select: [:each | each class = SessionElement]) do: [:each | each populate: mooseModel].
+	(root allElements select: [:each | each class = MJSessionElement]) do: [:each | each populate: mooseModel].
 
 	self assert: mooseModel allSessionBeans size = 2.
 	self assert: (mooseModel allSessionBeans contains: [:each | each name = #AStatelessSession]).
