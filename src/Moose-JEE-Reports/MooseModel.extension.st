@@ -1,6 +1,19 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Reports' }
+MooseModel >> mappingAmongScriptsAndTableReport [
+	<menuItem: 'Mapping Group Report' category: 'JEAs Reports'>
+
+	|spec|
+	spec := REPConcernSpecification on: self.
+	spec label: 'Mapping Group Report'.
+
+	spec composite: 'Potential matches through tables' with: [
+ 		 spec concern: MJFAMIXScriptGroupReports new ].
+	spec open
+]
+
+{ #category : #'*Moose-JEE-Reports' }
 MooseModel >> tableGroupReport [
 	<menuItem: 'Table Group Report' category: 'JEAs Reports'>
 
