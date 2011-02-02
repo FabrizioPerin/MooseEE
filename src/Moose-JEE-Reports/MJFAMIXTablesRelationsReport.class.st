@@ -1,26 +1,30 @@
 Class {
-	#name : #MJFAMIXScriptGroupReports,
+	#name : #MJFAMIXTablesRelationsReport,
 	#superclass : #REPComputedConcern,
 	#category : #'Moose-JEE-Reports'
 }
 
 { #category : #'as yet unclassified' }
-MJFAMIXScriptGroupReports >> browser [
+MJFAMIXTablesRelationsReport >> browser [
 	| browser |
 	browser := GLMTabulator new.
 	browser column: #allmaps; column: #visualization.
 	browser transmit to: #allmaps; andShow: [:a | 
   	a list 
 		title: 'Scripts and table mapping';
-		display: [ :maps |
-				maps];
+		display: [ :hierarchies | self model allMaps];
 		showOnly: 50].
 	
 	browser transmit to: #visualization; from: #allmaps; andShow: [:a | 
 		a mondrian 
 			title: 'Relations';
 			painting: [:view :map |
-				| scripts tables maps|
+				| scripts tables maps currentHierarchy|
+				
+				currentHierarchy := result at: map ifAbsent: [Error signal: 'Element not found'].
+				
+				result keys do:[:key |
+					].
 
 				"maps := result select: [:each | each from = map from ]."
 				
@@ -28,7 +32,8 @@ MJFAMIXScriptGroupReports >> browser [
 				scripts := (scripts flatCollect: [:each | each withDeepInvokedScripts]) asSet.
 				maps := result select: [:each | scripts includes: each from ].
 				
-				scripts := (maps flatCollect: [:each | each from withDeepInvokingScripts])asSet.
+				scripts := scripts intersection: (maps flatCollect: [:each | each from withDeepInvokingScripts]).
+				
 				tables := (maps collect: [:each | each to]) asSet.
 				
 				view shape rectangle text: [:script | script container isNil ifTrue: [script name] ifFalse: [script container]]; fontSize: 10; borderColor: Color red.
@@ -41,7 +46,7 @@ MJFAMIXScriptGroupReports >> browser [
 				view interaction popupText.
 				view nodes: scripts.
 				
-				view shape rectangle text: [:table | table name]; fontColor: Color cyan.
+				view shape tableShape.
 				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
 				view interaction popupText.
 				view nodes: tables.
@@ -165,9 +170,9 @@ MJFAMIXScriptGroupReports >> browser [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXScriptGroupReports >> computeResult [
+MJFAMIXTablesRelationsReport >> computeResult [
 
-	| invocations scripts maps |
+	| invocations scripts maps tables allHierarchy |
 
 "	invocations := self model allInvocations select: [:each | (each from isMemberOf: PXSScript) and: [
 											(each anyCandidate isMemberOf: PXSScript)]].
@@ -176,10 +181,19 @@ MJFAMIXScriptGroupReports >> computeResult [
 	scripts := (scripts addAll: (invocations flatCollect: [:each | each candidates])) asSet."
 
 	maps := ((self model allMaps select: [:map | map from isKindOf: PXSScript]) sorted: [:first :second | first from name < second from name]) asSet.
-
-	"maps := self model allMaps select: [:each | scripts includes: each from ]. "
-
-	^maps
+	
+	allHierarchy := Dictionary new.
+	maps do: [:map | allHierarchy at: map ifAbsentPut: (map from withDeepInvokingScripts)].
+		"
+		scripts  := map from withDeepInvokingScripts.
+		scripts := (scripts flatCollect: [:each | each withDeepInvokedScripts]) asSet.
+		maps := result select: [:each | scripts includes: each from ].
+				
+		scripts := scripts intersection: (maps flatCollect: [:each | each from withDeepInvokingScripts]).
+				
+		tables := (maps collect: [:each | each to]) asSet."
+		
+	^allHierarchy
 	
 	"maps := group first mooseModel allMaps select: [:each | scripts includes: each from ]. 
 	tableToExclude := group first mooseModel allFKAssociations collect: [:each | each from ownerTable].
@@ -203,19 +217,19 @@ view dominanceTreeLayout."
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXScriptGroupReports >> explanation [ 
+MJFAMIXTablesRelationsReport >> explanation [ 
   ^ 'This report aim to identify potential missing link between two database table considering the relation among scripts.
 
 The report shows all the scripts that has a connection with one or more other scripts and with a table'
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXScriptGroupReports >> label [ 
+MJFAMIXTablesRelationsReport >> label [ 
   ^ 'Potential missing links between tebles'
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXScriptGroupReports >> viewLevenshteinDistancesAmong: aTableGroup and: aCollectionOfEdges On: view [
+MJFAMIXTablesRelationsReport >> viewLevenshteinDistancesAmong: aTableGroup and: aCollectionOfEdges On: view [
 	| mooseModel allInterestingColumns  allInterestingTables builder |
 
 	allInterestingColumns := ((aCollectionOfEdges collect: [:each | each from ]) union: (aCollectionOfEdges collect: [:each | each to])) asSet. 
