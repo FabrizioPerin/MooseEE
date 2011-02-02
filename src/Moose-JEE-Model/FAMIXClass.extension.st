@@ -203,6 +203,23 @@ FAMIXClass >> numberOfTransactionMethods [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+FAMIXClass >> pageRankValue [
+	<property: #PRV longName: 'Page Rank Value' description:
+			'The value assigned by the page rank algorithm to this class considering the client classes'>
+			
+	^self
+		lookUpPropertyNamed: #PRV
+		computedAs: [
+				| assoc |
+				assoc := ((PageRank new 
+						referenced: #clientClasses;
+						runOn: (self mooseModel allClasses reject: [:each | each isTestClass])) collect: [:each | each = self]) first.
+				(assoc value integerPart asString , '.' , assoc value fractionPart asString asString sliceFrom: 1 to: 3)]
+		
+	
+]
+
+{ #category : #'*Moose-JEE-Model' }
 FAMIXClass >> parentEJBBean [
 	<MSEProperty: #parentEJBBean type: #Object>
 	"self flag: 'annotate with fame meta descriptions'."

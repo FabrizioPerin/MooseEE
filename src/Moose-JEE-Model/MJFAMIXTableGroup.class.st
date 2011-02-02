@@ -54,6 +54,17 @@ MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> ranked [
+	^(((PageRank new
+	referenced: [:element |
+		(element isMemberOf: MJFAMIXTable) ifTrue: [ element mappedNamedEntities] ifFalse: [
+		(element isMemberOf: FAMIXClass) ifTrue: [ element clientClasses] ifFalse: [#()]]
+		];
+	runOn: self entities) associations 
+	asSortedCollection: [ :a :b | a value >= b value ]) collect: [ :ea | ea ])
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> viewDBTables [
 	"<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> "
 
@@ -73,6 +84,28 @@ MJFAMIXTableGroup >> viewDBTablesOn: view [
 		(self sorted: [:a :b | a name < b name ])  do: [:table | 
 				table viewDBTableOn: view.].
 			view gridLayout].
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewTableRank [
+	<menuItem: 'Table Rank' category: 'JEAs Visualizations'>
+	| view |
+	view := MOViewRenderer new.
+	self viewTableRankOn: view.
+	^ view openWithStatusbar title: 'Table Rank'
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> viewTableRankOn: view [ 
+	| objects |
+	
+	objects := self ranked.
+	
+	view shape label
+		text: [:each | each key name , (each value integerPart asString , '.' , each value fractionPart asString asString sliceFrom: 1 to: 3 )].	
+	view nodes: objects.
+	
+	view bottomFlowLayout maxWidth: 600
 ]
 
 { #category : #'as yet unclassified' }

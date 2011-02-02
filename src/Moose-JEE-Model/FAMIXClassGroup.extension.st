@@ -175,7 +175,7 @@ FAMIXClassGroup >> ranked [
 	^(((PageRank new
 	referenced: #clientClasses;
 	runOn: self entities) associations 
-	asSortedCollection: [ :a :b | a value >= b value ]) collect: [ :ea | ea key ]) asMooseGroup
+	asSortedCollection: [ :a :b | a value >= b value ]) collect: [ :ea | ea ]) asMooseGroup
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -215,7 +215,7 @@ FAMIXClassGroup >> viewClassRankOn: view [
 	
 	objects := (self reject: #isTestClass) ranked.
 	view shape label
-		text: [:each | each name].
+		text: [:each | ' ' , each key name , (each value integerPart asString , '.' , each value fractionPart asString asString sliceFrom: 1 to: 3 )].
 	
 	view nodes: objects.
 	view bottomFlowLayout maxWidth: 600
