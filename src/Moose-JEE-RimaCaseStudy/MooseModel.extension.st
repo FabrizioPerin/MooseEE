@@ -1,6 +1,12 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
+MooseModel >> browseMappings [
+	<menuItem: 'Rima Browser for mappings' category: 'JEAs Browsers'>
+	MJRimaMappingBrowser new browser openOn: self	
+]
+
+{ #category : #'*Moose-JEE-RimaCaseStudy' }
 MooseModel >> buildRelationsAmongTablesAndClassesByClassName [
 	<menuItem: 'Build Relations Among Tables And Classes by class name' category: 'JEAs Menu'>
 
