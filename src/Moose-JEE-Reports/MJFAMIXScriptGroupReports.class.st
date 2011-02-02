@@ -8,7 +8,7 @@ Class {
 MJFAMIXScriptGroupReports >> browser [
 	| browser |
 	browser := GLMTabulator new.
-	browser column: #allmaps; column: #map.
+	browser column: #allmaps; column: #visualization.
 	browser transmit to: #allmaps; andShow: [:a | 
   	a list 
 		title: 'Scripts and table mapping';
@@ -28,7 +28,14 @@ MJFAMIXScriptGroupReports >> browser [
 				scripts := (scripts flatCollect: [:each | each withDeepInvokedScripts]) asSet.
 				maps := result select: [:each | scripts includes: each from ].
 				
+				scripts := scripts intersection: (maps flatCollect: [:each | each from withDeepInvokingScripts]).
+				
 				tables := (maps collect: [:each | each to]) asSet.
+				
+				view shape rectangle text: [:script | script container isNil ifTrue: [script name] ifFalse: [script container]]; fontSize: 10; borderColor: Color red.
+				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+				view interaction popupText.
+				view node: (scripts remove: map from ifAbsent: [Error signal: 'Element not found' ]).
 	
 				view shape rectangle text: [:script | script container isNil ifTrue: [script name] ifFalse: [script container]]; fontSize: 10.
 				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
@@ -40,9 +47,21 @@ MJFAMIXScriptGroupReports >> browser [
 				view interaction popupText.
 				view nodes: tables.
 
+				view shape line color: Color black.
 				view edges: maps from: #from to: #to.
-				view treeLayout verticalGap: 80]].
+				
+				view shape line color: Color lightGray lighter.
+				view edges: self model allInvocations from: #sender toAll: #candidates.
+				
+				
+				view horizontalDominanceTreeLayout" verticalGap: 80"]].
 	
+	browser transmit 
+			to: #allmaps->#selection; 
+			from: #visualization; when: [:s | (s notNil and: [ s isMemberOf: PXSScript]) and: [self model allMaps anySatisfy: [:each | each from = s] ] ] ; 
+			transformed: [ :s | 
+					(self model allMaps select: [:each | each from = s]) first ].	
+		
 	^ browser startOn: self result
 
 "| browser |
