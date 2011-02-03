@@ -1,6 +1,19 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Reports' }
+MooseModel >> derivedDependenciesReport [
+	<menuItem: 'Derived Dependencies' category: 'JEAs Reports'>
+
+	|spec|
+	spec := REPConcernSpecification on: self.
+	spec label: 'Derived dependencies Report'.
+
+	spec composite: 'Browser for derived dependencies' with: [
+ 		 spec concern: MJFAMIXDerivedDependenciesReport new ].
+	spec open
+]
+
+{ #category : #'*Moose-JEE-Reports' }
 MooseModel >> fkImprvedIdentificationReport [
 	<menuItem: 'Improved identification' category: 'JEAs Reports'>
 

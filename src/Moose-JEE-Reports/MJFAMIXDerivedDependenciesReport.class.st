@@ -8,23 +8,46 @@ Class {
 MJFAMIXDerivedDependenciesReport >> browser [
   | browser |
   browser := GLMTabulator new.
-  browser column: #code; column: #map.
+  browser column: #maps; column: #code.
 
-	browser transmit to: #code; andShow: [:a | 
-		a list 
-		title: 'Leventhein dinstances among fields';
-	      display: [ :edges |
-	 	     | res stream distances |
-			stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
-			distances := edges select: [:each | each weight < self cleanUpThreshold].
-			distances := distances sorted: [:first :second | first weight < second weight ].
-			distances do: [:each |
-				stream nextPutAll: (each from ownerTable name , '::' , each from name , String tab , '--- ', each weight asString , ' --->' , String tab , each to ownerTable name , '::' , each to name , String cr).].
-			stream close.
-			distances];
-		showOnly: 50.].
+	browser transmit to: #maps; andShow: [:a | 
+		a tree 
+			title: 'Maps grouped by table';
+			display: [ :maps |
+				| index groups currentGroup |
+			
+				"Grouping by table"
+				index := 1.
+				groups := OrderedCollection new.
+				currentGroup := OrderedCollection new.
+				[index <= maps size] whileTrue: [
+					(currentGroup size > 0) 
+						ifTrue: [
+							((maps at: index) to = currentGroup last to) 
+								ifTrue: [currentGroup add: (maps at: index)]
+								ifFalse: [
+									groups add: currentGroup.
+									currentGroup := OrderedCollection new]]
+						ifFalse: [currentGroup add: (maps at: index)].
+					index := index + 1].
+				
+				groups do: [:group | 
+						(group collect: #from) asMooseGroup fullyConnectGroupElementsThroughDependencies].
+				
+				self halt.
+				
+				groups];
+		showOnly: 50;
+		children: [ :item :x :level |
+					item isCollection 
+						ifTrue: [ item ]
+						ifFalse: [ #() ]];
+		format: [ :each | 
+					each isCollection
+						ifTrue: [ each first to name ]
+						ifFalse: [ each from mooseDisplayString ] ]].
 
-	browser transmit to: #map; from: #code; andShow: [:a | 
+	browser transmit to: #maps; from: #code; andShow: [:a | 
 	    a mondrian
 	      title: 'FK Relations';
 	      painting: [:view :edge | 
@@ -46,7 +69,7 @@ MJFAMIXDerivedDependenciesReport >> cleanUpThreshold [
 
 { #category : #'as yet unclassified' }
 MJFAMIXDerivedDependenciesReport >> computeResult [
-  ^ self model allTables levenshteinDistancesAmongFieldsTable.
+  ^ self model allMaps sorted: [:first :second | first to name < second to name].
 ]
 
 { #category : #'as yet unclassified' }
