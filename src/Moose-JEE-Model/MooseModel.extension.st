@@ -169,8 +169,13 @@ MooseModel >> browseCodeWithAnnotationsForJEA [
 MooseModel >> buildRelationsAmongDBTablesAndClasses [
 	<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Menu'>
 
-	| tables tableEntities counter annotationTypeTable |
+	| tables tableEntities counter annotationTypeTable ejbVer |
 
+	self ejbVersion isNil 
+				ifTrue: [
+					ejbVer := UITheme builder 
+								chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
+					self ejbVersion: ejbVer.].
 	self isEJB30 
 	ifTrue:[	
 		annotationTypeTable := (self allAnnotationTypes select: [:each | each name = 'Table']).
@@ -236,8 +241,13 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
-	| attributes classes counter allIndexes |
+	| attributes classes counter allIndexes ejbVer|
 
+	self ejbVersion isNil 
+				ifTrue: [
+					ejbVer := UITheme builder 
+								chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
+					self ejbVersion: ejbVer.].
 	self isEJB30 
 	ifTrue:[	
 		attributes := (self allAnnotationTypes select: [:each | each name = #Column or: [each name = #GeneratedValue]]) flatCollect: [:each | each annotatedEntities ].
@@ -433,7 +443,7 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 			self populateWithRelationalElementsFrom: parser blackBoard.
 			
 			self ejbVersion isNil 
-				ifFalse: [
+				ifTrue: [
 					ejbVer := UITheme builder 
 								chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
 					self ejbVersion: ejbVer.].

@@ -20,7 +20,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXSessionBean class >> annotation [
-	<MSEClass: #SessionBean super: #MJFAMIXEJBean>
+	<MSEClass: #MJFAMIXSessionBean super: #MJFAMIXEJBean>
 	<package: #'Moose-JEE-Model'>
 	<MSEComment: 'SessionBean represents a JEE Session Bean.
 	

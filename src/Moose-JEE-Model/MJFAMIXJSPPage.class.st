@@ -8,6 +8,12 @@ Class {
 	#category : #'Moose-JEE-Model'
 }
 
+{ #category : #'as yet unclassified' }
+MJFAMIXJSPPage class >> annotation [
+	<MSEClass: #MJFAMIXJSPPage super: #FAMIXNamedEntity>
+	<package: #'Moose-JEE-Model'>
+]
+
 { #category : #accessing }
 MJFAMIXJSPPage >> addOutgoingJspInvocations: aMapping [
 	outgoingJspInvocations add: aMapping.
