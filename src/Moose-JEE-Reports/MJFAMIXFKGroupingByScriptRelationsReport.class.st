@@ -13,8 +13,8 @@ MJFAMIXFKGroupingByScriptRelationsReport >> browser [
 	browser transmit to: #interestingMaps; andShow: [:a |
 		a list
 			title: 'Maps';
-			display: [:maps | maps];
-			showOnly: 50].
+			display: [:maps | maps]";
+			showOnly: 50"].
 	
 	browser transmit to: #visualization; from: #interestingMaps; andShow: [:a | 
 		a mondrian

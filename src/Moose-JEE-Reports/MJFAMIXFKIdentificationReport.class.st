@@ -1,57 +1,74 @@
 Class {
-	#name : #MJFAMIXTableGroupReports,
+	#name : #MJFAMIXFKIdentificationReport,
 	#superclass : #REPComputedConcern,
 	#category : #'Moose-JEE-Reports'
 }
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupReports >> browser [
-  | browser |
-  browser := GLMTabulator new.
-  browser column: #code; column: #map.
+MJFAMIXFKIdentificationReport >> browser [
+	| browser |
+	browser := GLMTabulator new.
+	browser column: #interestingMaps;" column: #visualization; "column: #distances; column:#dinstVis.
 
-	browser transmit to: #code; andShow: [:a | 
-		a list 
-		title: 'Leventhein dinstances among fields';
-	      display: [ :edges |
-	 	     | res stream distances |
-			stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
-			distances := edges select: [:each | each weight < self cleanUpThreshold].
-			distances := distances sorted: [:first :second | first weight < second weight ].
-			distances do: [:each |
-				stream nextPutAll: (each from ownerTable name , '::' , each from name , String tab , '--- ', each weight asString , ' --->' , String tab , each to ownerTable name , '::' , each to name , String cr).].
-			stream close.
-			distances];
-		showOnly: 50.].
+	browser transmit to: #interestingMaps; andShow: [:a |
+		a list
+			title: 'Maps';
+			display: [:maps | (maps collect: #to) asSet]";
+			showOnly: 50"].
+	
+	browser transmit from: #interestingMaps; to: #distances;  andShow: [:a | 
+		a list
+			title: 'Potential FK relations';
+			display: [:table | 
+				| scripts tables maps distances|
+				
+				scripts  := ((result select: [:each | each to = table]) flatCollect: [:each | each from withDeepInvokingScripts]) asSet.
+				scripts := (scripts flatCollect: [:each | each withDeepInvokedScripts]) asSet.
+				maps := result select: [:each | scripts includes: each from ].
+				
+				scripts := (maps flatCollect: [:each | each from withDeepInvokingScripts])asSet.
+				tables := (maps collect: [:each | each to]) asSet.
+				
+				distances := tables asMooseGroup levenshteinDistancesAmongFieldsTable.
 
-	browser transmit to: #map; from: #code; andShow: [:a | 
+				distances asSet..
+				
+				]].
+	browser transmit from: #distances; to: #dinstVis; andShow: [:a | 
 	    a mondrian
 	      title: 'FK Relations';
 	      painting: [:view :edge | 
-			| tables edges |
+			| tables maps |
 			"Starting from the selected edge (from part) pickup all the other edges having the selected one as invoker or invoked element"
-			edges := result select: [:each | (edge from = each from) or: [edge from = each to]].
-			tables := ((edges collect: [:each | each from ownerTable]) union: (edges collect: [:each | each to ownerTable])) asSet.
-	        	self viewLevenshteinDistancesAmong: tables and: edges On: view]].
+			maps := result select: [:each | (edge from = each from) or: [edge from = each to]].
+			tables := ((maps) union: (maps collect: [:each | each to ownerTable])) asSet.
+	        	self viewLevenshteinDistancesAmong: tables and: maps On: view]].
 
-	^ browser startOn: self result
+  ^ browser startOn: self result
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupReports >> cleanUpThreshold [
+MJFAMIXFKIdentificationReport >> cleanUpThreshold [
 	"this method return the threshold used by this report to clean up the results. 
 	E.g. with a threshold of 1 there will be visualized only distances euqlas to 0"
 	^1
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupReports >> computeResult [
-  ^ self model allTables levenshteinDistancesAmongFieldsTable.
+MJFAMIXFKIdentificationReport >> computeResult [
+	
+	| maps lonelyMaps interestingMaps |
+	
+	maps := self model allMaps select: [:map | map from isKindOf: PXSScript].
+	lonelyMaps := maps select: [:each | each from withDeepInvokingScripts size = 1].
+	interestingMaps := maps reject: [:each | each from withDeepInvokingScripts size = 1].
+	
+	^interestingMaps
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupReports >> explanation [ 
-  ^ 'List of data base''s columns that have a levensthein distance among them below ', self cleanUpThreshold asString , '
+MJFAMIXFKIdentificationReport >> explanation [ 
+  ^ 'List of data base''s columns that have a levensthein distance among them below 
 In the first panel there is the list of column''s distances in a form:
 	 
 column''s table name>>column name -> column''s table name>>column name (distance)
@@ -67,12 +84,12 @@ By selecting the first association in the visualization you will see TAB3 with t
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupReports >> label [ 
+MJFAMIXFKIdentificationReport >> label [ 
   ^ 'Foreign Key recovery'
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXTableGroupReports >> viewLevenshteinDistancesAmong: aTableGroup and: aCollectionOfEdges On: view [
+MJFAMIXFKIdentificationReport >> viewLevenshteinDistancesAmong: aTableGroup and: aCollectionOfEdges On: view [
 	| mooseModel allInterestingColumns  allInterestingTables builder |
 
 	allInterestingColumns := ((aCollectionOfEdges collect: [:each | each from ]) union: (aCollectionOfEdges collect: [:each | each to])) asSet. 
