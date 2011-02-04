@@ -178,24 +178,17 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 					self ejbVersion: ejbVer.].
 	self isEJB30 
 	ifTrue:[	
-		annotationTypeTable := (self allAnnotationTypes select: [:each | each name = 'Table']).
-		annotationTypeTable isEmpty 
-			ifFalse: [
-				(annotationTypeTable size > 1)
-					ifTrue: [
-						tableEntities := UITheme builder 
-								chooseDropList: 'Choose which element you want' list: annotationTypeTable asArray.
-						tableEntities := tableEntities annotatedEntities]
-					ifFalse: [tableEntities := annotationTypeTable first annotatedEntities.].
-			tables := self allTables.
-			counter :=  1.
+		tableEntities := (self allAnnotationTypes select: [:each | each name = 'Table']) flatCollect: [:each | each annotatedEntities ].
 
-			UIManager default
-				displayProgress: 'Building relations among Tables and Classes'
-				at: Sensor cursorPoint
-				from: counter
-				to: (tableEntities size * tables size)
-				during: [ :bar |
+		tables := self allTables.
+		counter :=  1.
+
+		UIManager default
+			displayProgress: 'Building relations among Tables and Classes'
+			at: Sensor cursorPoint
+			from: counter
+			to: (tableEntities size * tables size)
+			during: [ :bar |
 					counter := counter+1.
 					bar value: counter.
 				
@@ -209,7 +202,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 									table addMappedBy: mapping.
 									self withoutAnnounceAdd: mapping.].
 								counter := counter+1.
-								bar value: counter.]]]]]
+								bar value: counter]]]]
 	ifFalse:[
 		tableEntities := self allClasses select: [:class | class methods anySatisfy: #doesExecuteAQuery].
 		tables := self allTables.
@@ -241,7 +234,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
-	| attributes classes counter allIndexes ejbVer|
+	| attributesAndMethods classes counter allIndexes ejbVer|
 
 	self ejbVersion isNil 
 				ifTrue: [
@@ -250,8 +243,8 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 					self ejbVersion: ejbVer.].
 	self isEJB30 
 	ifTrue:[	
-		attributes := (self allAnnotationTypes select: [:each | each name = #Column or: [each name = #GeneratedValue]]) flatCollect: [:each | each annotatedEntities ].
-		classes := (attributes collect: [:each | each parentType ]) asSet.
+		attributesAndMethods := (self allAnnotationTypes select: [:each | each name = #Column or: [each name = #GeneratedValue]]) flatCollect: [:each | each annotatedEntities ].
+		classes := (attributesAndMethods collect: [:each | each parentType ]) asSet.
 
 		counter :=  1.
 		
@@ -259,21 +252,55 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 			displayProgress: 'Building relations among Columns and Attributes'
 			at: Sensor cursorPoint
 			from: counter
-			to: (attributes size * self allColumns size)
+			to: classes size
 			during: [ :bar |
 				counter := counter+1.
 				bar value: counter.
 
 				classes do: [:class |
-					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns |
+					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns tableColumnsMatched internalCounter classMethods |
 					source := class sourceText.
 					dictionaryOfColumns := Dictionary new.
 					dictionaryOfAttributes := Dictionary new.
 					
-					classAttributes := class attributes intersection: attributes.
+					classAttributes := class attributes intersection: attributesAndMethods.
+					classMethods := class methods intersection: attributesAndMethods.
 					tableColumns := OrderedCollection new.
 					class mappedRelationalEntities isEmpty ifFalse: [tableColumns := class mappedRelationalEntities first columns ].
 					
+					internalCounter := 1.
+					UIManager default
+						displayProgress: 'Trying to match with methods'
+						at: Sensor cursorPoint
+						from: 1
+						to: (classMethods size * tableColumns size)
+						during: [ :internalBar |
+							
+							"first try to match with methods"
+							tableColumnsMatched := OrderedCollection new.
+							classMethods do: [:method |
+								tableColumns do: [:column | 
+									
+									internalCounter := internalCounter + 1.
+									internalBar value: internalCounter. 
+
+									((method sourceText findString: ('@Column(name = "',column name,'"')) > 0) ifTrue: [
+										| mapping |
+										mapping := MJFAMIXMapping new mapTarget: column; mapSource: method.
+										method addMaps: mapping.
+										column addMappedBy: mapping.
+										self withoutAnnounceAdd: mapping.
+										tableColumnsMatched add: column]]]
+					].
+					
+					"Removing columns already matched with methods"
+					tableColumnsMatched do: [:each |
+						tableColumns remove: each ifAbsent: [Error signal: 'Weird. This case should not be possible']].					
+					
+					counter := counter+1.
+					bar value: counter.
+					
+					"now try to match the rest"					
 					tableColumns do: [:column | 
 						| ind |
 						"(class name = 'CustomerClass' and: [column name = 'CM_CLASS_ID']) ifTrue: [self halt.]."
@@ -292,28 +319,37 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 					
 					currentAtt := currentCol := nil.
 					
-					allIndexes do: [:ind |
-						| mapping |
+					internalCounter := 1.
+					UIManager default
+						displayProgress: 'Trying to match with attributes'
+						at: Sensor cursorPoint
+						from: 1
+						to: allIndexes size
+						during: [ :internalBar |
+							allIndexes do: [:ind |
+								| mapping |
+							
+								"(class name = 'CustomerClass') ifTrue:[self halt]. "
+							
+								dictionaryOfColumns at: ind ifPresent: [:col | 
+									currentCol := col].
 						
-						"(class name = 'CustomerClass') ifTrue:[self halt]. "
-						
-						dictionaryOfColumns at: ind ifPresent: [:col | 
-							currentCol := col].
-					
-						dictionaryOfAttributes at: ind ifPresent: [:att |
-							currentAtt := att].
-						
-						(currentCol isNil not and: [currentAtt isNil not]) 
-							ifTrue: [
-								mapping := MJFAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
-								currentAtt addMaps: mapping.
-								currentCol addMappedBy: mapping.
-								self withoutAnnounceAdd: mapping.
-								currentAtt := currentCol := nil.].
-
-						counter := counter+1.
-						bar value: counter].
-				]]].
+								dictionaryOfAttributes at: ind ifPresent: [:att |
+									currentAtt := att].
+							
+								(currentCol isNil not and: [currentAtt isNil not]) 
+									ifTrue: [
+										mapping := MJFAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
+										currentAtt addMaps: mapping.
+										currentCol addMappedBy: mapping.
+										self withoutAnnounceAdd: mapping.
+										currentAtt := currentCol := nil.].
+								
+								internalCounter := internalCounter + 1.
+								internalBar value: internalCounter. ]]].
+				
+					counter := counter+1.
+					bar value: counter]].
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -451,8 +487,8 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 			bar value: 4.
 			bar value: 'Building relations'.
 			
-			self buildRelationsAmongDBTablesAndClasses.			
-			self buildRelationsAmongTableColumnsAndMethods.
+			"self buildRelationsAmongDBTablesAndClasses.			
+			self buildRelationsAmongTableColumnsAndMethods."
 			
 			bar value: 5].
 	^self
