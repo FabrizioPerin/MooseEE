@@ -123,6 +123,9 @@ MJSQLImporter >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
 				counter := counter + 1.
 				bar value: counter].	
 				
+			"connect columns and tables"
+			aMooseModel allTables do: [:table | table columns do: [:col | col ownerTable: table]].
+			
 			bar value: 'Computing foreign keys constraints'.
 			
 			aBlackBoard databases do: [:aDBRepresentation | 
