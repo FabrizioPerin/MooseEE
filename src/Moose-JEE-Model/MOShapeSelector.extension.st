@@ -90,6 +90,24 @@ MOShapeSelector >> umlClassDiagramLikeForTable [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> umlClassShapeGreen [
+	| builder |
+		
+	builder := MOFormsBuilder new.
+	
+	builder column; fill; pref; grow.
+	builder row; fill; pref; grow; row; fill; pref; grow; row; fill; pref; grow.
+	builder x: 1 y: 1 add: (MORectangleShape new text: [:class | class mooseDisplayString]; fontSize: 10; fontColor: Color green darker darker darker).
+	builder x: 1 y: 2 add: MORectangleShape new.
+	builder x: 1 y: 2 add: MOChildrenShape new.
+	
+	^view shape: builder shape
+	
+	
+	
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> umlClassWithAll [
 	| builder |
 	builder := MOFormsBuilder new.

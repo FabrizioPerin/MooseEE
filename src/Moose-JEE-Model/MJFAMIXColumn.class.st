@@ -67,11 +67,10 @@ MJFAMIXColumn >> isPK: aBooleanOrNil [
 MJFAMIXColumn >> ownerTable [
 
 	ownerTable isNil ifTrue: [
-		ownerTable := self mooseModel allTables detect: [:table | 
-			(table columns select: [:column | column = self]) isEmpty 
-				ifTrue: [false]
-				ifFalse: [true]]].
-
+		ownerTable := self mooseModel allTables 
+			detect: [:table | table columns anySatisfy: [:column | column = self]]
+			ifNone: [nil]].
+	
 	^ownerTable
 ]
 
@@ -83,9 +82,12 @@ MJFAMIXColumn >> ownerTable: anObjectOrNil [
 
 { #category : #accessing }
 MJFAMIXColumn >> printOn: aStream [
-
-	self ownerTable isNil ifFalse: [aStream nextPutAll: self ownerTable name].
-	aStream nextPutAll: '>>'.
+	| table |
+	
+	table := self ownerTable.
+	table ifNotNil: [
+		table mooseNameOn: aStream.
+		aStream nextPutAll: '>>>'].
 	aStream nextPutAll: self name.
 	aStream nextPutAll: ' (Column)'.
 ]

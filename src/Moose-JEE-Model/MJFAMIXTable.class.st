@@ -91,6 +91,13 @@ MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTable >> printOn: aStream [
+	
+	aStream nextPutAll: self name.
+	aStream nextPutAll: ' (Table)'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTable >> viewDBTableOn: view [
 	view shape DBTableShape.
 	view interaction popupText.

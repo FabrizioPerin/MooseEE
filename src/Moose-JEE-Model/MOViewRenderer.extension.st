@@ -13,7 +13,7 @@ MOViewRenderer >> umlLikeShape: aString on: aBlock [
 	builder := MOFormsBuilder new.
 	builder column; fill.
 	builder row; fill; row; fill.
-	builder x: 1 y: 1 add: (MOLabelShape new text: aString).
+	builder x: 1 y: 1 add: (MORectangleShape new text: aString).
 	builder x: 1 y: 2 add: MORectangleShape new.
 	builder x: 1 y: 2 add: aBlock.
 	^builder shape
@@ -25,7 +25,7 @@ MOViewRenderer >> umlPackageShapeWithLabel: aBlock [
 	builder := MOFormsBuilder new.
 	builder row; pref; row; size: -1; row; fill; pref; grow; size: 15.
 	builder column; pref; column; fill; pref; grow; size: 15.
-	builder x: 1 y:1 add: ((MOLabelShape new text: aBlock)).
+	builder x: 1 y:1 add: ((MORectangleShape new text: aBlock)).
 	builder x: 1 y: 3 w: 2 add: (MOFormsShape new).
 	^self shape: builder shapes.
 ]
@@ -36,7 +36,7 @@ MOViewRenderer >> umlPackageShapeWithLabel: aBlock with:  aShape [
 	builder := MOFormsBuilder new.
 	builder row; pref; row; size: -1; row; fill; pref; grow; size: 15.
 	builder column; pref; column; fill; pref; grow; size: 15.
-	builder x: 1 y:1 add: ((MOLabelShape new text: aBlock)).
+	builder x: 1 y:1 add: ((MORectangleShape new text: aBlock)).
 	builder x: 1 y: 3 w: 2 add: aShape.
 	^self shape: builder shapes.
 ]
@@ -62,7 +62,7 @@ MOViewRenderer >> umlShape: aString [
 	builder 
 		x: 1
 		y: 1
-		add: (MOLabelShape new text: aString).
+		add: (MORectangleShape new text: aString).
 	builder 
 		x: 1
 		y: 2
@@ -70,7 +70,7 @@ MOViewRenderer >> umlShape: aString [
 	builder 
 		x: 1
 		y: 2
-		add: (MOLabelShape new text: 
+		add: (MORectangleShape new text: 
 			[ :cls | 
 			cls methodDict keys 
 				inject: ''
