@@ -66,10 +66,10 @@ MJFAMIXColumn >> isPK: aBooleanOrNil [
 { #category : #accessing }
 MJFAMIXColumn >> ownerTable [
 
-	ownerTable isNil ifTrue: [
+	"ownerTable isNil ifTrue: [
 		ownerTable := self mooseModel allTables 
 			detect: [:table | table columns anySatisfy: [:column | column = self]]
-			ifNone: [nil]].
+			ifNone: [nil]]."
 	
 	^ownerTable
 ]
