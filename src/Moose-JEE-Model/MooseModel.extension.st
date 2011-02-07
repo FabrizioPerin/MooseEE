@@ -195,7 +195,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 					tables do: [:table | 
 						tableEntities do: [:class |
 							"(table nameWithAnnotationAsRegex matches: class sourceText)"
-							((class sourceText findString: ('@Table(name = "',table name,'"') startingAt: 1 caseSensitive: false) > 0)
+							((class sourceText findString: ('@Table(name = "',table name,'"')) > 0)
 								ifTrue:[ |mapping|
 									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 									class addMaps: mapping.
@@ -231,7 +231,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
-MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
+MooseModel >> buildRelationsAmongTableColumnsAndMethods [
 	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
 	| attributesAndMethods classes counter allIndexes ejbVer|
@@ -267,7 +267,6 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 					classMethods := class methods intersection: attributesAndMethods.
 					tableColumns := OrderedCollection new.
 					class mappedRelationalEntities isEmpty ifFalse: [tableColumns := class mappedRelationalEntities first columns ].
-					tableColumnsMatched := OrderedCollection new.					
 					
 					internalCounter := 1.
 					UIManager default
@@ -276,7 +275,7 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 						from: 1
 						to: (classMethods size * tableColumns size)
 						during: [ :internalBar |
-														
+							
 							"first try to match with methods"
 							tableColumnsMatched := OrderedCollection new.
 							classMethods do: [:method |
@@ -284,9 +283,8 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 									
 									internalCounter := internalCounter + 1.
 									internalBar value: internalCounter. 
-									(class name = 'CaseCategoryEntity') ifTrue: [self halt].
 
-									((method sourceText findString: ('@Column(name = "',column name,'"') startingAt: 1 caseSensitive: false) > 0) ifTrue: [
+									((method sourceText findString: ('@Column(name = "',column name,'"')) > 0) ifTrue: [
 										| mapping |
 										mapping := MJFAMIXMapping new mapTarget: column; mapSource: method.
 										method addMaps: mapping.
@@ -306,7 +304,7 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 					tableColumns do: [:column | 
 						| ind |
 						"(class name = 'CustomerClass' and: [column name = 'CM_CLASS_ID']) ifTrue: [self halt.]."
-						ind := (source findString: ('@Column(name = "',column name,'"') startingAt: 1 caseSensitive: false).
+						ind := (source findString: ('@Column(name = "',column name,'"')).
 						(ind = 0) ifFalse: [dictionaryOfColumns at: ind put: column]].
 				
 					classAttributes do: [:attr |

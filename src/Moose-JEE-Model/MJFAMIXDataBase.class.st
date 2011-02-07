@@ -25,6 +25,13 @@ MJFAMIXDataBase >> initialize [
 ]
 
 { #category : #accessing }
+MJFAMIXDataBase >> printOn: aStream [
+	
+	aStream nextPutAll: self name.
+	aStream nextPutAll: ' (Database)'
+]
+
+{ #category : #accessing }
 MJFAMIXDataBase >> tables [
 	^tables
 ]
