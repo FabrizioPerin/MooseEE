@@ -44,7 +44,7 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			mooseModel buildRelationsAmongDBTablesAndClasses.
 			progBar value: 6.
 			
-			mooseModel buildRelationsAmongTableColumnsAndMethods.
+			mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 			progBar value: 7.
 		
 			progBar value: 'Creating annotations'.
