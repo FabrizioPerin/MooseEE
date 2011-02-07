@@ -69,7 +69,7 @@ MJFAMIXRelationalEntityTests >> testMappedNamedEntitiesCaseInsensitive [
 							 ].
 						
 	"adding a fake sourceText to the Entities"
-	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseTable1.
+	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseNames.
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 	
 	mooseModel buildRelationsAmongDBTablesAndClasses.

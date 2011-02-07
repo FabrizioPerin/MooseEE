@@ -787,7 +787,7 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
 ]
 
 { #category : #files }
-JEETestModels >> fakeSourceTextWithLowerCaseTable1 [
+JEETestModels >> fakeSourceTextWithLowerCaseNames [
 
 	^'import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -818,7 +818,7 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   private Integer workUnitAuthId;
 
   // workunit operation
-  @Column(name = "Column2")
+  @Column(name = "column2")
   @Enumerated(EnumType.STRING)
   private WorkUnitAuthOperation Att1;
 
@@ -830,10 +830,10 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   private String Att2;
 
   // all & any conditions, operation conditions
-  @Column(name = "Column5")
+  @Column(name = "column5")
   private String allOperations;
 
-  @Column(name = "Column6")
+  @Column(name = "column6")
   private String Att3;
 
   @Column(name = "Column7")
