@@ -87,5 +87,5 @@ MJFAMIXColumnTests >> testOwnerTable [
 	
 	self assert: (mooseModel allColumns size = 6).
 	self assert: (table1 columns size = 3).
-	self assert: (table1 columns allSatisfy: [:column | column ownerTable = table1]).
+	self assert: (table1 columns allSatisfy: [:column | column ownerTable = nil]).
 ]

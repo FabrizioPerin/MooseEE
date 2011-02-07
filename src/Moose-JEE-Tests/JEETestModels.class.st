@@ -786,6 +786,70 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   private String resourceConditions;'
 ]
 
+{ #category : #files }
+JEETestModels >> fakeSourceTextWithLowerCaseTable1 [
+
+	^'import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+/**
+ * @author roth_ch
+ */
+
+@Entity
+@Table(name = "table1", schema = "ESV")
+public class WorkUnitAuthorization extends ActivityBaseBO {
+
+  /**
+   * The serialization version. Note that this changes with every version of this class!
+   */
+  private static final long serialVersionUID = "$Revision: 1.7 $".hashCode();
+  /**
+   * Excluded fields for equality compare.
+   */
+  private static final String[] EXCLUDED_FIELDS = { "workUnitAuthId", "version" };
+  /**
+   * technical primary key.
+   */
+  @Id
+  @SequenceGenerator(name = "seqWothId", sequenceName = "ESV.SEQ_NAME", allocationSize = 1, initialValue = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seqWothId")
+  @Column(name = "Column1")
+  private Integer workUnitAuthId;
+
+  // workunit operation
+  @Column(name = "Column2")
+  @Enumerated(EnumType.STRING)
+  private WorkUnitAuthOperation Att1;
+
+  // all & any conditions
+  @Column(name = "Column3")
+  private String allConditions;
+
+  @Column(name = "Column4")
+  private String Att2;
+
+  // all & any conditions, operation conditions
+  @Column(name = "Column5")
+  private String allOperations;
+
+  @Column(name = "Column6")
+  private String Att3;
+
+  @Column(name = "Column7")
+  private String operationConditions;
+
+  // all & any resources, resource conditions
+  @Column(name = "Column8")
+  private String allResources;
+
+  @Column(name = "Column9")
+  private String anyResources;
+
+  @Column(name = "Column10")
+  private String resourceConditions;'
+]
+
 { #category : #initialize }
 JEETestModels >> initialize [
 	| parser factory doc |

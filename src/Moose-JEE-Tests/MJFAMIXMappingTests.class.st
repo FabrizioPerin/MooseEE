@@ -131,3 +131,40 @@ MJFAMIXMappingTests >> testFAMIXMappingModelPopulation [
 	self assert: (mooseModel allMaps size = 1).
 	
 ]
+
+{ #category : #testsOnJEEModel }
+MJFAMIXMappingTests >> testFAMIXMappingModelPopulationCaseInsensitive [
+	| mooseModel annotationType famixAnchor jEETestModel root |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	mooseModel ejbVersion: #EJB30.
+	root := jEETestModel root.
+	
+	"define Entity beans"
+	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	
+	"Creating the annotation type Table"
+	annotationType := FAMIXAnnotationType new name: #Table.
+	mooseModel add: annotationType.
+	
+	"Creating the instances"
+	mooseModel allEntityBeans do: [:bean | 
+							| instance |
+							instance := FAMIXAnnotationInstance new.
+							instance annotationType: annotationType.
+							instance annotatedEntity: bean.
+							mooseModel add: instance.
+							 ].
+						
+	"adding a fake sourceText to the Entities"
+	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseTable1 .
+	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
+
+	mooseModel buildRelationsAmongDBTablesAndClasses.
+
+	self assert: (mooseModel allEntityBeans size = 2).
+	self assert: (mooseModel allTables size = 3).
+	self assert: (mooseModel allMaps size = 1).
+	
+]
