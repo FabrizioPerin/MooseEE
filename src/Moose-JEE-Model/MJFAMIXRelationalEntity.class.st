@@ -71,6 +71,12 @@ MJFAMIXRelationalEntity >> mappedNamedEntities [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> mooseNameOn: aStream [ 
+	
+	aStream nextPutAll: self name.
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> referencedBy [
 
 	<MSEProperty: #referencedBy type: #MJFAMIXFKAssociation opposite: #targetTable> <multivalued> <derived>
