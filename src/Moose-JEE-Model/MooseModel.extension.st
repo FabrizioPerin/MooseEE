@@ -258,7 +258,7 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 				bar value: counter.
 
 				classes do: [:class |
-					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns tableColumnsMatched internalCounter classMethods |
+					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns internalCounter classMethods |
 					source := class sourceText.
 					dictionaryOfColumns := Dictionary new.
 					dictionaryOfAttributes := Dictionary new.
@@ -267,8 +267,8 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 					classMethods := class methods intersection: attributesAndMethods.
 					tableColumns := OrderedCollection new.
 					class mappedRelationalEntities isEmpty ifFalse: [tableColumns := class mappedRelationalEntities first columns ].
-					tableColumnsMatched := OrderedCollection new.					
 					
+					"try to match with methods"
 					internalCounter := 1.
 					UIManager default
 						displayProgress: 'Trying to match with methods'
@@ -278,31 +278,24 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 						during: [ :internalBar |
 														
 							"first try to match with methods"
-							tableColumnsMatched := OrderedCollection new.
 							classMethods do: [:method |
 								tableColumns do: [:column | 
 									
 									internalCounter := internalCounter + 1.
 									internalBar value: internalCounter. 
-									(class name = 'CaseCategoryEntity') ifTrue: [self halt].
 
 									((method sourceText findString: ('@Column(name = "',column name,'"') startingAt: 1 caseSensitive: false) > 0) ifTrue: [
 										| mapping |
 										mapping := MJFAMIXMapping new mapTarget: column; mapSource: method.
 										method addMaps: mapping.
 										column addMappedBy: mapping.
-										self withoutAnnounceAdd: mapping.
-										tableColumnsMatched add: column]]]
-					].
+										self withoutAnnounceAdd: mapping]]]].
+				
 					
-					"Removing columns already matched with methods"
-					tableColumnsMatched do: [:each |
-						tableColumns remove: each ifAbsent: [Error signal: 'Weird. This case should not be possible']].					
-					
+					"now try to match the rest"
 					counter := counter+1.
 					bar value: counter.
 					
-					"now try to match the rest"					
 					tableColumns do: [:column | 
 						| ind |
 						"(class name = 'CustomerClass' and: [column name = 'CM_CLASS_ID']) ifTrue: [self halt.]."
