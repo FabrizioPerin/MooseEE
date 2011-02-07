@@ -80,7 +80,7 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulation [
 		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
 	
 	mooseModel buildRelationsAmongDBTablesAndClasses.
-	mooseModel buildRelationsAmongTableColumnsAndMethods.
+	mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 
 	self assert: (mooseModel allEntityBeans size = 2).
 	self assert: (mooseModel allTables size = 3).
@@ -143,7 +143,7 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulationCaseInsensitive [
 		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
 	
 	mooseModel buildRelationsAmongDBTablesAndClasses.
-	mooseModel buildRelationsAmongTableColumnsAndMethods.
+	mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 
 	self assert: (mooseModel allEntityBeans size = 2).
 	self assert: (mooseModel allTables size = 3).
