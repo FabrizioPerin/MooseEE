@@ -13,6 +13,106 @@ MJFAMIXTableGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCode [
+
+	self do: [:table |
+		| startingMaps invokingClasses allInterestingClasses interestingMaps tableToConnect |
+		
+		startingMaps := table mooseModel allMaps select: [:each | each to = table].
+		
+		invokingClasses := OrderedCollection new.
+		startingMaps do: [:each |
+			(each from isMemberOf: FAMIXClass) ifTrue: [invokingClasses addAll: each from withDeepInvokingClasses]].
+		invokingClasses := invokingClasses asSet.
+		
+		allInterestingClasses := (invokingClasses flatCollect: [:class | class withDeepInvokedClasses]) asSet.
+		
+		"now that i have all tables i look for all the mapping that i am interest in"
+		interestingMaps := (table mooseModel allMaps select: [:each | allInterestingClasses includes: each from]) asSet.
+		
+		tableToConnect := (interestingMaps collect: #mapTarget) asSet asArray.
+		
+		(1 to: tableToConnect size) do: [:rowIndex | 
+			((rowIndex + 1) to: tableToConnect size) do: [:colIndex |
+				(self mooseModel allDerivedDependencies anySatisfy: [:each | (each source = (tableToConnect at: rowIndex)) and: [(each target = (tableToConnect at: colIndex))]]) ifFalse: [ 
+					| dep |
+					dep := MJFAMIXDerivedDependency new isDirected: false.
+					dep source: (tableToConnect at: rowIndex).
+					dep target: (tableToConnect at: colIndex).
+					dep rationale: 'Connection derived from connections among source code elements.'.
+				
+					(tableToConnect at: rowIndex) addOutgoingDerivedDependency: dep.
+					(tableToConnect at: colIndex) addIncomingDerivedDependency: dep.
+					self mooseModel withoutAnnounceAdd: dep]]]
+	]
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCodeNOTWORKiNG [
+
+| tables groups classesFromThisTable maps allInvolvedClasses mapsToStartWith table |
+
+
+mapsToStartWith := self mooseModel allMaps select: [:each | each to = table].
+
+"all tables mapped directly or mapped through their columns"
+"tables := (self mooseModel allMaps collect: [:each | 
+			(each to isMemberOf: MJFAMIXTable)
+				ifTrue: [each to] 
+				ifFalse: [each to ownerTable]]) asSet."
+			
+"maps := (self mooseModel allMaps select: [:each | tables includes: each to]) asSet .  			
+
+allInvolvedClasses := OrderedCollection new.
+
+maps do: [:each | 
+			each from isScript ifTrue: [each from withDeepInvokingScripts].
+			each from isClass ifTrue: [allInvolvedClasses addAll: each from withDeepInvokingClasses].
+			each from isMethod ifTrue: [allInvolvedClasses addAll: each from parentType withDeepInvokingClasses]]."
+
+"Select all the maps that refer to one of the element of self (table group)"
+maps := (self mooseModel allMaps select: [:each | 
+			(each to isMemberOf: MJFAMIXTable)
+				ifTrue: [self includes: each to ] 
+				ifFalse: [self includes: each to ownerTable]]) asSet.
+
+maps do: [:map |
+		| mapsPointingThisTable allClassesFromATable interestingMaps classesPointingThisTableWithDeepInvokingClasses  |
+		
+		(map to isMemberOf: MJFAMIXTable) 
+			ifTrue: [table :=  map to] 
+			ifFalse: [table := map to ownerTable].
+		
+		mapsPointingThisTable := self mooseModel allMaps select: [:each | each to = table].
+		
+		classesPointingThisTableWithDeepInvokingClasses := OrderedCollection new.
+		mapsPointingThisTable do: [:each |
+					each from isClass ifTrue: [classesPointingThisTableWithDeepInvokingClasses addAll: each from withDeepInvokingClasses].
+					each from isMethod ifTrue: [classesPointingThisTableWithDeepInvokingClasses addAll: each from parentType withDeepInvokingClasses]].		
+		classesPointingThisTableWithDeepInvokingClasses := classesPointingThisTableWithDeepInvokingClasses asSet.
+		 
+		mapsPointingThisTable := mapsPointingThisTable select: [:each | each from isMemberOf: FAMIXClass]. 
+		classesFromThisTable := (classesPointingThisTableWithDeepInvokingClasses flatCollect: [:each | each from withDeepInvokingClasses]) asSet.
+				
+		allClassesFromATable := (classesFromThisTable flatCollect: [:each | each withDeepInvokedClasses]) asSet.
+		
+		interestingMaps := self mooseModel allMaps select: [:each | allClassesFromATable includes: each from].
+		
+		(1 to: interestingMaps size) do: [:rowIndex | 
+			((rowIndex + 1) to: interestingMaps size) do: [:colIndex |
+				| dep |
+				dep := MJFAMIXDerivedDependency new isDirected: false.
+				dep source: (interestingMaps at: rowIndex).
+				dep target: (interestingMaps at: colIndex).
+				dep rationale: 'Connection derived from connections among source code elements.'.
+				
+				(interestingMaps at: rowIndex) addOutgoingDerivedDependency: dep.
+				(interestingMaps at: colIndex) addIncomingDerivedDependency: dep.
+				self mooseModel withoutAnnounceAdd: dep]]].
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
 	
 	| aLevenshteinDistanceStrategy progr tableLeftGroup tableRightGroup result |

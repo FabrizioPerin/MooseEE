@@ -25,6 +25,12 @@ MooseModel >> allDatabases [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> allDerivedDependencies [
+
+	^self allWithType: MJFAMIXDerivedDependency "asMetaDescription"
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allEntityBeans [
 	<navigation: 'All Entity Beans'>
 
