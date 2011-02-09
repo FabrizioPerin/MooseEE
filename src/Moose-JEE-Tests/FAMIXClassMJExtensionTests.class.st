@@ -248,3 +248,47 @@ FAMIXClassMJExtensionTests >> testNOTM [
 	mooseModel allClasses do: [:each | sum := sum + each numberOfTransactionMethods ].
 	self assert: ( sum = 13 ).
 ]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testWithDeepInvokedClasses [
+
+		| mooseModel class |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryComplex.
+
+	self assert: (mooseModel allClasses size = 17).
+	
+	
+	class := (mooseModel allClasses select: [:each | each name = #AStatefulSessionBean]) first.
+	self assert: (class withDeepInvokedClasses) size = 1.
+	
+	class := (mooseModel allClasses select: [:each | each name = #AStatelessSessionBean]) first.
+	self assert: (class withDeepInvokedClasses) size = 2.
+	
+	class := (mooseModel allClasses select: [:each | each name = #Class4]) first.
+	self assert: (class withDeepInvokedClasses) size = 4.
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testWithDeepInvokingClasses [
+
+	| mooseModel class |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryComplex.
+
+	self assert: (mooseModel allClasses size = 17).
+	
+	
+	class := (mooseModel allClasses select: [:each | each name = #AStatefulSessionBean]) first.
+	self assert: (class withDeepInvokingClasses) size = 4.
+	
+	class := (mooseModel allClasses select: [:each | each name = #AStatelessSessionBean]) first.
+	self assert: (class withDeepInvokingClasses) size = 3.
+	
+	class := (mooseModel allClasses select: [:each | each name = #Class4]) first.
+	self assert: (class withDeepInvokingClasses) size = 2.
+	
+	
+	
+	
+]

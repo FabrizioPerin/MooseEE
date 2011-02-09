@@ -850,6 +850,70 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   private String resourceConditions;'
 ]
 
+{ #category : #files }
+JEETestModels >> fakeSourceTextWithTable2 [
+
+	^'import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+/**
+ * @author roth_ch
+ */
+
+@Entity
+@Table(name = "Table2", schema = "ESV")
+public class WorkUnitAuthorization extends ActivityBaseBO {
+
+  /**
+   * The serialization version. Note that this changes with every version of this class!
+   */
+  private static final long serialVersionUID = "$Revision: 1.7 $".hashCode();
+  /**
+   * Excluded fields for equality compare.
+   */
+  private static final String[] EXCLUDED_FIELDS = { "workUnitAuthId", "version" };
+  /**
+   * technical primary key.
+   */
+  @Id
+  @SequenceGenerator(name = "seqWothId", sequenceName = "ESV.SEQ_NAME", allocationSize = 1, initialValue = 1)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seqWothId")
+  @Column(name = "Column1")
+  private Integer workUnitAuthId;
+
+  // workunit operation
+  @Column(name = "Column2")
+  @Enumerated(EnumType.STRING)
+  private WorkUnitAuthOperation Att1;
+
+  // all & any conditions
+  @Column(name = "Column3")
+  private String allConditions;
+
+  @Column(name = "Column4")
+  private String Att2;
+
+  // all & any conditions, operation conditions
+  @Column(name = "Column5")
+  private String allOperations;
+
+  @Column(name = "Column6")
+  private String Att3;
+
+  @Column(name = "Column7")
+  private String operationConditions;
+
+  // all & any resources, resource conditions
+  @Column(name = "Column8")
+  private String allResources;
+
+  @Column(name = "Column9")
+  private String anyResources;
+
+  @Column(name = "Column10")
+  private String resourceConditions;'
+]
+
 { #category : #initialize }
 JEETestModels >> initialize [
 	| parser factory doc |
@@ -2214,6 +2278,431 @@ JEETestModels >> sampleMooseModelWithInvocation [
 			yourself
 		).
 
+
+	^mooseModel
+]
+
+{ #category : #models }
+JEETestModels >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryComplex [
+
+	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean invocation someMethod someOtherMethod aMethod class3 class4 method1 method2 method3 method4 invocation2 invocation3 invocation4 invocation5 methodThatExecute method5 method6 method7 method9 method10 method11 method12 method13 method14 method8 invocation6 invocation7 invocation8 invocation9 invocation10 invocation11 invocation12 invocation13 invocation14 invocation15 invocation16 invocation17 invocation18 invocation19 database dbTable1 dbTable2 dbTable3 tableColumn |
+
+	mooseModel := MooseModel new.
+
+	aPackage := FAMIXNamespace new
+				name: #aPackage;
+				yourself.
+	anotherPackage := FAMIXNamespace new
+			name: #anotherPackage;
+			yourself.
+
+	aStatelessSessionBean := FAMIXClass new
+			name: #AStatelessSessionBean;
+			container: aPackage;
+			yourself.
+
+	aMethod := FAMIXMethod new
+				name: #aMethod;
+				parentType: aStatelessSessionBean;
+				signature: #aMethod asString;	
+				yourself.
+
+	aStatelessSessionBean addMethod: (aMethod);
+			addMethod: (FAMIXMethod new
+				name: #anotherMethod;
+				parentType: aStatelessSessionBean;
+				signature: #anotherMethod asString;	
+				yourself
+			).
+	aStatefulSessionBean := FAMIXClass new
+			name: #AStatefulSessionBean;
+			container: aPackage;
+			yourself.
+
+	someMethod := FAMIXMethod new
+				name: #someMethod;
+				parentType: aStatefulSessionBean;
+				signature: #someMethod asString;	
+				yourself.
+
+	methodThatExecute := FAMIXMethod new
+						name: #executeBatch;
+						parentType: aStatefulSessionBean;
+						signature: #executeBatch asString;	
+						yourself.
+	
+	someOtherMethod := FAMIXMethod new
+				name: #someOtherMethod;
+				parentType: aStatefulSessionBean;
+				signature: #someOtherMethod asString;	
+				yourself.
+
+	aStatefulSessionBean
+			addMethod: (someMethod);
+			addMethod: (someOtherMethod);
+			addMethod: (methodThatExecute).
+
+	class3 :=  FAMIXClass new
+			name: #Class3;
+			container: aPackage;
+			yourself.
+
+	method1 := FAMIXMethod new
+				name: #method1;
+				parentType: class3;
+				signature: #method1 asString;	
+				yourself.
+	
+	method2 := FAMIXMethod new
+				name: #method2;
+				parentType: class3;
+				signature: #method2 asString;	
+				yourself.
+
+	method3 := FAMIXMethod new
+				name: #method3;
+				parentType: class3;
+				signature: #method3 asString;	
+				yourself.
+				
+	method4 := FAMIXMethod new
+				name: #method4;
+				parentType: class3;
+				signature: #method4 asString;	
+				yourself.
+
+	method5 := FAMIXMethod new
+				name: #method5;
+				parentType: class3;
+				signature: #method5 asString;	
+				yourself.
+
+	method6 := FAMIXMethod new
+				name: #method6;
+				parentType: class3;
+				signature: #method6 asString;	
+				yourself.
+
+	method7 := FAMIXMethod new
+				name: #method7;
+				parentType: class3;
+				signature: #method7 asString;	
+				ejbTransactionType: 'Required';
+				yourself.
+
+	class3	addMethod: (method1);
+			addMethod: (method2);
+			addMethod: (method4);
+			addMethod: (method5);
+			addMethod: (method6);
+			addMethod: (method7).
+
+
+	class4 := FAMIXClass new
+			name: #Class4;
+			container: aPackage;
+			yourself.
+
+	method8 := FAMIXMethod new
+				name: #method8;
+				parentType: class4;
+				signature: #method8 asString;	
+				ejbTransactionType: 'Required';
+				yourself.
+	
+	method9 := FAMIXMethod new
+				name: #method9;
+				parentType: class4;
+				signature: #method9 asString;	
+				yourself.
+
+	method10 := FAMIXMethod new
+				name: #method10;
+				parentType: class4;
+				signature: #method10 asString;	
+				yourself.
+	method11 := FAMIXMethod new
+				name: #method11;
+				parentType: class4;
+				signature: #method11 asString;	
+				ejbTransactionType: 'Required';
+				yourself.
+
+	method12 := FAMIXMethod new
+				name: #method12;
+				parentType: class4;
+				signature: #method12 asString;	
+				yourself.
+
+	method13 := FAMIXMethod new
+				name: #method13;
+				parentType: class4;
+				signature: #method13 asString;	
+				yourself.
+
+	method14 := FAMIXMethod new
+				name: #method14;
+				parentType: class4;
+				signature: #method14 asString;	
+				ejbTransactionType: 'Required';
+				yourself.
+
+	class4	addMethod: (method8);
+			addMethod: (method3);
+			addMethod: (method9);
+			addMethod: (method10);
+			addMethod: (method11);
+			addMethod: (method12);
+			addMethod: (method13);
+			addMethod: (method14).
+
+	"invocation to method that executes a queryes"
+	invocation := FAMIXInvocation new sender: method1; addCandidate: methodThatExecute; signature: #executeBatch; yourself.
+	method1 addOutgoingInvocation: invocation.
+	methodThatExecute addIncomingInvocation: invocation.
+
+	invocation2 := FAMIXInvocation new sender: method2; addCandidate: methodThatExecute; signature: #executeBatch; yourself.
+	method2 addOutgoingInvocation: invocation2.
+	methodThatExecute addIncomingInvocation: invocation2.
+
+	invocation3 := FAMIXInvocation new sender: method3; addCandidate: methodThatExecute; signature: #executeBatch; yourself.
+	method3 addOutgoingInvocation: invocation3.
+	methodThatExecute addIncomingInvocation: invocation3.
+
+	"other invocation"
+	invocation4 := FAMIXInvocation new sender: method4; addCandidate: method1; signature: #method1; yourself.
+	method4 addOutgoingInvocation: invocation4.
+	method1 addIncomingInvocation: invocation4.
+
+	invocation5 := FAMIXInvocation new sender: method5; addCandidate: method2 ; signature: #method2; yourself.
+	method5 addOutgoingInvocation: invocation5.
+	method2 addIncomingInvocation: invocation5.
+
+	invocation6 := FAMIXInvocation new sender: method5; addCandidate: method6 ; signature: #method6; yourself.
+	method5 addOutgoingInvocation: invocation6.
+	method6 addIncomingInvocation: invocation6.
+
+	invocation7 := FAMIXInvocation new sender: method6; addCandidate: method2 ; signature: #method2; yourself.
+	method6 addOutgoingInvocation: invocation7.
+	method2 addIncomingInvocation: invocation7.
+
+	invocation8 := FAMIXInvocation new sender: method8; addCandidate: method4 ; signature: #method4; yourself.
+	method8 addOutgoingInvocation: invocation8.
+	method4 addIncomingInvocation: invocation8.
+
+	invocation9 := FAMIXInvocation new sender: method9; addCandidate: method4 ; signature: #method4; yourself.
+	method9 addOutgoingInvocation: invocation9.
+	method4 addIncomingInvocation: invocation9.
+
+	invocation10 := FAMIXInvocation new sender: method10; addCandidate: method6 ; signature: #method6; yourself.
+	method10 addOutgoingInvocation: invocation10.
+	method6 addIncomingInvocation: invocation10.
+
+	invocation11 := FAMIXInvocation new sender: method11; addCandidate: method6 ; signature: #method6; yourself.
+	method11 addOutgoingInvocation: invocation11.
+	method6 addIncomingInvocation: invocation11.
+
+	invocation12 := FAMIXInvocation new sender: method11; addCandidate: method1 ; signature: #method1; yourself.
+	method11 addOutgoingInvocation: invocation12.
+	method1 addIncomingInvocation: invocation12.
+
+	invocation13 := FAMIXInvocation new sender: method14; addCandidate: method10 ; signature: #method10; yourself.
+	method14 addOutgoingInvocation: invocation13.
+	method10 addIncomingInvocation: invocation13.
+
+	invocation14 := FAMIXInvocation new sender: method7; addCandidate: method3 ; signature: #method3 ;yourself.
+	method7 addOutgoingInvocation: invocation14.
+	method3 addIncomingInvocation: invocation14.
+
+	invocation15 := FAMIXInvocation new sender: method12; addCandidate: method7 ; signature: #method7 ;yourself.
+	method12 addOutgoingInvocation: invocation15.
+	method7 addIncomingInvocation: invocation15.
+
+	invocation16 := FAMIXInvocation new sender: method13; addCandidate: method7 ; signature: #method7 ;yourself.
+	method13 addOutgoingInvocation: invocation16.
+	method7 addIncomingInvocation: invocation16.
+
+	"old invocations"
+	invocation17 := FAMIXInvocation new sender: aMethod; addCandidate: someMethod ; signature: #someMethod ;yourself.
+	aMethod addOutgoingInvocation: invocation17.
+	someMethod addIncomingInvocation: invocation17.	
+
+	invocation18 := FAMIXInvocation new sender: method1; addCandidate: aMethod ; signature: #aMethod ;yourself.
+	method1 addOutgoingInvocation: invocation18.
+	aMethod addIncomingInvocation: invocation18.
+
+	invocation19 := FAMIXInvocation new sender: method2; addCandidate: aMethod ; signature: #aMethod ;yourself.
+	method2 addOutgoingInvocation: invocation19.
+	aMethod addIncomingInvocation: invocation19.
+
+	"instanciating relational elements"
+	database := MJFAMIXDataBase new name: #database1.
+
+	dbTable1 := MJFAMIXTable new
+			name: 'Table1';
+			ownerDataBase: database.
+	
+	dbTable2 := MJFAMIXTable new
+			name: 'Table2';
+			ownerDataBase: database.
+
+	dbTable3 := MJFAMIXTable new
+			name: 'Table3';
+			ownerDataBase: database.
+
+	tableColumn := MJFAMIXColumn new
+						name: #Column2;
+						isPK: true;
+						isFK: false;
+						ownerTable:  dbTable1;
+						type: 'integer'.
+	dbTable1 addColumn: tableColumn.
+	
+	tableColumn := MJFAMIXColumn new
+						name: #Column4;
+						isPK: false;
+						isFK: false;
+						ownerTable:  dbTable1;
+						type: 'string'.
+	dbTable1 addColumn: tableColumn.
+	
+	tableColumn := MJFAMIXColumn new
+						name: #Column6;
+						isPK: false;
+						isFK: false;
+						ownerTable:  dbTable1;
+						type: 'integer'.
+	dbTable1 addColumn: tableColumn.
+						
+	
+	tableColumn := MJFAMIXColumn new
+						name: #Column1;
+						isPK: true;
+						isFK: false;
+						ownerTable:  dbTable2;
+						type: 'integer'.
+	dbTable2 addColumn: tableColumn.
+	
+	tableColumn := MJFAMIXColumn new
+						name: #Column3;
+						isPK: false;
+						isFK: true;
+						ownerTable:  dbTable2;
+						type: 'integer'.
+	dbTable2 addColumn: tableColumn.
+						
+	tableColumn := MJFAMIXColumn new
+						name: #Column5;
+						isPK: true;
+						isFK: false;
+						ownerTable:  dbTable3;
+						type: 'integer'.
+	dbTable3 addColumn: tableColumn.
+
+	database addTable: dbTable1.
+ 	database addTable: dbTable2.
+	database addTable: dbTable3.
+
+	mooseModel
+		addAll: aStatelessSessionBean methods;
+		addAll: aStatefulSessionBean methods;
+		addAll: class3 methods;
+		addAll: class4 methods;
+		add: aPackage;
+		add: anotherPackage;
+		add: invocation;
+		add: invocation2;
+		add: invocation3;
+		add: invocation4;
+		add: invocation5;
+		add: invocation6;
+		add: invocation7;
+		add: invocation8;
+		add: invocation9;
+		add: invocation10;
+		add: invocation11;
+		add: invocation12;
+		add: invocation13;
+		add: invocation14;
+		add: invocation15;
+		add: invocation16;
+		add: invocation17;
+		add: invocation18;
+		add: invocation19;
+		add: class3;
+		add: class4;
+		add: (FAMIXClass new
+			name: #AStatelessSessionHome;
+			container: aPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AStatelessSession;
+			container: aPackage;
+			yourself
+		);
+		add: aStatelessSessionBean;
+		add: (FAMIXClass new
+			name: #AStatefulSessionHome;
+			container: aPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AStatefulSession;
+			container: aPackage;
+			yourself
+		);
+		add: aStatefulSessionBean;
+		add: (FAMIXClass new
+			name: #ACMPEntityHome;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntityBean;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ACMPEntityPK;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntityHome;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntityBean;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #ABMPEntity;
+			container: anotherPackage;
+			yourself
+		);
+		add: (FAMIXClass new
+			name: #AMessageBean;
+			container: aPackage;
+			yourself
+		);
+		add: database;
+		addAll: database tables;
+		addAll: dbTable1 columns;
+		addAll: dbTable2 columns;
+		addAll: dbTable3 columns.
 
 	^mooseModel
 ]
