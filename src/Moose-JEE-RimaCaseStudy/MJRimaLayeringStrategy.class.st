@@ -15,4 +15,6 @@ MJRimaLayeringStrategy >> populateDataLayer: aLayerInstance [
 			
 	annotationTypeDataLayer := (model allAnnotationTypes select: [:each | each name = #dataLayer]).
 	annotationTypeDataLayer ifNotEmpty: [aLayerInstance containedClasses addAll: annotationTypeDataLayer first annotatedEntities].
+	
+	model add: aLayerInstance. 
 ]
