@@ -258,6 +258,42 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewSystemByLayerOn: view [
+
+	| serviceLayer dataLayer logicLayer |
+
+	serviceLayer := self mooseModel allWithType: MJFAMIXServiceLayer.
+	dataLayer := (self mooseModel allWithType: MJFAMIXDataLayer) first.
+	logicLayer := self mooseModel allWithType: MJFAMIXLogicLayer.
+	   
+	
+	view shape layerShape.
+	view interaction nodraggable.
+	view node: dataLayer forIt: [
+		
+		view interaction nodraggable.
+		view interaction menuMorphBlock: [:each | each mooseMenuMorph].  
+		view shape rectangle withBorder.
+		view nodes: dataLayer containedClasses forEach: [:each | 
+					view nodes: each methods.
+					view gridLayout].
+		
+		view shape line color: Color veryLightGray.  
+		view edges: dataLayer containedClasses from: #superclass to: #yourself.
+		
+		view treeLayout].
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewSystemByLayers [
+	<menuItem: 'System by layer' category: 'JEAs Visualizations'>
+	| view |
+	view := MOViewRenderer new.
+	self viewSystemByLayerOn: view.
+	^view openWithStatusbar title: 'System by layer'
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewSystemComplexityByLayerOn: view [
 
 	| beans data logic map invocationsMap invoked aBoolean |
@@ -379,109 +415,6 @@ FAMIXClassGroup >> viewTransactionFlow [
 	view := MOViewRenderer new.
 	self viewTransactionFlowOn: view withAllMethods: false.
 	^view openWithStatusbar title: 'Transaction Flow'
-]
-
-{ #category : #'*Moose-JEE-Model-visualizations' }
-FAMIXClassGroup >> viewTransactionFlow4 [
-	"<menuItem: 'Transaction Flow TEST' category: 'JEAs Visualizations WORKINGON'>"
-	| view |
-	view := MOViewRenderer new.
-	self viewTransactionFlow4On: view.
-	view open
-]
-
-{ #category : #'*Moose-JEE-Model-visualizations' }
-FAMIXClassGroup >> viewTransactionFlow4On: aView [
-
-	| interestingClasses allInterestingMethods otherMethods tables internalShape |
-
-	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
-	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
-	
-	aView interaction item: 'inspect' action: [:elem | self inspect].
-	aView shape rectangle withBorder.
-	aView nodes: interestingClasses forEach: [:class |
-		
-		aView interaction nodraggable.
-		(aView shape rectangle text: [:each | each name]) withBorder.
-		aView node: class.
-		
-		"aView interaction forward."
-		
-		aView interaction nodraggable.
-		aView shape rectangle borderColor: Color transparent.
-		aView node: class forIt:[
-			allInterestingMethods := class methods select: #isPartOfATransaction.
-				otherMethods := class methods difference: allInterestingMethods.
-
-				aView nodeShape: ( MOEllipseShape width: 7 height: 7 fillColor: Color lightGray lighter).
-				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
-																	and: [ each hasEJBTransactionAttribute not ] ] ).
-
-				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color white ) ).
-				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery not 
-																	and: [ each hasEJBTransactionAttribute not ] ] ).
-
-				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color blue ) borderColor:  Color blue darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery 
-															and: [ each startATransaction 
-																and: [ each couldBeAnEntryPoint ] ] ] ).
-
-				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color blue ) borderColor: Color blue darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | ( each doesExecuteAQuery not ) 
-																	and: [ each startATransaction 
-																		and: [ each couldBeAnEntryPoint ] ] ] ).
-
-				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
-																	and: [ each startAUselessTransaction ] ] ).
-
-				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color red ) borderColor: Color red darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
-																	and: [ each startAUselessTransaction ] ] ).
-
-				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
-																	and: [ each startAUselessTransaction not 
-																		and: [ each couldBeAnEntryPoint not
-																			and: [ each hasEJBTransactionAttribute ] ] ] ] ).
-
-				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color cyan ) borderColor: Color cyan darker darker ).
-				aView nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
-																	and: [ each startAUselessTransaction not 
-																		and: [ each couldBeAnEntryPoint not
-																			and: [ each hasEJBTransactionAttribute ] ] ] ] ).
-	
-				aView nodeShape: ( ( MOEllipseShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | each doesExecuteAQuery
-																	and: [ each startAUselessTransaction not 
-																		and: [ each couldBeAnEntryPoint
-																			and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
-
-				aView nodeShape: ( ( MORectangleShape width: 7 height: 7 fillColor: Color orange) borderColor: Color orange darker darker).
-				aView nodes: ( allInterestingMethods select: [:each | (each doesExecuteAQuery not) 
-																	and: [ each startAUselessTransaction not 
-																		and: [ each couldBeAnEntryPoint
-																			and: [ each ejbTransactionType asString asLowercase = 'supports' ] ] ] ] ).
-
-				aView shape line color darker.
-				aView edges: class internalInvocations from: #sender toAll: #candidates.
-				aView horizontalTreeLayout.].
-	
-			aView verticalLineLayout gapSize:0; stretchVertically.
-			].
-		
-	aView shape line color lighter.
-	aView edges: self mooseModel allClasses from: #yourself toAll: #invokedClasses.
-	
-	"Show data base tables"
-	tables := (interestingClasses flatCollect: [:class | class mappedRelationalEntities ]).
-	aView nodes: tables using: ( MORectangleShape new withBorder; text: [:table | table name ] ).
-	aView shape line color darker.
-	aView edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
-
-	"aView dominanceTreeLayout."
-	aView dominanceGrouppedTreeLayout.
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }

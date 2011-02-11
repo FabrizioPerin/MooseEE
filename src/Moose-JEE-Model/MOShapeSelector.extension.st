@@ -27,6 +27,24 @@ MOShapeSelector >> DBTableShape [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MOShapeSelector >> layerShape [
+	| builder |
+		
+	builder := MOFormsBuilder new.
+	
+	builder column; fill; pref; grow.
+	builder row; fill; pref; grow; row; fill; pref; grow.
+	builder x: 1 y: 1 add: (MORectangleShape new withText; text: [:layer | layer name]; fontSize: 10; textAlignment: #left).
+	builder x: 1 y: 2 add: MORectangleShape new.
+	builder x: 1 y: 2 add: MOChildrenShape new.
+	
+	^view shape: builder shape
+	
+	
+	
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MOShapeSelector >> tableShape [
 	| builder |
 		

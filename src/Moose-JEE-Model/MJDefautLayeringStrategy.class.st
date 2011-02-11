@@ -5,6 +5,15 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+MJDefautLayeringStrategy >> instanciateLayers [
+	
+	MJFAMIXPresentationLayer new acceptStrategy: self.
+	MJFAMIXServiceLayer new acceptStrategy: self.
+	MJFAMIXLogicLayer new acceptStrategy: self.
+	MJFAMIXDataLayer new acceptStrategy: self.
+]
+
+{ #category : #'as yet unclassified' }
 MJDefautLayeringStrategy >> populateDataLayer: aLayerInstance [
 
 	

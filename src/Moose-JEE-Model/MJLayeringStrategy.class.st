@@ -20,3 +20,9 @@ MJLayeringStrategy >> initialize: aMooseModel [
 	
 	^self
 ]
+
+{ #category : #'as yet unclassified' }
+MJLayeringStrategy >> instanciateLayers [
+	
+	self subclassResponsibility 
+]

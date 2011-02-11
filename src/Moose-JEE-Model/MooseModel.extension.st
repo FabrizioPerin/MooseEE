@@ -753,6 +753,22 @@ MooseModel >> isEJB30 [
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
+MooseModel >> populateSystemLayers [
+	<menuItem: 'Populate system layers' category: 'JEAs Menu'>
+
+	| tables tableEntities counter annotationTypeTable strategy |
+
+	strategy := UITheme builder chooseDropList: 'Choose the strategy to populate the layers ' list: (MJLayeringStrategy allSubclasses).
+	
+	strategy  isNil 
+		ifTrue: [ DialogWindow new alert: 'Strategy not selected, operation aborted.']
+		ifFalse: [
+			| layeringStrategy |
+			layeringStrategy := strategy on: self.
+			layeringStrategy instanciateLayers.].
+]
+
+{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> populateWithJSPsFrom: aBlackBoard [
 
 	MJJSPImporter new populate: self withJSPsFrom: aBlackBoard.
