@@ -1,25 +1,25 @@
 Class {
-	#name : #MJFAMIXServiceLayerTests,
+	#name : #MJFAMIXLogicLayerTests,
 	#superclass : #MJFAMIXBusinessLayerTests,
 	#category : #'Moose-JEE-Tests'
 }
 
 { #category : #testsOnJEEModel }
-MJFAMIXServiceLayerTests >> testFAMIXServiceLayerAcceptStrategy [
+MJFAMIXLogicLayerTests >> testFAMIXLogicLayerAcceptStrategy [
 
 	| mooseModel serviceLayer |
 
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
 
-	serviceLayer := MJFAMIXServiceLayer new acceptStrategy: (MJDefautLayeringStrategy on: mooseModel).
+	serviceLayer := MJFAMIXLogicLayer new acceptStrategy: (MJDefautLayeringStrategy on: mooseModel).
 	
-	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
+	"self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) first  = serviceLayer).
-	self assert: serviceLayer containedSessionBeans size = 3.
+	self assert: serviceLayer containedSessionBeans size = 3."
 ]
 
 { #category : #testsOnJEEModel }
-MJFAMIXServiceLayerTests >> testFAMIXServiceLayerPopulate [
+MJFAMIXLogicLayerTests >> testFAMIXLogicLayerPopulate [
 
 	| mooseModel serviceLayer |
 
@@ -29,7 +29,7 @@ MJFAMIXServiceLayerTests >> testFAMIXServiceLayerPopulate [
 	serviceLayer populate: mooseModel.
 	
 	
-	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
+	"self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) first  = serviceLayer).
-	self assert: serviceLayer containedSessionBeans size = 3.
+	self assert: serviceLayer containedSessionBeans size = 3."
 ]
