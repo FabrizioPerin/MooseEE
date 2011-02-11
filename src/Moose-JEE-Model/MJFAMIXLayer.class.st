@@ -13,6 +13,11 @@ MJFAMIXLayer class >> annotation [
 	<package: #'Moose-JEE-Model'>
 ]
 
+{ #category : #'as yet unclassified' }
+MJFAMIXLayer >> acceptStrategy: aLayeringStrategy [
+	^self subclassResponsibility
+]
+
 { #category : #accessing }
 MJFAMIXLayer >> belongsTo [ 
 	^''

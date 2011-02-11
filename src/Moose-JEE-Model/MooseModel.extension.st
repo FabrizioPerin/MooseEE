@@ -98,7 +98,7 @@ MooseModel >> allMaps [
 
 	| group |
 	
-	group :=  self allWithType: MJFAMIXMapping.
+	group :=  self allWithType: MJFAMIXMapping ofGroupClass: MJFAMIXMappingGroup.
 	group description: 'All Maps'.
 	^group
 ]
