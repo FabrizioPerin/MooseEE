@@ -31,7 +31,7 @@ MJFAMIXLayer >> containedClasses [
 { #category : #initialization }
 MJFAMIXLayer >> initialize [ 
 	super initialize.
-	containedClasses := OrderedCollection new.
+	containedClasses := Set new.
 	^self
 ]
 
