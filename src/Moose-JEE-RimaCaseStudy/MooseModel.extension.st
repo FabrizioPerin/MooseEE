@@ -8,7 +8,7 @@ MooseModel >> browseMappings [
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
 MooseModel >> buildRelationsAmongTablesAndClassesByClassName [
-	<menuItem: 'Build Relations Among Tables And Classes by class name' category: 'JEAs Menu'>
+	<menuItem: 'Build Relations Among Tables And Classes by class name' category: 'JEAs Importers'>
 
 	| interfaces tables counter |
 	interfaces := (self allClasses select: #isInterface)sorted: [:a :b | a name > b name].
