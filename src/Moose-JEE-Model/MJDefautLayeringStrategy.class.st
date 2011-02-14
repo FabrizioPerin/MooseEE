@@ -39,9 +39,7 @@ MJDefautLayeringStrategy >> populateLogicLayer: aLayerInstance [
 { #category : #'as yet unclassified' }
 MJDefautLayeringStrategy >> populatePresentationLayer: aLayerInstance [
 
-	"aLayerInstance containedClasses addAll:  (model allClasses select: [:class | 
-					(class doesImplements: #Serializable)  or: [ 
-					class  methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ] ] )."
+	aLayerInstance containedClasses addAll: (model allClasses select: [:class | class methods anySatisfy: [:method | (method name = #doPost) or: [ method name = #doGet ] ] ] ).
 	
 	model add: aLayerInstance.
 	

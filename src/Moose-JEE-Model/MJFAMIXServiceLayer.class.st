@@ -33,6 +33,11 @@ MJFAMIXServiceLayer >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXServiceLayer >> name [
+	^'Service Layer'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXServiceLayer >> selectClassesFrom: aMooseModel [
 
 	containedClasses addAll:( aMooseModel allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ]).

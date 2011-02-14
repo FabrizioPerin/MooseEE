@@ -16,6 +16,11 @@ MJFAMIXLogicLayer >> acceptStrategy: aLayeringStrategy [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXLogicLayer >> name [
+	^'Logic Layer'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXLogicLayer >> selectClassesFrom: aMooseModel [
 	
 ]

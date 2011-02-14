@@ -222,6 +222,57 @@ FAMIXClassGroup >> viewClassRankOn: view [
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewClassesHighlightingExecutedQueriesOn: view [
+
+	| cyan magenta yellow black red green blue |
+	
+	cyan := ( self select: [ :class | class methods anySatisfy: [:method | ( method doesInvoke: 'executeQuery' ) and: [ ( method doesInvoke: 'executeUpdate' ) not ] ] ] ).
+	magenta := ( self select: [ :class | class methods anySatisfy: [:method | ( method doesInvoke: 'executeQuery' ) not and: [ ( method doesInvoke: 'executeUpdate' ) ] ] ] ).
+	yellow := ( self select: [ :class | class methods anySatisfy: [:method | ( method doesInvoke: 'executeQuery' ) not and: [ ( method doesInvoke: 'executeUpdate' ) not ] ] ] ).
+	
+	black :=  ((cyan intersect: magenta) intersect: yellow).
+	
+	red := (yellow intersect: magenta) difference: black.
+	green := (cyan intersect: yellow) difference: black.
+	blue := (cyan intersect: magenta) difference: black.
+	
+	view shape rectangle fillColor: Color black.
+	view nodes: black.
+	
+	view shape rectangle fillColor: Color green; borderColor:  Color green darker darker.
+	view nodes: green.
+	
+	view shape rectangle fillColor: Color red; borderColor:  Color red darker darker.
+	view nodes: red.
+	
+	view shape rectangle fillColor: Color blue; borderColor:  Color blue darker darker.
+	view nodes: blue.
+	
+	view shape rectangle fillColor: Color yellow; borderColor:  Color yellow darker darker.
+	view nodes: ((yellow difference: cyan) difference: magenta).
+	
+	view shape rectangle fillColor: Color cyan; borderColor:  Color cyan darker darker.
+	view nodes: ((cyan difference: magenta) difference: yellow).
+	
+	view shape rectangle fillColor: Color magenta; borderColor:  Color magenta darker darker.
+	view nodes: ((magenta difference: cyan) difference: yellow).
+
+	
+	"view shape line color lighter.
+	view edges: self mooseModel allClasses
+		from: #yourself
+		toAll: #invokedClasses."
+		
+	view shape line color: Color lightGray.
+	view edges: self mooseModel allClasses
+		from: #yourself
+		toAll: #subClasses.
+	view treeLayout.
+	
+
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
@@ -274,9 +325,8 @@ FAMIXClassGroup >> viewSystemByLayerOn: view [
 		view interaction nodraggable.
 		view interaction menuMorphBlock: [:each | each mooseMenuMorph].  
 		view shape rectangle withBorder.
-		view nodes: dataLayer containedClasses forEach: [:each | 
-					view nodes: each methods.
-					view gridLayout].
+		view nodes: dataLayer containedClasses forEach: [:class | 
+					 class viewMethodsIncludeIn: class methods ForUnsafeQueriesOn: view].
 		
 		view shape line color: Color veryLightGray.  
 		view edges: dataLayer containedClasses from: #superclass to: #yourself.

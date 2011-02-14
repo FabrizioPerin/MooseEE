@@ -28,6 +28,18 @@ MJFAMIXLayer >> containedClasses [
 	^containedClasses
 ]
 
+{ #category : #'as yet unclassified' }
+MJFAMIXLayer >> fileOutContainedClasses [
+	<menuItem: 'File out contained classes list' category: 'JEAs Utilities'>
+	| stream |
+	
+	stream := CrLfFileStream forceNewFileNamed: (self name , '.out').
+	
+	self containedClasses do: [:class |
+		stream nextPutAll: (class mooseName asString , String cr asString)].	
+	stream close.
+]
+
 { #category : #initialization }
 MJFAMIXLayer >> initialize [ 
 	super initialize.

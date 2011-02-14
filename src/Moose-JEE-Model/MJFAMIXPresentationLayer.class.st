@@ -17,6 +17,11 @@ MJFAMIXPresentationLayer >> acceptStrategy: aLayeringStrategy [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXPresentationLayer >> name [
+	^'Presentation Layer'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXPresentationLayer >> selectClassesFrom: aMooseModel [
 
 	containedClasses addAll: (aMooseModel allClasses select: [:class | class methods anySatisfy: [:method | (method name = #doPost) or: [ method name = #doGet ] ] ] )

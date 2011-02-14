@@ -58,7 +58,7 @@ MJDominanceTreeWithGroupsLayout >> layout: aNodeCollection atPoint: aPoint atLay
 				aNodeCollection do: [:each | (each model groupNumber = nil)
 									ifFalse:[notnilGroup add: each]
 									ifTrue:[nilGroup add:each]].
-				nodeCollectionToUse := notnilGroup sortBy:[:a :b | a model groupNumber > b model groupNumber].
+				nodeCollectionToUse := notnilGroup sort:[:a :b | a model groupNumber > b model groupNumber].
 				nodeCollectionToUse addAll: nilGroup.]
 		ifFalse:[ nodeCollectionToUse := OrderedCollection withAll: aNodeCollection ].
 
