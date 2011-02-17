@@ -2,25 +2,143 @@ Class {
 	#name : #MJSQLImporterFromVisitor,
 	#superclass : #Object,
 	#instVars : [
-		'sqlASTParser'
+		'sqlASTParser',
+		'targetModel',
+		'tables',
+		'columns'
 	],
 	#category : #'Moose-JEE-Importers-SQL'
 }
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> ensureATable: aTableNode [
-	self halt.
+MJSQLImporterFromVisitor >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
+
+	| fkAssociations |
+	
+	fkAssociations := OrderedCollection new.
+
+	dbTables do: [:table |
+		aDraftObjectTableGroup do: [:draftTable |
+			(table name = draftTable name) ifTrue: [ " table contain the db table with the foreign keys"
+				draftTable constraints do: [:constr |
+					(constr isArray not and: [constr isFKConstraint]) ifTrue: [
+						| referencedTable |
+						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
+						"set as foreign key the columns of the table having the constraint"
+						(1 to: (constr pkColumnsName size)) do: [:index |
+							| tableColumn referencedTableColumn fkAssoc |
+							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
+							referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
+							tableColumn isFK: true.
+							
+							"creation of the association"	
+							fkAssoc := MJFAMIXFKAssociation new targetTable: referencedTableColumn; sourceTable: tableColumn.
+							referencedTableColumn addReferencedBy: fkAssoc.
+							tableColumn addReferences: fkAssoc.
+							
+							fkAssociations add: fkAssoc.							
+						]
+					]
+				]
+			]
+		]
+	].
+
+	^fkAssociations.
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> importSQLCreateScriptFrom: aStream AMooseModel: aMooseModel [
+MJSQLImporterFromVisitor >> ensureATable: aTableNode [
+	
+	| tab |
+	
+	tab := MJFAMIXTable new.
+	tab name: aTableNode name.
+	tab columns: (aTableNode columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	
+	"setting up the primary keys"
+	"aDraftObjectTable constraints do: [:constraint | 
+		((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnsName do: [:attNames |
+				(tab columns select: [:col | col name = attNames]) first isPK: true]]]."
+	
+	^tab
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> importSQLCreateScriptFrom: aStream [
+	| sqlScriptNodes scriptNode aVisitor |
+	
+	sqlScriptNodes := (self sqlASTParser parse: aStream) deepFlatten.
+	
+	aVisitor := SQLASTConcreteVisitor new importer: self.
+	
+	sqlScriptNodes do: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: aVisitor ]].
+	
+
+	
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> importSQLCreateScriptFrom: aStream intoAMooseModel: aMooseModel [
 	| sqlScriptNodes scriptNode visitor |
 	
 	sqlScriptNodes := self sqlASTParser parse: aStream.
 	
-	visitor := (SQLASTVisitor new) importer: self.
+	visitor := (SQLASTAbstractVisitor new) importer: self.
+	
+	self halt.
+	
+	sqlScriptNodes 
+	
+
 	
 	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> instanciateAColumnFrom: aDraftObject [
+	
+	
+	| att |
+	
+	att := MJFAMIXColumn new.
+	att name: aDraftObject name.
+	att type: aDraftObject type.
+	att isFK: aDraftObject isFK.
+	att isPK: aDraftObject isPK.
+	
+	^att
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> instanciateADataBaseFrom: aDraftDataBaseObject [
+		
+	| dB |
+	
+	dB := MJFAMIXDataBase new.
+	dB name: aDraftDataBaseObject name.
+	dB tables: (aDraftDataBaseObject tables collect: [:aTableRepresentation | self instanciateADataBaseTableFrom: aTableRepresentation ]).
+	
+	^dB
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> instanciateADataBaseTableFrom: aDraftObjectTable [
+	
+	| tab |
+	
+	tab := MJFAMIXTable new.
+	tab name: aDraftObjectTable name.
+	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	
+	"setting up the primary keys"
+	aDraftObjectTable constraints do: [:constraint | 
+		((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnsName do: [:attNames |
+				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
+	
+	^tab
 ]
 
 { #category : #'as yet unclassified' }
@@ -70,6 +188,62 @@ MJSQLImporterFromVisitor >> populate: aMooseModel withRelationalElementsFrom: aB
 ]
 
 { #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> populateWithRelationalElements [
+
+	| dataBases columns tables counter aBlackBoard aMooseModel |
+	
+	dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
+	tables := dataBases flatCollect: [:each | each tables ].
+	columns := tables flatCollect: [:table | table columns ].
+	
+	counter := 1.
+	
+	UIManager default
+		displayProgress: 'Importing DB From an SQL file'
+		at: Sensor cursorPoint
+		from: 1 
+		to: (tables size + columns size)
+		during: [ :bar | 
+		
+			counter := counter + 1.
+			bar value: counter.
+			bar value: 'Adding data base'.
+			
+			aMooseModel addAll: dataBases.
+
+			bar value: ('Adding ', tables size asString ,' tables').
+			tables do: [:table | 
+				aMooseModel withoutAnnounceAdd: table.
+				counter := counter + 1.
+				bar value: counter].
+			
+			bar value: ('Adding' , columns size asString , 'attributes').
+	
+			columns do: [:col |
+				aMooseModel withoutAnnounceAdd: col.
+				counter := counter + 1.
+				bar value: counter].	
+				
+			bar value: 'Computing foreign keys constraints'.
+			
+			aBlackBoard databases do: [:aDBRepresentation | 
+				aMooseModel withoutAnnounceAddAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )].
+			].
+	
+	^aMooseModel
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> sqlASTParser [
 	^ sqlASTParser ifNil: [sqlASTParser := PetitSQLiteASTNodesParser new]
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitor >> targetModel [
+	^ targetModel
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitor >> targetModel: anObject [
+	targetModel := anObject
 ]
