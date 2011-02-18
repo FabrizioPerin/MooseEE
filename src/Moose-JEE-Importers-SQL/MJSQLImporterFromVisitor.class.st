@@ -15,6 +15,8 @@ MJSQLImporterFromVisitor >> computeForeignKeysFor: dbTables from: aDraftObjectTa
 
 	| fkAssociations |
 	
+	self flag: 'TODO: to remove'.
+	
 	fkAssociations := OrderedCollection new.
 
 	dbTables do: [:table |
@@ -48,13 +50,52 @@ MJSQLImporterFromVisitor >> computeForeignKeysFor: dbTables from: aDraftObjectTa
 ]
 
 { #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> ensureAColumn: anASTColumnNode [
+	| att |
+	
+	att := MJFAMIXColumn new.
+	att name: anASTColumnNode name.
+	att type: anASTColumnNode type.
+
+	^att
+	"	| att |
+	
+	self flag: 'TODO: to remove'.
+	
+	att := MJFAMIXColumn new.
+	att name: aDraftObject name.
+	att type: aDraftObject type.
+	
+	att defaultValue: aDraftObject constraints defaultValue.
+	att isUnique: aDraftObject constraints unique.
+	att canBeNull: aDraftObject constraints canBeNull.
+	att isPK: aDraftObject constraints canBeNull.
+	
+	^att"
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> ensureAColumnConstraint: aColumnConstraintNode [
+	| att |
+	
+	att := MJFAMIXColumn new.
+	att name: aColumnConstraintNode name.
+	att type: aColumnConstraintNode type.
+	att isFK: aColumnConstraintNode isFK.
+	att isPK: aColumnConstraintNode isPK.
+	
+	^att
+	
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 	
 	| tab |
 	
 	tab := MJFAMIXTable new.
 	tab name: aTableNode name.
-	tab columns: (aTableNode columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	tab columns: (aTableNode columns collect: [:aColumnRepresentation | self halt. aColumnRepresentation accept: self]).   
 	
 	"setting up the primary keys"
 	"aDraftObjectTable constraints do: [:constraint | 
@@ -97,25 +138,10 @@ MJSQLImporterFromVisitor >> importSQLCreateScriptFrom: aStream intoAMooseModel: 
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> instanciateAColumnFrom: aDraftObject [
-	
-	
-	| att |
-	
-	att := MJFAMIXColumn new.
-	att name: aDraftObject name.
-	att type: aDraftObject type.
-	att isFK: aDraftObject isFK.
-	att isPK: aDraftObject isPK.
-	
-	^att
-	
-]
-
-{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> instanciateADataBaseFrom: aDraftDataBaseObject [
-		
 	| dB |
+	
+	self flag: 'TODO: to remove'.
 	
 	dB := MJFAMIXDataBase new.
 	dB name: aDraftDataBaseObject name.
@@ -126,12 +152,13 @@ MJSQLImporterFromVisitor >> instanciateADataBaseFrom: aDraftDataBaseObject [
 
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> instanciateADataBaseTableFrom: aDraftObjectTable [
-	
 	| tab |
+	
+	self flag: 'TODO: to remove'.
 	
 	tab := MJFAMIXTable new.
 	tab name: aDraftObjectTable name.
-	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation |aColumnRepresentation accept: self ]).   
 	
 	"setting up the primary keys"
 	aDraftObjectTable constraints do: [:constraint | 
@@ -143,8 +170,9 @@ MJSQLImporterFromVisitor >> instanciateADataBaseTableFrom: aDraftObjectTable [
 
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> populate: aMooseModel withRelationalElementsFrom: aBlackBoard [
-
-	| dataBases columns tables counter |
+	|counter dataBases |
+	
+	self flag: 'TODO: to remove'.
 	
 	dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
 	tables := dataBases flatCollect: [:each | each tables ].
@@ -190,7 +218,9 @@ MJSQLImporterFromVisitor >> populate: aMooseModel withRelationalElementsFrom: aB
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> populateWithRelationalElements [
 
-	| dataBases columns tables counter aBlackBoard aMooseModel |
+	| dataBases counter aBlackBoard aMooseModel |
+	
+	self flag: 'TODO: to remove'.
 	
 	dataBases := aBlackBoard databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
 	tables := dataBases flatCollect: [:each | each tables ].
