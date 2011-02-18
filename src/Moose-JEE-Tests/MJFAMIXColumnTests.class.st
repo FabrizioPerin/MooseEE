@@ -5,6 +5,41 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testCanBeNull [
+	| col |
+
+	col := MJFAMIXColumn new
+					name: #Column2;
+					canBeNull: true.
+	
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: col canBeNull.  
+	
+	col canBeNull: false.
+	
+	self deny: col canBeNull.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testCanBeNullFromAModel [
+	| jEETestModel mooseModel table1 |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
+	
+	self assert: (mooseModel allColumns size = 6).
+	self assert: (table1 columns size = 3).
+	
+	self deny: ((table1 columns select: [:each | each name = #Column2 ]) first canBeNull).
+	self deny: ((table1 columns select: [:each | each name = #Column2 ]) first canBeNull).
+	self assert: ((table1 columns select: [:each | each name = #Column4 ]) first canBeNull).
+	self deny: ((table1 columns select: [:each | each name = #Column6 ]) first canBeNull).
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testInUse [
 	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
 
@@ -130,6 +165,68 @@ MJFAMIXColumnTests >> testInUseCaseInsensitive [
 	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column4 and: [map mapTarget inUse]]).
 	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column6 and: [map mapTarget inUse]]).
 
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testIsUnique [
+	| col |
+
+	col := MJFAMIXColumn new
+					name: #Column2;
+					isUnique: true.
+					
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: col isUnique.
+	
+	col isUnique: false.
+	
+	self deny: col isUnique.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testIsUniqueFromAModel [
+	| jEETestModel mooseModel table1 |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
+	
+	self assert: (mooseModel allColumns size = 6).
+	self assert: (table1 columns size = 3).
+
+	self assert: ((table1 columns select: [:each | each name = #Column4 ]) first isUnique).
+	self deny: ((table1 columns select: [:each | each name = #Column6 ]) first isUnique).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testMJFAMIXColumnCreateAll [
+	| col |
+
+	col := MJFAMIXColumn new
+					name: #Column2;
+					isPK: true;
+					isFK: false;
+					ownerTable:  (MJFAMIXTable new name: #tab1);
+					canBeNull: false;
+					type: 'integer'.
+	
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: col isPK.
+	self deny: col isFK.
+	self deny: col canBeNull.
+	self assert: (col type = 'integer').            
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testMJFAMIXColumnCreation [
+	| col |
+
+	col := MJFAMIXColumn new name: #Column2.  
+	
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
 ]
 
 { #category : #'as yet unclassified' }

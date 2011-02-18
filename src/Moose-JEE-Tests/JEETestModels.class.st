@@ -2019,6 +2019,7 @@ JEETestModels >> sampleMooseModelWithDB [
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable1;
+						canBeNull: false;
 						type: 'integer'.
 	
 	tableColumn2 := MJFAMIXColumn new
@@ -2026,6 +2027,8 @@ JEETestModels >> sampleMooseModelWithDB [
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
+						canBeNull: true;
+						isUnique: true;
 						type: 'string'.
 	
 	tableColumn3 := MJFAMIXColumn new
@@ -2033,6 +2036,8 @@ JEETestModels >> sampleMooseModelWithDB [
 						isPK: false;
 						isFK: false;
 						ownerTable:  dbTable1;
+						canBeNull: false;
+						isUnique: false;
 						type: 'integer'.
 						
 	dbTable1 addColumn: tableColumn1.
