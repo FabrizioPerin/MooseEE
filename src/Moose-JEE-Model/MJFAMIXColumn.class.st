@@ -8,7 +8,8 @@ Class {
 		'type',
 		'used',
 		'isUnique',
-		'canBeNull'
+		'canBeNull',
+		'defaultValue'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -27,6 +28,16 @@ MJFAMIXColumn >> canBeNull [
 { #category : #accessing }
 MJFAMIXColumn >> canBeNull: anObject [
 	canBeNull := anObject
+]
+
+{ #category : #accessing }
+MJFAMIXColumn >> defaultValue [
+	^ defaultValue
+]
+
+{ #category : #accessing }
+MJFAMIXColumn >> defaultValue: wathever [ 
+	defaultValue := wathever.
 ]
 
 { #category : #accessing }
