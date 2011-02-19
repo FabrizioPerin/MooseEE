@@ -5,6 +5,16 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testCreation [
+	| tab |
+
+	tab := MJFAMIXTable new name: 'Table1'.
+	
+	self assert: (tab isMemberOf: MJFAMIXTable).     
+	self assert: (tab name = 'Table1').  
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testInUse [
 	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
 

@@ -40,6 +40,34 @@ MJFAMIXColumnTests >> testCanBeNullFromAModel [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testCreation [
+	| col |
+	
+	col := MJFAMIXColumn new
+					name: #Column2..
+					
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testDefaultValue [
+	| col |
+
+	col := MJFAMIXColumn new
+					name: #Column2;
+					defaultValue: 0.
+	
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: (col defaultValue = 0).  
+	
+	col defaultValue: 'isAString'.
+	
+	self assert: col defaultValue = 'isAString'.
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testInUse [
 	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
 

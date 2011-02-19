@@ -18,7 +18,31 @@ MJSQLImporterFromVisitorTests >> testEnsureAColumn [
 	
 	col := SQLColumnDefNode new 
 				name: #col1;
-				type: 'integer'.
+				type: 'integer';
+				constraints: #().
+	
+	famixCol := importer ensureAColumn: col.
+	
+	self assert: (famixCol isMemberOf: MJFAMIXColumn).
+	self assert: (famixCol name = #col1).
+	self assert: (famixCol type = 'integer').
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitorTests >> testEnsureAColumnWithConstraints [
+	| importer col famixCol const |
+	
+	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	const := SQLColumnConstraintNode new
+					defaultValue: 0;
+					isPK: true;
+					canBeNull: false;
+					isUnique: nil.
+					
+	col := SQLColumnDefNode new 
+				name: #col1;
+				type: 'integer';
+				constraints: (Array with: const).
 	
 	famixCol := importer ensureAColumn: col.
 	
