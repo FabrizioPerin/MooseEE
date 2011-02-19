@@ -5,7 +5,8 @@ Class {
 		'sqlASTParser',
 		'targetModel',
 		'tables',
-		'columns'
+		'columns',
+		'sqlASTVisitor'
 	],
 	#category : #'Moose-JEE-Importers-SQL'
 }
@@ -56,33 +57,27 @@ MJSQLImporterFromVisitor >> ensureAColumn: anASTColumnNode [
 	att := MJFAMIXColumn new.
 	att name: anASTColumnNode name.
 	att type: anASTColumnNode type.
+	
+	anASTColumnNode constraints do: [:const |
+							att defaultValue: const defaultValue.
+							att isUnique: const isUnique.
+							att canBeNull: const canBeNull.
+							att isPK: const canBeNull].
 
 	^att
-	"	| att |
-	
-	self flag: 'TODO: to remove'.
-	
-	att := MJFAMIXColumn new.
-	att name: aDraftObject name.
-	att type: aDraftObject type.
-	
-	att defaultValue: aDraftObject constraints defaultValue.
-	att isUnique: aDraftObject constraints unique.
-	att canBeNull: aDraftObject constraints canBeNull.
-	att isPK: aDraftObject constraints canBeNull.
-	
-	^att"
 ]
 
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> ensureAColumnConstraint: aColumnConstraintNode [
 	| att |
-	
-	att := MJFAMIXColumn new.
+	self flag: #todo remove.
+	"att := MJFAMIXColumn new.
 	att name: aColumnConstraintNode name.
 	att type: aColumnConstraintNode type.
 	att isFK: aColumnConstraintNode isFK.
-	att isPK: aColumnConstraintNode isPK.
+	att isPK: aColumnConstraintNode isPK."
+	
+	
 	
 	^att
 	
@@ -93,9 +88,8 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 	
 	| tab |
 	
-	tab := MJFAMIXTable new.
-	tab name: aTableNode name.
-	tab columns: (aTableNode columns collect: [:aColumnRepresentation | self halt. aColumnRepresentation accept: self]).   
+	tab := MJFAMIXTable new name: aTableNode name.
+	tab columns: (aTableNode columns collect: [:aColumnRepresentation | self halt. aColumnRepresentation accept: self sqlASTVisitor]).   
 	
 	"setting up the primary keys"
 	"aDraftObjectTable constraints do: [:constraint | 
@@ -266,6 +260,11 @@ MJSQLImporterFromVisitor >> populateWithRelationalElements [
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> sqlASTParser [
 	^ sqlASTParser ifNil: [sqlASTParser := PetitSQLiteASTNodesParser new]
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> sqlASTVisitor [
+	^ sqlASTVisitor ifNil: [sqlASTVisitor := SQLASTConcreteVisitor new importer: self]
 ]
 
 { #category : #accessing }
