@@ -70,15 +70,6 @@ MJSQLImporterFromVisitor >> ensureAColumn: anASTColumnNode [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> ensureAColumnConstraint: aColumnConstraintNode [
-	| att |
-	self flag: #todo remove.
-	
-	^att
-	
-]
-
-{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 	
 	| tab |
@@ -88,9 +79,13 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 
 	"setting up the primary keys"
 	aTableNode constraints do: [:aConstraintNode |
-			| constraint |
-			constraint :=  aConstraintNode accept: sqlASTVisitor.
-			constraint isPKConstraint ifTrue: [aConstraintNode pkColumnsName do: [:attNames |
+		| constraint constNode |
+		aConstraintNode isArray
+			ifTrue: [constNode := aConstraintNode second]
+			ifFalse: [constNode := aConstraintNode].
+
+		constraint :=  constNode accept: sqlASTVisitor.
+		constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
 				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
 		
 	^tab
@@ -99,12 +94,13 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 	| newConstr |
-	newConstr := PetitSQLConstraints new.
+	
+	newConstr := MJFAMIXSQLConstraint new.
 
 	newConstr isPKConstraint: aTableConstraintNode isPKConstraint.
 	newConstr isFKConstraint: aTableConstraintNode isFKConstraint.
 		
-	newConstr isPKConstraint ifTrue: [newConstr pkColumnsName do: [:each | newConstr addPKColumnName: each ]].
+	newConstr isPKConstraint ifTrue: [aTableConstraintNode pkColumnsName do: [:each | newConstr addPKColumnName: each ]].
 	
 	^newConstr
 ]
@@ -112,14 +108,12 @@ MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> importSQLCreateScriptFrom: aStream [
 	| sqlScriptNodes scriptNode |
-	
+		
 	sqlScriptNodes := (sqlASTParser parse: aStream) deepFlatten.
-	
-
 	
 	self populateTargetModelWith: (sqlScriptNodes collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: sqlASTVisitor]]).
 	
-	
+	^self targetModel.
 ]
 
 { #category : #'as yet unclassified' }
@@ -134,13 +128,11 @@ MJSQLImporterFromVisitor >> initialize [
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 
-	| dataBases counter aMooseModel aBlackBoard |
+	| dataBases counter aBlackBoard |
 	
-	self halt.
-	
-	dataBases := aCollectionOfEnsuredNodes databases collect: [:aDBRepresentation | self instanciateADataBaseFrom: aDBRepresentation ].
-	tables := dataBases flatCollect: [:each | each tables ].
-	columns := tables flatCollect: [:table | table columns ].
+	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: MJFAMIXDataBase].
+	tables := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: MJFAMIXTable].
+	columns := tables flatCollect: [:table | table columns].
 	
 	counter := 1.
 	
@@ -155,31 +147,29 @@ MJSQLImporterFromVisitor >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 			bar value: counter.
 			bar value: 'Adding data base'.
 			
-			aMooseModel addAll: dataBases.
+			self targetModel addAll: dataBases.
 
 			bar value: ('Adding ', tables size asString ,' tables').
 			tables do: [:table | 
-				aMooseModel withoutAnnounceAdd: table.
+				self targetModel withoutAnnounceAdd: table.
 				counter := counter + 1.
 				bar value: counter].
 			
-			bar value: ('Adding' , columns size asString , 'attributes').
-	
+			bar value: ('Adding' , columns size asString , 'attributes').	
 			columns do: [:col |
-				aMooseModel withoutAnnounceAdd: col.
+				self targetModel withoutAnnounceAdd: col.
 				counter := counter + 1.
 				bar value: counter].	
 				
 			"connect columns and tables"
-			aMooseModel allTables do: [:table | table columns do: [:col | col ownerTable: table]].
+			self targetModel allTables do: [:table | table columns do: [:col | col ownerTable: table]].
 			
-			bar value: 'Computing foreign keys constraints'.
-			
+			"bar value: 'Computing foreign keys constraints'.			
 			aBlackBoard databases do: [:aDBRepresentation | 
-				aMooseModel withoutAnnounceAddAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )].
+				self targetModel withoutAnnounceAddAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )]."
 			].
 	
-	^aMooseModel
+	^self targetModel
 	
 	
 
@@ -187,12 +177,12 @@ MJSQLImporterFromVisitor >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 MJSQLImporterFromVisitor >> sqlASTParser [
 	^ sqlASTParser
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 MJSQLImporterFromVisitor >> sqlASTVisitor [
 	^ sqlASTVisitor
 ]
