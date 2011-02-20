@@ -10,6 +10,12 @@ Class {
 	#category : #'Moose-JEE-Tests-Importers-SQL'
 }
 
+{ #category : #models }
+MJSQLImporterFromVisitorTests >> stringWithACoupleOfTables [
+	^'CREATE TABLE APPAB (ABFID NUMBER(10, 0) NOT NULL ENABLE, STEP NUMBER(10, 0) NOT NULL ENABLE, DIzID NUMBER(10, 0), START NUMBER(10, 0), STEPNAME VARCHAR2(64), NOID NUMBER(10, 0), AaS NUMBER(10, 0), ENTER NUMBER(10, 0), EXIT NUMBER(10, 0), RKID NUMBER(10, 0), NAME VARCHAR2(64), BEM3 NUMBER(10, 0), CONSTRAINT testName primary key (ABFID));
+CREATE TABLE APP_ACCESS (EX_ID NUMBER(10, 0) NOT NULL ENABLE, ESPE NUMBER(10, 0) NOT NULL ENABLE, ESC_PED DATE NOT NULL ENABLE, ATT_CE VARCHAR2(50), ATT_CD DATE, ATT_TED NUMBER(1, 0), ATT_MD DATE, AT_CL VARCHAR2(4000), LNK_CREATOR NUMBER(10, 0), TLNK_CREATOR NUMBER(10, 0), LN_FIER NUMBER(10, 0), TL_FIER NUMBER(10, 0), ROL_OW NUMBER(10, 0))'
+]
+
 { #category : #accessing }
 MJSQLImporterFromVisitorTests >> testEnsureAColumn [
 	| importer col famixCol |
@@ -142,9 +148,29 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstrant [
 	self assert: (famixTab columns size = 1).
 	self assert: (famixTab columns first name = #col1).
 	self assert: (famixTab columns first type = 'integer').
-	
-	  
+		
+	self assert: (famixTab columns first isPK).
 
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitorTests >> testImportSQLCreateScriptFromAStream [
+
+	| importer populatedModel sqlScriptNodes sqlASTVisitor mm pkCol |
+	
+	mm := MooseModel new.
+	
+	importer := MJSQLImporterFromVisitor new targetModel: mm.
+	populatedModel := importer importSQLCreateScriptFrom: self stringWithACoupleOfTables.
+	
+	self assert: (populatedModel = mm).
+	self assert: (populatedModel allTables size = 2).
+	self assert: (populatedModel allColumns size = 25).
+	
+	pkCol := populatedModel allTables first columns select: [:each | each isPK isNil not and:[each isPK] ].
+	
+	self assert: (pkCol size = 1).
+	self assert: (pkCol first name = 'ABFID').
 ]
 
 { #category : #accessing }
@@ -153,8 +179,16 @@ MJSQLImporterFromVisitorTests >> testSqlASTParser [
 	| importer |
 	importer := MJSQLImporterFromVisitor new.
 
-	self assert: (importer sqlASTParser hash = importer sqlASTParser hash).   
 	self assert: (importer sqlASTParser isMemberOf: PetitSQLiteASTNodesParser).
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitorTests >> testSqlASTVisitor [
+	
+	| importer |
+	importer := MJSQLImporterFromVisitor new.
+
+	self assert: (importer sqlASTVisitor isMemberOf: SQLASTConcreteVisitor).
 ]
 
 { #category : #accessing }
