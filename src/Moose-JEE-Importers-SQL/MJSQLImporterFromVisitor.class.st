@@ -6,48 +6,54 @@ Class {
 		'targetModel',
 		'tables',
 		'columns',
-		'sqlASTVisitor'
+		'sqlASTVisitor',
+		'databases',
+		'alterTableStatements'
 	],
 	#category : #'Moose-JEE-Importers-SQL'
 }
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
+MJSQLImporterFromVisitor >> computeForeignKeys [
 
-	| fkAssociations |
-	
-	self flag: 'TODO: to remove'.
-	
+	| fkAssociations dbTables aDraftObjectTableGroup |
+
 	fkAssociations := OrderedCollection new.
 
-	dbTables do: [:table |
-		aDraftObjectTableGroup do: [:draftTable |
-			(table name = draftTable name) ifTrue: [ " table contain the db table with the foreign keys"
-				draftTable constraints do: [:constr |
-					(constr isArray not and: [constr isFKConstraint]) ifTrue: [
-						| referencedTable |
-						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
-						"set as foreign key the columns of the table having the constraint"
-						(1 to: (constr pkColumnsName size)) do: [:index |
-							| tableColumn referencedTableColumn fkAssoc |
-							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
-							referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
-							tableColumn isFK: true.
-							
-							"creation of the association"	
-							fkAssoc := MJFAMIXFKAssociation new targetTable: referencedTableColumn; sourceTable: tableColumn.
-							referencedTableColumn addReferencedBy: fkAssoc.
-							tableColumn addReferences: fkAssoc.
-							
-							fkAssociations add: fkAssoc.							
-						]
-					]
-				]
-			]
-		]
-	].
-
+	tables valuesDo: [:table | table constraints do: [:constr | 
+			constr isFKConstraint ifTrue: [
+				| referencedTable |
+				referencedTable := tables at: constr referencedTableName ifAbsent: [DialogWindow new alert: 'FK constraint refer to a not existing table'].
+				
+				"set as foreign key the columns of the table having the constraint"
+				(1 to: (constr pkColumnsName size)) do: [:index |
+					| tableColumn referencedTableColumn fkAssoc |
+					tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
+					referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
+					tableColumn isFK: true.
+						
+					"creation of the association"	
+					fkAssoc := MJFAMIXFKAssociation new targetTable: referencedTableColumn; sourceTable: tableColumn.
+					referencedTableColumn addReferencedBy: fkAssoc.
+					tableColumn addReferences: fkAssoc.
+					
+					fkAssociations add: fkAssoc.	
+					]]]].
 	^fkAssociations.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> computePrimaryKeys [
+
+	| fkAssociations dbTables aDraftObjectTableGroup |
+
+	tables valuesDo: [:table | table constraints do: [:constr | 
+			constr isPKConstraint ifTrue: [
+				constr pkColumnsName do: [:attNames |
+				(table columns select: [:col | col name = attNames]) first isPK: true]]]].
+
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -84,17 +90,27 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 			ifTrue: [constNode := aConstraintNode second]
 			ifFalse: [constNode := aConstraintNode].
 
-		constraint :=  constNode accept: sqlASTVisitor.
-		constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
-				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
+		tab addConstraint: (constNode accept: sqlASTVisitor).
+		"constraint isPKConstraint ifTrue: [constraint pkColumnsName do: [:attNames |
+				(tab columns select: [:col | col name = attNames]) first isPK: true]]"].
+	
+	tables 
+		at: tab name 
+		ifPresent: [DialogWindow new alert: 'Table missed because there is another table with the same name.'] 
+		ifAbsent: [tables at: tab name put: tab].
 		
 	^tab
 ]
 
 { #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> ensureAnAlterTableStmt: anAlterTableStmtNode [
+	alterTableStatements addLast: anAlterTableStmtNode.
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 	| newConstr |
-	
+
 	newConstr := MJFAMIXSQLConstraint new.
 
 	newConstr isPKConstraint: aTableConstraintNode isPKConstraint.
@@ -111,7 +127,7 @@ MJSQLImporterFromVisitor >> importSQLCreateScriptFrom: aStream [
 		
 	sqlScriptNodes := (sqlASTParser parse: aStream) deepFlatten.
 	
-	self populateTargetModelWith: (sqlScriptNodes collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: sqlASTVisitor]]).
+	self populateTargetModelFrom: (sqlScriptNodes collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: sqlASTVisitor]]).
 	
 	^self targetModel.
 ]
@@ -121,18 +137,23 @@ MJSQLImporterFromVisitor >> initialize [
 	super initialize.
 	
 	sqlASTVisitor := SQLASTConcreteVisitor new importer: self.
-	sqlASTParser := PetitSQLiteASTNodesParser new
+	sqlASTParser := PetitSQLiteASTNodesParser new.
 	
+	tables := Dictionary new.
+	columns := OrderedCollection new.
+	alterTableStatements := OrderedCollection new.
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> populateTargetModelWith: aCollectionOfEnsuredNodes [
+MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 
 	| dataBases counter aBlackBoard |
 	
 	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: MJFAMIXDataBase].
-	tables := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: MJFAMIXTable].
-	columns := tables flatCollect: [:table | table columns].
+
+	tables keysAndValuesDo: [:key :value | columns addAll: value columns].
+	
+	alterTableStatements do: [:alterTable | self reifyAnAlterTableStatementFrom: alterTable.].  
 	
 	counter := 1.
 	
@@ -164,10 +185,11 @@ MJSQLImporterFromVisitor >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 			"connect columns and tables"
 			self targetModel allTables do: [:table | table columns do: [:col | col ownerTable: table]].
 			
-			"bar value: 'Computing foreign keys constraints'.			
-			aBlackBoard databases do: [:aDBRepresentation | 
-				self targetModel withoutAnnounceAddAll: (self computeForeignKeysFor: dataBases first tables from: aDBRepresentation tables )]."
-			].
+			bar value: 'Computing foreign keys constraints'.
+			self computePrimaryKeys.
+			
+			bar value: 'Computing foreign keys constraints'.			
+			self targetModel withoutAnnounceAddAll: self computeForeignKeys.].
 	
 	^self targetModel
 	
@@ -175,6 +197,24 @@ MJSQLImporterFromVisitor >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 
 	
 	
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> reifyAnAlterTableStatementFrom: anAlterTableStmt [
+
+	anAlterTableStmt isRename ifTrue: [
+		tables 
+			at: anAlterTableStmt nameOfTableToAlter 
+			ifPresent: [:value | value name: anAlterTableStmt newTableName]
+			ifAbsent: [DialogWindow new alert: 'Alter Table statement defined on a table not present.']].
+		
+	anAlterTableStmt isAddConstraint ifTrue: [
+		tables 
+			at: anAlterTableStmt nameOfTableToAlter 
+			ifPresent: [:value | 
+				value name: anAlterTableStmt newTableName]
+			ifAbsent: [DialogWindow new alert: 'Alter Table statement defined on a table not present.']].
+	  
 ]
 
 { #category : #accessing }
