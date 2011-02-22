@@ -18,3 +18,13 @@ MJRimaLayeringStrategy >> populateDataLayer: aLayerInstance [
 	
 	model add: aLayerInstance. 
 ]
+
+{ #category : #'as yet unclassified' }
+MJRimaLayeringStrategy >> populateServiceLayer: aLayerInstance [  
+
+	"aLayerInstance containedClasses addAll:( model allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ])."
+	aLayerInstance containedSessionBeans addAll: (model allSessionBeans collect: [:bean | bean implementationClass] ).
+	
+	model add: aLayerInstance.
+	
+]
