@@ -30,6 +30,17 @@ MJFAMIXFKAssociation >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXFKAssociation >> printOn: aStream [
+
+	self from isNil	
+		ifFalse: [aStream nextPutAll: self from name].
+	aStream nextPutAll: ' -> '.
+	self to isNil	
+		ifFalse: [aStream nextPutAll: self to name].
+	aStream nextPutAll: ' (FK association)'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXFKAssociation >> sourceTable [
 
 	<MSEProperty: #sourceTable type: #MJFAMIXRelationalEntity opposite: #references>
