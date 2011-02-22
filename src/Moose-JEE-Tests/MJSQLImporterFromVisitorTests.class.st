@@ -155,8 +155,8 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstrant [
 	self assert: (famixTab columns first type = 'integer').
 		
 	self assert: (famixTab constraints first isPKConstraint).
-	self assert: (famixTab constraints first pkColumnsName size = 1).
-	self assert: (famixTab constraints first pkColumnsName first = #col1).
+	self assert: (famixTab constraints first pkColumnNames size = 1).
+	self assert: (famixTab constraints first pkColumnNames first = #col1).
 		
 
 ]
@@ -199,6 +199,103 @@ MJSQLImporterFromVisitorTests >> testImportSQLCreateScriptFromAStreamWithAlterTa
 	
 	self assert: (pkCol size = 1).
 	self assert: (pkCol first name = 'ABFID').
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTableFK [
+	| importer tab famixTab col const |
+	
+	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	
+	col := SQLColumnDefNode new 
+				name: #col1;
+				type: 'integer';
+				constraints: nil.	
+	
+	tab := SQLCreateTableStmtNode new 
+				name: #tab1;
+				columns: #();
+				constraints: #().
+	
+	famixTab := importer ensureATable: tab.
+	
+	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab name = #tab1).
+	self assert: (famixTab columns size = 1).
+	self assert: (famixTab columns first name = #col1).
+	self assert: (famixTab columns first type = 'integer').
+		
+	self assert: (famixTab constraints first isPKConstraint).
+	self assert: (famixTab constraints first pkColumnNames size = 1).
+	self assert: (famixTab constraints first pkColumnNames first = #col1).
+		
+
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTablePK [
+	| importer tab famixTab col const |
+	
+	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	
+	col := SQLColumnDefNode new 
+				name: #col1;
+				type: 'integer';
+				constraints: nil.	
+	
+	tab := SQLCreateTableStmtNode new 
+				name: #tab1;
+				columns: #();
+				constraints: #().
+	
+	famixTab := importer ensureATable: tab.
+	
+	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab name = #tab1).
+	self assert: (famixTab columns size = 1).
+	self assert: (famixTab columns first name = #col1).
+	self assert: (famixTab columns first type = 'integer').
+		
+	self assert: (famixTab constraints first isPKConstraint).
+	self assert: (famixTab constraints first pkColumnNames size = 1).
+	self assert: (famixTab constraints first pkColumnNames first = #col1).
+		
+
+]
+
+{ #category : #accessing }
+MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTableRename [
+	| importer tab famixTab col const |
+	
+	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	
+	col := SQLColumnDefNode new 
+				name: #col1;
+				type: 'integer';
+				constraints: nil.
+	
+	const := SQLTableConstraintNode new
+					isPKConstraint: true;
+					addPKColumnName: #col1.
+	
+	tab := SQLCreateTableStmtNode new 
+				name: #tab1;
+				columns: (Array with: col);
+				constraints: (Array with: const).
+	
+	famixTab := importer ensureATable: tab.
+	
+	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab name = #tab1).
+	self assert: (famixTab columns size = 1).
+	self assert: (famixTab columns first name = #col1).
+	self assert: (famixTab columns first type = 'integer').
+		
+	self assert: (famixTab constraints first isPKConstraint).
+	self assert: (famixTab constraints first pkColumnNames size = 1).
+	self assert: (famixTab constraints first pkColumnNames first = #col1).
+		
+
 ]
 
 { #category : #accessing }

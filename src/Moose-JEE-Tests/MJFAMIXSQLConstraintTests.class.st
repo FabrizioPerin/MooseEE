@@ -27,9 +27,9 @@ MJFAMIXSQLConstraintTests >> testAddPKColumnName [
 	const addPKColumnName: #Col1.
 	const addPKColumnName: #Col2.
 	
-	self assert: (const pkColumnsName size = 2). 
-	self assert: (const pkColumnsName first = #Col1).
-	self assert: (const pkColumnsName second = #Col2).  
+	self assert: (const pkColumnNames size = 2). 
+	self assert: (const pkColumnNames first = #Col1).
+	self assert: (const pkColumnNames second = #Col2).  
 ]
 
 { #category : #initialization }

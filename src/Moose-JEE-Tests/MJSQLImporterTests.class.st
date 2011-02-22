@@ -395,15 +395,15 @@ MJSQLImporterTests >> testInstanciateADataBaseFromWithConstraints [
 	self assert: ((famixGeneratedTable columns select: [:col | col name = 'Col3Tab3']) first isFK ).
 	self assert: ((famixGeneratedTable columns select: [:col | col name = 'Col2Tab3']) first isFK ).
 	self assert: (constr referencedTableName = 'Tab1').
-	self assert: (constr pkColumnsName size = 2).
+	self assert: (constr pkColumnNames size = 2).
 
 	referencedTable := (db tables select: [:tab | tab name = constr referencedTableName ]) first.
 	
-	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkColumnsName first.]).
-	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkColumnsName second]).
+	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkColumnNames first.]).
+	self assert: (referencedTable columns anySatisfy: [:col | col name =  constr pkColumnNames second]).
 	
-	self assert: ((referencedTable columns select: [:col | col name = constr pkColumnsName first ]) first isPK).
-	self assert: ((referencedTable columns select: [:col | col name = constr pkColumnsName  second ]) first isPK).
+	self assert: ((referencedTable columns select: [:col | col name = constr pkColumnNames first ]) first isPK).
+	self assert: ((referencedTable columns select: [:col | col name = constr pkColumnNames  second ]) first isPK).
 
 ]
 
