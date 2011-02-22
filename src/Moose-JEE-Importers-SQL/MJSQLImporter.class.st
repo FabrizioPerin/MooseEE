@@ -19,10 +19,10 @@ MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 						| referencedTable |
 						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
 						"set as foreign key the columns of the table having the constraint"
-						(1 to: (constr pkColumnsName size)) do: [:index |
+						(1 to: (constr pkColumnNames size)) do: [:index |
 							| tableColumn referencedTableColumn fkAssoc |
 							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
-							referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
+							referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnNames at: index)] )first.
 							tableColumn isFK: true.
 							
 							"creation of the association"	
@@ -80,7 +80,7 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	
 	"setting up the primary keys"
 	aDraftObjectTable constraints do: [:constraint | 
-		((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnsName do: [:attNames |
+		((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnNames do: [:attNames |
 				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
 	
 	^tab

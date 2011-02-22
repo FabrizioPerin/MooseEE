@@ -26,10 +26,10 @@ MJSQLImporterFromVisitor >> computeForeignKeys [
 				referencedTable := tables at: constr referencedTableName ifAbsent: [DialogWindow new alert: 'FK constraint refer to a not existing table'].
 				
 				"set as foreign key the columns of the table having the constraint"
-				(1 to: (constr pkColumnsName size)) do: [:index |
+				(1 to: (constr pkColumnNames size)) do: [:index |
 					| tableColumn referencedTableColumn fkAssoc |
 					tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
-					referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnsName at: index)] )first.
+					referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnNames at: index)] )first.
 					tableColumn isFK: true.
 						
 					"creation of the association"	
@@ -46,11 +46,9 @@ MJSQLImporterFromVisitor >> computeForeignKeys [
 { #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> computePrimaryKeys [
 
-	| fkAssociations dbTables aDraftObjectTableGroup |
-
 	tables valuesDo: [:table | table constraints do: [:constr | 
 			constr isPKConstraint ifTrue: [
-				constr pkColumnsName do: [:attNames |
+				constr pkColumnNames do: [:attNames |
 				(table columns select: [:col | col name = attNames]) first isPK: true]]]].
 
 	
@@ -115,8 +113,10 @@ MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 
 	newConstr isPKConstraint: aTableConstraintNode isPKConstraint.
 	newConstr isFKConstraint: aTableConstraintNode isFKConstraint.
+	newConstr isUnique: aTableConstraintNode isUnique.
 		
-	newConstr isPKConstraint ifTrue: [aTableConstraintNode pkColumnsName do: [:each | newConstr addPKColumnName: each ]].
+	newConstr isPKConstraint ifTrue: [aTableConstraintNode pkColumnNames do: [:each | newConstr addPKColumnName: each ]].
+	newConstr isUnique ifTrue: [aTableConstraintNode uniqueColumnNames do: [:each | newConstr addUniqueColumnName: each ]].
 	
 	^newConstr
 ]
@@ -200,21 +200,27 @@ MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 ]
 
 { #category : #'as yet unclassified' }
-MJSQLImporterFromVisitor >> reifyAnAlterTableStatementFrom: anAlterTableStmt [
+MJSQLImporterFromVisitor >> reifyAnAlterTableStatementFrom: anAlterTableStmtNode [
 
-	anAlterTableStmt isRename ifTrue: [
+	anAlterTableStmtNode isRename ifTrue: [
 		tables 
-			at: anAlterTableStmt nameOfTableToAlter 
-			ifPresent: [:value | value name: anAlterTableStmt newTableName]
+			at: anAlterTableStmtNode nameOfTableToAlter 
+			ifPresent: [:value | value name: anAlterTableStmtNode newTableName]
 			ifAbsent: [DialogWindow new alert: 'Alter Table statement defined on a table not present.']].
 		
-	anAlterTableStmt isAddConstraint ifTrue: [
+	anAlterTableStmtNode isAddConstraint ifTrue: [
 		tables 
-			at: anAlterTableStmt nameOfTableToAlter 
-			ifPresent: [:value | 
-				value name: anAlterTableStmt newTableName]
+			at: anAlterTableStmtNode nameOfTableToAlter 
+			ifPresent: [:value |
+					self reifyTableConstraintNodeFor: value From: anAlterTableStmtNode constraints]
 			ifAbsent: [DialogWindow new alert: 'Alter Table statement defined on a table not present.']].
 	  
+]
+
+{ #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> reifyTableConstraintNodeFor: aTable From: aCollectionOfTableConstraints [
+	^aCollectionOfTableConstraints do: [:constraint | 
+		aTable addConstraint: (self ensureTableConstraintNode: constraint)].
 ]
 
 { #category : #accessing }
