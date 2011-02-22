@@ -280,6 +280,9 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
+			package: 'Moose-JEE-Browsers' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-Model'];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
@@ -334,6 +337,9 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
+			package: 'Moose-JEE-Browsers' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-Model'];
 			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
