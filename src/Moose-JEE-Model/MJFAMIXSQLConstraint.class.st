@@ -7,7 +7,9 @@ Class {
 		'isFKConstraint',
 		'fkReferencedTableName',
 		'fkColumns',
-		'pkColumns'
+		'pkColumns',
+		'isUnique',
+		'uniqueColumns'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -20,6 +22,11 @@ MJFAMIXSQLConstraint >> addFKColumnName: aString [
 { #category : #initialization }
 MJFAMIXSQLConstraint >> addPKColumnName: aString [
 	pkColumns addLast: aString.
+]
+
+{ #category : #initialization }
+MJFAMIXSQLConstraint >> addUniqueColumnName: aString [
+	uniqueColumns addLast: aString.
 ]
 
 { #category : #initialization }
@@ -62,6 +69,16 @@ MJFAMIXSQLConstraint >> isPKConstraint: aBoolean [
 ]
 
 { #category : #accessing }
+MJFAMIXSQLConstraint >> isUnique [
+	^ isUnique
+]
+
+{ #category : #accessing }
+MJFAMIXSQLConstraint >> isUnique: anObject [
+	isUnique := anObject
+]
+
+{ #category : #accessing }
 MJFAMIXSQLConstraint >> name [
 
 	^name
@@ -76,7 +93,7 @@ MJFAMIXSQLConstraint >> name: aString [
 ]
 
 { #category : #initialization }
-MJFAMIXSQLConstraint >> pkColumnsName [
+MJFAMIXSQLConstraint >> pkColumnNames [
 	^pkColumns
 ]
 
@@ -88,4 +105,9 @@ MJFAMIXSQLConstraint >> referencedTableName [
 { #category : #initialization }
 MJFAMIXSQLConstraint >> referencedTableName: aString [
 	fkReferencedTableName := aString.
+]
+
+{ #category : #initialization }
+MJFAMIXSQLConstraint >> uniqueColumnNames [
+	^uniqueColumns
 ]
