@@ -25,12 +25,6 @@ MooseModel >> allDatabases [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-MooseModel >> allDerivedDependencies [
-
-	^self allWithType: MJFAMIXDerivedDependency "asMetaDescription"
-]
-
-{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allEntityBeans [
 	<navigation: 'All Entity Beans'>
 
@@ -82,17 +76,8 @@ MooseModel >> allJSPages [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> allLayers [
-	<navigation: 'All Maps'>
 
-	| group |
-
-	group := MJFAMIXLayerGroup new addAll: self allPresentationLayer.
-	group addAll: self allLogicLayer.
-	group addAll: self allDataLayer.
-	group addAll: self allServiceLayer.
-	
-	group description: 'All Standard Layers'.
-	^group
+	^self allPresentationLayer, self allLogicLayer, self allDataLayer, self allServiceLayer
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -107,7 +92,7 @@ MooseModel >> allMaps [
 
 	| group |
 	
-	group :=  self allWithType: MJFAMIXMapping ofGroupClass: MJFAMIXMappingGroup.
+	group :=  self allWithType: MJFAMIXMapping.
 	group description: 'All Maps'.
 	^group
 ]
@@ -166,7 +151,7 @@ MooseModel >> allTransactionalMethods [
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> annotateTheModelForJEEBrowser [
 
-	<menuItem: 'Annotate the model with JEE informations' category: 'JEAs Utilities' >
+	<menuItem: 'Annotate the model with JEE informations' category: 'JEAs Menu' >
 
 	self createAnnotationForTransactionScope.
 	self createAnnotationForUnsafeQuery.
@@ -176,13 +161,13 @@ MooseModel >> annotateTheModelForJEEBrowser [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> browseCodeWithAnnotationsForJEA [
-	<menuItem: 'Code Browser For JEA' category: 'JEAs Utilities'>
+	<menuItem: 'Code Browser For JEA' category: 'JEAs Menu'>
 	MooseBrowsers new codeBrowserForJEA openOn: self	
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> buildRelationsAmongDBTablesAndClasses [
-	<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Importers'>
+	<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Menu'>
 
 	| tables tableEntities counter annotationTypeTable ejbVer |
 
@@ -247,7 +232,7 @@ MooseModel >> buildRelationsAmongDBTablesAndClasses [
 
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
-	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Importers'>
+	<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Menu'>
 
 	| attributesAndMethods classes counter allIndexes ejbVer|
 
@@ -363,15 +348,6 @@ MooseModel >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-MooseModel >> cleanUpLayers [
-	<menuItem: 'Clean up all layers' category: 'JEAs Utilities'>
-	
-	MJFAMIXLayer allSubclasses do: [:each | self withoutAnnounceRemoveAll: (self allWithType: each)].
-	
-
-]
-
-{ #category : #'*Moose-JEE-Model' }
 MooseModel >> createAnnotationForTransactionScope [
 
 	"Creation of the annotation types"
@@ -476,60 +452,6 @@ MooseModel >> ejbVersion: aSymbol [
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
-MooseModel >> experimentalImportDBFromSQLFile: aFileStream [
-	
-	| parser result ejbVer |
-
-	UIManager default
-		displayProgress: 'Importing DB From an SQL file'
-		at: Sensor cursorPoint
-		from: 1 
-		to: 5
-		during: [ :bar | 
-			| importer |
-			
-			bar value: 2.
-			bar value: 'Parsing SQL file'.
-			importer := MJSQLImporterFromVisitor new targetModel: self.
-			importer importSQLCreateScriptFrom: ([ aFileStream contentsOfEntireFile ]
-																				ensure: [ aFileStream close ]).
-			
-			"bar value: 3.
-			bar value: 'Populate the model'.
-			self populateWithRelationalElementsFrom: parser blackBoard."
-			
-			"self ejbVersion isNil 
-				ifTrue: [
-					ejbVer := UITheme builder 
-								chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
-					self ejbVersion: ejbVer.]."
-
-			bar value: 4.
-			bar value: 'Building relations'.
-			
-			"self buildRelationsAmongDBTablesAndClasses.			
-			self buildRelationsAmongTableColumnsAndMethods."
-			
-			bar value: 5].
-	^self
-]
-
-{ #category : #'*Moose-JEE-Model-Importers' }
-MooseModel >> experimentalImportDBFromSQLFileGUI [
-	<menuItem: 'Import database from SQL file EXPERIMENT' category: 'JEAs Importers'>
-	
-	| file |
-	
-	file := UITheme builder 
-		fileOpen: 'Import information from SQL file'
-		extensions: #('sql').
-
-	file isNil 
-		ifTrue: [ DialogWindow new alert: 'File not found.'.]
-		ifFalse:[self experimentalImportDBFromSQLFile: file readStream].
-]
-
-{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFile: aFileStream [
 	
 	| parser result ejbVer |
@@ -569,7 +491,7 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFileGUI [
-	<menuItem: 'Import database from SQL file' category: 'JEAs Importers'>
+	<menuItem: 'Import database from SQL file' category: 'JEAs Menu'>
 	
 	| file |
 	
@@ -629,7 +551,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importEjbJarFromFolderGUI [
 
-	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEAs Importers'>
+	<menuItem: 'Import ejb-jar xmls from folder' category: 'JEAs Menu'>
 
 	| folderName |
 	
@@ -677,7 +599,7 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importJSPagesContainedIntoAFolderGUI [
 
-	<menuItem: 'Import JS Pages from folder' category: 'JEAs Importers'>
+	<menuItem: 'Import JS Pages from folder' category: 'JEAs Menu'>
 
 	| folderName |
 	
@@ -737,7 +659,7 @@ MoosePanel open.
 
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> instanciateJBeansFromAnnotations [
-	<menuItem: 'Import beans from annotations' category: 'JEAs Importers'>
+	<menuItem: 'Import beans from annotations' category: 'JEAs Menu'>
 	
 	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes counter |
 	
@@ -825,25 +747,6 @@ MooseModel >> isEJB30 [
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
-MooseModel >> populateSystemLayers [
-	<menuItem: 'Populate system layers' category: 'JEAs Importers'>
-
-	|  question strategy |
-
-	question := UITheme builder questionWithoutCancel: 'Do you want to clean up previously created layers?'.
-	question ifTrue: [self cleanUpLayers].   
-
-	strategy := UITheme builder chooseDropList: 'Choose the strategy to populate the layers ' list: (MJLayeringStrategy allSubclasses).
-	
-	strategy  isNil 
-		ifTrue: [ DialogWindow new alert: 'Strategy not selected, operation aborted.']
-		ifFalse: [
-			| layeringStrategy |			
-			layeringStrategy := strategy on: self.
-			layeringStrategy instanciateLayers.].
-]
-
-{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> populateWithJSPsFrom: aBlackBoard [
 
 	MJJSPImporter new populate: self withJSPsFrom: aBlackBoard.
@@ -911,7 +814,7 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsGUI [
-	<menuItem: 'Try to fix links with files' category: 'JEAs Utilities'>
+	<menuItem: 'Try to fix links with files' category: 'JEAs Menu'>
 
 	| folder |
 	
@@ -933,20 +836,4 @@ MooseModel >> withoutAnnounceAddAll: entities [
 	 
 	entities do: [:each | self withoutAnnounceAdd: each].
 	^entities
-]
-
-{ #category : #'*Moose-JEE-Model' }
-MooseModel >> withoutAnnounceRemove: anElement [ 
-	
-	self entityStorage remove: anElement. 
-	anElement privateSetMooseModel: nil. 
-	self privateState flushGroups. 
-	^anElement
-]
-
-{ #category : #'*Moose-JEE-Model' }
-MooseModel >> withoutAnnounceRemoveAll: collection [ 
-	
-	 collection do: [:each | self withoutAnnounceRemove: each]. 
-	
 ]

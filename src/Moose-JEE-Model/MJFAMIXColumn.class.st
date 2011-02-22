@@ -6,10 +6,7 @@ Class {
 		'isFK',
 		'ownerTable',
 		'type',
-		'used',
-		'isUnique',
-		'canBeNull',
-		'defaultValue'
+		'used'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -18,26 +15,6 @@ Class {
 MJFAMIXColumn class >> annotation [
 	<MSEClass: #MJFAMIXColumn super: #MJFAMIXRelationalEntity>
 	<package: #'Moose-JEE-Model'>
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> canBeNull [
-	^ canBeNull
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> canBeNull: anObject [
-	canBeNull := anObject
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> defaultValue [
-	^ defaultValue
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> defaultValue: wathever [ 
-	defaultValue := wathever.
 ]
 
 { #category : #accessing }
@@ -61,8 +38,6 @@ MJFAMIXColumn >> initialize [
 	ownerTable := nil.
 	type := nil.
 	used := nil.
-	isUnique := nil.
-	canBeNull := nil.
 ]
 
 { #category : #accessing }
@@ -86,16 +61,6 @@ MJFAMIXColumn >> isPK [
 MJFAMIXColumn >> isPK: aBooleanOrNil [
 
 	isPK := aBooleanOrNil.
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> isUnique [
-	^ isUnique
-]
-
-{ #category : #accessing }
-MJFAMIXColumn >> isUnique: anObject [
-	isUnique := anObject
 ]
 
 { #category : #accessing }
