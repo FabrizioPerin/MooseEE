@@ -196,20 +196,51 @@ MJFAMIXColumnTests >> testInUseCaseInsensitive [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testIsFK [
+	| col |
+
+	col := MJFAMIXColumn new
+					name: #Column2.
+	
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: (col isFK isNil).  
+	
+	col isFK: true.
+	
+	self assert: (col isFK).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testIsPK [
+	| col |
+
+	col := MJFAMIXColumn new
+					name: #Column2.
+	
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: (col isPK isNil).  
+	
+	col isPK: true.
+	
+	self assert: (col isPK).
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testIsUnique [
 	| col |
 
 	col := MJFAMIXColumn new
-					name: #Column2;
-					isUnique: true.
-					
+					name: #Column2.
+	
 	self assert: (col isMemberOf: MJFAMIXColumn).
 	self assert: (col name = #Column2).
-	self assert: col isUnique.
+	self assert: (col isUnique isNil).  
 	
-	col isUnique: false.
+	col isUnique: true.
 	
-	self deny: col isUnique.
+	self assert: (col isUnique).
 ]
 
 { #category : #'as yet unclassified' }

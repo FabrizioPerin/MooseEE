@@ -914,6 +914,72 @@ public class WorkUnitAuthorization extends ActivityBaseBO {
   private String resourceConditions;'
 ]
 
+{ #category : #elements }
+JEETestModels >> fiveTablesConnectedThroughForeignKey [
+
+^'CREATE TABLE Tab1(
+    tab1_ID                   NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    tab1_col1 NUMBER(10, 0) ,
+   tab1_col2                   NUMBER(10, 0),
+    tab1_col3                      DATE ,
+    tab1_col4                    NVARCHAR2(255)      NOT NULL,
+     tab1_col5                      CHAR(1) DEFAULT N);
+
+CREATE TABLE Tab2(
+    tab2_ID                   NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    tab2_col1 NUMBER(10, 0)      NOT NULL,
+   tab2_col2                   NUMBER(10, 0)      NOT NULL ,
+    tab2_col3                      DATE                NOT NULL,
+    tab2_col4                    NVARCHAR2(255)      NOT NULL,
+     tab2_col5                      CHAR(1) DEFAULT N);
+
+CREATE TABLE Tab3(
+    tab3_ID                   NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    tab3_col1 NUMBER(10, 0)      NOT NULL ,
+   tab3_col2                   NUMBER(10, 0)    NOT NULL ,
+    tab3_col3                      DATE           NOT NULL,
+    tab3_col4                    NVARCHAR2(255)      NOT NULL,
+     tab3_col5                      CHAR(1) DEFAULT N,
+	tab3_tab1_FK NUMBER(10),
+	tab3_tab2_FK NUMBER(10));
+
+CREATE TABLE Tab4(
+    tab4_ID                   NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    tab4_col1 NUMBER(10, 0)      NOT NULL ,
+   tab4_col2                   NUMBER(10, 0)      NOT NULL ,
+    tab4_col3                      DATE                NOT NULL,
+    tab4_col4                    NVARCHAR2(255)      NOT NULL,
+     tab4_col5                      CHAR(1) DEFAULT N,
+	tab4_tab3_FK NUMBER(10,0));
+
+CREATE TABLE Tab5(
+    tab5_ID                   NUMBER(10, 0)      NOT NULL PRIMARY KEY,
+    tab5_col1 NUMBER(10, 0)      NOT NULL ,
+   tab5_col2                   NUMBER(10, 0)      NOT NULL ,
+    tab5_col3                      DATE                NOT NULL,
+    tab5_col4                    NVARCHAR2(255)     NOT NULL,
+     tab5_col5                      CHAR(1) DEFAULT N,
+	tab5_tab3_FK NUMBER(10,0));
+
+
+ALTER TABLE Tab3 ADD CONSTRAINT tab1_to_tab3
+    FOREIGN KEY (tab3_tab1_FK)
+    REFERENCES Tab1(tab1_ID);
+
+ALTER TABLE Tab3 ADD CONSTRAINT tab2_to_tab3
+    FOREIGN KEY (tab3_tab2_FK)
+    REFERENCES Tab2(tab2_ID);
+
+ALTER TABLE Tab4 ADD CONSTRAINT tab3_to_tab4
+    FOREIGN KEY (tab4_tab3_FK)
+    REFERENCES Tab3(tab3_ID);
+
+ALTER TABLE Tab5 ADD CONSTRAINT tab3_to_tab5
+    FOREIGN KEY (tab5_tab3_FK)
+    REFERENCES Tab3(tab3_ID)'
+
+]
+
 { #category : #initialize }
 JEETestModels >> initialize [
 	| parser factory doc |
@@ -1900,6 +1966,24 @@ JEETestModels >> sampleMooseModel [
 		).
 
 	^mooseModel
+]
+
+{ #category : #models }
+JEETestModels >> sampleMooseModelContainingABiggerDB [
+	
+	| mooseModel parser |
+
+	mooseModel := MooseModel new.
+	mooseModel name: 'testDataBase'.
+	
+	PPParserResource reset.
+	parser := PPParserResource current parserAt: PetitSQLiteParser.
+	
+	parser parse: self fiveTablesConnectedThroughForeignKey.
+
+	mooseModel populateWithRelationalElementsFrom: parser blackBoard.
+	
+	^mooseModel 
 ]
 
 { #category : #models }
