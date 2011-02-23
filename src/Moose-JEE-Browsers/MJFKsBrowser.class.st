@@ -40,7 +40,7 @@ MJFKsBrowser >> browser [
 				
 				interestingFKAssociation := table mooseModel allFKAssociations select: [:each | (each from ownerTable = table) or: [each to ownerTable = table]].
 				
-				tables := ((interestingFKAssociation collect: [:each | each targetTable ownerTable]) union: (interestingFKAssociation collect: [:each | each sourceTable ownerTable]))  asSet.
+				tables := ((interestingFKAssociation collect: [:each | each targetColumn ownerTable]) union: (interestingFKAssociation collect: [:each | each sourceColumn ownerTable]))  asSet.
 	
 				view shape tableShape.
 				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
@@ -48,7 +48,7 @@ MJFKsBrowser >> browser [
 				view nodes: tables.
 
 				view shape line color: Color lightGray.  
-				view edges: interestingFKAssociation from: [:assoc | assoc sourceTable ownerTable] to: [:assoc | assoc targetTable ownerTable].
+				view edges: interestingFKAssociation from: [:assoc | assoc sourceColumn ownerTable] to: [:assoc | assoc targetColumn ownerTable].
 				
 				view horizontalTreeLayout horizontalGap: 80]].
 
