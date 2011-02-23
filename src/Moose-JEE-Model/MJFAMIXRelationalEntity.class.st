@@ -60,12 +60,6 @@ MJFAMIXRelationalEntity >> mappedBy [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXRelationalEntity >> mappedBy: aMapping [
-	self flag: #toRemove.
-	mappedBy value: aMapping
-]
-
-{ #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> mappedNamedEntities [
 	^self mapDirection: #mapSource on: self mooseModel allMaps 
 ]

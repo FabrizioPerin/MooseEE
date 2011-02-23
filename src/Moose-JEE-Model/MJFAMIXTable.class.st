@@ -70,6 +70,11 @@ MJFAMIXTable >> initialize [
 ]
 
 { #category : #accessing }
+MJFAMIXTable >> name [
+	^name
+]
+
+{ #category : #accessing }
 MJFAMIXTable >> nameAsRegex [
 	^nameAsRegEx isNil  
 		ifTrue: [('.*', self name, '.*') asRegex]
@@ -102,21 +107,21 @@ MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 	ownerDataBase := aFAMIXDataBase.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 MJFAMIXTable >> printOn: aStream [
 	
 	aStream nextPutAll: self name.
 	aStream nextPutAll: ' (Table)'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visualizations }
 MJFAMIXTable >> viewDBTableOn: view [
 	view shape DBTableShape.
 	view interaction popupText.
 	view node: self.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visualizations }
 MJFAMIXTable >> viewTable [
 	<menuItem: 'Table' category: 'MooseJEE Visualizations'> 
 	
@@ -127,7 +132,7 @@ MJFAMIXTable >> viewTable [
 	view open
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visualizations }
 MJFAMIXTable >> viewTableOn: view [
 
 	view shape tableShape.
@@ -147,7 +152,7 @@ MJFAMIXTable >> viewTableOn: view [
 		view verticalLineLayout. ].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visualizations }
 MJFAMIXTable >> viewTableUsage [
 	<menuItem: 'Table''s used elements' category: 'MooseJEE Visualizations'> 
 	
@@ -157,9 +162,45 @@ MJFAMIXTable >> viewTableUsage [
 	view open
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visualizations }
 MJFAMIXTable >> viewTableUsageOn: view [
 	view shape umlClassDiagramLikeForTable.
 	view interaction popupText.
 	view node: self.
+]
+
+{ #category : #accessing }
+MJFAMIXTable >> withDeepReferencedByTables [
+
+	| cursor result tablesReferenceTheCurentOne |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: self.
+	
+	[cursor <= result size] whileTrue: [
+		tablesReferenceTheCurentOne := (( result at: cursor ) columns flatCollect: [:each | each referencedBy]) collect: [:assoc | assoc sourceColumn ownerTable].
+		result addAll: ( tablesReferenceTheCurentOne reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1.
+	].
+
+	^ result.
+]
+
+{ #category : #accessing }
+MJFAMIXTable >> withDeepReferencesTables [
+
+	| cursor result tablesReferencedByTheCurrent |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: self.
+	
+	[cursor <= result size] whileTrue: [
+		tablesReferencedByTheCurrent := ((result at: cursor) columns flatCollect: [:each | each references]) collect: [:each | each targetColumn ownerTable].
+		result addAll: ( tablesReferencedByTheCurrent reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1.
+	].
+
+	^ result.
 ]

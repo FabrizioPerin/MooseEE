@@ -30,8 +30,8 @@ MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCode [
 		"now that i have all tables i look for all the mapping that i am interest in"
 		interestingMaps := (table mooseModel allMaps select: [:each | allInterestingClasses includes: each from]) asSet.
 		
-		tableToConnect := (interestingMaps collect: #mapTarget) asSet asArray.
-		
+		tableToConnect := (interestingMaps collect: #mapTarget) asSet sorted: [:a :b | a name < b name].
+
 		(1 to: tableToConnect size) do: [:rowIndex | 
 			((rowIndex + 1) to: tableToConnect size) do: [:colIndex |
 				(self mooseModel allDerivedDependencies anySatisfy: [:each | (each source = (tableToConnect at: rowIndex)) and: [(each target = (tableToConnect at: colIndex))]]) ifFalse: [ 
