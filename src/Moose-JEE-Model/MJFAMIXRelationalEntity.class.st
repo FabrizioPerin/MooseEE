@@ -46,8 +46,8 @@ MJFAMIXRelationalEntity >> belongsTo [
 MJFAMIXRelationalEntity >> initialize [
 	super initialize.
 	mappedBy := FMMultivalueLink on: self opposite: #mapTarget:.
-	references := FMMultivalueLink on: self opposite: #sourceTable:.
-	referencedBy := FMMultivalueLink on: self opposite: #targetTable:.
+	references := FMMultivalueLink on: self opposite: #sourceColumn:.
+	referencedBy := FMMultivalueLink on: self opposite: #targetColumn:.
 ]
 
 { #category : #'as yet unclassified' }
@@ -79,7 +79,7 @@ MJFAMIXRelationalEntity >> mooseNameOn: aStream [
 { #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> referencedBy [
 
-	<MSEProperty: #referencedBy type: #MJFAMIXFKAssociation opposite: #targetTable> <multivalued> <derived>
+	<MSEProperty: #referencedBy type: #MJFAMIXFKAssociation opposite: #targetColumn> <multivalued> <derived>
 	<MSEComment: 'Foreign Key constrait.'>
 	
 	^referencedBy 
@@ -88,7 +88,7 @@ MJFAMIXRelationalEntity >> referencedBy [
 { #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> references [
 
-	<MSEProperty: #references type: #MJFAMIXFKAssociation opposite: #sourceTable> <multivalued> <derived>
+	<MSEProperty: #references type: #MJFAMIXFKAssociation opposite: #sourceColumn> <multivalued> <derived>
 	<MSEComment: 'Foreign Key constrait.'>
 	
 	^references

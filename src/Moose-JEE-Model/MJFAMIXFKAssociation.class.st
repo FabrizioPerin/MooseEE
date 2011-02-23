@@ -18,7 +18,7 @@ MJFAMIXFKAssociation class >> annotation [
 { #category : #'as yet unclassified' }
 MJFAMIXFKAssociation >> from [
 
-	^ self sourceTable
+	^ self sourceColumn
 ]
 
 { #category : #'as yet unclassified' }
@@ -41,44 +41,44 @@ MJFAMIXFKAssociation >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXFKAssociation >> sourceTable [
+MJFAMIXFKAssociation >> sourceColumn [
 
-	<MSEProperty: #sourceTable type: #MJFAMIXRelationalEntity opposite: #references>
+	<MSEProperty: #sourceColumn type: #MJFAMIXRelationalEntity opposite: #references>
 	<MSEComment: 'Relational element references another relational element.'>
 	
 	^sourceTable 
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXFKAssociation >> sourceTable: aRelationalEntity [
+MJFAMIXFKAssociation >> sourceColumn: aRelationalEntity [
 	
 	sourceTable := FMMultivalueLink 
 								on: self
 								update: #references
-								from: self sourceTable
+								from: self sourceColumn
 								to: aRelationalEntity
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXFKAssociation >> targetTable [
-	<MSEProperty: #targetTable type: #MJFAMIXRelationalEntity opposite: #referencedBy>
+MJFAMIXFKAssociation >> targetColumn [
+	<MSEProperty: #targetColumn type: #MJFAMIXRelationalEntity opposite: #referencedBy>
 	<MSEComment: 'Relational element referenced by another relational element.'>
 	
 	^targetTable
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXFKAssociation >> targetTable: aRelationalEntity [
+MJFAMIXFKAssociation >> targetColumn: aRelationalEntity [
 
 	targetTable := FMMultivalueLink 
 								on: self
 								update: #referencedBy
-								from: self targetTable
+								from: self targetColumn
 								to: aRelationalEntity
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXFKAssociation >> to [
 
-	^ self targetTable
+	^ self targetColumn
 ]

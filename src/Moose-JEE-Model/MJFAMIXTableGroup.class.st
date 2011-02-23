@@ -145,7 +145,7 @@ MJFAMIXTableGroup >> viewTablesFKsOn: view [
 	"view edges: self mooseModel allFKAssociations from: [:each | each sourceTable]  to: [:each | each targetTable].
 
 	view shape line color: Color transparent."
-	view edges: self mooseModel allFKAssociations from: [:each | each sourceTable ownerTable ]  to: [:each | each targetTable ownerTable].
+	view edges: self mooseModel allFKAssociations from: [:each | each sourceColumn ownerTable ]  to: [:each | each targetColumn ownerTable].
 	
 	view horizontalTreeLayout  horizontalGap: 150.
 ]
