@@ -196,6 +196,28 @@ MJFAMIXTableTests >> testWithDeepReferencedByTables [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testWithDeepReferencedByTablesOnTwoLevels [	
+	| jEETestModel mooseModel table1 tablesReferenceingTable3 |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
+	mooseModel ejbVersion: #EJB30.
+
+	table1 := (mooseModel allTables select: [:each | each name = 'Tab1']) first.
+
+	self assert: (table1 isMemberOf: MJFAMIXTable).
+	
+	tablesReferenceingTable3 := table1 withDeepReferencedByTables.
+	
+	self assert: (tablesReferenceingTable3 size = 4).
+	self assert: (tablesReferenceingTable3 anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab4']) first)]).
+	self assert: (tablesReferenceingTable3 anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab5']) first)]).
+	self assert: (tablesReferenceingTable3 anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab3']) first)]).
+	self assert: (tablesReferenceingTable3 anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab1']) first)]).
+	    
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testWithDeepReferencesTables [	
 	| jEETestModel mooseModel table3 referencedTables |
 	
@@ -212,5 +234,65 @@ MJFAMIXTableTests >> testWithDeepReferencesTables [
 	self assert: (referencedTables size = 3).
 	self assert: (referencedTables anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab1']) first)]).
 	self assert: (referencedTables anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab2']) first)]).
+	    
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testWithDeepReferencesTablesFromTablesWithoutReferencedTables [
+	| jEETestModel mooseModel table1 referencedTables |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
+	mooseModel ejbVersion: #EJB30.
+
+	table1 := (mooseModel allTables select: [:each | each name = 'Tab1']) first.
+
+	self assert: (table1 isMemberOf: MJFAMIXTable).
+	
+	referencedTables := table1 withDeepReferencesTables.
+	
+	self assert: (referencedTables size = 1).
+	self assert: (referencedTables first = table1).
+	    
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testWithDeepReferencesTablesFromTablesWithoutReferenceingTables [
+	| jEETestModel mooseModel table5 referencedTables |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
+	mooseModel ejbVersion: #EJB30.
+
+	table5 := (mooseModel allTables select: [:each | each name = 'Tab5']) first.
+
+	self assert: (table5 isMemberOf: MJFAMIXTable).
+	
+	referencedTables := table5 withDeepReferencedByTables.
+	
+	self assert: (referencedTables size = 1).
+	self assert: (referencedTables first = table5).
+	    
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testWithDeepReferencesTablesOnTwoLevels [
+	| jEETestModel mooseModel table5 referencedTables |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
+	mooseModel ejbVersion: #EJB30.
+
+	table5 := (mooseModel allTables select: [:each | each name = 'Tab5']) first.
+
+	self assert: (table5 isMemberOf: MJFAMIXTable).
+	
+	referencedTables := table5 withDeepReferencesTables.
+	
+	self assert: (referencedTables size = 4).
+	self assert: (referencedTables anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab1']) first)]).
+	self assert: (referencedTables anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab2']) first)]).
+	self assert: (referencedTables anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab3']) first)]).
+	self assert: (referencedTables anySatisfy: [:table | table = ((mooseModel allTables select: [:each | each name = 'Tab5']) first)]).
 	    
 ]
