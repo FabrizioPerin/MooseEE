@@ -26,7 +26,7 @@ MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 							tableColumn isFK: true.
 							
 							"creation of the association"	
-							fkAssoc := MJFAMIXFKAssociation new targetTable: referencedTableColumn; sourceTable: tableColumn.
+							fkAssoc := MJFAMIXFKAssociation new targetColumn: referencedTableColumn; sourceColumn: tableColumn.
 							referencedTableColumn addReferencedBy: fkAssoc.
 							tableColumn addReferences: fkAssoc.
 							
