@@ -15,7 +15,7 @@ MJFAMIXFKAssociationTests >> testMJFAMIXFKAssociationCreation [
 	table1 := mooseModel entityNamed: #Table1.
 	table2 := mooseModel entityNamed: #Table2.
 	
-	fkAssoc := MJFAMIXFKAssociation new targetTable: table1; sourceTable: table2.
+	fkAssoc := MJFAMIXFKAssociation new targetColumn: table1; sourceColumn: table2.
 	
 	table1 addReferencedBy: fkAssoc.
 	table2 addReferences: fkAssoc.
