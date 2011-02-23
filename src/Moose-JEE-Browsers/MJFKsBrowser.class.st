@@ -36,19 +36,17 @@ MJFKsBrowser >> browser [
 		a mondrian 
 			title: 'Relations';
 			painting: [:view :table |
-				| tables interestingFKAssociation |
+				| tables interestingTables |
 				
-				interestingFKAssociation := table mooseModel allFKAssociations select: [:each | (each from ownerTable = table) or: [each to ownerTable = table]].
+				interestingTables := (table withDeepReferencesTables union: table withDeepReferencedByTables) asSet.
 				
-				tables := ((interestingFKAssociation collect: [:each | each targetColumn ownerTable]) union: (interestingFKAssociation collect: [:each | each sourceColumn ownerTable]))  asSet.
-	
 				view shape tableShape.
 				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
 				view interaction popupText.
-				view nodes: tables.
+				view nodes: interestingTables.
 
 				view shape line color: Color lightGray.  
-				view edges: interestingFKAssociation from: [:assoc | assoc sourceColumn ownerTable] to: [:assoc | assoc targetColumn ownerTable].
+				view edges: table mooseModel allFKAssociations from: [:assoc | assoc sourceColumn ownerTable] to: [:assoc | assoc targetColumn ownerTable].
 				
 				view horizontalTreeLayout horizontalGap: 80]].
 
