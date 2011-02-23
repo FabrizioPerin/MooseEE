@@ -11,6 +11,16 @@ MJFAMIXDataLayer class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXDataLayer >> acceptStrategy: aLayeringStrategy [
+	aLayeringStrategy populateDataLayer: self.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXDataLayer >> name [
+	^'Data Layer'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXDataLayer >> selectClassesFrom: aMooseModel [
 
 	containedClasses addAll:  (aMooseModel allClasses select: [:class | 

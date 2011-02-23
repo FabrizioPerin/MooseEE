@@ -11,6 +11,16 @@ MJFAMIXLogicLayer class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXLogicLayer >> acceptStrategy: aLayeringStrategy [
+	aLayeringStrategy populateLogicLayer: self
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXLogicLayer >> name [
+	^'Logic Layer'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXLogicLayer >> selectClassesFrom: aMooseModel [
 	
 ]

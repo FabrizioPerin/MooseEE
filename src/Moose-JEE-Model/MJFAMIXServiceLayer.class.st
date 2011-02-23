@@ -13,6 +13,12 @@ MJFAMIXServiceLayer class >> annotation [
 	<package: #'Moose-JEE-Model'>
 ]
 
+{ #category : #'as yet unclassified' }
+MJFAMIXServiceLayer >> acceptStrategy: aLayeringStrategy [
+	aLayeringStrategy populateServiceLayer: self  
+	
+]
+
 { #category : #accessing }
 MJFAMIXServiceLayer >> containedSessionBeans [
 	^containedSessionBeans
@@ -24,6 +30,11 @@ MJFAMIXServiceLayer >> initialize [
 	containedSessionBeans := OrderedCollection new.
 	
 	^self
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXServiceLayer >> name [
+	^'Service Layer'
 ]
 
 { #category : #'as yet unclassified' }

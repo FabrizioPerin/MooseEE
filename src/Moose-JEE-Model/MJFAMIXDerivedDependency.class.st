@@ -15,7 +15,9 @@ Class {
 	#superclass : #MJAssociation,
 	#instVars : [
 		'source',
-		'target'
+		'target',
+		'directed',
+		'rationale'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -39,6 +41,29 @@ MJFAMIXDerivedDependency >> initialize [
 	
 	source := nil.
 	target := nil.
+	directed := nil.
+	rationale := ''.
+]
+
+{ #category : #accessing }
+MJFAMIXDerivedDependency >> isDirected [
+	"If false it means that the direction of the dependency does not count. If true it means that the direction is from the source to the target. Can be nil"
+	^directed
+]
+
+{ #category : #accessing }
+MJFAMIXDerivedDependency >> isDirected: aBoolean [
+	directed := aBoolean.
+]
+
+{ #category : #accessing }
+MJFAMIXDerivedDependency >> rationale [
+	^rationale
+]
+
+{ #category : #accessing }
+MJFAMIXDerivedDependency >> rationale: aString [
+	rationale := aString.
 ]
 
 { #category : #'as yet unclassified' }

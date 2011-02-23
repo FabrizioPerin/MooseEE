@@ -7,7 +7,8 @@ Class {
 		'ownerDataBase',
 		'nameAsRegExIgCa',
 		'nameAsRegEx',
-		'used'
+		'used',
+		'tableConstraints'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -25,6 +26,11 @@ MJFAMIXTable >> addColumn: aFAMIXTablesColumn [
 ]
 
 { #category : #accessing }
+MJFAMIXTable >> addConstraint: aMJFAMIXSQLConstraint [
+	tableConstraints addLast: aMJFAMIXSQLConstraint
+]
+
+{ #category : #accessing }
 MJFAMIXTable >> columns [
 	^columns
 ]
@@ -33,6 +39,11 @@ MJFAMIXTable >> columns [
 MJFAMIXTable >> columns: aOrderedCollection [
 
 	columns := aOrderedCollection.
+]
+
+{ #category : #accessing }
+MJFAMIXTable >> constraints [
+	^ tableConstraints
 ]
 
 { #category : #accessing }
@@ -55,6 +66,7 @@ MJFAMIXTable >> initialize [
 	ownerDataBase := nil.
 	nameAsRegExIgCa := nil.
 	nameAsRegEx := nil.
+	tableConstraints := OrderedCollection new.
 ]
 
 { #category : #accessing }
