@@ -234,21 +234,28 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTableF
 
 { #category : #accessing }
 MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTablePK [
-	| importer tab famixTab col const |
+	| importer tab alterTabStmt const alterTabNode mm famixTab |
 	
 	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
 	
-	col := SQLColumnDefNode new 
-				name: #col1;
-				type: 'integer';
-				constraints: nil.	
+	alterTabStmt := SQLAlterTableStmtNode new 
+				nameOfTableToAlter: #tab1;
+				isRename: true;
+				newTableName: #tab2.	
 	
 	tab := SQLCreateTableStmtNode new 
 				name: #tab1;
 				columns: #();
 				constraints: #().
 	
-	famixTab := importer ensureATable: tab.
+	"famixTab := importer ensureATable: tab.
+	alterTabNode := importer ensureAnAlterTableStmt: alterTabStmt. "
+	mm := importer populateTargetModelFrom: ((Array with: tab with: alterTabNode) collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: importer sqlASTVisitor]]).
+	
+	self assert: (mm allTables size = 1).
+	self assert: (mm allTables first name = #tab1).
+	self assert: (mm allTables size = 1).
+	  
 	
 	self assert: (famixTab isMemberOf: MJFAMIXTable).
 	self assert: (famixTab name = #tab1).
@@ -265,37 +272,31 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTableP
 
 { #category : #accessing }
 MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromAnAlterTableRename [
-	| importer tab famixTab col const |
+	| importer tab alterTabStmt const mm famixTab |
 	
 	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
 	
-	col := SQLColumnDefNode new 
-				name: #col1;
-				type: 'integer';
-				constraints: nil.
-	
-	const := SQLTableConstraintNode new
-					isPKConstraint: true;
-					addPKColumnName: #col1.
+	alterTabStmt := SQLAlterTableStmtNode new 
+				nameOfTableToAlter: #tab1;
+				isRename: true;
+				newTableName: #tab2.	
 	
 	tab := SQLCreateTableStmtNode new 
 				name: #tab1;
-				columns: (Array with: col);
-				constraints: (Array with: const).
+				columns: #();
+				constraints: #().
 	
 	famixTab := importer ensureATable: tab.
 	
 	self assert: (famixTab isMemberOf: MJFAMIXTable).
 	self assert: (famixTab name = #tab1).
-	self assert: (famixTab columns size = 1).
-	self assert: (famixTab columns first name = #col1).
-	self assert: (famixTab columns first type = 'integer').
-		
-	self assert: (famixTab constraints first isPKConstraint).
-	self assert: (famixTab constraints first pkColumnNames size = 1).
-	self assert: (famixTab constraints first pkColumnNames first = #col1).
-		
+	
+	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
 
+	mm := importer populateTargetModelFrom: ((Array with: tab with: alterTabStmt) collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: importer sqlASTVisitor]]).
+	
+	self assert: (mm allTables size = 1).
+	self assert: (mm allTables first name = #tab2).
 ]
 
 { #category : #accessing }
