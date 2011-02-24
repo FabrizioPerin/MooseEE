@@ -21,7 +21,7 @@ MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 						"set as foreign key the columns of the table having the constraint"
 						(1 to: (constr pkColumnNames size)) do: [:index |
 							| tableColumn referencedTableColumn fkAssoc |
-							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnsName at: index)]) first.
+							tableColumn := 	(table columns select: [:col | col name = (constr fkColumnNames at: index)]) first.
 							referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnNames at: index)] )first.
 							tableColumn isFK: true.
 							
