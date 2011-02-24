@@ -23,7 +23,7 @@ MJSQLImporterFromVisitor >> computeForeignKeys [
 	tables valuesDo: [:table | table constraints do: [:constr | 
 			constr isFKConstraint ifTrue: [
 				| referencedTable |
-				referencedTable := tables at: constr referencedTableName ifAbsent: [DialogWindow new alert: 'FK constraint refer to a not existing table'].
+				referencedTable := tables at: constr referencedTableName ifAbsent: [constr inspect. DialogWindow new alert: 'FK constraint refer to a not existing table'].
 				
 				"set as foreign key the columns of the table having the constraint"
 				(1 to: (constr pkColumnNames size)) do: [:index |
@@ -33,7 +33,7 @@ MJSQLImporterFromVisitor >> computeForeignKeys [
 					tableColumn isFK: true.
 						
 					"creation of the association"	
-					fkAssoc := MJFAMIXFKAssociation new targetTable: referencedTableColumn; sourceTable: tableColumn.
+					fkAssoc := MJFAMIXFKAssociation new targetColumn: referencedTableColumn; sourceColumn: tableColumn.
 					referencedTableColumn addReferencedBy: fkAssoc.
 					tableColumn addReferences: fkAssoc.
 					
@@ -118,7 +118,10 @@ MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 		
 	newConstr isPKConstraint ifTrue: [aTableConstraintNode pkColumnNames do: [:each | newConstr addPKColumnName: each ]].
 	newConstr isUnique ifTrue: [aTableConstraintNode uniqueColumnNames do: [:each | newConstr addUniqueColumnName: each ]].
-	newConstr isFKConstraint ifTrue: [aTableConstraintNode fkColumnNames do: [:each | newConstr addFKColumnName: each ]].
+	newConstr isFKConstraint ifTrue: [
+		newConstr referencedTableName: aTableConstraintNode referencedTableName.
+		aTableConstraintNode fkColumnNames do: [:each | newConstr addFKColumnName: each ].
+		aTableConstraintNode pkColumnNames do: [:each | newConstr addPKColumnName: each ]].
 	newConstr isCheck ifTrue: [newConstr expressionString: aTableConstraintNode expressionString].
 	
 	^newConstr
