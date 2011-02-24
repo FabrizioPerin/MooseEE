@@ -9,7 +9,9 @@ Class {
 		'fkColumns',
 		'pkColumns',
 		'isUnique',
-		'uniqueColumns'
+		'uniqueColumns',
+		'isCheckConstraint',
+		'expressionString'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -29,8 +31,18 @@ MJFAMIXSQLConstraint >> addUniqueColumnName: aString [
 	uniqueColumns addLast: aString.
 ]
 
+{ #category : #accessing }
+MJFAMIXSQLConstraint >> expressionString [
+	^ expressionString
+]
+
+{ #category : #accessing }
+MJFAMIXSQLConstraint >> expressionString: aString [
+	expressionString := aString
+]
+
 { #category : #initialization }
-MJFAMIXSQLConstraint >> fkColumnsName [
+MJFAMIXSQLConstraint >> fkColumnNames [
 	^fkColumns
 ]
 
@@ -42,6 +54,16 @@ MJFAMIXSQLConstraint >> initialize [
 	fkColumns := OrderedCollection new.
 	pkColumns := OrderedCollection new.
 	fkReferencedTableName := nil.
+]
+
+{ #category : #accessing }
+MJFAMIXSQLConstraint >> isCheck [
+	^ isCheckConstraint
+]
+
+{ #category : #accessing }
+MJFAMIXSQLConstraint >> isCheck: aBoolean [
+	isCheckConstraint := aBoolean
 ]
 
 { #category : #initialization }
