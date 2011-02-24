@@ -181,7 +181,7 @@ MJSQLImporterTests >> createNewColumnNamed: aString whichTypeIs: aTypeName [
 MJSQLImporterTests >> createNewFKConstraintNamed: aString between: aCollectionWithaTableAndOfColumns and: anotherCollectionWithaTableAndOfColumns [
 	
 	| constr |
-	constr := PetitSQLConstraints new name: aString.
+	constr := PetitSQLPKOrFKConstraint new name: aString.
 	
 	constr isFKConstraint: true.
 	constr isPKConstraint: false.
@@ -206,7 +206,7 @@ MJSQLImporterTests >> createNewFKConstraintNamed: aString between: aCollectionWi
 { #category : #'as yet unclassified' }
 MJSQLImporterTests >> createNewPKConstraintNamed: aString for: aTable and: aCollectionOfColumns [
 	| constr |
-	constr := PetitSQLConstraints new name: aString.
+	constr := PetitSQLPKOrFKConstraint new name: aString.
 	
 	constr isFKConstraint: false.
 	constr isPKConstraint: true.
