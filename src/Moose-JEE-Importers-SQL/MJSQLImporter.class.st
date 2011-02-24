@@ -13,8 +13,8 @@ MJSQLImporter >> computeForeignKeysFor: dbTables from: aDraftObjectTableGroup [
 
 	dbTables do: [:table |
 		aDraftObjectTableGroup do: [:draftTable |
-			(table name = draftTable name) ifTrue: [ " table contain the db table with the foreign keys"
-				draftTable constraints do: [:constr |
+			(table name = draftTable name) ifTrue: [ " table contains the db table with the foreign keys"
+				(draftTable constraints select: [:each | each isMemberOf: PetitSQLPKOrFKConstraint])  do: [:constr |
 					(constr isArray not and: [constr isFKConstraint]) ifTrue: [
 						| referencedTable |
 						referencedTable := (dbTables select: [:refTable | refTable name = constr referencedTableName]) first.
@@ -80,8 +80,10 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	
 	"setting up the primary keys"
 	aDraftObjectTable constraints do: [:constraint | 
-		((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnNames do: [:attNames |
-				(tab columns select: [:col | col name = attNames]) first isPK: true]]].
+		(constraint isMemberOf: PetitSQLPKOrFKConstraint) ifTrue:[  
+			((constraint isArray not) and: [constraint isPKConstraint]) ifTrue: [constraint pkColumnNames do: [:attNames |
+				(tab columns select: [:col | col name = attNames]) first isPK: true]]]
+		].
 	
 	^tab
 ]
