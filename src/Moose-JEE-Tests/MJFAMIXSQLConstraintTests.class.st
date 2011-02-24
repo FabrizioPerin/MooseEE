@@ -13,9 +13,9 @@ MJFAMIXSQLConstraintTests >> testAddFKColumnName [
 	const addFKColumnName: #Col1.
 	const addFKColumnName: #Col2.
 	
-	self assert: (const fkColumnsName size = 2). 
-	self assert: (const fkColumnsName first = #Col1).
-	self assert: (const fkColumnsName second = #Col2).  
+	self assert: (const fkColumnNames size = 2). 
+	self assert: (const fkColumnNames first = #Col1).
+	self assert: (const fkColumnNames second = #Col2).  
 ]
 
 { #category : #initialization }
