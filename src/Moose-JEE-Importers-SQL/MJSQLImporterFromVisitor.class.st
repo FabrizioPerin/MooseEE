@@ -94,7 +94,7 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 	
 	tables 
 		at: tab name 
-		ifPresent: [DialogWindow new alert: 'Table missed because there is another table with the same name.'] 
+		ifPresent: [:table | DialogWindow new alert: 'Table missed because there is another table with the same name.'] 
 		ifAbsent: [tables at: tab name put: tab].
 		
 	^tab
@@ -156,10 +156,8 @@ MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 	| dataBases counter aBlackBoard |
 	
 	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: MJFAMIXDataBase].
-
-	tables keysAndValuesDo: [:key :value | columns addAll: value columns].
-	
 	alterTableStatements do: [:alterTable | self reifyAnAlterTableStatementFrom: alterTable.].  
+	tables keysAndValuesDo: [:key :value | columns addAll: value columns].
 	
 	counter := 1.
 	
@@ -177,7 +175,7 @@ MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 			self targetModel addAll: dataBases.
 
 			bar value: ('Adding ', tables size asString ,' tables').
-			tables do: [:table | 
+			tables valuesDo: [:table | 
 				self targetModel withoutAnnounceAdd: table.
 				counter := counter + 1.
 				bar value: counter].
@@ -211,7 +209,9 @@ MJSQLImporterFromVisitor >> reifyAnAlterTableStatementFrom: anAlterTableStmtNode
 	anAlterTableStmtNode isRename ifTrue: [
 		tables 
 			at: anAlterTableStmtNode nameOfTableToAlter 
-			ifPresent: [:value | value name: anAlterTableStmtNode newTableName]
+			ifPresent: [:value |
+				tables at: anAlterTableStmtNode newTableName ifAbsentPut: [value name: anAlterTableStmtNode newTableName].
+				tables removeKey: anAlterTableStmtNode nameOfTableToAlter ]
 			ifAbsent: [DialogWindow new alert: 'Alter Table statement defined on a table not present.']].
 		
 	anAlterTableStmtNode isAddConstraint ifTrue: [
