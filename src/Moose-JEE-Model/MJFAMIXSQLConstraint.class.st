@@ -53,6 +53,7 @@ MJFAMIXSQLConstraint >> initialize [
 	isFKConstraint := nil.
 	fkColumns := OrderedCollection new.
 	pkColumns := OrderedCollection new.
+	uniqueColumns := OrderedCollection new.
 	fkReferencedTableName := nil.
 ]
 
