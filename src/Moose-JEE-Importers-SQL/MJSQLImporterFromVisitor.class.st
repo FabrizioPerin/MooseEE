@@ -106,6 +106,11 @@ MJSQLImporterFromVisitor >> ensureAnAlterTableStmt: anAlterTableStmtNode [
 ]
 
 { #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor >> ensureSelectStmtNode: aSelectStmtNode [
+	
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 	| newConstr |
 
