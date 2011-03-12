@@ -76,7 +76,7 @@ MJSQLImporter >> instanciateADataBaseTableFrom: aDraftObjectTable [
 	
 	tab := MJFAMIXTable new.
 	tab name: aDraftObjectTable name.
-	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]).   
+	tab columns: (aDraftObjectTable columns collect: [:aColumnRepresentation | self instanciateAColumnFrom: aColumnRepresentation ]) asMooseGroup.   
 	
 	"setting up the primary keys"
 	aDraftObjectTable constraints do: [:constraint | 

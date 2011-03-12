@@ -79,7 +79,7 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 	| tab |
 
 	tab := MJFAMIXTable new name: aTableNode name.
-	tab columns: (aTableNode columns collect: [:aColumnNode | aColumnNode accept: sqlASTVisitor]).   
+	tab columns: (aTableNode columns collect: [:aColumnNode | aColumnNode accept: sqlASTVisitor]) asMooseGroup. 
 
 	"setting up the primary keys"
 	aTableNode constraints do: [:aConstraintNode |
