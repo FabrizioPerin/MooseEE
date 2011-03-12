@@ -32,7 +32,8 @@ MJFAMIXTable >> addConstraint: aMJFAMIXSQLConstraint [
 
 { #category : #accessing }
 MJFAMIXTable >> columns [
-	^columns
+	<navigation: #columns>
+	^columns description: 'Columns defined'.
 ]
 
 { #category : #accessing }

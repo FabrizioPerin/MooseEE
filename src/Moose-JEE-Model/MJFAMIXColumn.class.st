@@ -22,6 +22,8 @@ MJFAMIXColumn class >> annotation [
 
 { #category : #accessing }
 MJFAMIXColumn >> canBeNull [
+	<property: #canBeNull longName: 'Can Be Null' description:
+			'This column can be null'>
 	^ canBeNull
 ]
 
@@ -67,6 +69,8 @@ MJFAMIXColumn >> initialize [
 
 { #category : #accessing }
 MJFAMIXColumn >> isFK [
+	<property: #isFK longName: 'is Foreign Key' description:
+			'This column is foreign key from another table'>
 	^isFK
 ]
 
@@ -78,7 +82,8 @@ MJFAMIXColumn >> isFK: aBooleanOrNil [
 
 { #category : #accessing }
 MJFAMIXColumn >> isPK [
-
+	<property: #isPK longName: 'is Primary Key' description:
+			'This column is a primary key'>
 	^isPK
 ]
 
@@ -90,6 +95,8 @@ MJFAMIXColumn >> isPK: aBooleanOrNil [
 
 { #category : #accessing }
 MJFAMIXColumn >> isUnique [
+	<property: #isUnique longName: 'is Unique' description:
+			'The content of this column must be unique'>
 	^ isUnique
 ]
 
@@ -100,7 +107,7 @@ MJFAMIXColumn >> isUnique: anObject [
 
 { #category : #accessing }
 MJFAMIXColumn >> ownerTable [
-
+	<navigation: #ownerTable>
 	"ownerTable isNil ifTrue: [
 		ownerTable := self mooseModel allTables 
 			detect: [:table | table columns anySatisfy: [:column | column = self]]
@@ -129,6 +136,8 @@ MJFAMIXColumn >> printOn: aStream [
 
 { #category : #accessing }
 MJFAMIXColumn >> type [
+	<property: #type longName: 'type' description:
+			'Type of this column'>
 	^type
 ]
 

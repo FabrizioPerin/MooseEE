@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXSQLConstraint,
-	#superclass : #Object,
+	#superclass : #MooseEntity,
 	#instVars : [
 		'name',
 		'isPKConstraint',
@@ -15,6 +15,12 @@ Class {
 	],
 	#category : #'Moose-JEE-Model'
 }
+
+{ #category : #'as yet unclassified' }
+MJFAMIXSQLConstraint class >> annotation [
+	<MSEClass: #MJFAMIXSQLConstraint super: #MooseEntity>
+	<package: #'Moose-JEE-Model'>
+]
 
 { #category : #initialization }
 MJFAMIXSQLConstraint >> addFKColumnName: aString [
@@ -48,6 +54,7 @@ MJFAMIXSQLConstraint >> fkColumnNames [
 
 { #category : #initialization }
 MJFAMIXSQLConstraint >> initialize [
+	super initialize.	
 	name := nil.
 	isPKConstraint := nil.
 	isFKConstraint := nil.
@@ -59,6 +66,7 @@ MJFAMIXSQLConstraint >> initialize [
 
 { #category : #accessing }
 MJFAMIXSQLConstraint >> isCheck [
+	<property: #isCheck>
 	^ isCheckConstraint
 ]
 
@@ -69,6 +77,7 @@ MJFAMIXSQLConstraint >> isCheck: aBoolean [
 
 { #category : #initialization }
 MJFAMIXSQLConstraint >> isFKConstraint [
+	<property: #isFKConstraint>
 	^isFKConstraint
 	
 ]
@@ -81,6 +90,7 @@ MJFAMIXSQLConstraint >> isFKConstraint: aBoolean [
 
 { #category : #initialization }
 MJFAMIXSQLConstraint >> isPKConstraint [
+	<property: #isPKConstraint>
 	^isPKConstraint
 	
 ]
@@ -93,6 +103,7 @@ MJFAMIXSQLConstraint >> isPKConstraint: aBoolean [
 
 { #category : #accessing }
 MJFAMIXSQLConstraint >> isUnique [
+	<property: #isUnique>
 	^ isUnique
 ]
 
@@ -103,16 +114,12 @@ MJFAMIXSQLConstraint >> isUnique: anObject [
 
 { #category : #accessing }
 MJFAMIXSQLConstraint >> name [
-
-	^name
-	
+	^ name
 ]
 
-{ #category : #initialization }
+{ #category : #accessing }
 MJFAMIXSQLConstraint >> name: aString [
-
-	name := aString.
-	
+	name := aString
 ]
 
 { #category : #initialization }
