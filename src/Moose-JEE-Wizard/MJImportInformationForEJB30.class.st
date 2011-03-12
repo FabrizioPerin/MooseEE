@@ -57,8 +57,8 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			
 			progBar value: 'Performing post import operations'.
 			
-			appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
-			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel].
+			"appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
+			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel]."
 			progBar value: 10.
 			
 			mooseModel install.

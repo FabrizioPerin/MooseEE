@@ -45,8 +45,8 @@ MJImportInformationForEJB21 >> actionsToPerform [
 			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePathName).
 			progBar value: 6.
 			
-			appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
-			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel].
+			"appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].
+			appLayers do: [:layerClassNameSymbol | ((Smalltalk at: layerClassNameSymbol) perform: #new) populate: mooseModel]."
 			progBar value: 7.
 
 			mooseModel install.
