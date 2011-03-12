@@ -54,12 +54,6 @@ FAMIXNamedEntity >> maps [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-FAMIXNamedEntity >> maps: aMapping [
-	self flag: #toRemove.
-	self maps value: aMapping
-]
-
-{ #category : #'*Moose-JEE-Model' }
 FAMIXNamedEntity >> outgoingDerivedDependency [
 	<MSEProperty: #outgoingDerivedDependency type: #MJFAMIXDerivedDependency opposite: #source> <multivalued>  <derived>
 	<MSEComment: 'Dependency derived from another dependency.'>
