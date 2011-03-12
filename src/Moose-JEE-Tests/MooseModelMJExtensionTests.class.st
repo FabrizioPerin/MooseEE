@@ -5,6 +5,78 @@ Class {
 }
 
 { #category : #tests }
+MooseModelMJExtensionTests >> testAllDataLayer [
+	| mooseModel dataLayer |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryComplex.
+	
+	dataLayer := MJFAMIXDataLayer new acceptStrategy: (MJDefautLayeringStrategy on: mooseModel).
+		
+	self assert: (mooseModel allDataLayer size = 1).
+	self assert: (mooseModel allDataLayer first  = dataLayer).
+	
+	self assert: dataLayer containedClasses size = 2.
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testAllLayers [
+	| mooseModel dataLayer allLayers strategy |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryComplex.
+	
+	(MJDefautLayeringStrategy on: mooseModel) instanciateLayers.
+		
+	self assert: (mooseModel allLayers size = 4).
+	
+	self assert: (mooseModel allPresentationLayer size = 1).
+	self assert: (mooseModel allServiceLayer size = 1).
+	self assert: (mooseModel allLogicLayer size = 1).
+	self assert: (mooseModel allDataLayer size = 1).
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testAllLogicLayer [
+
+	| mooseModel logicLayer |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
+
+	logicLayer := MJFAMIXLogicLayer new acceptStrategy: (MJDefautLayeringStrategy on: mooseModel).
+	
+	self assert: (mooseModel allLogicLayer size = 1).
+	self assert: (mooseModel allLogicLayer first  = logicLayer).
+	self assert: logicLayer containedClasses size = 0.
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testAllPresentitonLayer [
+
+	| mooseModel presentationLayer |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
+
+	presentationLayer := MJFAMIXPresentationLayer new acceptStrategy: (MJDefautLayeringStrategy on: mooseModel).
+	
+	self assert: (mooseModel allPresentationLayer size = 1).
+	self assert: (mooseModel allPresentationLayer first = presentationLayer).
+	self assert: presentationLayer containedClasses size = 0.
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testAllServiceLayer [
+
+	| mooseModel serviceLayer |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
+
+	serviceLayer := MJFAMIXServiceLayer new acceptStrategy: (MJDefautLayeringStrategy on: mooseModel).
+	
+	self assert: (mooseModel allServiceLayer size = 1).
+	self assert: (mooseModel allServiceLayer first = serviceLayer).
+	self assert: serviceLayer containedSessionBeans size = 3.
+]
+
+{ #category : #tests }
 MooseModelMJExtensionTests >> testAnnotationTypeAndInstancesofTransactionScope [
 
 	| mooseModel annotationTp allInstances annotatedMethods annotatedClasses |
@@ -214,4 +286,30 @@ MooseModelMJExtensionTests >> testInvocations [
 	self assert: ( ( ( invocation at: 1 ) candidates ) size = 1 ).
 	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) isKindOf: FAMIXMethod ).
 	self assert: ( ( ( ( invocation at: 1 ) candidates ) at: 1 ) name = #someMethod ).
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testIsEJB21 [
+
+	| mooseModel  invocation |
+	mooseModel := JEETestModels new sampleMooseModel.
+	
+	self deny: mooseModel isEJB21.
+	
+	mooseModel ejbVersion: #EJB21.
+	
+	self assert: mooseModel isEJB21.  
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testIsEJB30 [
+
+	| mooseModel  invocation |
+	mooseModel := JEETestModels new sampleMooseModel.
+	
+	self deny: mooseModel isEJB30.
+	
+	mooseModel ejbVersion: #EJB30.
+	
+	self assert: mooseModel isEJB30.  
 ]
