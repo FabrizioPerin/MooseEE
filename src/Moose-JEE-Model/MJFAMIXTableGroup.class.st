@@ -14,6 +14,16 @@ MJFAMIXTableGroup class >> annotation [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCode [
+	"This method compute derived dependencies considering the relations among software entities. 
+	1- the algorithm cycle on all the tables;
+	2- for each table we pick all the maps pointing to this table
+	3- starting from this maps we build an invokation call graph and we pick up all the other maps that we can find
+	4- finally we create a derived dependency amongs all the table that are involved in all the maps.
+	
+	Note: there is a condition that avoid the creation of multiple derived dependency among two classes.
+	
+	
+	considering the invokation call graph starting from the classes on the of the classes we find all other maps that are involve and consequently all the table that are involved in potential relations"
 
 	self do: [:table |
 		| startingMaps invokingClasses allInterestingClasses interestingMaps tableToConnect |
