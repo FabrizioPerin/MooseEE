@@ -853,6 +853,7 @@ MooseModel >> populateWithJSPsFrom: aBlackBoard [
 
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
+	self deprecated: 'Use the importer with the AST instead' on:  '18 March 2011' in: nil.	
 
 	MJSQLImporter new populate: self withRelationalElementsFrom: aBlackBoard.
 	

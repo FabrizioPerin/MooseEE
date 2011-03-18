@@ -141,15 +141,16 @@ MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
 		during: [ :bar | 
 			bar value: progr.
 			
+			"these nested loops logically organize the table in a matrix and the computation is done on the whole matrix"
 			(1 to: tableLeftGroup size) asArray do: [:rowIndex |
 				| columnsPKGroup |
 				
 				columnsPKGroup := (tableLeftGroup at: rowIndex) columns select: [:col | col isPK notNil and: [col isPK] ].
 				
-				((rowIndex + 1) to: tableRightGroup size) asArray do: [:colIndex |
+				(1 to: tableRightGroup size) asArray do: [:colIndex |
 					| distance columnsGroup |
 					
-					columnsGroup := (tableRightGroup at: colIndex) columns reject: [:col | col isFK notNil and:[col isFK]].
+					columnsGroup := ((tableRightGroup at: colIndex) columns reject: [:col | col isFK notNil and:[col isFK]]) reject:  [:col | col isPK notNil and: [col isPK] ].
 					columnsPKGroup do: [:pk | 
 						columnsGroup do: [:col |
 							distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: pk name target: col name.
