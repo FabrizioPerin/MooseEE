@@ -14,6 +14,11 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+MJSQLImporterFromVisitor class >> on: aModel [
+	^self new targetModel: aModel.
+]
+
+{ #category : #'as yet unclassified' }
 MJSQLImporterFromVisitor >> computeForeignKeys [
 
 	| fkAssociations dbTables aDraftObjectTableGroup |
