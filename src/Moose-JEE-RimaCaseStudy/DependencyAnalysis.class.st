@@ -1,6 +1,9 @@
 Class {
 	#name : #DependencyAnalysis,
 	#superclass : #Object,
+	#instVars : [
+		'targetModel'
+	],
 	#category : #'Moose-JEE-RimaCaseStudy'
 }
 
@@ -110,12 +113,19 @@ X_M_CostQueue
 )
 ]
 
+{ #category : #'as yet unclassified' }
+DependencyAnalysis class >> on: aModel [
+	^self new targetModel: aModel
+]
+
 { #category : #now }
-DependencyAnalysis >> computeCouplingBasedOnRefereesIn: aModel [
-	| interf4scr deps view result normalizationFactor |
-	interf4scr := self interfaces4ScreensIn: aModel .  
+DependencyAnalysis >> computeCouplingBasedOnRefereesIn [
+	
+	| interf4scr result normalizationFactor |
+	
+	interf4scr := self interfaces4ScreensIn.  
 	result := OrderedCollection new. 
-	normalizationFactor := (self identifyCommonRefereeClassesIn: aModel) size.  
+	normalizationFactor := self identifyCommonRefereeClassesIn size.  
 	
 	(1 to: interf4scr size) do: [:rowIndex |
 		| fromClass fromClassInvokingClasses |
@@ -130,7 +140,7 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesIn: aModel [
 			size := (fromClassInvokingClasses intersection: toClassInvokingClasses) size.
 			
 			(size > normalizationFactor) ifTrue: [
-				edge := MalWeightedEdge with: aModel.
+				edge := MalWeightedEdge with: targetModel.
 				edge from: fromClass.
 				edge to: toClass.
 				edge weight: (size - normalizationFactor).
@@ -141,11 +151,11 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesIn: aModel [
 ]
 
 { #category : #now }
-DependencyAnalysis >> computeCouplingBasedOnRefereesWDIn: aModel [
+DependencyAnalysis >> computeCouplingBasedOnRefereesWDIn [
 	| interf4scr deps view result commonTypes |
-	interf4scr := self interfaces4ScreensIn: aModel .  
+	interf4scr := self interfaces4ScreensIn.  
 	result := OrderedCollection new. 
-	commonTypes := (self identifyCommonRefereeClassesIn: aModel).  
+	commonTypes := self identifyCommonRefereeClassesIn.
 	
 	(1 to: interf4scr size) do: [:rowIndex |
 		| fromClass fromClassInvokingClasses |
@@ -168,11 +178,13 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWDIn: aModel [
 ]
 
 { #category : #now }
-DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetails: aModel [
-	| classes4screens deps view result normalizationFactor commonClasses |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetails [
+
+	| classes4screens result commonClasses normalizationFactor |
+	
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new.
-	commonClasses := (self identifyCommonClassesOn: aModel)  reject: #isStub.
+	commonClasses := self identifyCommonClassesOn reject: #isStub.
 	normalizationFactor := commonClasses size.  
 	
 	(1 to: classes4screens size) do: [:rowIndex |
@@ -201,22 +213,18 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetails: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> computeCouplingThroughInterfacesOn: aModel [
-	| interfaces4screens deps view result normalizationFactor commonClasses allClasses allEntity |
+DependencyAnalysis >> computeCouplingThroughInterfacesOn [
+	| allClasses allEntity result interfaces4screens commonClasses |
 	
-	allClasses :=  aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	allClasses :=  targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 
 	allEntity := allClasses union: (allClasses flatCollect: [:each | each implementedInterfaces]).
 	allEntity := allEntity union: (allEntity flatCollect: [:each | each clientClasses]).
 	allEntity := allEntity union: (allEntity flatCollect: [:each | each incomingAccesses collect: [:access | access accessor belongsTo]]).
 	
 	allEntity := allEntity asSet.
-	self halt.
-	"interfaces4screens := aModel allClasses select: [:each | self class allInterfacesForScreens includes: each name asSymbol]."
+
 	result := OrderedCollection new.
-	
-	"commonClasses := (self identifyCommonClassesOn: aModel)  reject: #isStub.
-	normalizationFactor := commonClasses size.  "
 	
 	(1 to: interfaces4screens size) do: [:rowIndex |
 		| fromClass fromClassInvokingClasses |
@@ -244,11 +252,12 @@ DependencyAnalysis >> computeCouplingThroughInterfacesOn: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn: aModel [
-	| classes4screens deps view result normalizationFactor |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn [
+	| classes4screens result normalizationFactor |
+	
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new. 
-	normalizationFactor := (self identifyCommonClassesOn: aModel) size.  
+	normalizationFactor := self identifyCommonClassesOn size.  
 	
 	(1 to: classes4screens size) do: [:rowIndex |
 		| fromClass fromClassInvokingClasses |
@@ -263,7 +272,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn: aMod
 			size := (fromClassInvokingClasses intersection: toClassInvokingClasses) size.
 			
 			(size > normalizationFactor) ifTrue: [ self halt.
-				edge := MalWeightedEdge with: aModel.
+				edge := MalWeightedEdge with: targetModel.
 				edge from: fromClass.
 				edge to: toClass.
 				edge weight: (size - normalizationFactor).
@@ -273,11 +282,13 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn: aMod
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> computeCouplingWithNormalizationAndWithoutStubClassesOn: aModel [
-	| classes4screens deps view result normalizationFactor commonClasses |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+DependencyAnalysis >> computeCouplingWithNormalizationAndWithoutStubClassesOn [
+	
+	| classes4screens result commonClasses normalizationFactor |
+	
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new.
-	commonClasses := (self identifyCommonClassesOn: aModel)  reject: #isStub.
+	commonClasses := self identifyCommonClassesOn reject: #isStub.
 	normalizationFactor := commonClasses size.  
 	
 	(1 to: classes4screens size) do: [:rowIndex |
@@ -306,38 +317,40 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithoutStubClassesOn: a
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> computeCouplingWithNormalizationOn: aModel [
-	| classes4screens deps view result normalizationFactor |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
-	result := OrderedCollection new. 
-	normalizationFactor := (self identifyCommonClassesOn: aModel) size.  
-	
-	(1 to: classes4screens size) do: [:rowIndex |
-		| fromClass fromClassInvokingClasses |
-		fromClass := classes4screens at: rowIndex.
-		fromClassInvokingClasses := fromClass invokedClasses asSet.
-		
-		((rowIndex +1) to: classes4screens size) do: [:colIndex |
-			| toClass toClassInvokingClasses size edge |
-			toClass := classes4screens at: colIndex.
-			toClassInvokingClasses := toClass invokedClasses asSet.
-			
-			size := (fromClassInvokingClasses intersection: toClassInvokingClasses) size.
-			
-			(size > normalizationFactor) ifTrue: [
-				edge := MalWeightedEdge with: aModel.
-				edge from: fromClass.
-				edge to: toClass.
-				edge weight: (size - normalizationFactor).
-				result add: edge]]].
-	
-	^result
+DependencyAnalysis >> computeCouplingWithNormalizationOn [
+
+	| classes4screens result normalizationFactor |
+
+	classes4screens := targetModel allClasses select: [ :each | self class classesForScreens includes: each name asSymbol ].
+	result := OrderedCollection new.
+	normalizationFactor := self identifyCommonClassesOn size.
+	(1 to: classes4screens size)
+		do: [ :rowIndex | 
+			| fromClass fromClassInvokingClasses |
+			fromClass := classes4screens at: rowIndex.
+			fromClassInvokingClasses := fromClass invokedClasses asSet.
+			(rowIndex + 1 to: classes4screens size)
+				do: [ :colIndex | 
+					| toClass toClassInvokingClasses size edge |
+					toClass := classes4screens at: colIndex.
+					toClassInvokingClasses := toClass invokedClasses asSet.
+					size := (fromClassInvokingClasses intersection: toClassInvokingClasses) size.
+					size > normalizationFactor
+						ifTrue: [ 
+							edge := MalWeightedEdge with: targetModel.
+							edge from: fromClass.
+							edge to: toClass.
+							edge weight: size - normalizationFactor.
+							result add: edge ] ] ].
+	^ result
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> computeCouplingWithoutNormalizationOn: aModel [
-	| classes4screens deps view result normalizationFactor |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+DependencyAnalysis >> computeCouplingWithoutNormalizationOn [
+	
+	| classes4screens result |
+	
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new. 
 	
 	(1 to: classes4screens size) do: [:rowIndex |
@@ -353,7 +366,7 @@ DependencyAnalysis >> computeCouplingWithoutNormalizationOn: aModel [
 			size := (fromClassInvokingClasses intersection: toClassInvokingClasses) size.
 			
 			(size > 0) ifTrue: [
-				edge := MalWeightedEdge with: aModel.
+				edge := MalWeightedEdge with: targetModel.
 				edge from: fromClass.
 				edge to: toClass.
 				edge weight: size.
@@ -363,11 +376,11 @@ DependencyAnalysis >> computeCouplingWithoutNormalizationOn: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> displayCouplingOn: aModel [
+DependencyAnalysis >> displayCouplingWithoutNormalizationOn [
 	| view edges deps classes4screens |
 	
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
-	edges := self computeCouplingOn: aModel.
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	edges := self computeCouplingWithoutNormalizationOn.
 	
 	
 	view := MOViewRenderer new.
@@ -384,34 +397,13 @@ DependencyAnalysis >> displayCouplingOn: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> displayCouplingWithoutNormalizationOn: aModel [
-	| view edges deps classes4screens |
+DependencyAnalysis >> displayDependenciesFrom [
 	
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
-	edges := self computeCouplingWithoutNormalizationOn: aModel.
-	
-	
-	view := MOViewRenderer new.
-
-	view shape rectangle text: #name.  
-	view nodes: classes4screens.
-	
-	"view edges: aModel allInvocations from: [:e| e sender belongsTo ] toAll: [:e| e candidates collect: [:f| f belongsTo ]]. " 
-	view shape line width: [:each | each weight ].
-	view edges: edges from: #from to: #to.
-	
-	view circleLayout .
-	view open.
-]
-
-{ #category : #'as yet unclassified' }
-DependencyAnalysis >> displayDependenciesFrom: aModel [
 	| classes4screens deps view |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	deps := (classes4screens flatCollect: [:e| e withDeepInvokedClasses ]  ) asSet.
 	
-
-
 	view := MOViewRenderer new.
 
 	view shape rectangle text: #name.  
@@ -425,8 +417,9 @@ DependencyAnalysis >> displayDependenciesFrom: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> identifyCommonClassesOn: aModel [
-	| classes4screens commonClasses |
+DependencyAnalysis >> identifyCommonClassesOn [
+	| classes4screens aModel commonClasses |
+	
 	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 
 	commonClasses := classes4screens first invokedClasses.
@@ -441,9 +434,11 @@ DependencyAnalysis >> identifyCommonClassesOn: aModel [
 ]
 
 { #category : #now }
-DependencyAnalysis >> identifyCommonRefereeClassesIn: aModel [
-	| i4sc commonClasses |
-	i4sc := self interfaces4ScreensIn: aModel .
+DependencyAnalysis >> identifyCommonRefereeClassesIn [
+	
+	| i4sc aModel commonClasses |
+	
+	i4sc := self interfaces4ScreensIn.
 	    
 
 	commonClasses := i4sc first referencingTypes.
@@ -458,15 +453,15 @@ DependencyAnalysis >> identifyCommonRefereeClassesIn: aModel [
 ]
 
 { #category : #now }
-DependencyAnalysis >> interfaces4ScreensIn: aModel [
-	^aModel allTypes select: [:each | self class allInterfacesForScreens includes: each name asSymbol].
+DependencyAnalysis >> interfaces4ScreensIn [
+	^targetModel allTypes select: [:each | self class allInterfacesForScreens includes: each name asSymbol].
 	
 ]
 
 { #category : #now }
-DependencyAnalysis >> printSortedCouplingBasedOnRefereesIn: aModel [
+DependencyAnalysis >> printSortedCouplingBasedOnRefereesIn [
 	| view edges deps |
-	edges := (self computeCouplingBasedOnRefereesWDIn: aModel) asSortedCollection: [:a :b | a weight >b weight].
+	edges := self computeCouplingBasedOnRefereesWDIn asSortedCollection: [:a :b | a weight >b weight].
 	Transcript clear.
 	edges do: [:e|
 		Transcript show: e from printString , ', ', e to printString , ', ', e weight asString ; cr.
@@ -476,9 +471,9 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesIn: aModel [
 ]
 
 { #category : #now }
-DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDIn: aModel [
+DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDIn [
 	| view edges deps |
-	edges := (self computeCouplingBasedOnRefereesWDIn: aModel) asSortedCollection: [:a :b | a value size > b value size].
+	edges := self computeCouplingBasedOnRefereesWDIn asSortedCollection: [:a :b | a value size > b value size].
 	Transcript clear.
 	(edges copyFrom: 1 to: 20) do: [:e |
 		Transcript show: e key key printString , '; ', e key value printString;cr; show: '; (', e value name, ')' ; cr.
@@ -487,10 +482,10 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDIn: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> printSortedCouplingOn: aModel [
+DependencyAnalysis >> printSortedCouplingOn [
 	| view edges deps classes4screens |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
-	edges := (self computeCouplingOn: aModel) asSortedCollection: [:a :b | a weight >b weight].
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	edges := self computeCouplingOn asSortedCollection: [:a :b | a weight >b weight].
 	Transcript clear.
 	edges do: [:e|
 		Transcript show: e from printString , ', ', e to printString , ', ', e weight asString ; cr.
@@ -500,10 +495,10 @@ DependencyAnalysis >> printSortedCouplingOn: aModel [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> printSortedCouplingWithNormalizationWithoutStubsOn: aModel [
+DependencyAnalysis >> printSortedCouplingWithNormalizationWithoutStubsOn [
 	| view edges deps classes4screens |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
-	edges := (self computeCouplingWithNormalizationAndWithoutStubClassesOn: aModel) asSortedCollection: [:a :b | a value size >b value size].
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	edges := self computeCouplingWithNormalizationAndWithoutStubClassesOn asSortedCollection: [:a :b | a value size >b value size].
 	Transcript clear.
 	(edges copyFrom:1 to: 40) do: [:e|
 		Transcript show: e key key printString , '; ', e key value printString;cr; show: '; (', e value name, ')' ; cr.
@@ -513,14 +508,24 @@ DependencyAnalysis >> printSortedCouplingWithNormalizationWithoutStubsOn: aModel
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> printSortedCouplingWithoutNormalizationOn: aModel [
+DependencyAnalysis >> printSortedCouplingWithoutNormalizationOn [
 	| view edges deps classes4screens |
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
-	edges := (self computeCouplingWithoutNormalizationOn:    aModel) asSortedCollection: [:a :b | a weight >b weight].
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	edges := self computeCouplingWithoutNormalizationOn asSortedCollection: [:a :b | a weight >b weight].
 	Transcript clear.
 	edges do: [:e|
 		Transcript show: e from printString , '; ', e to printString , '; ', e weight asString ; cr.
 		] .
 	
 	
+]
+
+{ #category : #'as yet unclassified' }
+DependencyAnalysis >> targetModel [
+	^targetModel
+]
+
+{ #category : #'as yet unclassified' }
+DependencyAnalysis >> targetModel: aModel [
+	targetModel := aModel   
 ]
