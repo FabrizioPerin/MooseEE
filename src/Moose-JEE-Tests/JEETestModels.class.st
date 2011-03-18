@@ -1971,37 +1971,31 @@ JEETestModels >> sampleMooseModel [
 { #category : #models }
 JEETestModels >> sampleMooseModelContainingABiggerDB [
 	
-	| mooseModel parser |
+	| mooseModel importer |
 
 	mooseModel := MooseModel new.
 	mooseModel name: 'testDataBase'.
 	
 	PPParserResource reset.
-	parser := PPParserResource current parserAt: PetitSQLiteParser.
 	
-	parser parse: self fiveTablesConnectedThroughForeignKey.
-
-	mooseModel populateWithRelationalElementsFrom: parser blackBoard.
+	importer := MJSQLImporterFromVisitor on: mooseModel.
 	
-	^mooseModel 
+	^importer importSQLCreateScriptFrom: self fiveTablesConnectedThroughForeignKey.
 ]
 
 { #category : #models }
 JEETestModels >> sampleMooseModelContainingJustADB [
 	
-	| mooseModel parser |
+	| mooseModel importer |
 
 	mooseModel := MooseModel new.
 	mooseModel name: 'testDataBase'.
 	
 	PPParserResource reset.
-	parser := PPParserResource current parserAt: PetitSQLiteParser.
 	
-	parser parse: self threeTablesConnectedThroughForeignKey.
-
-	mooseModel populateWithRelationalElementsFrom: parser blackBoard.
+	importer := MJSQLImporterFromVisitor on: mooseModel.
 	
-	^mooseModel 
+	^importer importSQLCreateScriptFrom: self threeTablesConnectedThroughForeignKey.
 ]
 
 { #category : #models }
@@ -4572,6 +4566,6 @@ ALTER TABLE A_Asset ADD CONSTRAINT AAssetGroup_AAsset
 
 ALTER TABLE A_Asset ADD CONSTRAINT ADUser_AAsset 
     FOREIGN KEY (AD_User_ID)
-    REFERENCES AD_User(AD_User_ID);'
+    REFERENCES AD_User(AD_User_ID)'
 
 ]

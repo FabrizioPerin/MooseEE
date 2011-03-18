@@ -49,7 +49,7 @@ MJFAMIXTableTests >> testConstraints [
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
 	self assert: (table3 isMemberOf: MJFAMIXTable).
-	self assert: (table3 constraints size =0).
+	self assert: (table3 constraints size = 2).
 ]
 
 { #category : #'as yet unclassified' }
