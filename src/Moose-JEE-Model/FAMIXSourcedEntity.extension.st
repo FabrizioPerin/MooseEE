@@ -7,14 +7,24 @@ FAMIXSourcedEntity >> accessDirection: directionSymbol on: dependencyList [
 
 	directionSymbol = #accessedEntity
 				ifTrue: [
-					^ (dependencyList  select: [:each | each to = self]) collect: [:each | each from].
+					^ (dependencyList  select: [:each | each from = self]) collect: [:each | each to].
 					].
 	directionSymbol = #accessorEntity
 				ifTrue: [
-					^ (dependencyList  select: [:each | each from = self]) collect: [:each | each to].
+					^ (dependencyList  select: [:each | each to = self]) collect: [:each | each from].
 					].
 			
 	SyntaxErrorNotification signal: 'second argument should be #dbAccesses or #sourceAccessors'.
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXSourcedEntity >> accessedRelationalEntities [
+	^self accessDirection:  #accessedEntity on: self mooseModel allDBAccesses
+]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXSourcedEntity >> accessorSourceEntities [
+	^self accessDirection:  #accessorEntity on: self mooseModel allDBAccesses
 ]
 
 { #category : #'*Moose-JEE-Model' }
