@@ -5,14 +5,25 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MJFAMIXMappingGroup >> printOutListOfMaps [
-	| stream |
+MJFAMIXMappingGroup class >> annotation [
+
+	<MSEClass: #MJFAMIXMappingGroup super: #MJAbstractGroup>
+	<package: #'Moose-JEE-Model'>
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXMappingGroup >> saveListOfMapsOnFile [
+	| stream fileName |
 	
-	stream := CrLfFileStream forceNewFileNamed: 'maps.txt'.
+	fileName := UIManager default request: 'Insert a file name'.
 	
-	self do: [:map |
-		stream nextPutAll: (map from mooseName asString , Character space asString , map to name asString , String cr asString)].	
-	stream close.
-	
-	^stream
+	(fileName isNil or: [fileName = '']) 
+		ifTrue: [ DialogWindow new alert: 'Invalid file name']
+		ifFalse: [
+			stream := CrLfFileStream forceNewFileNamed: fileName.
+			self do: [:map |
+				stream nextPutAll: (map from mooseName asString , Character space asString , map to name asString , String cr asString)].	
+			stream close.
+			
+			^stream].
 ]

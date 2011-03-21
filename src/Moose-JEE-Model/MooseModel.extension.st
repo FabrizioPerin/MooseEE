@@ -13,6 +13,17 @@ MooseModel >> allColumns [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> allDBAccesses [
+	<navigation: 'All DB accessses'>
+
+	| group |
+	
+	group :=  self allWithType: MJFAMIXDBAccess.
+	group description: 'All DB accessses'.
+	^group
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allDataLayer [
 	"it should always be one"
 	^self allWithType: MJFAMIXDataLayer
