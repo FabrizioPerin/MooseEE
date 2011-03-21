@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'mappedBy',
 		'references',
-		'referencedBy'
+		'referencedBy',
+		'sourceAccessors'
 	],
 	#category : #'Moose-JEE-Model'
 }
@@ -38,6 +39,13 @@ MJFAMIXRelationalEntity >> addReferences: aForeignKeyAssoc [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> addSourceAccessors: aDBAccess [
+
+	sourceAccessors add: aDBAccess
+
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> belongsTo [ 
 	^''
 ]
@@ -48,6 +56,7 @@ MJFAMIXRelationalEntity >> initialize [
 	mappedBy := FMMultivalueLink on: self opposite: #mapTarget:.
 	references := FMMultivalueLink on: self opposite: #sourceColumn:.
 	referencedBy := FMMultivalueLink on: self opposite: #targetColumn:.
+	sourceAccessors := FMMultivalueLink on: self opposite: #accessedEntity:.
 ]
 
 { #category : #'as yet unclassified' }
@@ -86,4 +95,13 @@ MJFAMIXRelationalEntity >> references [
 	<MSEComment: 'Foreign Key constrait.'>
 	
 	^references
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> sourceAccessors [
+	<MSEProperty: #sourceAccessors type: #MJFAMIXDBAccess opposite: #accessedEntity> <multivalued> <derived>
+	<MSEComment: 'DB Access relationship.'>
+	
+	^sourceAccessors
+
 ]

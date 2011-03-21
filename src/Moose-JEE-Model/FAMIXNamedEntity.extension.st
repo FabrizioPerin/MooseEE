@@ -20,7 +20,7 @@ FAMIXNamedEntity >> incomingDerivedDependency [
 	<MSEProperty: #incomingDerivedDependency type: #MJFAMIXDerivedDependency opposite: #target> <multivalued>  <derived>
 	<MSEComment: 'Dependency derived from another dependency.'>
 	
-	^self privateState attributeAt: #incomingDerivedDependency ifAbsent: [FMMultivalueLink on: self opposite: #target:].
+	^self privateState attributeAt: #incomingDerivedDependency ifAbsentPut: [FMMultivalueLink on: self opposite: #target:].
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -50,7 +50,7 @@ FAMIXNamedEntity >> maps [
 	<MSEProperty: #maps type: #MJFAMIXMapping opposite: #mapSource> <multivalued>  <derived>
 	<MSEComment: 'Map relationship.'>
 	
-	^self privateState attributeAt: #maps ifAbsent: [FMMultivalueLink on: self opposite: #mapSource:].
+	^self privateState attributeAt: #maps ifAbsentPut: [FMMultivalueLink on: self opposite: #mapSource:].
 ]
 
 { #category : #'*Moose-JEE-Model' }
@@ -58,5 +58,5 @@ FAMIXNamedEntity >> outgoingDerivedDependency [
 	<MSEProperty: #outgoingDerivedDependency type: #MJFAMIXDerivedDependency opposite: #source> <multivalued>  <derived>
 	<MSEComment: 'Dependency derived from another dependency.'>
 	
-	^self privateState attributeAt: #outgoingDerivedDependency ifAbsent: [FMMultivalueLink on: self opposite: #source:].
+	^self privateState attributeAt: #outgoingDerivedDependency ifAbsentPut: [FMMultivalueLink on: self opposite: #source:].
 ]
