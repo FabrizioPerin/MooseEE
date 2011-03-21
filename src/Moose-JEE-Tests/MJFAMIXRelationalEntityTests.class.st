@@ -81,3 +81,21 @@ MJFAMIXRelationalEntityTests >> testMappedNamedEntitiesCaseInsensitive [
 	self assert: (table1 mappedNamedEntities first = aCMPEntity ).
 
 ]
+
+{ #category : #tests }
+MJFAMIXRelationalEntityTests >> testSourceAccessors [
+	
+	| table dbAccess |
+	
+	table := MJFAMIXTable new name: #Table1.
+	
+	dbAccess := MJFAMIXDBAccess new accessedEntity: table.
+	
+	table addSourceAccessors: dbAccess.
+	
+	self assert: (table isMemberOf: MJFAMIXTable).
+
+	self assert: (table sourceAccessors isMemberOf: FMMultivalueLink).
+	self assert: (table sourceAccessors first = dbAccess).
+	self assert: (table sourceAccessors first to = table).
+]

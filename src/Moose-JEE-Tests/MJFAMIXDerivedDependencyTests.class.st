@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXDerivedDependencyTests,
-	#superclass : #TestCase,
+	#superclass : #MJAssociationTests,
 	#category : #'Moose-JEE-Tests'
 }
 

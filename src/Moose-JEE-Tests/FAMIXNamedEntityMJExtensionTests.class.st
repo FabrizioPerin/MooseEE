@@ -5,6 +5,26 @@ Class {
 }
 
 { #category : #tests }
+FAMIXNamedEntityMJExtensionTests >> testIncomingDerivedDependency [
+
+	| namedEntity derivedDependecy |
+	
+	namedEntity := FAMIXNamedEntity new name: 'testEntity'. 
+	
+	derivedDependecy := MJFAMIXDerivedDependency new target: namedEntity.
+
+	namedEntity addIncomingDerivedDependency: derivedDependecy.
+	
+	self assert: (namedEntity isMemberOf: FAMIXNamedEntity).
+
+	self assert: (namedEntity incomingDerivedDependency isMemberOf: FMMultivalueLink).
+	self assert: (namedEntity incomingDerivedDependency size = 1).
+	self assert: (namedEntity incomingDerivedDependency first = derivedDependecy).
+	self assert: (namedEntity incomingDerivedDependency first to = namedEntity).
+
+]
+
+{ #category : #tests }
 FAMIXNamedEntityMJExtensionTests >> testMappedRelationalEntities [
 	| mooseModel root jEETestModel annotationType famixAnchor aCMPEntity table1 |
 
@@ -81,5 +101,52 @@ FAMIXNamedEntityMJExtensionTests >> testMappedRelationalEntitiesCaseInsensitive 
 	self assert: (aCMPEntity mappedRelationalEntities first = table1 ).
 	
 	
+
+]
+
+{ #category : #tests }
+FAMIXNamedEntityMJExtensionTests >> testOutgoingAndIncomingDerivedDependency [
+
+	| invokedEntity invokingEntity derivedDependecy |
+	
+	invokedEntity := FAMIXNamedEntity new name: 'testEntityInvoked'. 
+	invokingEntity := FAMIXNamedEntity new name: 'testEntityInvoking'.
+	
+	derivedDependecy := MJFAMIXDerivedDependency new source: invokingEntity; target: invokedEntity.
+
+	invokingEntity addOutgoingDerivedDependency: derivedDependecy.
+	invokedEntity addIncomingDerivedDependency: derivedDependecy.
+	
+	self assert: (invokedEntity isMemberOf: FAMIXNamedEntity).
+	self assert: (invokedEntity incomingDerivedDependency isMemberOf: FMMultivalueLink).
+	self assert: (invokedEntity incomingDerivedDependency size = 1).
+	self assert: (invokedEntity incomingDerivedDependency first = derivedDependecy).
+	self assert: (invokedEntity incomingDerivedDependency first to = invokedEntity).
+
+	self assert: (invokingEntity isMemberOf: FAMIXNamedEntity).
+	self assert: (invokingEntity outgoingDerivedDependency isMemberOf: FMMultivalueLink).
+	self assert: (invokingEntity outgoingDerivedDependency size = 1).
+	self assert: (invokingEntity outgoingDerivedDependency first = derivedDependecy).
+	self assert: (invokingEntity outgoingDerivedDependency first from = invokingEntity).
+
+]
+
+{ #category : #tests }
+FAMIXNamedEntityMJExtensionTests >> testOutgoingDerivedDependency [
+
+	| namedEntity derivedDependecy |
+	
+	namedEntity := FAMIXNamedEntity new name: 'testEntity'. 
+	
+	derivedDependecy := MJFAMIXDerivedDependency new source: namedEntity.
+
+	namedEntity addOutgoingDerivedDependency: derivedDependecy.
+	
+	self assert: (namedEntity isMemberOf: FAMIXNamedEntity).
+
+	self assert: (namedEntity outgoingDerivedDependency isMemberOf: FMMultivalueLink).
+	self assert: (namedEntity outgoingDerivedDependency size = 1).
+	self assert: (namedEntity outgoingDerivedDependency first = derivedDependecy).
+	self assert: (namedEntity outgoingDerivedDependency first from = namedEntity).
 
 ]

@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXMappingTests,
-	#superclass : #TestCase,
+	#superclass : #MJAssociationTests,
 	#category : #'Moose-JEE-Tests'
 }
 
