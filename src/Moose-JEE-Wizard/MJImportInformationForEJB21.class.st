@@ -81,20 +81,20 @@ MJImportInformationForEJB21 >> buildWizardPanels [
 	pane3 := WizardMiddlePane named: 'Select the source code directory'.
 	pane4 := WizardLastPane named: 'After import operations'.
 	
-	part1 := MJInfoPart new: self informationText.
+	part1 := TextPart new text: self informationText.
 	pane1 addPart: part1 associatedTo: #nothing.
  
-	part2 := MJChooseFilePart new.
+	part2 := ChooseFilePart new.
 	pane2 addPart: part2 associatedTo: #mseFilePathName.
 	
-	part3 := MJChooseDirectoryPart new.
+	part3 := ChooseFilePart new.
 	pane3 addPart: part3 associatedTo: #sourceDirectoryPath.
 
-	part4 :=  MJCheckboxPart new: 'Open visualizations'.
+	part4 :=  CheckboxPart new label: 'Open visualizations'.
 	part4 selected: true.
 	pane4 addPart: part4 associatedTo: #openVisualizations.
 	
-	part5 :=  MJCheckboxPart new: 'Open annotations browser'.
+	part5 :=  CheckboxPart new label: 'Open annotations browser'.
 	part5 selected: true.
 	pane4 addPart: part5 associatedTo: #openBrowsers.
 
