@@ -14,15 +14,31 @@ MJFAMIXTableGroupReports >> browser [
 		a list 
 		title: 'Leventhein dinstances among fields';
 	      display: [ :edges |
-	 	     | res stream distances |
-			stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
+	 	     | res distances |
 			distances := edges select: [:each | each weight < self cleanUpThreshold].
 			distances := distances sorted: [:first :second | first weight < second weight ].
-			distances do: [:each |
-				stream nextPutAll: (each from ownerTable name , '::' , each from name , String tab , '--- ', each weight asString , ' --->' , String tab , each to ownerTable name , '::' , each to name , String cr).].
-			stream close.
 			distances];
-		showOnly: 50.].
+		showOnly: 50.
+		a 
+			act: [:f :edges | 
+				| stream distances |
+				self halt.
+				distances := edges select: [:each | each weight < self cleanUpThreshold].
+				distances := distances sorted: [:first :second | first weight < second weight ].
+				stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
+				edges do: [:each | self print: each asStringOn: stream].
+				stream close] 
+			entitled: 'Export as string'.
+		a 
+			act: [:f :edges | 
+				| stream distances |
+				distances := edges select: [:each | each weight < self cleanUpThreshold].
+				distances := distances sorted: [:first :second | first weight < second weight ].
+				stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.csv'.
+				distances do: [:each | self print: each asCSVOn: stream].
+				stream close] 
+			entitled: 'Export as CSV'.
+		].
 
 	browser transmit to: #map; from: #code; andShow: [:a | 
 	    a mondrian
@@ -69,6 +85,18 @@ By selecting the first association in the visualization you will see TAB3 with t
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroupReports >> label [ 
   ^ 'Foreign Key recovery'
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupReports >> print: aDistance asCSVOn: aStream [
+
+	aStream nextPutAll: (aDistance from ownerTable name , ';' , aDistance from name , ';' ,  aDistance to ownerTable name , ';' , aDistance to name , ';' , aDistance weight asString , String cr).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupReports >> print: aDistance asStringOn: aStream [
+
+	aStream nextPutAll: (aDistance from ownerTable name , '::' , aDistance from name , String tab , '--- ', aDistance weight asString , ' --->' , String tab , aDistance to ownerTable name , '::' , aDistance to name , String cr).
 ]
 
 { #category : #'as yet unclassified' }

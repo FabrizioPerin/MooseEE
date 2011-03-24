@@ -27,6 +27,19 @@ MooseModel >> fkImprvedIdentificationReport [
 ]
 
 { #category : #'*Moose-JEE-Reports' }
+MooseModel >> levensteinDistranceReport [
+	<menuItem: 'Levenstein distrance report' category: 'JEAs Reports'>
+
+	|spec|
+	spec := REPConcernSpecification on: self.
+	spec label: 'Table Group Report'.
+
+	spec composite: 'Levenstein distrance report' with: [
+ 		 spec concern: MJFAMIXFKIdentificationReport new ].
+	spec open
+]
+
+{ #category : #'*Moose-JEE-Reports' }
 MooseModel >> mappingAmongScriptsAndTableReport2 [
 	<menuItem: 'Mapping Group Report 2' category: 'JEAs Reports'>
 
