@@ -119,6 +119,23 @@ DependencyAnalysis class >> on: aModel [
 ]
 
 { #category : #now }
+DependencyAnalysis >> allInterestingElementInTheTargetModel [
+	"Apparently the classes that are generate from the database table are the one that subclass PO.java and 
+	start with 'X_' (for the classes) or 'I_' (for the interface). 
+	So this method return all those elements that are contained into the target model"
+	
+	| relevantClasses relevantInterfaces |
+
+	relevantClasses := (targetModel allClasses select: [:class | class name = 'PO' ]) first subInheritances collect: [:each | each subclass].
+	relevantClasses := (relevantClasses select: [:class | 'X_*' match: class name ]) reject: #isStub.
+
+	relevantInterfaces := (relevantClasses flatCollect: [:class | class implementedInterfaces ]) asSet reject: #isStub.
+	relevantInterfaces := (relevantInterfaces select: [:interface | 'I_*' match: interface name]).
+	
+	^relevantClasses union: relevantInterfaces.  
+]
+
+{ #category : #now }
 DependencyAnalysis >> computeCouplingBasedOnRefereesIn [
 	| interf4scr result normalizationFactor |
 	interf4scr := self interfaces4ScreensIn.
@@ -141,6 +158,72 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesIn [
 							edge from: fromClass.
 							edge to: toClass.
 							edge weight: size - normalizationFactor.
+							result add: edge ] ] ].
+	^ result
+]
+
+{ #category : #now }
+DependencyAnalysis >> computeCouplingBasedOnRefereesWDAndEdges [
+	| interf4scr deps view result commonTypes |
+	
+	interf4scr := self interfaces4ScreensIn.
+	result := OrderedCollection new.
+	commonTypes := self identifyCommonRefereeClassesIn.
+	
+	(1 to: interf4scr size) 
+		do: [ :rowIndex | 
+			| fromClass fromClassInvokingClasses |
+			
+			fromClass := interf4scr at: rowIndex.
+			fromClassInvokingClasses := fromClass referencingTypes asSet.
+			
+			(rowIndex + 1 to: interf4scr size)
+				do: [ :colIndex | 
+					| toClass toClassInvokingClasses edge interestingClasses |
+					toClass := interf4scr at: colIndex.
+					toClassInvokingClasses := toClass referencingTypes asSet.
+					interestingClasses := (fromClassInvokingClasses intersection: toClassInvokingClasses)
+						reject: [ :each | commonTypes includes: each ].
+						
+					interestingClasses size > 0
+						ifTrue: [ 
+							edge := MalWeightedEdge with: targetModel.
+							edge from: fromClass.
+							edge to: toClass.
+							edge weight: interestingClasses.
+							result add: edge ] ] ].
+	^ result
+]
+
+{ #category : #now }
+DependencyAnalysis >> computeCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
+	| interf4scr deps view result commonTypes |
+	
+	interf4scr := self allInterestingElementInTheTargetModel asOrderedCollection.
+	result := OrderedCollection new.
+	commonTypes := self identifyCommonRefereeClassesFor: interf4scr.
+	
+	(1 to: interf4scr size) 
+		do: [ :rowIndex | 
+			| fromClass fromClassInvokingClasses |
+			
+			fromClass := interf4scr at: rowIndex.
+			fromClassInvokingClasses := fromClass referencingTypes asSet.
+			
+			(rowIndex + 1 to: interf4scr size)
+				do: [ :colIndex | 
+					| toClass toClassInvokingClasses edge interestingClasses |
+					toClass := interf4scr at: colIndex.
+					toClassInvokingClasses := toClass referencingTypes asSet.
+					interestingClasses := (fromClassInvokingClasses intersection: toClassInvokingClasses)
+						reject: [ :each | commonTypes includes: each ].
+						
+					interestingClasses size > 0
+						ifTrue: [ 
+							edge := MalWeightedEdge with: targetModel.
+							edge from: fromClass.
+							edge to: toClass.
+							edge weight: interestingClasses.
 							result add: edge ] ] ].
 	^ result
 ]
@@ -175,7 +258,7 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetails [
 	
 	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new.
-	commonClasses := self identifyCommonClassesOn reject: #isStub.
+	commonClasses := self identifyCommonClasses reject: #isStub.
 	normalizationFactor := commonClasses size.  
 	
 	(1 to: classes4screens size) do: [:rowIndex |
@@ -191,12 +274,46 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetails [
 			interestingClasses := (fromClassInvokingClasses intersection: toClassInvokingClasses) reject: [:each | commonClasses includes: each ].   
 			
 			(interestingClasses size > 0) ifTrue: [
-		"		edge := MalWeightedEdge with: aModel.
+				edge := MalWeightedEdge with: targetModel .
 				edge from: fromClass.
 				edge to: toClass.
-				edge weight: (size - normalizationFactor)."
+				edge weight: interestingClasses.
 				
 				result add: (fromClass -> toClass -> interestingClasses).
+				]]].
+			
+	
+	^result
+]
+
+{ #category : #now }
+DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetailsInTheEdges [
+	| classes4screens result commonClasses normalizationFactor |
+	
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	result := OrderedCollection new.
+	commonClasses := self identifyCommonClasses reject: #isStub.
+	normalizationFactor := commonClasses size.  
+	
+	(1 to: classes4screens size) do: [:rowIndex |
+		| fromClass fromClassInvokingClasses |
+		fromClass := classes4screens at: rowIndex.
+		fromClassInvokingClasses := (fromClass invokedClasses reject: #isStub) asSet.
+		
+		((rowIndex +1) to: classes4screens size) do: [:colIndex |
+			| toClass toClassInvokingClasses size edge interestingClasses |
+			toClass := classes4screens at: colIndex.
+			toClassInvokingClasses := (toClass invokedClasses reject: #isStub) asSet.
+			
+			interestingClasses := (fromClassInvokingClasses intersection: toClassInvokingClasses) reject: [:each | commonClasses includes: each ].
+			
+			(interestingClasses size > 0) ifTrue: [
+				edge := MalWeightedEdge with: targetModel .
+				edge from: fromClass.
+				edge to: toClass.
+				edge weight: interestingClasses.
+				
+				result add: edge.
 				]]].
 			
 	
@@ -248,7 +365,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn [
 	
 	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new. 
-	normalizationFactor := self identifyCommonClassesOn size.  
+	normalizationFactor := self identifyCommonClasses size.  
 	
 	(1 to: classes4screens size) do: [:rowIndex |
 		| fromClass fromClassInvokingClasses |
@@ -279,7 +396,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithoutStubClassesOn [
 	
 	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 	result := OrderedCollection new.
-	commonClasses := self identifyCommonClassesOn reject: #isStub.
+	commonClasses := self identifyCommonClasses reject: #isStub.
 	normalizationFactor := commonClasses size.  
 	
 	(1 to: classes4screens size) do: [:rowIndex |
@@ -314,7 +431,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationOn [
 
 	classes4screens := targetModel allClasses select: [ :each | self class classesForScreens includes: each name asSymbol ].
 	result := OrderedCollection new.
-	normalizationFactor := self identifyCommonClassesOn size.
+	normalizationFactor := self identifyCommonClasses size.
 	(1 to: classes4screens size)
 		do: [ :rowIndex | 
 			| fromClass fromClassInvokingClasses |
@@ -438,15 +555,31 @@ DependencyAnalysis >> displayDependenciesFrom [
 ]
 
 { #category : #'as yet unclassified' }
-DependencyAnalysis >> identifyCommonClassesOn [
-	| classes4screens aModel commonClasses |
+DependencyAnalysis >> identifyCommonClasses [
+	| classes4screens commonClasses |
 	
-	classes4screens := aModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
 
 	commonClasses := classes4screens first invokedClasses.
 
 	(2 to: classes4screens size) do: [:index | 
 		commonClasses := (classes4screens at: index) invokedClasses intersection: commonClasses].
+	
+	^commonClasses
+	
+	
+	
+]
+
+{ #category : #now }
+DependencyAnalysis >> identifyCommonRefereeClassesFor: aCollectionOfClasses [
+
+	| commonClasses |
+	
+	commonClasses := aCollectionOfClasses first referencingTypes.
+
+	(2 to: aCollectionOfClasses size) do: [:index | 
+		commonClasses := (aCollectionOfClasses at: index) referencingTypes asSet intersection: commonClasses].
 	
 	^commonClasses
 	
@@ -482,15 +615,38 @@ DependencyAnalysis >> interfaces4ScreensIn [
 { #category : #'as yet unclassified' }
 DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 	
-	aCollectionOfWeightedEdges
-		do: [ :edge | aStream nextPutAll: edge from printString , '; ' , edge to printString , '; ' , edge weight asString , String cr ]
+	UIManager default
+		displayProgress: 'Exporting in CSV'
+		at: Sensor cursorPoint
+		from: 1 
+		to: aCollectionOfWeightedEdges size
+		during: [ :bar | 
+			| index |
+			index := 1.
+			aCollectionOfWeightedEdges
+				do: [ :edge | 
+				
+					aStream nextPutAll: edge from printString , '; ' , edge to printString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr.
+					
+					index := index + 1.
+					bar value: index. ]]
+	asStream close.  
+]
+
+{ #category : #now }
+DependencyAnalysis >> printComputeCouplingBasedOnRefereesWithDetailsInTheEdges [
+	| interestingClasses edges stream |
+	
+	
+	edges := self computeCouplingBasedOnRefereesWithDetailsInTheEdges asSortedCollection: [:a :b | a weight size > b weight size ].
+	stream := CrLfFileStream forceNewFileNamed: 'resultOfCouplingBasedOnReferees.csv'.
+	self print: edges asCSVOn: stream.
 ]
 
 { #category : #'as yet unclassified' }
 DependencyAnalysis >> printCouplingWithoutNormalizationDetailingInvokers [
-	| edges classes4screens stream |
-	
-	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
+	| edges stream |
+
 	edges := self couplingWithoutNormalizationDetailingInvokersOn asSortedCollection: [:a :b | a weight size > b weight size].
 	
 	stream := CrLfFileStream forceNewFileNamed: 'resultOfCouplingWithoutNormalizationDetailingInvokers.csv'.
@@ -506,6 +662,32 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesIn [
 		Transcript show: e from printString , ', ', e to printString , ', ', e weight asString ; cr.
 		] .
 	
+	
+]
+
+{ #category : #now }
+DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdges [
+	| edges stream |
+	edges := self computeCouplingBasedOnRefereesWDAndEdges asSortedCollection: [:a :b | a weight size > b weight size].
+	
+	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdges.csv'.
+	
+	self print: edges asCSVOn: stream.
+	
+
+	
+]
+
+{ #category : #now }
+DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
+	| edges stream |
+	edges := self computeCouplingBasedOnRefereesWDAndEdgesOnAllSystem asSortedCollection: [:a :b | a weight size > b weight size].
+	
+	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesOnAllSystem.csv'.
+	
+	self print: edges asCSVOn: stream.
+	
+
 	
 ]
 
