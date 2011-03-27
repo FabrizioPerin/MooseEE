@@ -12,7 +12,7 @@ MJFAMIXTableGroup class >> annotation [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCode [
 	"This method compute derived dependencies considering the relations among software entities. 
 	1- the algorithm cycle on all the tables;
@@ -58,7 +58,7 @@ MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCode [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCodeNOTWORKiNG [
 
 | tables groups classesFromThisTable maps allInvolvedClasses mapsToStartWith table |
@@ -122,49 +122,7 @@ maps do: [:map |
 				self mooseModel withoutAnnounceAdd: dep]]].
 ]
 
-{ #category : #'as yet unclassified' }
-MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
-	
-	| aLevenshteinDistanceStrategy progr tableLeftGroup tableRightGroup result |
-	
-	tableLeftGroup := self asArray.
-	tableRightGroup := self asArray.
-	result := OrderedCollection new.
-	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
-	progr := 1.
-	
-	UIManager default
-		displayProgress: 'Computing levenshtein distances'
-		at: Sensor cursorPoint
-		from: 1 
-		to: ((tableLeftGroup size * tableRightGroup size)/2) asInteger
-		during: [ :bar | 
-			bar value: progr.
-			
-			"these nested loops logically organize the table in a matrix and the computation is done on the whole matrix"
-			(1 to: tableLeftGroup size) asArray do: [:rowIndex |
-				| columnsPKGroup |
-				
-				columnsPKGroup := (tableLeftGroup at: rowIndex) columns select: [:col | col isPK notNil and: [col isPK] ].
-				
-				(1 to: tableRightGroup size) asArray do: [:colIndex |
-					| distance columnsGroup |
-					
-					columnsGroup := ((tableRightGroup at: colIndex) columns reject: [:col | col isFK notNil and:[col isFK]]) reject:  [:col | col isPK notNil and: [col isPK] ].
-					columnsPKGroup do: [:pk | 
-						columnsGroup do: [:col |
-							distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: pk name target: col name.
-							(distance < 4)  ifTrue: [
-								| normalization |
-								normalization := (distance asFloat / (pk name size max: col name size)).
-								normalization < 0.43 ifTrue: [ 
-									result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]]].
-				progr := progr+1.
-				bar value: progr]]].
-	^result
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 MJFAMIXTableGroup >> ranked [
 	^(((PageRank new
 	referenced: [:element |
@@ -175,7 +133,7 @@ MJFAMIXTableGroup >> ranked [
 	asSortedCollection: [ :a :b | a value >= b value ]) collect: [ :ea | ea ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewDBTables [
 	"<menuItem: 'View DB Tables' category: 'JEAs Visualizations'> "
 
@@ -186,7 +144,7 @@ MJFAMIXTableGroup >> viewDBTables [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewDBTablesOn: view [
 	
 	view shape rectangle withoutBorder.
@@ -197,7 +155,7 @@ MJFAMIXTableGroup >> viewDBTablesOn: view [
 			view gridLayout].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewTableRank [
 	<menuItem: 'Table Rank' category: 'JEAs Visualizations'>
 	| view |
@@ -206,7 +164,7 @@ MJFAMIXTableGroup >> viewTableRank [
 	^ view openWithStatusbar title: 'Table Rank'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewTableRankOn: view [ 
 	| objects |
 	
@@ -219,7 +177,7 @@ MJFAMIXTableGroup >> viewTableRankOn: view [
 	view bottomFlowLayout maxWidth: 600
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewTables [
 	<menuItem: 'View Tables' category: 'JEAs Visualizations'> 
 
@@ -231,7 +189,7 @@ MJFAMIXTableGroup >> viewTables [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewTablesFKs [
 	<menuItem: 'View Tables with FK Relations' category: 'JEAs Visualizations'> 
 
@@ -243,7 +201,7 @@ MJFAMIXTableGroup >> viewTablesFKs [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewTablesFKsOn: view [
 	
 	view shape tableShape.
@@ -261,7 +219,7 @@ MJFAMIXTableGroup >> viewTablesFKsOn: view [
 	view horizontalTreeLayout  horizontalGap: 150.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewTablesOn: view [
 	
 	self do: [:table |
@@ -269,7 +227,7 @@ MJFAMIXTableGroup >> viewTablesOn: view [
 	view gridLayout.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewUMLTablesWithEJBeans [
 	"<menuItem: 'Tables with Entity Beans UML class diagram' category: 'JEAs Visualizations'> "
 
@@ -280,7 +238,7 @@ MJFAMIXTableGroup >> viewUMLTablesWithEJBeans [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #views }
 MJFAMIXTableGroup >> viewUMLTablesWithEJBeansOn: view [
 	
 	| lonelyTables notLonelyTables |	
