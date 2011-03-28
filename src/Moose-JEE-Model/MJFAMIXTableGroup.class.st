@@ -122,6 +122,48 @@ maps do: [:map |
 				self mooseModel withoutAnnounceAdd: dep]]].
 ]
 
+{ #category : #utilities }
+MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
+	
+	| aLevenshteinDistanceStrategy progr tableLeftGroup tableRightGroup result |
+	
+	tableLeftGroup := self asArray.
+	tableRightGroup := self asArray.
+	result := OrderedCollection new.
+	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
+	progr := 1.
+	
+	UIManager default
+		displayProgress: 'Computing levenshtein distances'
+		at: Sensor cursorPoint
+		from: 1 
+		to: ((tableLeftGroup size * tableRightGroup size)/2) asInteger
+		during: [ :bar | 
+			bar value: progr.
+			
+			"these nested loops logically organize the table in a matrix and the computation is done on the whole matrix"
+			(1 to: tableLeftGroup size) asArray do: [:rowIndex |
+				| columnsPKGroup |
+				
+				columnsPKGroup := (tableLeftGroup at: rowIndex) columns select: [:col | col isPK notNil and: [col isPK] ].
+				
+				(1 to: tableRightGroup size) asArray do: [:colIndex |
+					| distance columnsGroup |
+					
+					columnsGroup := ((tableRightGroup at: colIndex) columns reject: [:col | col isFK notNil and:[col isFK]]) reject:  [:col | col isPK notNil and: [col isPK] ].
+					columnsPKGroup do: [:pk | 
+						columnsGroup do: [:col |
+							distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: pk name target: col name.
+							(distance < 4)  ifTrue: [
+								| normalization |
+								normalization := (distance asFloat / (pk name size max: col name size)).
+								normalization < 0.43 ifTrue: [ 
+									result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]]].
+				progr := progr+1.
+				bar value: progr]]].
+	^result
+]
+
 { #category : #accessing }
 MJFAMIXTableGroup >> ranked [
 	^(((PageRank new
