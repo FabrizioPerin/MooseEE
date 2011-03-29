@@ -47,31 +47,6 @@ FAMIXClassMJExtensionTests >> testAccessATableSettingItByHand [
 	class accessATable: false.
 	
 	self deny: class accessATable.
-	
-	
-	        
-	
-	"jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	root := jEETestModel root.
-	
-	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
-	
-	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
-	table := mooseModel entityNamed: #Table1.
-	
-	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
-	
-	class addMaps: mapping.
-	table addMappedBy: mapping.
-	
-	mooseModel add: mapping.
-	
-	self assert: (mooseModel allMaps size = 1).
-	
-	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]).
-	self assert: map size = 1."
-
 ]
 
 { #category : #tests }
@@ -200,6 +175,36 @@ FAMIXClassMJExtensionTests >> testHasImplementsAnEntityBean [
 	
 	self assert: ( mooseModel allEntityBeans size = 0 ).
 	self assert: ( ( mooseModel allClasses select: [:each | each hasImplementsAnEntityBean ] ) size = 0 ).
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testHasMethodsThatExecuteAQuery [
+	| mooseModel classes |
+
+	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
+	classes := mooseModel allClasses select: #hasMethodsThatExecuteAQuery.
+	
+	self assert: classes size = 1
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testImplementedEntityBean [
+
+	| mooseModel allImplementingClasses classImplementingABean jEETestModel root |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithTransAndQueryAndBeans.
+	"root := jEETestModel root.
+	
+	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel]."
+	
+	self assert: ( mooseModel allEntityBeans size = 3 ).
+	self assert: ( ( mooseModel allClasses select: #hasImplementsAnEntityBean ) size = 3 ).
+	
+	classImplementingABean := (mooseModel allClasses select: [:class | class name = #Class4]) first.
+	
+	self deny: (classImplementingABean implementedEntityBean isNil).
+	self assert: (classImplementingABean implementedEntityBean isMemberOf: MJFAMIXEntityBean).
 ]
 
 { #category : #testsOnJEEModel }
