@@ -5,6 +5,76 @@ Class {
 }
 
 { #category : #tests }
+FAMIXClassMJExtensionTests >> testAccessATableSettingAutomaticallyConsideringTheMappings [
+	| jEETestModel mooseModel root class table mapping |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	root := jEETestModel root.
+	
+	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	
+	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
+	table := mooseModel entityNamed: #Table1.
+	
+	self deny: class accessATable.
+	
+	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	
+	class addMaps: mapping.
+	table addMappedBy: mapping.
+	
+	mooseModel add: mapping.
+	
+	self assert: (mooseModel allMaps size = 1).
+	self assert: class accessATable.
+]
+
+{ #category : #tests }
+FAMIXClassMJExtensionTests >> testAccessATableSettingItByHand [
+	
+	| class |
+	
+	class := FAMIXClass new name: 'TESTClass'.
+	
+	self assert: (class isMemberOf: FAMIXClass).
+	self assert: (class name = 'TESTClass').
+	
+	class accessATable: true.
+	
+	self assert: class accessATable.
+	
+	class accessATable: false.
+	
+	self deny: class accessATable.
+	
+	
+	        
+	
+	"jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	root := jEETestModel root.
+	
+	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	
+	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
+	table := mooseModel entityNamed: #Table1.
+	
+	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	
+	class addMaps: mapping.
+	table addMappedBy: mapping.
+	
+	mooseModel add: mapping.
+	
+	self assert: (mooseModel allMaps size = 1).
+	
+	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]).
+	self assert: map size = 1."
+
+]
+
+{ #category : #tests }
 FAMIXClassMJExtensionTests >> testCompleteHierarchyInWhichThisResides [
 	" I will fill MethodToAnalyze with all the methods that are part of a methods invokations chain that don't have a method that start a transaction"
 
@@ -36,17 +106,6 @@ FAMIXClassMJExtensionTests >> testCompleteHierarchyInWhichThisResidesRight [
 
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 	self assert: ( ( ( ( mooseModel allClasses select: [:each | each name = #'Class3' ] ) at: 1 ) completeHierarchyInWhichThisResides ) size = 1 ).
-]
-
-{ #category : #tests }
-FAMIXClassMJExtensionTests >> testDTOs [
-	
-	| mooseModel |
-	mooseModel := JEETestModels new mooseModelWithDTOs.
-
-
-					
-				
 ]
 
 { #category : #tests }
