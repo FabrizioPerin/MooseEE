@@ -86,6 +86,41 @@ I_M_CostQueue
 ]
 
 { #category : #'as yet unclassified' }
+DependencyAnalysis class >> associationsInterfacesScreens [
+	| out |
+	out := OrderedCollection new.
+	out add: 'I_M_Product' -> ('product cost' -> 'Select Product').
+	out add: 'I_M_Product_Costing' -> ('product cost' -> 'Costing').
+	out add: 'I_M_Cost' -> ('product cost' -> 'Product Costs').
+	out add: 'I_M_CostDetail' -> ('product cost' -> 'Cost Detail').
+	out add: 'I_M_CostQueue' -> ('product cost' -> 'Cost Queue').
+	
+	out add: 'I_A_Depreciation_Entry' -> ('Split Asset Entry' -> 'Create Split Asset Entry').
+	out add: 'I_A_Depreciation_Entry' -> ('Transfer Asset Entry' -> 'Create Asset Transfer Entry').
+
+	out add: 'I_A_Registration' -> ('Registration' -> 'Registration').
+	out add: 'I_A_RegistrationValue' -> ('Registration' -> 'value').
+	out add: 'I_A_RegistrationAttribute' -> ('Registration Attribute' -> 'attribute').
+	out add: 'I_A_RegistrationProduct' -> ('Registration' -> 'Product').
+
+	out add: 'I_HR_Job' -> ('Payroll Job' -> 'Job').
+	out add: 'I_HR_Constract' -> ('Payroll Contract' -> 'Contract').
+	out add: 'I_HR_Department' -> ('Payroll Department' -> 'Department').
+
+	out add: 'I_HR_Employee' -> ('Payroll Employee' -> 'Employee').
+	out add: 'I_R_ContactInterest' -> ('Payroll Employee' -> 'Interest Area').
+	out add: 'I_C_BPartner' -> ('Payroll Employee' -> 'Business partner').
+	out add: 'I_C_BP_Employee_Acct' -> ('Payroll Employee' -> 'Employee accounting').
+	out add: 'I_HR_Attribute' -> ('Payroll Employee' -> 'Attributes').
+	out add: 'I_C_BP_BankAccount' -> ('Payroll Employee' -> 'Bank Account').
+	out add: 'I_C_BPartner_Location' -> ('Payroll Employee' -> 'Location').
+	out add: 'I_AD_User' -> ('Payroll Employee' -> 'Contract User').
+	
+	^out
+
+]
+
+{ #category : #'as yet unclassified' }
 DependencyAnalysis class >> classesForScreens [
 	^#(
 X_HR_Job 
@@ -623,14 +658,37 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 		during: [ :bar | 
 			| index |
 			index := 1.
+			aStream nextPutAll: ('FROM' , '; ' , 'TO' , '; ' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr).
 			aCollectionOfWeightedEdges
 				do: [ :edge | 
 				
 					aStream nextPutAll: edge from printString , '; ' , edge to printString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr.
 					
 					index := index + 1.
-					bar value: index. ]]
-	asStream close.  
+					bar value: index. ]].
+	aStream close.  
+]
+
+{ #category : #'as yet unclassified' }
+DependencyAnalysis >> print: aCollectionOfWeightedEdges withScreensAsCSVOn: aStream [
+	
+	UIManager default
+		displayProgress: 'Exporting in CSV'
+		at: Sensor cursorPoint
+		from: 1 
+		to: aCollectionOfWeightedEdges size
+		during: [ :bar | 
+			| index |
+			index := 1.
+			aStream nextPutAll: ('Screen for FROM' , ';' , 'FROM' , '; ' , 'TO' , '; ' , 'Screen for TO' , ';' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr).
+			aCollectionOfWeightedEdges
+				do: [ :edge | 
+				
+					aStream nextPutAll: (((DependencyAnalysis associationsInterfacesScreens select: [:each | each key = edge from name]) first value) asString , '; ' , edge from printString , '; ' , edge to printString , '; ' , ((DependencyAnalysis associationsInterfacesScreens select: [:each | each key = edge to name]) first value) asString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr).
+					
+					index := index + 1.
+					bar value: index. ]].
+	aStream close.  
 ]
 
 { #category : #now }
@@ -686,6 +744,19 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
 	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesOnAllSystem.csv'.
 	
 	self print: edges asCSVOn: stream.
+	
+
+	
+]
+
+{ #category : #now }
+DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesWithScreens [
+	| edges stream |
+	edges := self computeCouplingBasedOnRefereesWDAndEdges asSortedCollection: [:a :b | a weight size > b weight size].
+	
+	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesWithScreens.csv'.
+	
+	self print: edges withScreensAsCSVOn: stream.
 	
 
 	
