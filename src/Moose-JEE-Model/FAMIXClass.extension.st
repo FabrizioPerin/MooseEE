@@ -9,7 +9,7 @@ FAMIXClass >> accessATable [
 		ifAbsent: [
 			| val |
 			val := self mappedRelationalEntities size > 0.
-			self accessATable: val.
+			"self accessATable: val."
 			val.]
 ]
 
