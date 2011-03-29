@@ -64,7 +64,6 @@ FAMIXClass >> hasImplementsAnEntityBean [
 { #category : #'*Moose-JEE-Model' }
 FAMIXClass >> hasMethodsThatExecuteAQuery [
 
-	self flag: #TODO test.
 	^self methods anySatisfy: [ :method | method doesExecuteAQuery ]
 ]
 
