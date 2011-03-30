@@ -486,6 +486,51 @@ MooseModel >> ejbVersion: aSymbol [
 	^self privateState attributeAt: #ejbVersion put: aSymbol
 ]
 
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> fixFileAnchorsFrom: aFolder [ 
+	| index startingPoint javaFiles |
+
+	self rootFolder: aFolder pathName.
+	self name: aFolder localName.
+	index := 1.
+	
+	javaFiles := OrderedCollection new.
+	startingPoint := aFolder entries asOrderedCollection.
+	
+	startingPoint do: [:each | 
+		each isDirectory 
+			ifFalse: [('.*\.java$' asRegex matches: each name) ifTrue: [javaFiles add: each]]
+			ifTrue: [startingPoint addAll: each asFileDirectory entries]].
+	
+	UIManager default
+		displayProgress: 'Fixing'
+		at: Sensor cursorPoint
+		from: index
+		to: self allClasses size * javaFiles size
+		during: [:bar | 
+			bar value: index.
+
+			self allClasses
+				do: [:class | 
+					javaFiles do: [:file |
+						(class name , '.java' = file name) ifTrue: [
+							"| fileStream |
+							fileStream := CrLfFileStream new open: file fullName forWrite: false."
+							class sourceAnchor fileName: (file fullName copyFrom: (self rootFolder size + 1) to: file fullName size)].
+						index := index + 1.
+						bar value: index]]]
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> fixFileAnchorsFromGUI [
+	| aFolder |
+	<menuItem: 'Try to fix file anchors' category: 'JEAs Utilities'>
+	aFolder := UITheme builder chooseDirectory: 'Choose the root folder for ' , self name.
+	aFolder isNil
+		ifTrue: [DialogWindow new alert: 'Folder not found.']
+		ifFalse: [self fixFileAnchorsFrom: aFolder]
+]
+
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFile: aFileStream [
 	| parser result ejbVer |
@@ -879,7 +924,7 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 	
 	| allFileAnchors cursor |
 	
-	self flag: #TODOtest.
+	self deprecated: 'Use fixFileAnchorsFrom: instead ' on: '30 March 2011' in: nil.   
 	
 	self rootFolder: aFolder pathName.
 	self name: aFolder localName.
@@ -926,9 +971,11 @@ MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> tryToFixFAMiXFileAnchorsGUI [
-	<menuItem: 'Try to fix links with files' category: 'JEAs Utilities'>
+	"<menuItem: 'Try to fix links with files' category: 'JEAs Utilities'>"
 
 	| folder |
+	
+	self deprecated: 'Use "Try to fix file anchors" menu entry instead ' on: '30 March 2011' in: nil.   
 	
 	folder := UITheme builder chooseDirectory: 'Choose the root folder for ', self name.
 	"folder := FileDirectory on: aPathString"
