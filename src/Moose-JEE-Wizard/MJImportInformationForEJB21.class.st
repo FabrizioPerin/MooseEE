@@ -42,7 +42,7 @@ MJImportInformationForEJB21 >> actionsToPerform [
 			
 			progBar value: 'Performing post import operations'.
 			
-			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePathName).
+			mooseModel fixFileAnchorsFrom: (FileDirectory on: sourcePathName).
 			progBar value: 6.
 			
 			"appLayers := (MJFAMIXLayer allSubclasses select: [:class | class allSubclasses isEmpty]) collect: [:class | class name].

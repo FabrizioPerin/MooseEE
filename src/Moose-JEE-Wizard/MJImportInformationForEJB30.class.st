@@ -36,7 +36,7 @@ MJImportInformationForEJB30 >> actionsToPerform [
 					mooseModel importDBFromSQLFileUsingAST: (StandardFileStream readOnlyFileNamed: sqlFileNamePath) ].
 			progBar value: 4.
 	
-			mooseModel tryToFixFAMiXFileAnchorsFrom: (FileDirectory on: sourcePath).
+			mooseModel fixFileAnchorsFrom: (FileDirectory on: sourcePath).
 			progBar value: 5.
 	
 			progBar value: 'Creationg relations among the DB and the software elements'.
