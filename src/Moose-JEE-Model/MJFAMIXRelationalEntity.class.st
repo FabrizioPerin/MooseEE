@@ -98,6 +98,11 @@ MJFAMIXRelationalEntity >> references [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXRelationalEntity >> removePointersToMaps [
+	mappedBy := FMMultivalueLink on: self opposite: #mapTarget:
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXRelationalEntity >> sourceAccessors [
 	<MSEProperty: #sourceAccessors type: #MJFAMIXDBAccess opposite: #accessedEntity> <multivalued> <derived>
 	<MSEComment: 'DB Access relationship.'>

@@ -60,3 +60,9 @@ FAMIXNamedEntity >> outgoingDerivedDependency [
 	
 	^self privateState attributeAt: #outgoingDerivedDependency ifAbsentPut: [FMMultivalueLink on: self opposite: #source:].
 ]
+
+{ #category : #'*Moose-JEE-Model' }
+FAMIXNamedEntity >> removePointersToMaps [
+	
+	^self privateState attributeAt: #maps put: (FMMultivalueLink on: self opposite: #mapSource:).
+]
