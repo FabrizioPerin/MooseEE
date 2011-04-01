@@ -79,8 +79,8 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulation [
 		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
 		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
-	mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 
 	self assert: (mooseModel allEntityBeans size = 2).
 	self assert: (mooseModel allTables size = 3).
@@ -142,8 +142,8 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulationCaseInsensitive [
 		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
 		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
-	mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 
 	self assert: (mooseModel allEntityBeans size = 2).
 	self assert: (mooseModel allTables size = 3).
@@ -187,7 +187,7 @@ MJFAMIXMappingTests >> testFAMIXMappingModelPopulation [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 
-	mooseModel buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 
 	self assert: (mooseModel allEntityBeans size = 2).
 	self assert: (mooseModel allTables size = 3).
@@ -224,7 +224,7 @@ MJFAMIXMappingTests >> testFAMIXMappingModelPopulationCaseInsensitive [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseNames .
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 
-	mooseModel buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 
 	self assert: (mooseModel allEntityBeans size = 2).
 	self assert: (mooseModel allTables size = 3).

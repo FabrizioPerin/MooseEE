@@ -77,7 +77,7 @@ MJFAMIXTableGroupTests >> testComputeDeriveDependenciesFromSourceCodeNoDependenc
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithTable2.
 	(mooseModel allEntityBeans select:[:each | each name = #ABMPEntity]) first sourceAnchor: famixAnchor.
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 	
 	self assert: (mooseModel allMaps size = 2).
 	

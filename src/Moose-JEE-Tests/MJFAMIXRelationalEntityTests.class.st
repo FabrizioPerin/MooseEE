@@ -33,7 +33,7 @@ MJFAMIXRelationalEntityTests >> testMappedNamedEntities [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 	
 	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
 	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
@@ -72,7 +72,7 @@ MJFAMIXRelationalEntityTests >> testMappedNamedEntitiesCaseInsensitive [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseNames.
 	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 	
 	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
 	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .

@@ -105,7 +105,7 @@ MJFAMIXTableTests >> testInUse [
 	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
 	mooseModel allEntityBeans first implementationClass sourceAnchor: famixAnchor.
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 
 	self assert: (mooseModel allColumns size = 6).
 	

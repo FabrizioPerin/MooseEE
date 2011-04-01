@@ -116,8 +116,8 @@ MJFAMIXColumnTests >> testInUse [
 		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
 		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
-	mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 
 	self assert: (mooseModel allColumns size = 6).
 
@@ -180,8 +180,8 @@ MJFAMIXColumnTests >> testInUseCaseInsensitive [
 		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
 		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
 	
-	mooseModel buildRelationsAmongDBTablesAndClasses.
-	mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
+	(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 
 	self assert: (mooseModel allColumns size = 6).
 
