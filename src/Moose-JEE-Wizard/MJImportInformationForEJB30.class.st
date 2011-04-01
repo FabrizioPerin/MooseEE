@@ -41,10 +41,10 @@ MJImportInformationForEJB30 >> actionsToPerform [
 	
 			progBar value: 'Creationg relations among the DB and the software elements'.
 	
-			mooseModel buildRelationsAmongDBTablesAndClasses.
+			(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
 			progBar value: 6.
 			
-			mooseModel buildRelationsAmongTableColumnsAndMethodsAndAttributes.
+			(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
 			progBar value: 7.
 		
 			progBar value: 'Creating annotations'.
