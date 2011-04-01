@@ -19,6 +19,16 @@ MJFAMIXTable class >> annotation [
 	<package: #'Moose-JEE-Model'>
 ]
 
+{ #category : #testing }
+MJFAMIXTable >> FKColumns [
+	^self columns select: [:column | column isFK notNil and: [column isFK]].  
+]
+
+{ #category : #testing }
+MJFAMIXTable >> PKColumns [
+	^self columns select: [:column | column isPK notNil and: [column isPK]].  
+]
+
 { #category : #accessing }
 MJFAMIXTable >> addColumn: aFAMIXTablesColumn [
 
@@ -45,6 +55,11 @@ MJFAMIXTable >> columns: aOrderedCollection [
 { #category : #accessing }
 MJFAMIXTable >> constraints [
 	^ tableConstraints
+]
+
+{ #category : #testing }
+MJFAMIXTable >> hasComposePK [
+	^self PKColumns size > 1
 ]
 
 { #category : #accessing }

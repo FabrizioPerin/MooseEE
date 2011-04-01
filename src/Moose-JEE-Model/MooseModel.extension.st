@@ -58,7 +58,7 @@ MooseModel >> allFKAssociations [
 
 	| group |
 	
-	group :=  self allWithType: MJFAMIXFKAssociation.
+	group :=  self allWithType: MJFAMIXFKAssociation ofGroupClass: MJFAMIXFKAssociationGroup.
 	group description: 'All FK associations'.
 	^group
 ]
