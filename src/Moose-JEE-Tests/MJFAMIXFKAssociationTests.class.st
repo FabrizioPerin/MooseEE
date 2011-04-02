@@ -21,6 +21,21 @@ MJFAMIXFKAssociationTests >> testMJFAMIXFKAssociationCreation [
 ]
 
 { #category : #testsOnJEEModel }
+MJFAMIXFKAssociationTests >> testMJFAMIXFKFrom [
+	
+	| jEETestModel mooseModel table1 fkAssoc |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	
+	table1 := mooseModel entityNamed: #Table1.
+	
+	fkAssoc := MJFAMIXFKAssociation new sourceColumn: table1.
+	
+	self assert: (fkAssoc from = table1).
+]
+
+{ #category : #testsOnJEEModel }
 MJFAMIXFKAssociationTests >> testMJFAMIXFKFromAndTo [
 	
 	| jEETestModel mooseModel table1 table2 fkAssoc map class table |
@@ -68,4 +83,19 @@ MJFAMIXFKAssociationTests >> testMJFAMIXFKTargetColumn [
 	fkAssoc := MJFAMIXFKAssociation new targetColumn: table1.
 	
 	self assert: (fkAssoc targetColumn = table1).
+]
+
+{ #category : #testsOnJEEModel }
+MJFAMIXFKAssociationTests >> testMJFAMIXFKTo [
+	
+	| jEETestModel mooseModel table1 fkAssoc |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	
+	table1 := mooseModel entityNamed: #Table1.
+	
+	fkAssoc := MJFAMIXFKAssociation new targetColumn: table1.
+	
+	self assert: (fkAssoc to = table1).
 ]
