@@ -222,11 +222,14 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWDAndEdges [
 						
 					interestingClasses size > 0
 						ifTrue: [ 
-							edge := MalWeightedEdge with: targetModel.
-							edge from: fromClass.
-							edge to: toClass.
-							edge weight: interestingClasses.
-							result add: edge ] ] ].
+							(result anySatisfy: [:each | (each from = fromClass) and: [(each to = toClass)]]) 
+								ifFalse: [
+									edge := MalWeightedEdge with: targetModel.
+									edge from: fromClass.
+									edge to: toClass.
+									edge weight: interestingClasses.
+									result add: edge ]
+								ifTrue: [Transcript show: ('from: ', fromClass asString , ' to: ' , toClass asString) ] ] ] ].
 	^ result
 ]
 
@@ -871,7 +874,7 @@ DependencyAnalysis >> printTableCouplingFrom: aCollectionOfWeightedEdges asCSVOn
 			aStream nextPutAll: ('TABLE 1' , '; ' , 'TABLE 2' , '; ' , 'SHARED TABLES' , '; ' , 'SHARED TABLE NUMBER' , String cr).
 			aCollectionOfWeightedEdges
 				do: [ :edge | 				
-					aStream nextPutAll: (edge from name , ' ; ' , edge to name , ' ; ' , edge weight asString , ' ; ' , edge weight size , String cr).					
+					aStream nextPutAll: (edge from name , ' ; ' , edge to name , ' ; ' , edge weight asString , ' ; ' , edge weight size asString , String cr).					
 					index := index + 1.
 					bar value: index. ]].
 	aStream close.  
