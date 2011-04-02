@@ -63,6 +63,54 @@ MJFAMIXTableTests >> testCreation [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testFKColumns [
+	| jEETestModel mooseModel asset user assetGroup |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+	mooseModel ejbVersion: #EJB30.
+		
+	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
+	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
+	assetGroup := (mooseModel allTables select: [ :each | each name = 'A_Asset_Group' ]) first.
+	
+	
+	self assert: (assetGroup isMemberOf: MJFAMIXTable).
+	self assert: (assetGroup fkColumns size = 0).
+	
+	self assert: (asset isMemberOf: MJFAMIXTable).
+	self assert: (asset fkColumns size = 2).
+	self assert: (asset fkColumns allSatisfy: [:col | col name = 'A_Asset_Group_ID' or: [col name = 'AD_User_ID']]).
+	
+	self assert: (user isMemberOf: MJFAMIXTable).
+	self assert: (user fkColumns size = 0).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testHasComposePK [
+	| jEETestModel mooseModel asset user assetGroup |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+	mooseModel ejbVersion: #EJB30.
+	
+	self assert: (mooseModel allTables select: #hasComposePK) size = 2.
+	
+	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
+	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
+	assetGroup := (mooseModel allTables select: [ :each | each name = 'A_Asset_Group' ]) first.
+	
+	self assert: (asset isMemberOf: MJFAMIXTable).
+	self assert: asset hasComposePK.
+	
+	self assert: (user isMemberOf: MJFAMIXTable).
+	self assert: user hasComposePK.
+	
+	self assert: (assetGroup isMemberOf: MJFAMIXTable).
+	self deny: assetGroup hasComposePK.
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testInUse [
 	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
 
@@ -155,6 +203,29 @@ MJFAMIXTableTests >> testNameWithAnnotationAsRegex [
 	
 	self assert: (mooseModel allTables size = 3).
 	self assert: (table1 nameWithAnnotationAsRegex matches: jEETestModel fakeSourceText).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testPKColumns [
+	| jEETestModel mooseModel asset user assetGroup |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+	mooseModel ejbVersion: #EJB30.
+		
+	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
+	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
+	assetGroup := (mooseModel allTables select: [ :each | each name = 'A_Asset_Group' ]) first.
+	
+	
+	self assert: (assetGroup isMemberOf: MJFAMIXTable).
+	self assert: (assetGroup pkColumns size = 1).
+	
+	self assert: (asset isMemberOf: MJFAMIXTable).
+	self assert: (asset pkColumns size = 3).
+	
+	self assert: (user isMemberOf: MJFAMIXTable).
+	self assert: (user pkColumns size = 3).
 ]
 
 { #category : #'as yet unclassified' }
