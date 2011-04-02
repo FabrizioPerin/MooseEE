@@ -355,6 +355,53 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWithDetailsInTheEdges [
 	^result
 ]
 
+{ #category : #now }
+DependencyAnalysis >> computeCouplingOnTables [
+	| result tableGroup index |
+	
+	result := OrderedCollection new.
+	tableGroup := targetModel allTables.
+	index := 1.
+	
+	UIManager default
+		displayProgress: 'Importing DB From an SQL file'
+		at: Sensor cursorPoint
+		from: 1
+		to: (tableGroup size * tableGroup size) asInteger
+		during: [ :bar | 
+			bar value: index.
+			
+			(1 to: tableGroup size)
+				do: [ :rowIndex | 
+					| table interestingFKAssocOfRowTable referencingTables |
+					
+					table := tableGroup at: rowIndex.
+					interestingFKAssocOfRowTable := targetModel allFKAssociations select: [ :fkAssoc | table columns includes: fkAssoc targetColumn ].
+					referencingTables := (interestingFKAssocOfRowTable collect: [:each | each sourceColumn ownerTable]) asSet.
+					  
+					
+					(1 to: tableGroup size)
+						do: [ :colIndex | 
+							(tableGroup at: colIndex) = (tableGroup at: rowIndex)
+								ifFalse: [ 
+									| commonTables interestingFKAssocOfColTable |
+									
+									interestingFKAssocOfColTable :=  targetModel allFKAssociations select: [ :fkAssoc | (tableGroup at: colIndex) columns includes: fkAssoc targetColumn ].
+									commonTables := referencingTables intersection: (interestingFKAssocOfColTable collect: [:each | each sourceColumn ownerTable]) asSet.
+																		
+									commonTables size > 0
+										ifTrue: [ 
+											| edge |
+											edge := MalWeightedEdge with: targetModel.
+											edge from: (tableGroup at: colIndex).
+											edge to: table.
+											edge weight: commonTables.
+											result add: edge ] ].
+							index := index + 1.
+							bar value: index ] ] ].
+	^ result
+]
+
 { #category : #'as yet unclassified' }
 DependencyAnalysis >> computeCouplingThroughInterfacesOn [
 	| allClasses allEntity result interfaces4screens commonClasses |
@@ -589,6 +636,17 @@ DependencyAnalysis >> displayDependenciesFrom [
 	view open.
 ]
 
+{ #category : #now }
+DependencyAnalysis >> exp1TableCoupling [
+	| result aStream |
+	
+	result := self computeCouplingOnTables.
+	
+	aStream := CrLfFileStream forceNewFileNamed: 'couplingAmongTables.csv'.
+	
+	self printTableCouplingFrom: result asCSVOn: aStream.
+]
+
 { #category : #'as yet unclassified' }
 DependencyAnalysis >> identifyCommonClasses [
 	| classes4screens commonClasses |
@@ -797,6 +855,26 @@ DependencyAnalysis >> printSortedCouplingWithoutNormalizationOn [
 		] .
 	
 	
+]
+
+{ #category : #'as yet unclassified' }
+DependencyAnalysis >> printTableCouplingFrom: aCollectionOfWeightedEdges asCSVOn: aStream [
+	
+	UIManager default
+		displayProgress: 'Exporting in CSV'
+		at: Sensor cursorPoint
+		from: 1 
+		to: aCollectionOfWeightedEdges size
+		during: [ :bar | 
+			| index |
+			index := 1.
+			aStream nextPutAll: ('TABLE 1' , '; ' , 'TABLE 2' , '; ' , 'SHARED TABLES' , '; ' , 'SHARED TABLE NUMBER' , String cr).
+			aCollectionOfWeightedEdges
+				do: [ :edge | 				
+					aStream nextPutAll: (edge from name , ' ; ' , edge to name , ' ; ' , edge weight asString , ' ; ' , edge weight size , String cr).					
+					index := index + 1.
+					bar value: index. ]].
+	aStream close.  
 ]
 
 { #category : #'as yet unclassified' }
