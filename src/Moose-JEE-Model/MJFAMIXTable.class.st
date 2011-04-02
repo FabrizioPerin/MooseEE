@@ -19,16 +19,6 @@ MJFAMIXTable class >> annotation [
 	<package: #'Moose-JEE-Model'>
 ]
 
-{ #category : #testing }
-MJFAMIXTable >> FKColumns [
-	^self columns select: [:column | column isFK notNil and: [column isFK]].  
-]
-
-{ #category : #testing }
-MJFAMIXTable >> PKColumns [
-	^self columns select: [:column | column isPK notNil and: [column isPK]].  
-]
-
 { #category : #accessing }
 MJFAMIXTable >> addColumn: aFAMIXTablesColumn [
 
@@ -58,8 +48,13 @@ MJFAMIXTable >> constraints [
 ]
 
 { #category : #testing }
+MJFAMIXTable >> fkColumns [
+	^self columns select: [:column | column isFK notNil and: [column isFK]].  
+]
+
+{ #category : #testing }
 MJFAMIXTable >> hasComposePK [
-	^self PKColumns size > 1
+	^self pkColumns size > 1
 ]
 
 { #category : #accessing }
@@ -121,6 +116,11 @@ MJFAMIXTable >> ownerDataBase [
 MJFAMIXTable >> ownerDataBase: aFAMIXDataBase [
 
 	ownerDataBase := aFAMIXDataBase.
+]
+
+{ #category : #testing }
+MJFAMIXTable >> pkColumns [
+	^self columns select: [:column | column isPK notNil and: [column isPK]].  
 ]
 
 { #category : #accessing }
