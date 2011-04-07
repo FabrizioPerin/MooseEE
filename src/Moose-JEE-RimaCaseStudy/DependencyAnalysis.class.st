@@ -383,23 +383,21 @@ DependencyAnalysis >> computeCouplingOnTables [
 					referencingTables := (interestingFKAssocOfRowTable collect: [:each | each sourceColumn ownerTable]) asSet.
 					  
 					
-					(1 to: tableGroup size)
-						do: [ :colIndex | 
-							(tableGroup at: colIndex) = (tableGroup at: rowIndex)
-								ifFalse: [ 
-									| commonTables interestingFKAssocOfColTable |
+					(rowIndex + 1 to: tableGroup size)
+						do: [ :colIndex |
+								| commonTables interestingFKAssocOfColTable |
 									
-									interestingFKAssocOfColTable :=  targetModel allFKAssociations select: [ :fkAssoc | (tableGroup at: colIndex) columns includes: fkAssoc targetColumn ].
-									commonTables := referencingTables intersection: (interestingFKAssocOfColTable collect: [:each | each sourceColumn ownerTable]) asSet.
+								interestingFKAssocOfColTable :=  targetModel allFKAssociations select: [ :fkAssoc | (tableGroup at: colIndex) columns includes: fkAssoc targetColumn ].
+								commonTables := referencingTables intersection: (interestingFKAssocOfColTable collect: [:each | each sourceColumn ownerTable]) asSet.
 																		
-									commonTables size > 0
-										ifTrue: [ 
-											| edge |
-											edge := MalWeightedEdge with: targetModel.
-											edge from: (tableGroup at: colIndex).
-											edge to: table.
-											edge weight: commonTables.
-											result add: edge ] ].
+								commonTables size > 0
+									ifTrue: [ 
+										| edge |
+										edge := MalWeightedEdge with: targetModel.
+										edge from: (tableGroup at: colIndex).
+										edge to: table.
+										edge weight: commonTables.
+										result add: edge].
 							index := index + 1.
 							bar value: index ] ] ].
 	^ result
@@ -723,7 +721,7 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 			aCollectionOfWeightedEdges
 				do: [ :edge | 
 				
-					aStream nextPutAll: edge from printString , '; ' , edge to printString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr.
+					aStream nextPutAll: edge from name printString , '; ' , edge to name printString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr.
 					
 					index := index + 1.
 					bar value: index. ]].
