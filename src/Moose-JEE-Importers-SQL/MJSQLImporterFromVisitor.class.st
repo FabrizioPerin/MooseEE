@@ -32,15 +32,15 @@ MJSQLImporterFromVisitor >> computeForeignKeys [
 				
 				"set as foreign key the columns of the table having the constraint"
 				(1 to: (constr pkColumnNames size)) do: [:index |
-					| tableColumn referencedTableColumn fkAssoc |
-					tableColumn := 	(table columns select: [:col | col name = (constr fkColumnNames at: index)]) first.
+					| fkTableColumn referencedTableColumn fkAssoc |
+					fkTableColumn := 	(table columns select: [:col | col name = (constr fkColumnNames at: index)]) first.
 					referencedTableColumn := (referencedTable columns select: [:col | col name = (constr pkColumnNames at: index)] )first.
-					tableColumn isFK: true.
+					fkTableColumn isFK: true.
 						
 					"creation of the association"	
-					fkAssoc := MJFAMIXFKAssociation new targetColumn: referencedTableColumn; sourceColumn: tableColumn.
+					fkAssoc := MJFAMIXFKAssociation new targetColumn: referencedTableColumn; sourceColumn: fkTableColumn.
 					referencedTableColumn addReferencedBy: fkAssoc.
-					tableColumn addReferences: fkAssoc.
+					fkTableColumn addReferences: fkAssoc.
 					
 					fkAssociations add: fkAssoc.	
 					]]]].
