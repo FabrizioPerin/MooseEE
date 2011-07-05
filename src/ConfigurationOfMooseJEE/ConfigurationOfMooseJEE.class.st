@@ -27,7 +27,7 @@ ConfigurationOfMooseJEE class >> isMetacelloConfig [
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDefault [
 	
-	Transcript open.
+	TranscriptWindow openWindow.
 	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
 	
 	(self project version: 'default') load.
@@ -40,7 +40,7 @@ ConfigurationOfMooseJEE class >> loadDefault [
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 
-	Transcript open.
+	TranscriptWindow openWindow.
 	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
 	
 	(self project version: 'defaultWithoutMoose') load.
@@ -242,12 +242,12 @@ ConfigurationOfMooseJEE >> default: spec [
 					version: 'default';
 					repository: 'http://www.squeaksource.com/Moose' ].
 		
-		"spec  project: 'XMLSupport for MooseJEE' with: [
+		spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
-				version: '1.1.1';
-				repository: 'http://www.squeaksource.com/XMLSupport' ]."
+				version: '1.2.0';
+				repository: 'http://www.squeaksource.com/XMLSupport' ].
 		
 		spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
@@ -268,6 +268,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
 			package: 'Moose-JEE-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec repository: 'XMLSupport for MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-Reports' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
