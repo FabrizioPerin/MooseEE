@@ -34,7 +34,7 @@ MJFAMIXDerivedDependenciesReport >> browser [
 				groups do: [:group | 
 						(group collect: #from) asMooseGroup fullyConnectGroupElementsThroughDependencies].
 				
-				self halt.
+				"self halt."
 				
 				groups];
 		showOnly: 50;
