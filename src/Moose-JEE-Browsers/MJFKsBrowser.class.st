@@ -19,7 +19,7 @@ MJFKsBrowser >> browser [
     		a list 
 			title: 'List of tables';
 		     	display: [ :mm |
-				mm allTables sort: [:first :second | first name < second name].  
+				mm allTables sorted: [:first :second | first name < second name].  
 				"| maps |
 				maps :=((mm allMaps select: [:map | map from isMemberOf: FAMIXClass]) sorted: [:first :second | first from name < second from name]) asSet.
 				maps"];
