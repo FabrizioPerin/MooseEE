@@ -416,23 +416,6 @@ MooseModel >> importDBFromSQLFile: aFileStream [
 ]
 
 { #category : #'*Moose-JEE-Model-Importers' }
-MooseModel >> importDBFromSQLFileGUI [
-	<menuItem: 'Import database from SQL file' category: 'JEAs Importers'>
-	
-	| file |
-	
-	self deprecated: 'Use "Import database from SQL file Using AST" instead ' on: '18 March 2011' in: nil.   
-	
-	file := UITheme builder 
-		fileOpen: 'Import information from SQL file'
-		extensions: #('sql').
-
-	file isNil 
-		ifTrue: [ DialogWindow new alert: 'File not found.'.]
-		ifFalse:[self importDBFromSQLFile: file readStream].
-]
-
-{ #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importDBFromSQLFileUsingAST: aFileStream [
 	
 	| parser result ejbVer |
@@ -491,7 +474,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 	
 	| fileSystem entries directoryEntries parser root counter |
 	
-	fileSystem := FSDiskFilesystem current referenceTo: aString.
+	fileSystem := FSFilesystem onDisk referenceTo: aString.
 	entries := FSCollectVisitor breadthFirst: fileSystem.
 	
 	directoryEntries := entries select: [:entry| '.*ejb-jar.xml$' asRegex matches: entry reference name ].
@@ -510,7 +493,7 @@ MooseModel >> importEjbJarFromFolder: aString [
 					 | stream |
 					
 					stream := StandardFileStream readOnlyFileNamed: (entry reference name).
-					parser := OPOpaxHandler on:stream.
+					parser := XMLDOMParser on: stream.
 					
 					"parser startDocument."
 					parser parseDocument.
@@ -548,7 +531,7 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 	
 	| result fileSystem entries fileEntries counter |
 
-	fileSystem := FSDiskFilesystem current referenceTo: aFolderPath.
+	fileSystem := FSFilesystem onDisk referenceTo: aFolderPath.
 	entries := FSCollectVisitor breadthFirst: fileSystem.
 	
 	fileEntries := entries select: [:entry | '^.*.jsp$' asRegexIgnoringCase matches: entry reference name ].
