@@ -27,25 +27,25 @@ ConfigurationOfMooseJEE class >> isMetacelloConfig [
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDefault [
 	
-	TranscriptWindow openWindow.
-	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
+	"TranscriptWindow openWindow.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr."
 	
 	(self project version: 'default') load.
 	
 	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
-	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 ]
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 
-	TranscriptWindow openWindow.
-	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
+	"TranscriptWindow openWindow.
+	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr."
 	
 	(self project version: 'defaultWithoutMoose') load.
 
-	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 
 ]
@@ -53,25 +53,25 @@ ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadLastStable [
 	
-	Transcript open.
-	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
+	"Transcript open.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr."
 	
 	(self project version: 'laststable') load.
 	
 	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
-	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 ]
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadPXDefaultWithoutMoose [
 
-	Transcript open.
-	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr.
+	"Transcript open.
+	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr."
 	
 	(self project version: 'pXDefaultWithoutMoose') load.
 
-	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 
 ]
@@ -79,25 +79,25 @@ ConfigurationOfMooseJEE class >> loadPXDefaultWithoutMoose [
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion10 [
 	
-	Transcript open.
-	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr.
+	"Transcript open.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr."
 	
 	(self project version: '1.0') load.
 	
 	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
-	Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr.
+	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 ]
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion11 [
 	
-	Transcript open.
-	Transcript show: 'Loading Moose JEE v.1.1 configuration ...'; cr; show: '--------'; cr; cr.
+	"Transcript open.
+	Transcript show: 'Loading Moose JEE v.1.1 configuration ...'; cr; show: '--------'; cr; cr."
 	
 	(self project version: '1.1') load.
 
-	Transcript show: ''; cr; show: 'Moose JEE v.1.1 configuration loaded. Have fun!'; cr.
+	"Transcript show: ''; cr; show: 'Moose JEE v.1.1 configuration loaded. Have fun!'; cr."
 
 ]
 
