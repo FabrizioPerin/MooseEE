@@ -35,7 +35,7 @@ FAMIXClassGroupMJExtensionTests >> testRationNOQMNOM [
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOQM ) = 3).
-	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM) = 19 ).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #WIM) = 19 ).
 
 	self assert: ( mooseModel allClasses RatioNOQMNOM = ( 3.0 / 19.0 )).
 ]
@@ -47,7 +47,7 @@ FAMIXClassGroupMJExtensionTests >> testRationNOTMNOM [
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
 	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
-	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOM ) = 19 ).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #WIM ) = 19 ).
 
 	self assert: ( mooseModel allClasses RatioNOTMNOM = ( 13.0 / 19.0 )).
 ]
