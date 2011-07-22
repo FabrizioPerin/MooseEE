@@ -757,69 +757,6 @@ MooseModel >> populateWithRelationalElementsFrom: aBlackBoard [
 ]
 
 { #category : #'*Moose-JEE-Model' }
-MooseModel >> tryToFixFAMiXFileAnchorsFrom: aFolder [
-	
-	| allFileAnchors cursor |
-	
-	self deprecated: 'Use fixFileAnchorsFrom: instead ' on: '30 March 2011' in: nil.   
-	
-	self rootFolder: aFolder pathName.
-	self name: aFolder localName.
-	
-	allFileAnchors := self allWithType: FAMIXFileAnchor.
-	
-	cursor := 1.
-	UIManager default
-		displayProgress: 'Fixing'
-		at: Sensor cursorPoint
-		from: cursor
-		to: allFileAnchors size
-		during: [ :bar | 
-			allFileAnchors do: [:anchor | 
-				| startingFrom |
-				"Trying to readapt also the path separator in the case that the imported mse file has been generated on another platform"
-				OSProcess platformName = 'Win32'
-					ifTrue: [
-						[(anchor fileName indexOf: $/) = 0]
-							whileFalse: [ 
-								|newPath |
-								newPath := anchor fileName.
-								newPath at: (anchor fileName indexOf: $/) put: $\.
-								anchor fileName: newPath.
-								]]
-					ifFalse: [
-						[(anchor fileName indexOf: $\) = 0]
-							whileFalse: [ 
-								|newPath |
-								newPath := anchor fileName.
-								newPath at: (anchor fileName indexOf: $\) put: $/.
-								anchor fileName: newPath.
-								]].
-			
-				startingFrom := anchor fileName findString: self name.
-				(startingFrom = 0) ifFalse: [
-					startingFrom := anchor fileName findString: FileDirectory slash startingAt: startingFrom.
-					anchor fileName: (anchor fileName copyFrom: startingFrom + 1 to: anchor fileName size)].
-				cursor := cursor + 1.
-				bar value: cursor.
-				]].
-	
-]
-
-{ #category : #'*Moose-JEE-Model' }
-MooseModel >> tryToFixFAMiXFileAnchorsGUI [
-	"<menuItem: 'Try to fix links with files' category: 'JEAs Utilities'>"
-
-	| folder |
-	
-	self deprecated: 'Use "Try to fix file anchors" menu entry instead ' on: '30 March 2011' in: nil.   
-	
-	folder := UITheme builder chooseDirectory: 'Choose the root folder for ', self name.
-	"folder := FileDirectory on: aPathString"
-	folder ifNotNil: [ self tryToFixFAMiXFileAnchorsFrom: folder].
-]
-
-{ #category : #'*Moose-JEE-Model' }
 MooseModel >> withoutAnnounceAdd: anElement [ 
 	 
 	super add: anElement. 
