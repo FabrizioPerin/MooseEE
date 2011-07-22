@@ -1,6 +1,15 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> add: anElement [ 
+	 
+	super add: anElement. 
+	anElement privateSetMooseModel: self.
+	"self announcer announce: (MooseEntityAdded new entity: anElement)."
+	^anElement
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> allColumns [
 	<navigation: 'All Table Columns'>
 	
