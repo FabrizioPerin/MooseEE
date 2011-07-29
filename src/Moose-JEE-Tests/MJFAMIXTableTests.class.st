@@ -206,6 +206,69 @@ MJFAMIXTableTests >> testNameWithAnnotationAsRegex [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testNumberOfColumns [
+	| jEETestModel mooseModel asset user assetGroup |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+		
+	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
+	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
+	assetGroup := (mooseModel allTables select: [ :each | each name = 'A_Asset_Group' ]) first.
+	
+	self assert: (asset isMemberOf: MJFAMIXTable).
+	self assert: asset numberOfColumns = 35.
+	
+	self assert: (user isMemberOf: MJFAMIXTable).
+	self assert: user numberOfColumns = 30.
+	
+	self assert: (assetGroup isMemberOf: MJFAMIXTable).
+	self assert: assetGroup numberOfColumns = 10.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testNumberOfForeignKeys [
+	| jEETestModel mooseModel asset user assetGroup |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+		
+	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
+	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
+	assetGroup := (mooseModel allTables select: [ :each | each name = 'A_Asset_Group' ]) first.
+	
+	self assert: (asset isMemberOf: MJFAMIXTable).
+	self assert: asset numberOfForeignKeys = 2.
+	
+	self assert: (user isMemberOf: MJFAMIXTable).
+	self assert: user numberOfForeignKeys = 0.
+	
+	self assert: (assetGroup isMemberOf: MJFAMIXTable).
+	self assert: assetGroup numberOfForeignKeys = 0.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testNumberOfPrimaryKeys [
+	| jEETestModel mooseModel asset user assetGroup |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+		
+	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
+	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
+	assetGroup := (mooseModel allTables select: [ :each | each name = 'A_Asset_Group' ]) first.
+	
+	self assert: (asset isMemberOf: MJFAMIXTable).
+	self assert: asset numberOfPrimaryKeys = 3.
+	
+	self assert: (user isMemberOf: MJFAMIXTable).
+	self assert: user numberOfPrimaryKeys = 3.
+	
+	self assert: (assetGroup isMemberOf: MJFAMIXTable).
+	self assert: assetGroup numberOfPrimaryKeys = 1.
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testPKColumns [
 	| jEETestModel mooseModel asset user assetGroup |
 	

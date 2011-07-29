@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXTableGroupTests,
-	#superclass : #TestCase,
+	#superclass : #MJAbstractGroupTests,
 	#category : #'Moose-JEE-Tests'
 }
 
@@ -153,4 +153,28 @@ MJFAMIXTableGroupTests >> testLevenshteinDistancesAmongFieldsTable [
 	self assert: ((distances at: 6) to name = 'AD_Org_ID'). 
 	self assert: ((distances at: 6) to ownerTable name = 'A_Asset_Group').
 	self assert: ((distances at: 6) weight = 0). 
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupTests >> testMaximumNumberOfFKsPerClass [
+
+	| mooseModel |
+	
+	
+	mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
+	
+	self assert: (mooseModel allTables size = 3).
+	self assert: (mooseModel allTables maximumNumberOfFKsPerClass = 2).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXTableGroupTests >> testMaximumNumberOfPKsPerClass [
+
+	| mooseModel |
+	
+	
+	mooseModel := JEETestModels new sampleMooseModelContainingJustADB.
+	
+	self assert: (mooseModel allTables size = 3).
+	self assert: (mooseModel allTables maximumNumberOfPKsPerClass = 3).
 ]

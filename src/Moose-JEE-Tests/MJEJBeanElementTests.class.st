@@ -102,131 +102,6 @@ MJEJBeanElementTests >> minimalEjbJar [
 '
 ]
 
-{ #category : #models }
-MJEJBeanElementTests >> sampleMooseModel [
-	
-	| mooseModel aPackage anotherPackage aStatelessSessionBean aStatefulSessionBean |
-	mooseModel := MooseModel new.
-	aPackage := FAMIXNamespace new
-			name: #aPackage;
-			yourself.
-	anotherPackage := FAMIXNamespace new
-			name: #anotherPackage;
-			yourself.
-
-	aStatelessSessionBean := FAMIXClass new
-			name: #AStatelessSessionBean;
-			container: aPackage;
-			yourself.
-
-	aStatelessSessionBean addMethod: (FAMIXMethod new
-				name: #aMethod;
-				parentType: aStatelessSessionBean;
-				signature: #aMethod asString;
-				yourself
-			);
-			addMethod: (FAMIXMethod new
-				name: #anotherMethod;
-				parentType: aStatelessSessionBean;
-				signature: #anotherMethod asString;
-				yourself
-			).
-	aStatefulSessionBean := FAMIXClass new
-			name: #AStatefulSessionBean;
-			container: aPackage;
-			yourself.
-	aStatefulSessionBean
-			addMethod: (FAMIXMethod new
-				name: #someMethod;
-				parentType: aStatefulSessionBean;
-				signature: #someMethod asString;
-				yourself
-			);
-			addMethod: (FAMIXMethod new
-				name: #someOtherMethod;
-				parentType: aStatefulSessionBean;
-				signature: #someOtherMethod asString;
-				yourself
-			).
-
-		
-	mooseModel
-		addAll: aStatelessSessionBean methods;
-		addAll: aStatefulSessionBean methods;
-		add: aPackage;
-		add: anotherPackage;
-		add: (FAMIXClass new
-			name: #AStatelessSessionHome;
-			container: aPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #AStatelessSession;
-			container: aPackage;
-			yourself
-		);
-		add: aStatelessSessionBean;
-		add: (FAMIXClass new
-			name: #AStatefulSessionHome;
-			container: aPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #AStatefulSession;
-			container: aPackage;
-			yourself
-		);
-		add: aStatefulSessionBean;
-		add: (FAMIXClass new
-			name: #ACMPEntityHome;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ACMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ACMPEntityBean;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ACMPEntityPK;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntityHome;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntityBean;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #ABMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
-			name: #AMessageBean;
-			container: aPackage;
-			yourself
-		).
-
-
-	^mooseModel
-]
-
 { #category : #setup }
 MJEJBeanElementTests >> setUp [
 	| parser factory doc |
@@ -258,7 +133,7 @@ MJEJBeanElementTests >> testElementCreation [
 MJEJBeanElementTests >> testEntityResolving [
 	
 	| mooseModel aBean |
-	mooseModel := self sampleMooseModel.
+	mooseModel := JEETestModels new sampleMooseModel.
 
 	(root allElements select: [:each | each class = MJEntityElement ]) do: [:each | each populate: mooseModel].
 
@@ -288,7 +163,7 @@ MJEJBeanElementTests >> testEntityResolving [
 MJEJBeanElementTests >> testMessageDrivenResolving [
 	
 	| mooseModel aBean |
-	mooseModel := self sampleMooseModel.
+	mooseModel := JEETestModels new sampleMooseModel.
 
 	(root allElements select: [:each | each class = MJMessageDrivenElement]) do: [:each | each populate: mooseModel].
 
@@ -305,7 +180,9 @@ MJEJBeanElementTests >> testMessageDrivenResolving [
 MJEJBeanElementTests >> testSessionResolving [
 	
 	| mooseModel aStateless aStateful |
-	mooseModel := self sampleMooseModel.
+	
+	mooseModel := JEETestModels new sampleMooseModel.
+	
 	(root allElements select: [:each | each class = MJSessionElement]) do: [:each | each populate: mooseModel].
 
 	self assert: mooseModel allSessionBeans size = 2.
