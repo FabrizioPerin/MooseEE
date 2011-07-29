@@ -106,6 +106,30 @@ MJFAMIXTable >> nameWithAnnotationAsRegex [
 		ifFalse: [nameAsRegEx]
 ]
 
+{ #category : #metrics }
+MJFAMIXTable >> numberOfColumns [
+	<property: #NOCol longName: 'Number of columns' description:
+			'The number of columns defined for this tables including primary and foreign keys'>
+	
+	^columns size
+]
+
+{ #category : #metrics }
+MJFAMIXTable >> numberOfForeignKeys [
+	<property: #NOFK longName: 'Number of foreign keys' description:
+			'The number of columns defined for this tables that are foreign keys'>
+	
+	^self fkColumns size
+]
+
+{ #category : #metrics }
+MJFAMIXTable >> numberOfPrimaryKeys [
+	<property: #NOPK longName: 'Number of primary keys' description:
+			'The number of columns defined for this tables that are primary keys'>
+	
+	^self pkColumns size
+]
+
 { #category : #accessing }
 MJFAMIXTable >> ownerDataBase [
 

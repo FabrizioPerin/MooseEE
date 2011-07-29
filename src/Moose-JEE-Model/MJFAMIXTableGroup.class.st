@@ -164,6 +164,26 @@ MJFAMIXTableGroup >> levenshteinDistancesAmongFieldsTable [
 	^result
 ]
 
+{ #category : #views }
+MJFAMIXTableGroup >> maximumNumberOfFKsPerClass [
+	| max |
+	
+	max := 0.
+	self do: [:table | (table fkColumns size > max) ifTrue: [max := table fkColumns size] ].
+	
+	^max
+]
+
+{ #category : #views }
+MJFAMIXTableGroup >> maximumNumberOfPKsPerClass [
+	| max |
+	
+	max := 0.
+	self do: [:table | (table pkColumns size > max) ifTrue: [max := table pkColumns size] ].
+	
+	^max
+]
+
 { #category : #accessing }
 MJFAMIXTableGroup >> ranked [
 	^(((PageRank new
