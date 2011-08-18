@@ -4,6 +4,81 @@ Class {
 	#category : #'Moose-JEE-Wizard'
 }
 
+{ #category : #'as yet unclassified' }
+MooseJEEScripts class >> cleanUpForRelease [
+	"self new cleanUpForRelease"
+
+	Author fullName: 'Mr.Cleaner'.
+	self cleanUpPackageOrganizer.
+	self cleanUpMethods.
+	Smalltalk cleanUp: true except: #() confirming: false.
+	ImageMorph classPool at: #DefaultForm put: (Form extent: 1 @ 1 depth: 1).
+	Smalltalk organization removeEmptyCategories.
+	Smalltalk globals
+		at: #TTFontDescription
+		ifPresent: [ :c | 
+			c
+				clearDefault;
+				clearDescriptions ].
+	ExternalDropHandler resetRegisteredHandlers.
+	FreeTypeFontProvider current initialize.
+	SystemNavigation default
+		allObjectsDo: [ :each | 
+			(each respondsTo: #releaseCachedState)
+				ifTrue: [ each releaseCachedState ] ].
+	3 timesRepeat: [ 
+		Smalltalk garbageCollect.
+		Symbol compactSymbolTable ].
+	HashedCollection rehashAll.
+	
+	"Remove empty categories, which are not in MC packages, because MC does
+	not do this (this script does not make packages dirty)"
+	Smalltalk organization removeEmptyCategories.
+	Smalltalk
+		allClassesAndTraitsDo: [ :class |
+			[ :each |
+				each
+					removeEmptyCategories;
+					sortCategories ]
+						value: class organization;
+						value: class class organization ].
+	PackageOrganizer default packages
+		do: [ :each | each methods ifEmpty: [ PackageOrganizer default unregisterPackage: each ] ]
+		displayingProgress: 'Cleaning Packages'.
+	Smalltalk organization sortCategories.
+	ChangeSet removeChangeSetsNamedSuchThat: [ :each | true ].
+	ChangeSet resetCurrentToNewUnnamedChangeSet.
+	Smalltalk garbageCollect.
+	Author reset
+]
+
+{ #category : #'as yet unclassified' }
+MooseJEEScripts class >> cleanUpMethods [
+	"Make sure that all methods in use are restarted"
+	"ScriptLoader new cleanUpMethods"
+
+	WeakArray restartFinalizationProcess.
+	MethodChangeRecord allInstancesDo: [:x | x noteNewMethod: nil].
+	WorldState allInstancesDo: [ :ws | ws convertAlarms; convertStepList; resetWorldMenu].
+	WorldState allInstancesDo: [ :ws | ws instVarNamed: 'menuBuilder' put: nil ].
+	ExternalDropHandler initialize.
+	ScrollBar initializeImagesCache.
+	GradientFillStyle initPixelRampCache.
+	ProcessBrowser initialize.
+	Smalltalk garbageCollect.
+	Delay startTimerEventLoop
+]
+
+{ #category : #'as yet unclassified' }
+MooseJEEScripts class >> cleanUpPackageOrganizer [
+
+	PackageOrganizer default packages
+		do: [ :each | 
+			each methods isEmpty
+				ifTrue: [ PackageOrganizer default unregisterPackage: each ] ]
+		displayingProgress: 'Cleaning Packages'
+]
+
 { #category : #workspace }
 MooseJEEScripts class >> openDoitWorkspaceWith: anArray [ 
 	"self openDoitWorkspaceWith: {'a'. 'b'. 'c'}"
