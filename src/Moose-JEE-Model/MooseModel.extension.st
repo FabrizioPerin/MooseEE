@@ -228,6 +228,43 @@ MooseModel >> cleanUpAllMaps [
 ]
 
 { #category : #'*Moose-JEE-Model' }
+MooseModel >> cleanUpDuplicatedDeriveDependencies [
+	<menuItem: 'Clean up duplicated derived dependencies' category: 'JEAs Utilities'>
+	
+	| dd toRemove|
+	
+	dd := self allDerivedDependencies.
+	toRemove := OrderedCollection new.
+	(1 to: dd size) do: [:firstDDIndex |
+		((firstDDIndex + 1) to: dd size) do: [:secondDDIndex |
+			((dd at: firstDDIndex) source = (dd at: secondDDIndex) source) ifTrue: [
+				((dd at: firstDDIndex) target = (dd at: secondDDIndex) target) ifTrue: [
+					((dd at: firstDDIndex) isDirected = (dd at: secondDDIndex) isDirected) ifTrue: [
+						((dd at: firstDDIndex) rationale = (dd at: secondDDIndex) rationale) ifTrue: [
+							toRemove add: (dd at: secondDDIndex) ]]]]]].
+	
+	self withoutAnnounceRemoveAll: toRemove asSet.  
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> cleanUpDuplicatedMaps [
+	<menuItem: 'Clean up duplicated maps' category: 'JEAs Utilities'>
+	
+	| maps toRemove |
+	
+	maps := self allMaps.
+	toRemove := OrderedCollection new.
+	
+	(1 to: maps size) do: [:firstMapIndex |
+		((firstMapIndex + 1) to: maps size) do: [:secondMapIndex |
+			((maps at: firstMapIndex) mapSource = (maps at: secondMapIndex) mapSource) ifTrue: [
+				((maps at: firstMapIndex) mapTarget = (maps at: secondMapIndex) mapTarget) ifTrue: [
+					toRemove add: (maps at: secondMapIndex) ]]]].
+	
+	self withoutAnnounceRemoveAll: toRemove asSet.  
+]
+
+{ #category : #'*Moose-JEE-Model' }
 MooseModel >> cleanUpLayers [
 	<menuItem: 'Clean up all layers' category: 'JEAs Utilities'>
 	
