@@ -273,6 +273,51 @@ FAMIXClassGroup >> viewClassesHighlightingExecutedQueriesOn: view [
 ]
 
 { #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewDerivedDependenciesConstellation [
+
+	<menuItem: 'Deriverd Dependencies Constellation' category: 'JEAs Visualizations WIP'>
+	
+	| view |
+	view := MOViewRenderer new.
+	self viewDerivedDependenciesConstellationOn: view.
+	^ view openWithStatusbar title: 'Derived Dependencies Constellation'
+	
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
+FAMIXClassGroup >> viewDerivedDependenciesConstellationOn: aView [
+	| derivedConnections invoking allDirectedDependencies allNotDirectedDependencies |
+
+	derivedConnections := OrderedCollection new.
+	derivedConnections := self select: [:el | el incomingDerivedDependency isEmpty not or: [el outgoingDerivedDependency isEmpty not] ].
+	derivedConnections addAll: (self flatCollect: [:el | el derivedDependenciesDirection: #target on: self mooseModel allDerivedDependencies]).
+	derivedConnections addAll: (self flatCollect: [:el | el derivedDependenciesDirection: #source on: self mooseModel allDerivedDependencies]). 
+	"derivedConnections := derivedConnections asSet."
+	
+	aView shape label text: #name; fontSize: 8.
+	aView interaction menu: #mooseMenuMorph.
+	aView nodes: derivedConnections asSet.
+	
+	allDirectedDependencies := self mooseModel allDerivedDependencies select: [:dd | dd isDirected].
+	allNotDirectedDependencies := self mooseModel allDerivedDependencies reject: [:dd | dd isDirected].
+	
+	"View Edges"
+	aView interaction popupText: [:dd | dd asString , String eol , String eol , dd rationale ].
+	aView shape line color: Color veryLightGray.
+	aView edges: allDirectedDependencies from: #source to: #target.
+	
+	aView interaction popupText: [:dd | dd asString , String eol , String eol , dd rationale ].
+	aView shape line color: Color veryLightGray.
+	aView edges: allNotDirectedDependencies from: #source to: #target.
+	
+	aView interaction popupText: [:dd | dd asString , String eol , String eol , dd rationale ].
+	aView shape line color: Color veryLightGray.
+	aView edges: allNotDirectedDependencies from: #target to: #source.
+	
+	aView graphvizLayout fdp "neato" "ids" "dot" "sfdp" "twopi" "circo".
+]
+
+{ #category : #'*Moose-JEE-Model-visualizations' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	
 	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |

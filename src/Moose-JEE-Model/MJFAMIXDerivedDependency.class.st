@@ -41,7 +41,7 @@ MJFAMIXDerivedDependency >> initialize [
 	
 	source := nil.
 	target := nil.
-	directed := nil.
+	directed := false.
 	rationale := ''.
 ]
 
@@ -54,6 +54,17 @@ MJFAMIXDerivedDependency >> isDirected [
 { #category : #accessing }
 MJFAMIXDerivedDependency >> isDirected: aBoolean [
 	directed := aBoolean.
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXDerivedDependency >> printOn: aStream [
+
+	self from isNil	
+		ifFalse: [aStream nextPutAll: self from name].
+	aStream nextPutAll: ' -> '.
+	self to isNil	
+		ifFalse: [aStream nextPutAll: self to name].
+	aStream nextPutAll: ' (Derived Dependency)'
 ]
 
 { #category : #accessing }
