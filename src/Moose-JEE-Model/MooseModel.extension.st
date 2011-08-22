@@ -216,15 +216,20 @@ MooseModel >> buildMappingBetweenSoftwareEntityAndRelationalElements [
 
 { #category : #'*Moose-JEE-Model' }
 MooseModel >> cleanUpAllMaps [
+	
+	self withoutAnnounceRemoveAll: (self allWithType: MJFAMIXMapping).
+	self allClasses do: [:class | class removePointersToMaps ].
+	self allTables do: [:table | table removePointersToMaps ]
+]
+
+{ #category : #'*Moose-JEE-Model' }
+MooseModel >> cleanUpAllMapsGUI [
 	<menuItem: 'Clean up all maps' category: 'JEAs Utilities'>
 	
 	|  question strategy |
 
 	question := UITheme builder questionWithoutCancel: 'Do you want to clean up previously created maps?'.
-	question ifTrue: [
-		self withoutAnnounceRemoveAll: (self allWithType: MJFAMIXMapping).
-		self allClasses do: [:class | class removePointersToMaps ].
-		self allTables do: [:table | table removePointersToMaps ]].
+	question ifTrue: [self cleanUpAllMaps].
 ]
 
 { #category : #'*Moose-JEE-Model' }
