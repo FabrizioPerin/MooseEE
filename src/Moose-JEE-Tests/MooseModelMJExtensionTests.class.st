@@ -77,6 +77,30 @@ MooseModelMJExtensionTests >> testAllServiceLayer [
 ]
 
 { #category : #tests }
+MooseModelMJExtensionTests >> testAllTransactionalMethods [
+
+	| mooseModel  jEETestModel root |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	root := jEETestModel root.
+	
+	(root allElements select: [:each | each class = MJSessionElement]) do: [:each |
+		each populate: mooseModel].
+	(root allElements select: [:each | each class = MJContainerTransactionElement]) do: [:each |
+		each populate: mooseModel].
+
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
+					hasEJBTransactionAttribute.
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod()')
+					hasEJBTransactionAttribute not.
+	self assert: ((mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
+					methods allSatisfy: #hasEJBTransactionAttribute).
+	
+	self assert: (mooseModel allTransactionalMethods size = 3).
+]
+
+{ #category : #tests }
 MooseModelMJExtensionTests >> testAnnotationTypeAndInstancesofTransactionScope [
 
 	| mooseModel annotationTp allInstances annotatedMethods annotatedClasses |
@@ -122,6 +146,41 @@ MooseModelMJExtensionTests >> testAnnotationTypeAndInstancesofUnsafeQuery [
 	"mooseModel openInMoose."
 	
 	"MooseBrowsers new codeWithAnnotationsBrowser openOn: mooseModel."
+]
+
+{ #category : #tests }
+MooseModelMJExtensionTests >> testCleanUpAllMaps [
+
+	| jEETestModel mooseModel root annotationType famixAnchor distances result mapping table class |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithTransAndInvocationsAndDBAndQueryComplex.
+	mooseModel ejbVersion: #EJB30.
+	
+	self assert: (mooseModel allMaps size = 0).
+
+	"adding fake mappings"
+	table := (mooseModel allTables select: [:each | each name = #Table1]) first.
+	class := (mooseModel allClasses select: [:each | each name = #AStatelessSessionBean]) first.
+	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
+	class addMaps: mapping.
+	table addMappedBy: mapping.
+	mooseModel withoutAnnounceAdd: mapping.
+	
+	table := (mooseModel allTables select: [:each | each name = #Table2]) first.
+	class := (mooseModel allClasses select: [:each | each name = #Class4]) first.
+	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
+	class addMaps: mapping.
+	table addMappedBy: mapping.
+	mooseModel withoutAnnounceAdd: mapping.
+						
+	self assert: (mooseModel allMaps size = 2).
+
+	mooseModel cleanUpAllMaps.
+
+ 	self assert: (mooseModel allMaps size = 0). 
+	
+	
 ]
 
 { #category : #tests }

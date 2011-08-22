@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXTableGroupTests >> testAnnotation [
+	self assert: MJFAMIXTableGroup annotation == MJFAMIXTableGroup.
+]
+
 { #category : #'as yet unclassified' }
 MJFAMIXTableGroupTests >> testComputeDeriveDependenciesFromSourceCode [
 

@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXLogicLayerTests >> testAnnotation [
+	self assert: MJFAMIXLogicLayer annotation == MJFAMIXLogicLayer.
+]
+
 { #category : #testsOnJEEModel }
 MJFAMIXLogicLayerTests >> testFAMIXLogicLayerAcceptStrategy [
 
@@ -32,4 +37,9 @@ MJFAMIXLogicLayerTests >> testFAMIXLogicLayerPopulate [
 	"self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) first  = serviceLayer).
 	self assert: serviceLayer containedSessionBeans size = 3."
+]
+
+{ #category : #tests }
+MJFAMIXLogicLayerTests >> testName [
+	self assert: (MJFAMIXLogicLayer new name = 'Logic Layer')
 ]

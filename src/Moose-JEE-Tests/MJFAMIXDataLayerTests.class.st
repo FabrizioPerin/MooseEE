@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXDataLayerTests >> testAnnotation [
+	self assert: MJFAMIXDataLayer annotation == MJFAMIXDataLayer.
+]
+
 { #category : #testsOnJEEModel }
 MJFAMIXDataLayerTests >> testFAMIXDataLayerAcceptStrategy [
 

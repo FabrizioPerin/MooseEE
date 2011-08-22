@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXDerivedDependencyTests >> testAnnotation [
+	self assert: MJFAMIXDerivedDependency annotation == MJFAMIXDerivedDependency.
+]
+
 { #category : #'as yet unclassified' }
 MJFAMIXDerivedDependencyTests >> testDerivedDependencyCreation [
 	| dep tab1 tab2 |

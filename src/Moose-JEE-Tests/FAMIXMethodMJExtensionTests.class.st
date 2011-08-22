@@ -257,6 +257,29 @@ FAMIXMethodMJExtensionTests >> testHasEJBTransactionAttribute [
 ]
 
 { #category : #tests }
+FAMIXMethodMJExtensionTests >> testHasEJBTransactionAttributeThatSupportTransactions [
+	| mooseModel  jEETestModel root |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	root := jEETestModel setRootFrom: jEETestModel minimalEjbJarWithSupportedTransactions.
+	
+	(root allElements select: [:each | each class = MJSessionElement]) do: [:each |
+		each populate: mooseModel].
+	(root allElements select: [:each | each class = MJContainerTransactionElement]) do: [:each |
+		each populate: mooseModel].
+
+	
+	self assert: (mooseModel allClasses entityNamed: #'aPackage::AStatelessSessionBean')
+					methods size = 2.
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
+					hasEJBTransactionAttributeThatSupportTransactions.
+	self deny: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod()')
+					hasEJBTransactionAttributeThatSupportTransactions.
+		
+]
+
+{ #category : #tests }
 FAMIXMethodMJExtensionTests >> testInvocationCallChain [
 	
 	| mooseModel  invocation |
@@ -354,6 +377,24 @@ FAMIXMethodMJExtensionTests >> testIsPartOfAnUnsafeTransactionPath [
 	"method 4 is called from method 8 and 9. the first start a transaction, the second does not"
 	
 	self assert: ( ( mooseModel allMethods select: [:each | each name = #someMethod ] ) first isPartOfAnUnsafeTransactionPath ).
+]
+
+{ #category : #tests }
+FAMIXMethodMJExtensionTests >> testOwnedTable [
+	| jEETestModel mooseModel root class table mapping |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	root := jEETestModel root.
+	
+	class := mooseModel entityNamed: #'aPackage::AStatelessSessionBean'.
+	table := mooseModel entityNamed: #Table1.
+	
+	self assert: (class methods allSatisfy: [: method | method ownedTable = nil ]).
+	
+	class methods first ownedTable: table.
+	
+	self assert: (class methods first ownedTable = table).
 ]
 
 { #category : #tests }

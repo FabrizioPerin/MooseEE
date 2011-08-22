@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXColumnTests >> testAnnotation [
+	self assert: MJFAMIXColumn annotation == MJFAMIXColumn.
+]
+
 { #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testCanBeNull [
 	| col |

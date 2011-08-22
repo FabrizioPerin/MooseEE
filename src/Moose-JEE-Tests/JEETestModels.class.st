@@ -1106,6 +1106,101 @@ JEETestModels >> minimalEjbJar [
 '
 ]
 
+{ #category : #files }
+JEETestModels >> minimalEjbJarWithSupportedTransactions [
+
+	^'<?xml version="1.0"?>
+<ejb-jar>
+
+<enterprise-beans>
+
+	<!-- A minimal session EJB deployment -->
+	<session>
+ 		 <ejb-name>AStatefulSession</ejb-name>
+		<home>aPackage.AStatefulSessionHome</home>
+		<remote>aPackage.AStatefulSession</remote>
+		<ejb-class>aPackage.AStatefulSessionBean</ejb-class>
+		<session-type>Stateful</session-type>
+		<transaction-type>Container</transaction-type>
+	</session>
+
+	<session>
+ 		 <ejb-name>AStatelessSession</ejb-name>
+		<home>aPackage.AStatelessSessionHome</home>
+		<remote>aPackage.AStatelessSession</remote>
+		<ejb-class>aPackage.AStatelessSessionBean</ejb-class>
+		<session-type>Stateless</session-type>
+		<transaction-type>Container</transaction-type>
+	</session>
+
+	<!-- A minimal CMP entity EJB deployment -->
+	<entity>
+		<ejb-name>ACMPEntity</ejb-name>
+		<home>anotherPackage.ACMPEntityHome</home>
+		<remote>anotherPackage.ACMPEntity</remote>
+		<ejb-class>anotherPackage.ACMPEntityBean</ejb-class>
+		<persistence-type>Container</persistence-type>
+		<prim-key-class>anotherPackage.ACMPEntityPK</prim-key-class>
+		<reentrant>False</reentrant>
+		<cmp-field><field-name>attribute1</field-name></cmp-field>
+		<cmp-field><field-name>attribute2</field-name></cmp-field>
+      </entity>
+      
+	<!-- A minimal BMP entity EJB deployment -->
+	<entity>
+		<ejb-name>ABMPEntity</ejb-name>
+		<home>anotherPackage.ABMPEntityHome</home>
+		<remote>anotherPackage.ABMPEntity</remote>
+		<ejb-class>anotherPackage.ABMPEntityBean</ejb-class>
+		<persistence-type>Bean</persistence-type>
+		<prim-key-class>anotherPackage.ABMPEntityPK</prim-key-class>
+		<reentrant>False</reentrant>
+	</entity>
+
+	<message-driven>
+		<ejb-name>AMessageDriven</ejb-name>
+		<ejb-class>aPackage.AMessageBean</ejb-class>
+		<transaction-type>Container</transaction-type>
+		<message-driven-destination>
+			<destination-type>
+				javax.jms.Topic
+			</destination-type>
+		</message-driven-destination>
+		...
+	</message-driven>
+
+</enterprise-beans>
+
+<assembly-descriptor>
+
+	<container-transaction> 
+		<method> 
+			<ejb-name>AStatefulSession</ejb-name> 
+			<method-name>*</method-name> 
+		</method> 
+		<trans-attribute>Support</trans-attribute> 
+	</container-transaction> 
+	<container-transaction> 
+		<method> 
+			<ejb-name>AStatelessSession</ejb-name> 
+			<method-name>aMethod</method-name> 
+		</method> 
+		<trans-attribute>NotSupport</trans-attribute> 
+	</container-transaction> 
+	<container-transaction> 
+		<method> 
+			<ejb-name>ABMPEntity</ejb-name> 
+			<method-name>*</method-name> 
+		</method> 
+		<trans-attribute>requires</trans-attribute> 
+	</container-transaction> 
+
+</assembly-descriptor>
+
+</ejb-jar>
+'
+]
+
 { #category : #models }
 JEETestModels >> mooseModelWithDTOs [
 
@@ -4409,6 +4504,24 @@ JEETestModels >> sampleMooseModelWithTransaction [
 		).
 
 	^mooseModel
+]
+
+{ #category : #initialize }
+JEETestModels >> setRootFrom: aString [
+	| parser factory doc |
+
+	parser := XMLDOMParser on: aString readStream.
+	factory := XMLPluggableElementFactory new
+				elementClass: MJEJBeanElement;
+				handleElement: 'entity' withClass: MJEntityElement;
+				handleElement: 'message-driven' withClass: MJMessageDrivenElement;
+				handleElement: 'session' withClass: MJSessionElement;
+				handleElement: 'container-transaction' withClass: MJContainerTransactionElement.
+
+	parser nodeFactory: factory.  
+
+	doc := parser parseDocument.
+	^doc root.
 ]
 
 { #category : #elements }

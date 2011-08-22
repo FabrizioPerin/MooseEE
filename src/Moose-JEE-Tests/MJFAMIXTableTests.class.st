@@ -22,6 +22,11 @@ MJFAMIXTableTests >> testAddColumn [
 	self assert: (table3 columns size = 9).
 ]
 
+{ #category : #tests }
+MJFAMIXTableTests >> testAnnotation [
+	self assert: MJFAMIXTable annotation == MJFAMIXTable.
+]
+
 { #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testColumns [
 	| jEETestModel mooseModel table3 |

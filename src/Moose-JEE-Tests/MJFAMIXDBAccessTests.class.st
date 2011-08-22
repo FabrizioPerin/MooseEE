@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXDBAccessTests >> testAnnotation [
+	self assert: MJFAMIXDBAccess annotation == MJFAMIXDBAccess.
+]
+
 { #category : #testsOnJEEModel }
 MJFAMIXDBAccessTests >> testMJFAMIXDBAccessCreateWithAccessorAndAccessed [
 	

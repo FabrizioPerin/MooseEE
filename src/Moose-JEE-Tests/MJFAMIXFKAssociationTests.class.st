@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXFKAssociationTests >> testAnnotation [
+	self assert: MJFAMIXFKAssociation annotation == MJFAMIXFKAssociation.
+]
+
 { #category : #testsOnJEEModel }
 MJFAMIXFKAssociationTests >> testMJFAMIXFKAssociationCreation [
 

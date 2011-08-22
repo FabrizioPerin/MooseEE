@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXJSPInvocationTests >> testAnnotation [
+	self assert: MJFAMIXJSPInvocation annotation == MJFAMIXJSPInvocation.
+]
+
 { #category : #'as yet unclassified' }
 MJFAMIXJSPInvocationTests >> testFAMIXMappingCreation [
 	

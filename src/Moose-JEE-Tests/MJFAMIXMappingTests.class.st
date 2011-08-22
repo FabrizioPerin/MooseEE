@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXMappingTests >> testAnnotation [
+	self assert: MJFAMIXMapping annotation == MJFAMIXMapping.
+]
+
 { #category : #testsOnJEEModel }
 MJFAMIXMappingTests >> testFAMIXMappingCreation [
 	

@@ -4,6 +4,11 @@ Class {
 	#category : #'Moose-JEE-Tests'
 }
 
+{ #category : #tests }
+MJFAMIXServiceLayerTests >> testAnnotation [
+	self assert: MJFAMIXServiceLayer annotation == MJFAMIXServiceLayer.
+]
+
 { #category : #testsOnJEEModel }
 MJFAMIXServiceLayerTests >> testFAMIXServiceLayerAcceptStrategy [
 
