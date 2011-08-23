@@ -523,7 +523,7 @@ MooseModel >> importDBFromSQLFileUsingASTGUI [
 { #category : #'*Moose-JEE-Model-Importers' }
 MooseModel >> importEjbJarFromFolder: aString [
 	
-	| fileSystem entries directoryEntries parser root counter |
+	| fileSystem entries directoryEntries parser factory doc root counter |
 	
 	fileSystem := FSFilesystem onDisk referenceTo: aString.
 	entries := FSCollectVisitor breadthFirst: fileSystem.
@@ -545,18 +545,23 @@ MooseModel >> importEjbJarFromFolder: aString [
 					
 					stream := StandardFileStream readOnlyFileNamed: (entry reference name).
 					parser := XMLDOMParser on: stream.
-					
-					"parser startDocument."
-					parser parseDocument.
-					root := parser stack first.
+					factory := XMLPluggableElementFactory new
+									elementClass: MJEJBeanElement;
+									handleElement: 'entity' withClass: MJEntityElement;
+									handleElement: 'message-driven' withClass: MJMessageDrivenElement;
+									handleElement: 'session' withClass: MJSessionElement;
+									handleElement: 'container-transaction' withClass: MJContainerTransactionElement.
+					parser nodeFactory: factory.
+					doc := parser parseDocument.
+					root := doc root.
 							
-					(root allChildren select: [:eachElement | eachElement class = MJSessionElement])  do: [:eachElement |
+					(root allElements select: [:eachElement | eachElement class = MJSessionElement])  do: [:eachElement |
 							eachElement populate: self].
-					(root allChildren select: [:eachElement | eachElement class = MJEntityElement])  do: [:eachElement |
+					(root allElements select: [:eachElement | eachElement class = MJEntityElement])  do: [:eachElement |
 							eachElement populate: self].
-					(root allChildren select: [:eachElement | eachElement class = MJMessageDrivenElement])  do: [:eachElement |
+					(root allElements select: [:eachElement | eachElement class = MJMessageDrivenElement])  do: [:eachElement |
 							eachElement populate: self].
-					(root allChildren select: [:eachElement | eachElement class = MJContainerTransactionElement]) do: [:eachElement |
+					(root allElements select: [:eachElement | eachElement class = MJContainerTransactionElement]) do: [:eachElement |
 							eachElement populate: self].
 					counter := counter + 1.
 					bar value: counter.
