@@ -236,3 +236,35 @@ MJFAMIXMappingTests >> testFAMIXMappingModelPopulationCaseInsensitive [
 	self assert: (mooseModel allMaps size = 1).
 	
 ]
+
+{ #category : #testsOnJEEModel }
+MJFAMIXMappingTests >> testPrintOn [
+	
+	| mooseModel  class table map mapping jEETestModel root stream res |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+	root := jEETestModel root.
+	
+	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	
+	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
+	table := mooseModel entityNamed: #Table1.
+	
+	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	
+	class addMaps: mapping.
+	table addMappedBy: mapping.
+	
+	mooseModel add: mapping.
+	
+	self assert: (mooseModel allMaps size = 1).
+	
+	map := (mooseModel allMaps select: [:each | each from = class and: [each to = table]]) first.
+	
+	stream := ReadWriteStream on: ''.
+	map printOn: stream.
+	
+	self assert: (stream contents = (map mapSource name asString , ' -> ' , map mapTarget name asString , ' (Maps)')).
+
+]

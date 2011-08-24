@@ -62,3 +62,26 @@ MJFAMIXDerivedDependencyTests >> testDerivedDependencyRational [
 				
 	self assert: (dep rationale = 'Connection derived from connections among source code elements.').
 ]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXDerivedDependencyTests >> testPrintOn [
+	| dep tab1 tab2 stream |
+	
+	dep := MJFAMIXDerivedDependency new isDirected: false.
+	
+	self assert: (dep isMemberOf: MJFAMIXDerivedDependency).
+	
+	tab1 := (MJFAMIXTable new name: #Table1).
+	tab2 := (MJFAMIXTable new name: #Table2).
+	
+	dep source: tab1.
+	dep target: tab2.
+		
+	self assert: (dep target = tab2). 
+	self assert: (dep source = tab1).
+	
+	stream := ReadWriteStream on: ''.
+	dep printOn: stream.
+	
+	self assert: (stream contents = (dep source name asString , ' -> ' , dep target name asString , ' (Derived Dependency)')).
+]

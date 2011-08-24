@@ -104,3 +104,27 @@ MJFAMIXFKAssociationTests >> testMJFAMIXFKTo [
 	
 	self assert: (fkAssoc to = table1).
 ]
+
+{ #category : #testsOnJEEModel }
+MJFAMIXFKAssociationTests >> testPrintOn [
+	| jEETestModel mooseModel table1 table2 fkAssoc stream |
+
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModelWithDB.
+
+	table1 := mooseModel entityNamed: #Table1.
+	table2 := mooseModel entityNamed: #Table2.
+	
+	fkAssoc := MJFAMIXFKAssociation new targetColumn: table1; sourceColumn: table2.
+	
+	self assert: (fkAssoc targetColumn = fkAssoc to).  
+	self assert: (fkAssoc to = table1).
+	  
+	self assert: (fkAssoc sourceColumn = fkAssoc from).  
+	self assert: (fkAssoc from = table2).
+	
+	stream := ReadWriteStream on: ''.
+	fkAssoc printOn: stream.
+	
+	self assert: (stream contents = (fkAssoc sourceColumn name asString , ' -> ' , fkAssoc targetColumn name asString , ' (FK association)')).
+]
