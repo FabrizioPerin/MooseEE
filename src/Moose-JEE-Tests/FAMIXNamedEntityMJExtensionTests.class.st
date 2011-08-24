@@ -5,34 +5,6 @@ Class {
 }
 
 { #category : #tests }
-FAMIXNamedEntityMJExtensionTests >> testDerivedDependenciesDirectionOn [
-
-	| invokedEntity invokingEntity derivedDependecy mooseModel derivedConnections |
-	
-	mooseModel := JEETestModels new sampleMooseModel.
-	
-	invokedEntity := FAMIXNamedEntity new name: 'testEntityInvoked'. 
-	invokingEntity := FAMIXNamedEntity new name: 'testEntityInvoking'.
-	
-	derivedDependecy := MJFAMIXDerivedDependency new source: invokingEntity; target: invokedEntity.
-
-	invokingEntity addOutgoingDerivedDependency: derivedDependecy.
-	invokedEntity addIncomingDerivedDependency: derivedDependecy.
-	
-	mooseModel add: invokingEntity.
-	mooseModel add: invokedEntity.
-	mooseModel add: derivedDependecy.
-	
-	self assert: (mooseModel allDerivedDependencies size = 1).
-	
-	self assert: ((invokingEntity derivedDependenciesDirection: #target on: mooseModel allDerivedDependencies) first = invokedEntity).
-	self assert: ((invokingEntity derivedDependenciesDirection: #source on: mooseModel allDerivedDependencies) isEmpty).
-	
-	self assert: ((invokedEntity derivedDependenciesDirection: #source on: invokedEntity mooseModel allDerivedDependencies) first = invokingEntity).
-	self assert: ((invokedEntity derivedDependenciesDirection: #target on: invokedEntity mooseModel allDerivedDependencies) isEmpty).
-]
-
-{ #category : #tests }
 FAMIXNamedEntityMJExtensionTests >> testIncomingDerivedDependency [
 
 	| namedEntity derivedDependecy |
