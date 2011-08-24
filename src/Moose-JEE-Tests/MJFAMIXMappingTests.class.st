@@ -12,13 +12,10 @@ MJFAMIXMappingTests >> testAnnotation [
 { #category : #testsOnJEEModel }
 MJFAMIXMappingTests >> testFAMIXMappingCreation [
 	
-	| mooseModel  class table map mapping jEETestModel root |
+	| mooseModel  class table map mapping jEETestModel |
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithDB.
-	root := jEETestModel root.
-	
-	(root allElements  select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
 	
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.

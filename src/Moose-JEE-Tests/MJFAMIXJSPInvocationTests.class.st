@@ -10,16 +10,13 @@ MJFAMIXJSPInvocationTests >> testAnnotation [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXJSPInvocationTests >> testFAMIXMappingCreation [
+MJFAMIXJSPInvocationTests >> testFAMIXJSPInvocationCreation [
 	
-	| mooseModel class jEETestModel root jsPage jspInvocation invocation |
+	| mooseModel class jEETestModel jsPage jspInvocation invocation |
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModel.
-	root := jEETestModel root.
-	
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
-	
+
 	class := mooseModel entityNamed: #'aPackage::AStatelessSessionBean'.
 	jsPage := MJFAMIXJSPPage new name: 'JSPageTest'.
 	mooseModel add: jsPage.
@@ -36,4 +33,34 @@ MJFAMIXJSPInvocationTests >> testFAMIXMappingCreation [
 	invocation := (mooseModel allJSPInvocations select: [:each | each from = jsPage and: [each to = class]]).
 	self assert: invocation size = 1.
 
+]
+
+{ #category : #testsOnJEEModel }
+MJFAMIXJSPInvocationTests >> testPrintOn [
+	| mooseModel class jEETestModel jsPage jspInvocation invocation stream |
+	
+	jEETestModel := JEETestModels new.
+	mooseModel := jEETestModel sampleMooseModel.
+
+	class := mooseModel entityNamed: #'aPackage::AStatelessSessionBean'.
+	jsPage := MJFAMIXJSPPage new name: 'JSPageTest'.
+	mooseModel add: jsPage.
+	
+	jspInvocation := MJFAMIXJSPInvocation new invocationSource: jsPage; invocationTarget: class.
+	
+	class addIncomingJspInvocation: jspInvocation.
+	jsPage addOutgoingJspInvocations: jspInvocation.
+	
+	mooseModel add: jspInvocation.
+	
+	self assert: (mooseModel allJSPInvocations size = 1).
+	
+	invocation := (mooseModel allJSPInvocations select: [:each | each from = jsPage and: [each to = class]]).
+	self assert: invocation size = 1.
+
+	
+	stream := ReadWriteStream on: ''.
+	invocation first printOn: stream.
+	
+	self assert: (stream contents = (invocation first invocationSource name asString , ' -> ' , invocation first invocationTarget name asString , ' (Invokes)')).
 ]

@@ -297,6 +297,18 @@ MJFAMIXTableTests >> testPKColumns [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testPrintOn [
+	| tab stream |
+
+	tab := MJFAMIXTable new name: 'Table1'.
+	
+	stream := ReadWriteStream on: ''.
+	tab printOn: stream.
+	
+	self assert: (stream contents = (tab name asString , ' (Table)')).
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testSetColumns [
 	| jEETestModel mooseModel table3 |
 	

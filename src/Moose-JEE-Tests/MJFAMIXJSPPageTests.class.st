@@ -6,5 +6,5 @@ Class {
 
 { #category : #tests }
 MJFAMIXJSPPageTests >> testAnnotation [
-	self assert: MJFAMIXJSPPage annotation == MJFAMIXJSPPage.
+	self assert: MJFAMIXJSPAttribute annotation == MJFAMIXJSPAttribute.
 ]

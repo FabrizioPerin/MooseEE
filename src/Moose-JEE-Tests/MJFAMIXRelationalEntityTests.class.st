@@ -5,6 +5,11 @@ Class {
 }
 
 { #category : #tests }
+MJFAMIXRelationalEntityTests >> testAnnotation [
+	self assert: MJFAMIXRelationalEntity annotation == MJFAMIXRelationalEntity.
+]
+
+{ #category : #tests }
 MJFAMIXRelationalEntityTests >> testMappedNamedEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity root jEETestModel |
 

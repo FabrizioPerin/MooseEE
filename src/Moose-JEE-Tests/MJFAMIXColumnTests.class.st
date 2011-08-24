@@ -295,12 +295,12 @@ MJFAMIXColumnTests >> testMJFAMIXColumnCreation [
 
 { #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testOwnerTable [
-	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
+	| mooseModel annotationType jEETestModel table1 annotationTypeColumn famixAnchor maps |
 
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithDB.
 	mooseModel ejbVersion: #EJB30.
-	root := jEETestModel root.
+
 	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
 	
 	self assert: (mooseModel allColumns size = 6).
@@ -313,4 +313,43 @@ MJFAMIXColumnTests >> testOwnerTable [
 	self assert: (mooseModel allColumns size = 6).
 	self assert: (table1 columns size = 3).
 	self assert: (table1 columns allSatisfy: [:column | column ownerTable = nil]).
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testPrintOn [
+	| col stream |
+	
+	col := MJFAMIXColumn new
+					name: #Column2..
+					
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	
+	stream := ReadWriteStream on: ''.
+	col printOn: stream.
+	
+	self assert: (stream contents = (col name asString , ' (Column)')).
+
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXColumnTests >> testPrintOnWithTable [
+	| col stream tab |
+	
+	col := MJFAMIXColumn new
+					name: #Column2.
+					
+	tab := MJFAMIXTable new name: 'Table1'.
+	
+	col ownerTable: tab.
+					
+	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col name = #Column2).
+	self assert: (col ownerTable = tab).
+
+	stream := ReadWriteStream on: ''.
+	col printOn: stream.
+	
+	self assert: (stream contents = (col ownerTable name asString , '>>>' , col name asString , ' (Column)')).
+
 ]
