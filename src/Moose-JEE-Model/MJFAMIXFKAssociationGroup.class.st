@@ -20,12 +20,18 @@ MJFAMIXFKAssociationGroup >> exportListOfFKsAsCSVFile [
 	
 	(fileName isNil or: [fileName = '']) 
 		ifTrue: [ DialogWindow new alert: 'Invalid file name']
-		ifFalse: [
-			stream := CrLfFileStream forceNewFileNamed: fileName , '.csv'.
-			stream nextPutAll: ('REFERENCED TABLE' , ';' , 'REFERENCED TABLE COLUMN' , ';' , 'REFERENCING TABLE' , ';' , 'REFERENCING TABLE COLUMN' , String cr).
-			self do: [:fkAssoc |
+		ifFalse: [self exportListOfFKsAsCSVFileNamed: fileName].
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXFKAssociationGroup >> exportListOfFKsAsCSVFileNamed: aString [
+	| stream |
+	
+	stream := CrLfFileStream forceNewFileNamed: aString , '.csv'.
+	stream nextPutAll: ('REFERENCED TABLE' , ';' , 'REFERENCED TABLE COLUMN' , ';' , 'REFERENCING TABLE' , ';' , 'REFERENCING TABLE COLUMN' , String cr).
+	self do: [:fkAssoc |
 				stream nextPutAll: (fkAssoc targetColumn ownerTable name , ';' , fkAssoc targetColumn name , ';' , fkAssoc sourceColumn ownerTable name , ';' , fkAssoc sourceColumn name , String cr)].	
 			stream close.
 			
-			^stream].
+	^stream.
 ]

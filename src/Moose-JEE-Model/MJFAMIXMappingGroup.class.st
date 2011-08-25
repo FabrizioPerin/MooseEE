@@ -19,11 +19,17 @@ MJFAMIXMappingGroup >> saveListOfMapsOnFile [
 	
 	(fileName isNil or: [fileName = '']) 
 		ifTrue: [ DialogWindow new alert: 'Invalid file name']
-		ifFalse: [
-			stream := CrLfFileStream forceNewFileNamed: fileName.
-			self do: [:map |
+		ifFalse: [self saveListOfMapsOnFileNamed: fileName].
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXMappingGroup >> saveListOfMapsOnFileNamed: aString [
+	| stream |
+	
+	stream := CrLfFileStream forceNewFileNamed: aString.
+	self do: [:map |
 				stream nextPutAll: (map from mooseName asString , Character space asString , map to name asString , String cr asString)].	
-			stream close.
+	stream close.
 			
-			^stream].
+	^stream
 ]
