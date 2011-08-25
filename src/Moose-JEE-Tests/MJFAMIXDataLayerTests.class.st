@@ -38,3 +38,8 @@ MJFAMIXDataLayerTests >> testFAMIXDataLayerPopulate [
 	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) first  = dataLayer).
 	self assert: dataLayer containedClasses size = 2.
 ]
+
+{ #category : #tests }
+MJFAMIXDataLayerTests >> testName [
+	self assert: (MJFAMIXDataLayer new name = 'Data Layer')
+]

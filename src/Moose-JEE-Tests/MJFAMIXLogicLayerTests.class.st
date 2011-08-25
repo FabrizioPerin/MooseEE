@@ -26,17 +26,16 @@ MJFAMIXLogicLayerTests >> testFAMIXLogicLayerAcceptStrategy [
 { #category : #testsOnJEEModel }
 MJFAMIXLogicLayerTests >> testFAMIXLogicLayerPopulate [
 
-	| mooseModel serviceLayer |
+	| mooseModel logicLayer |
 
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryAndBeansAndHierarchi.
 
-	serviceLayer := MJFAMIXServiceLayer new.
-	serviceLayer populate: mooseModel.
+	logicLayer := MJFAMIXLogicLayer new.
+	logicLayer populate: mooseModel.
 	
-	
-	"self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) size = 1).
-	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) first  = serviceLayer).
-	self assert: serviceLayer containedSessionBeans size = 3."
+	self assert: ((mooseModel allWithType: MJFAMIXLogicLayer) size = 1).
+	self assert: ((mooseModel allWithType: MJFAMIXLogicLayer) first  = logicLayer).
+	self assert: (logicLayer containedClasses size = 0).
 ]
 
 { #category : #tests }

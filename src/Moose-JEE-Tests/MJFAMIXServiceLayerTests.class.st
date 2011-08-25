@@ -38,3 +38,8 @@ MJFAMIXServiceLayerTests >> testFAMIXServiceLayerPopulate [
 	self assert: ((mooseModel allWithType: MJFAMIXServiceLayer) first  = serviceLayer).
 	self assert: serviceLayer containedSessionBeans size = 3.
 ]
+
+{ #category : #tests }
+MJFAMIXServiceLayerTests >> testName [
+	self assert: (MJFAMIXServiceLayer new name = 'Service Layer')
+]

@@ -33,6 +33,39 @@ MJFAMIXSQLConstraintTests >> testAddPKColumnName [
 ]
 
 { #category : #initialization }
+MJFAMIXSQLConstraintTests >> testAddUniqueColumnName [
+	| const |
+
+	const := MJFAMIXSQLConstraint new.
+
+	const addUniqueColumnName: 'uniqueColumn'.
+	
+	self assert: (const uniqueColumnNames size = 1).
+	self assert: (const uniqueColumnNames first = 'uniqueColumn').
+]
+
+{ #category : #tests }
+MJFAMIXSQLConstraintTests >> testAnnotation [
+	self assert: MJFAMIXSQLConstraint annotation == MJFAMIXSQLConstraint.
+]
+
+{ #category : #initialization }
+MJFAMIXSQLConstraintTests >> testIsCheck [
+	| const |
+
+	const := MJFAMIXSQLConstraint new.
+	
+	const isCheck: true.
+	
+	self assert: (const expressionString = nil).
+	
+	const expressionString: 'should be an expression'.
+	
+	self assert: (const expressionString = 'should be an expression').
+	
+]
+
+{ #category : #initialization }
 MJFAMIXSQLConstraintTests >> testIsFKConstraint [	
 	| const |
 
@@ -56,6 +89,19 @@ MJFAMIXSQLConstraintTests >> testIsPKConstraint [
 	const isPKConstraint: true.
 	
 	self assert: const isPKConstraint.
+]
+
+{ #category : #initialization }
+MJFAMIXSQLConstraintTests >> testIsUnique [
+	| const |
+
+	const := MJFAMIXSQLConstraint new.
+
+	self assert: (const isUnique = nil).
+	
+	const isUnique: true.
+	
+	self assert: const isUnique.
 ]
 
 { #category : #initialization }
