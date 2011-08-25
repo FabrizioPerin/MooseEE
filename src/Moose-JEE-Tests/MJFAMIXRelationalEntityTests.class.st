@@ -10,6 +10,11 @@ MJFAMIXRelationalEntityTests >> testAnnotation [
 ]
 
 { #category : #tests }
+MJFAMIXRelationalEntityTests >> testBelongsTo [
+	self assert: MJFAMIXRelationalEntity new belongsTo = ''.
+]
+
+{ #category : #tests }
 MJFAMIXRelationalEntityTests >> testMappedNamedEntities [
 	| mooseModel annotationType famixAnchor entities table1 aCMPEntity root jEETestModel |
 

@@ -10,6 +10,11 @@ MJFAMIXLayerTests >> testAnnotation [
 ]
 
 { #category : #tests }
+MJFAMIXLayerTests >> testBelongsTo [
+	self assert: MJFAMIXLayer new belongsTo = ''.
+]
+
+{ #category : #tests }
 MJFAMIXLayerTests >> testFileOutContainedClasses [ 
 	
 	| mooseModel logicLayer |

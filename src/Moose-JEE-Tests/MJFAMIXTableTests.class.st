@@ -274,6 +274,23 @@ MJFAMIXTableTests >> testNumberOfPrimaryKeys [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXTableTests >> testOwnerDataBase [
+	| database dbTable1 |
+
+	dbTable1 := MJFAMIXTable new
+			name: 'Table1'.
+			
+	self assert: (dbTable1 ownerDataBase = nil).
+	
+	database := (MJFAMIXDataBase new name: #database1).
+	dbTable1 ownerDataBase: database.
+
+	self assert: (dbTable1 ownerDataBase = database)
+	
+
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testPKColumns [
 	| jEETestModel mooseModel asset user assetGroup |
 	
