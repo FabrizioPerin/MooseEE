@@ -43,8 +43,3 @@ MJFAMIXJSPPage >> outgoingJspInvocations [
 	
 	^outgoingJspInvocations
 ]
-
-{ #category : #accessing }
-MJFAMIXJSPPage >> outgoingJspInvocations: aMapping [
-	outgoingJspInvocations value: aMapping.
-]
