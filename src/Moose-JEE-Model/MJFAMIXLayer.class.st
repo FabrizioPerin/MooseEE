@@ -36,7 +36,7 @@ MJFAMIXLayer >> fileOutContainedClasses [
 	name := self name.
 	name := name removeSuffix: ' Layer'.
 	
-	stream := CrLfFileStream forceNewFileNamed: (name , '.out').
+	stream := MultiByteFileStream forceNewFileNamed: (name , '.out').
 	
 	self containedClasses do: [:class |
 		stream nextPutAll: (class mooseName asString , String cr asString)].

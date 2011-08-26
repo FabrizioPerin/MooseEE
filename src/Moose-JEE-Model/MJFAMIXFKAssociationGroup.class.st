@@ -27,7 +27,7 @@ MJFAMIXFKAssociationGroup >> exportListOfFKsAsCSVFile [
 MJFAMIXFKAssociationGroup >> exportListOfFKsAsCSVFileNamed: aString [
 	| stream |
 	
-	stream := CrLfFileStream forceNewFileNamed: aString , '.csv'.
+	stream := MultiByteFileStream forceNewFileNamed: aString , '.csv'.
 	stream nextPutAll: ('REFERENCED TABLE' , ';' , 'REFERENCED TABLE COLUMN' , ';' , 'REFERENCING TABLE' , ';' , 'REFERENCING TABLE COLUMN' , String cr).
 	self do: [:fkAssoc |
 				stream nextPutAll: (fkAssoc targetColumn ownerTable name , ';' , fkAssoc targetColumn name , ';' , fkAssoc sourceColumn ownerTable name , ';' , fkAssoc sourceColumn name , String cr)].	

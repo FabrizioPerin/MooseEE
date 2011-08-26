@@ -26,7 +26,7 @@ MJFAMIXMappingGroup >> saveListOfMapsOnFile [
 MJFAMIXMappingGroup >> saveListOfMapsOnFileNamed: aString [
 	| stream |
 	
-	stream := CrLfFileStream forceNewFileNamed: aString.
+	stream := MultiByteFileStream forceNewFileNamed: aString.
 	self do: [:map |
 				stream nextPutAll: (map from mooseName asString , Character space asString , map to name asString , String cr asString)].	
 	stream close.
