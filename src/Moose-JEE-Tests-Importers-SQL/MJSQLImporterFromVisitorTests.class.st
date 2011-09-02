@@ -353,6 +353,15 @@ MJSQLImporterFromVisitorTests >> testSqlASTVisitor [
 ]
 
 { #category : #accessing }
+MJSQLImporterFromVisitorTests >> testSqlASTVisitor2 [
+	
+	| importer |
+	importer := MJSQLImporterFromVisitor new.
+
+	self assert: (importer sqlASTVisitor isMemberOf: SQLASTConcreteVisitor).
+]
+
+{ #category : #accessing }
 MJSQLImporterFromVisitorTests >> testTargetModel [
 	
 	| mm importer |
