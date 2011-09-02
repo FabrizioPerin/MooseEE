@@ -64,19 +64,6 @@ ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
 ]
 
 { #category : #loading }
-ConfigurationOfMooseJEE class >> loadLastStable [
-	
-	"Transcript open.
-	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr."
-	
-	(self project version: 'laststable') load.
-	
-	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
-	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
-
-]
-
-{ #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion10 [
 	
 	"Transcript open.
@@ -284,11 +271,14 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
-		spec group: 'Tests' with: #( 'Moose-JEE-Tests').
+		spec group: 'Tests' with: #( 'Moose-JEE-Tests-Model' 'Moose-JEE-Tests-Importers-SQL' 'Moose-JEE-Tests-Importers-JSP' 'Moose-JEE-Tests-EJBDraftObjs').
 	]
 ]
 
@@ -361,7 +351,10 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
@@ -418,7 +411,10 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Tests' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
@@ -517,31 +513,5 @@ ConfigurationOfMooseJEE >> version12: spec [
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.13';
 			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.12'.
 			
-		].
-]
-
-{ #category : #baselines }
-ConfigurationOfMooseJEE >> versionLastStable: spec [
-	<version: 'laststable' imports: #('1.1-baseline')>
-
-	spec for: #common do: [
-		spec blessing: #development.
-		spec author: 'FabrizioPerin'.
-		spec timestamp: '06/22/2010 15:53'.
-		spec description: 'Stable version of Moose JEE'.
-		
-		spec project: 'Moose for MooseJEE' with: 'default'.
-
-		spec
-			package: 'Merlin' with: 'Merlin-cyrille_delaunay.62';
-			package: 'XML-Parser' with: 'XML-Parser-Alexandre_Bergel.81'.
-		
-		spec
-			package: 'Moose-JEE-Model' with: 'Moose-JEE-Model-FabrizioPerin.33';
-			package: 'Moose-JEE-Opax' with: 'Moose-JEE-Opax-FabrizioPerin.2';
-			package: 'Moose-JEE-Tests' with: 'Moose-JEE-Tests-FabrizioPerin.16';
-			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.9';
-			package: 'Moose-JEE-PetitSQLParser' with: 'Moose-JEE-PEGSQLParser-FabrizioPerin.1';
-			package: 'Moose-JEE-SQL' with: 'Moose-JEE-SQL-FabrizioPerin.1'.
 		].
 ]
