@@ -19,7 +19,7 @@ MJImportDatabaseUsingASTIntoEmptyModel >> execute [
 			mooseModel := MooseModel new.
 			mooseModel name: (file name sliceFrom: ((file name findLastOccurrenceOfString: FileDirectory slash startingAt: 1) + 1)  to: file name size ).
 	
-			mooseModel experimentalImportDBFromSQLFile: (StandardFileStream readOnlyFileNamed: file name).
+			mooseModel importDBFromSQLFileUsingAST: (StandardFileStream readOnlyFileNamed: file name).
 			
 			mooseModel install].
 ]
