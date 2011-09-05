@@ -7,7 +7,7 @@ Class {
 	#category : #'Moose-JEE-Tests-Algos'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJSparseMatrixCoordinateListTests >> testAddAtRawAndColumn [
 	| sparseMatrix |
 	
@@ -28,7 +28,7 @@ MJSparseMatrixCoordinateListTests >> testAddAtRawAndColumn [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJSparseMatrixCoordinateListTests >> testAt [
 	| sparseMatrix |
 	
@@ -49,7 +49,7 @@ MJSparseMatrixCoordinateListTests >> testAt [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJSparseMatrixCoordinateListTests >> testCoordinates [
 	| sparseMatrix |
 	
@@ -66,7 +66,7 @@ MJSparseMatrixCoordinateListTests >> testCoordinates [
 	self assert: (sparseMatrix coordinates includes: #(3 2)).
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJSparseMatrixCoordinateListTests >> testDictionaryCoordinates [
 	| sparseMatrix |
 	
@@ -76,7 +76,7 @@ MJSparseMatrixCoordinateListTests >> testDictionaryCoordinates [
 	 self assert: (sparseMatrix dictionaryOfCoordinates keys isEmpty).
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJSparseMatrixCoordinateListTests >> testMJSparseMatrixCoordinateListCreation [
 	| sparseMatrix |
 	

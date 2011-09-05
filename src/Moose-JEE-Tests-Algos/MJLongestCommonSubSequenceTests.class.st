@@ -4,7 +4,7 @@ Class {
 	#category : #'Moose-JEE-Tests-Algos'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testComputelcsLenght [
 	| lcs res |
 	
@@ -18,7 +18,7 @@ MJLongestCommonSubSequenceTests >> testComputelcsLenght [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testDirectionsMatrix [
 	| lcs |
 	
@@ -30,7 +30,7 @@ MJLongestCommonSubSequenceTests >> testDirectionsMatrix [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testFirstSequence [
 	| lcs |
 	
@@ -42,7 +42,7 @@ MJLongestCommonSubSequenceTests >> testFirstSequence [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testInitializeDirectionsMatrix [
 	| lcs |
 	
@@ -56,7 +56,7 @@ MJLongestCommonSubSequenceTests >> testInitializeDirectionsMatrix [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testInitializeValuesMatrix [
 	| lcs |
 	
@@ -73,7 +73,7 @@ MJLongestCommonSubSequenceTests >> testInitializeValuesMatrix [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testLcsLength [
 	| lcs |
 	
@@ -92,7 +92,7 @@ MJLongestCommonSubSequenceTests >> testLcsLength [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testMJLongestCommonSubSequenceCreation [
 	| lcs |
 	
@@ -102,7 +102,7 @@ MJLongestCommonSubSequenceTests >> testMJLongestCommonSubSequenceCreation [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testPrintLCSRecursivlyOnPositionAnd [
 	| lcs |
 	
@@ -124,7 +124,7 @@ MJLongestCommonSubSequenceTests >> testPrintLCSRecursivlyOnPositionAnd [
 	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) equals:  'bcba'.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testResults [
 	| lcs |
 	
@@ -146,7 +146,7 @@ MJLongestCommonSubSequenceTests >> testResults [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testSecondSequence [
 	| lcs |
 	
@@ -158,7 +158,7 @@ MJLongestCommonSubSequenceTests >> testSecondSequence [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testValuesMatrix [
 	| lcs |
 	
