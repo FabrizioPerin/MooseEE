@@ -79,6 +79,123 @@ MooseJEEScripts class >> cleanUpPackageOrganizer [
 		displayingProgress: 'Cleaning Packages'
 ]
 
+{ #category : #'font-settings' }
+MooseJEEScripts class >> defaultDejaVuFonts [
+	StrikeFont installDejaVu.
+	StandardFonts setFontsFromSpec: #(
+	        (balloonFont: 'BitmapDejaVu' 8)
+	        (buttonFont: 'BitmapDejaVu' 9)
+	        (codeFont: 'BitmapDejaVu' 9)
+	        (haloFont: 'BitmapDejaVu' 8)
+	        (listFont: 'BitmapDejaVu' 9)
+	        (menuFont: 'BitmapDejaVu' 9)
+	        (defaultFont: 'BitmapDejaVu' 9)
+	        (windowTitleFont: 'BitmapDejaVuBold' 12))
+]
+
+{ #category : #'font-settings' }
+MooseJEEScripts class >> defaultFontsSetting [
+	| menuFont titleFont codeFont defaultFont |
+	FreeTypeFontProvider current updateFromSystem.
+	menuFont := LogicalFont 
+		familyName: 'Helvetica Neue' 
+		pointSize: 9 
+		stretchValue: (LogicalFont stretchCondensed) 
+ 		weightValue: (LogicalFont weightBold) 
+		slantValue: (LogicalFont slantNormal).
+	titleFont := LogicalFont 
+		familyName: 'Helvetica Neue' 
+		pointSize: 14 
+ 		stretchValue: (LogicalFont stretchCondensed) 
+		weightValue: (LogicalFont weightBold) 
+		slantValue: (LogicalFont slantNormal).
+	codeFont := LogicalFont familyName: 'Monaco' pointSize: 8.
+	defaultFont := LogicalFont familyName: 'Helvetica Neue' pointSize: 9.
+	Preferences setSystemFontTo: defaultFont.
+	Preferences setListFontTo: defaultFont.
+	Preferences setFlapsFontTo: menuFont.
+	Preferences setHaloLabelFontTo: defaultFont.
+	Preferences setMenuFontTo: menuFont.
+	Preferences setWindowTitleFontTo: titleFont.
+	Preferences setBalloonHelpFontTo: defaultFont.
+	Preferences setCodeFontTo: codeFont.
+	Preferences setButtonFontTo: defaultFont.
+]
+
+{ #category : #'font-settings' }
+MooseJEEScripts class >> fontsSettingWindows [
+	| menuFont titleFont codeFont defaultFont |
+	FreeTypeFontProvider current updateFromSystem.
+	menuFont := LogicalFont 
+		familyName: 'Arial' 
+		pointSize: 10 
+		stretchValue: (LogicalFont stretchCondensed) 
+ 		weightValue: (LogicalFont weightBold) 
+		slantValue: (LogicalFont slantNormal).
+	titleFont := LogicalFont 
+		familyName: 'Arial' 
+		pointSize: 14
+ 		stretchValue: (LogicalFont stretchCondensed) 
+		weightValue: (LogicalFont weightBold) 
+		slantValue: (LogicalFont slantNormal).
+	codeFont := LogicalFont familyName: 'Arial' pointSize: 10.
+	defaultFont := LogicalFont familyName: 'Arial' pointSize: 10.
+	
+	Preferences setSystemFontTo: defaultFont.
+	Preferences setListFontTo: defaultFont.
+	Preferences setFlapsFontTo: menuFont.
+	Preferences setHaloLabelFontTo: defaultFont.
+	Preferences setMenuFontTo: menuFont.
+	Preferences setWindowTitleFontTo: titleFont.
+	Preferences setBalloonHelpFontTo: defaultFont.
+	Preferences setCodeFontTo: codeFont.
+	Preferences setButtonFontTo: defaultFont.
+]
+
+{ #category : #'font-settings' }
+MooseJEEScripts class >> largeDemoDejaVuFonts [
+	StrikeFont installDejaVu.
+	StandardFonts setDefaultFonts: #(
+	        (balloonFont: 'BitmapDejaVu' 10)
+	        (buttonFont: 'BitmapDejaVu' 12)
+	        (codeFont: 'BitmapDejaVu' 12)
+	        (haloFont: 'BitmapDejaVu' 10)
+	        (listFont: 'BitmapDejaVu' 12)
+	        (menuFont: 'BitmapDejaVu' 12)
+	        (defaultFont: 'BitmapDejaVu' 12)
+	        (windowTitleFont: 'BitmapDejaVuBold' 16))
+]
+
+{ #category : #'font-settings' }
+MooseJEEScripts class >> largeDemoFontsSetting [
+	| menuFont titleFont codeFont defaultFont |
+	menuFont := LogicalFont 
+		familyName: 'Helvetica Neue' 
+		pointSize: 12 
+		stretchValue: (LogicalFont stretchCondensed)  
+		weightValue: (LogicalFont weightBold)  
+		slantValue: (LogicalFont slantNormal).
+	titleFont := LogicalFont 
+		familyName: 'Helvetica Neue' 
+		pointSize: 16 
+		stretchValue: (LogicalFont stretchCondensed) 
+		weightValue: (LogicalFont weightBold) 
+		slantValue: (LogicalFont slantNormal).
+	codeFont := LogicalFont familyName: 'Monaco' pointSize: 14.
+	defaultFont := LogicalFont familyName: 'Helvetica Neue' pointSize: 14.
+	Preferences setSystemFontTo: defaultFont.
+	Preferences setListFontTo: defaultFont.
+	Preferences setFlapsFontTo: menuFont.
+	Preferences setHaloLabelFontTo: defaultFont.
+	Preferences setMenuFontTo: menuFont.
+	Preferences setWindowTitleFontTo: titleFont.
+	Preferences setBalloonHelpFontTo: defaultFont.
+	Preferences setCodeFontTo: codeFont.
+	Preferences setButtonFontTo: defaultFont.
+
+
+]
+
 { #category : #workspace }
 MooseJEEScripts class >> openDoitWorkspaceWith: anArray [ 
 	"self openDoitWorkspaceWith: {'a'. 'b'. 'c'}"
@@ -147,4 +264,8 @@ MooseJEEScripts class >> openWorkspaceWith: aString startingFrom: aStartingPoint
 	position: aStartingPoint;
  	extent: anEndPoint;
    openAsIs
+]
+
+{ #category : #'as yet unclassified' }
+MooseJEEScripts >> seeClassSide [
 ]
