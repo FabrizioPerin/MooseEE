@@ -13,74 +13,65 @@ LCSExperiments class >> on: aModel [
 ]
 
 { #category : #amongFields }
-LCSExperiments >> calculateLDAmongTablesFieldsCleanedUpAndPutResultsInto: aFileName [
-	| result distances aStream |
+LCSExperiments >> computeLCSAmongColumnsOf: aTable and: anotherTable andPutResultsOn: aStream [
+	| progr aTablePKs anotherTableColumns |
+
+	aTablePKs := aTable pkColumns.
+	anotherTableColumns := anotherTable columns reject: [ :col | col isPK = true ].
+
+	UIManager default
+		displayProgress: 'Computing LCS among ' , aTable name , ' and ' , anotherTable name
+		at: Sensor cursorPoint
+		from: 1
+		to: aTablePKs size * anotherTableColumns size
+		during: [ :bar | 
+
+			bar value: progr.
+			(1 to: aTablePKs size)
+				do: [ :pkColIndex | 
+					(1 to: anotherTable size)
+						do: [ :colIndex | 
+							| lcs |
+							lcs := MJLongestCommonSubSequence of: (aTablePKs at: pkColIndex) and: (anotherTable at: colIndex).
+							lcs computelcsLenght.
+							lcs writeResultAsCVSEntryOn: aStream ] ] ]
+]
+
+{ #category : #amongFields }
+LCSExperiments >> computeLCSAmongColumnsOfAllTables [
+	| result distances aStream fileName |
 	
-	result := self levenshteinDistancesAmongFieldsOf: targetModel allTables.
+	fileName := UITheme builder textEntry: 'Insert a file name (csv extension will be add)'.
 	
-	self cleanUpThreshold: 1.
-	
-	distances := result select: [:distance | distance weight < self cleanUpThreshold].
-	distances := distances sorted: [:first :second | first weight < second weight ].
-	aStream := CrLfFileStream forceNewFileNamed: (aFileName , '.csv').
-	aStream nextPutAll: ('FROM TABLE NAME' , ';' , 'FROM COLUMN NAME' , ';' , 'TO TABLE NAME' , ';' , 'TO COLUMN NAME' , ';' , 'DISTANCE' , String cr).
-	distances do: [:distance | self print: distance amongColumnsAsCSVOn: aStream].
-	aStream close
+	(fileName isNil or: [ fileName isEmpty ])
+		ifTrue: [ UITheme builder alert: 'Please insert a valid file name' ]
+		ifFalse: [ 
+			| tables |
+			aStream := CrLfFileStream forceNewFileNamed: fileName , '.csv'.
+			MJLongestCommonSubSequence writeCVSEntryHeaderOn: aStream.
+			tables := targetModel allTables.
+		
+			UIManager default
+				displayProgress: 'Computing LCS among all model''s table'
+				at: Sensor cursorPoint
+				from: 1
+				to: (tables size * tables size \ 2) asInteger
+				during: [ :bar | 
+					| counter |
+					counter := 1.
+					bar value: counter.
+					(1 to: tables size)
+						do: [ :firstIndex | 
+							(firstIndex to: tables size)
+								do: [ :secondIndex | 
+									self computeLCSAmongColumnsOf: (tables at: firstIndex) and: (tables at: secondIndex) andPutResultsOn: aStream.
+									counter := counter + 1.
+									bar value: counter ] ].
+					aStream close ] ]
 ]
 
 { #category : #accessing }
 LCSExperiments >> initialize [
-]
-
-{ #category : #amongFields }
-LCSExperiments >> levenshteinDistancesAmongFieldsOf: aTableGroup [
-	
-	| aLevenshteinDistanceStrategy progr tableLeftGroup tableRightGroup result |
-	
-	tableLeftGroup := aTableGroup asArray.
-	tableRightGroup := aTableGroup asArray.
-	result := OrderedCollection new.
-	aLevenshteinDistanceStrategy := DudeLevenshteinDistanceStrategy threshold: 2.
-	progr := 1.
-	
-	UIManager default
-		displayProgress: 'Computing levenshtein distances'
-		at: Sensor cursorPoint
-		from: 1 
-		to: ((tableLeftGroup size * tableRightGroup size)/2) asInteger
-		during: [ :bar | 
-			bar value: progr.
-			
-			"these nested loops logically organize the table in a matrix and the computation is done on the whole matrix"
-			(1 to: tableLeftGroup size) asArray do: [:rowIndex |
-				| columnsPKGroup |
-				
-				(tableLeftGroup at: rowIndex) hasComposePK
-					ifFalse: [columnsPKGroup := (tableLeftGroup at: rowIndex) pkColumns]
-					ifTrue: [columnsPKGroup := #()].
-				
-				(1 to: tableRightGroup size) asArray do: [:colIndex |
-					| distance columnsGroup |
-					
-					((tableRightGroup at: colIndex) = (tableLeftGroup at: rowIndex))
-						ifTrue: [columnsGroup := #()]
-						ifFalse: [
-							"columnsGroup := (tableRightGroup at: colIndex) columns."
-							"columnsGroup :=  ((tableRightGroup at: colIndex) columns reject:  [:col | col isPK notNil and: [col isPK] ] ) reject: [:col | col isFK notNil and:[col isFK]]."
-							columnsGroup :=  ((tableRightGroup at: colIndex) columns reject:  [:col | col isPK = true]).
-							"columnsGroup :=  (tableRightGroup at: colIndex) columns select:  [:col | (col isPK notNil and: [col isPK]) or: [(col isFK notNil and: [col isFK]) or:[col isUnique notNil and:[col isUnique]]]]."].
-					
-					columnsPKGroup do: [:pk | 
-						columnsGroup do: [:col |
-							distance := aLevenshteinDistanceStrategy levenshteinDistanceSource: pk name target: col name.
-							(distance < 1)  ifTrue: [
-								| normalization |
-								normalization := (distance asFloat / (pk name size max: col name size)).
-								normalization < 0.43 ifTrue: [ 
-									result add: (MalWeightedEdge new from: pk; to: col; weight: distance)]]]].
-				progr := progr+1.
-				bar value: progr]]].
-	^result
 ]
 
 { #category : #amongFields }
