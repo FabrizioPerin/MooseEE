@@ -21,6 +21,12 @@ MJLongestCommonSubSequence class >> of: aSequence and: anotherSequence [
 		
 ]
 
+{ #category : #algorithms }
+MJLongestCommonSubSequence class >> writeCVSEntryHeaderOn: aStream [
+	aStream nextPutAll: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr).
+	^aStream
+]
+
 { #category : #run }
 MJLongestCommonSubSequence >> computelcsLenght [
 			
@@ -32,26 +38,6 @@ MJLongestCommonSubSequence >> computelcsLenght [
 { #category : #accessing }
 MJLongestCommonSubSequence >> directionMatrix [
 	^ directionsMatrix
-]
-
-{ #category : #algorithms }
-MJLongestCommonSubSequence >> exportCVSEntryHeaderOn: aStream [
-	aStream nextPutAll: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr).
-	^aStream
-]
-
-{ #category : #algorithms }
-MJLongestCommonSubSequence >> exportResultAsCVSEntryOn: aStream [
-	
-	aStream nextPutAll: (firstSequence , ';' , secondSequence , ';' , (self printLCSRecursivlyStartingFrom: firstSequence size to: secondSequence size) size asString , ';' , result , String cr).
-	^aStream
-]
-
-{ #category : #algorithms }
-MJLongestCommonSubSequence >> exportResultAsCVSEntryWithHeaderOn: aStream [
-	self exportCVSEntryHeaderOn: aStream.
-	self exportResultAsCVSEntryOn: aStream.
-	^aStream
 ]
 
 { #category : #accessing }
@@ -150,4 +136,18 @@ MJLongestCommonSubSequence >> secondSequence: anObject [
 { #category : #accessing }
 MJLongestCommonSubSequence >> valuesMatrix [
 	^ valuesMatrix
+]
+
+{ #category : #algorithms }
+MJLongestCommonSubSequence >> writeResultAsCVSEntryOn: aStream [
+	
+	aStream nextPutAll: (firstSequence , ';' , secondSequence , ';' , (self printLCSRecursivlyStartingFrom: firstSequence size to: secondSequence size) size asString , ';' , result , String cr).
+	^aStream
+]
+
+{ #category : #algorithms }
+MJLongestCommonSubSequence >> writeResultAsCVSEntryWithHeaderOn: aStream [
+	self class writeCVSEntryHeaderOn: aStream.
+	self writeResultAsCVSEntryOn: aStream.
+	^aStream
 ]
