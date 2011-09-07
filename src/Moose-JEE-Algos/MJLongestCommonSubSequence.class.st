@@ -16,7 +16,8 @@ MJLongestCommonSubSequence class >> of: aSequence and: anotherSequence [
 
 	^(self new
 		firstSequence: aSequence;
-		secondSequence: anotherSequence)
+		secondSequence: anotherSequence;
+		result: nil)
 		
 ]
 
@@ -24,14 +25,33 @@ MJLongestCommonSubSequence class >> of: aSequence and: anotherSequence [
 MJLongestCommonSubSequence >> computelcsLenght [
 			
 		self lcsLength.
-		self printLCSRecursivlyOnPosition: firstSequence size and: secondSequence size.
-		
-		^result 
+		^self printLCSRecursivlyStartingFrom: firstSequence size to: secondSequence size.
+
 ]
 
 { #category : #accessing }
 MJLongestCommonSubSequence >> directionMatrix [
 	^ directionsMatrix
+]
+
+{ #category : #algorithms }
+MJLongestCommonSubSequence >> exportCVSEntryHeaderOn: aStream [
+	aStream nextPutAll: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr).
+	^aStream
+]
+
+{ #category : #algorithms }
+MJLongestCommonSubSequence >> exportResultAsCVSEntryOn: aStream [
+	
+	aStream nextPutAll: (firstSequence , ';' , secondSequence , ';' , (self printLCSRecursivlyStartingFrom: firstSequence size to: secondSequence size) size asString , ';' , result , String cr).
+	^aStream
+]
+
+{ #category : #algorithms }
+MJLongestCommonSubSequence >> exportResultAsCVSEntryWithHeaderOn: aStream [
+	self exportCVSEntryHeaderOn: aStream.
+	self exportResultAsCVSEntryOn: aStream.
+	^aStream
 ]
 
 { #category : #accessing }
@@ -88,27 +108,33 @@ MJLongestCommonSubSequence >> lcsLength [
 ]
 
 { #category : #algorithms }
-MJLongestCommonSubSequence >> printLCSRecursivlyOnPosition: xIndex and: yIndex [
+MJLongestCommonSubSequence >> printLCSRecursivlyStartingFrom: anIndex to: anotherIndex [
 
-	(xIndex = 0 or: [yIndex = 0]) ifTrue: [
+	(anIndex = 0 or: [anotherIndex = 0]) ifTrue: [
 		result := ''.
 		^result].
 	
-	((directionsMatrix at:  (xIndex + 1) and:  (yIndex + 1)) = #d)
+	((directionsMatrix at:  (anIndex + 1) and:  (anotherIndex + 1)) = #d)
 		ifTrue: [
-			self printLCSRecursivlyOnPosition: (xIndex - 1) and: (yIndex - 1).
-			result := result , (firstSequence at: xIndex) asString.]
+			self printLCSRecursivlyStartingFrom: (anIndex - 1) to: (anotherIndex - 1).
+			result := result , (firstSequence at: anIndex) asString.]
 		ifFalse: [
-			((directionsMatrix at: (xIndex + 1) and: (yIndex + 1)) = #u)
-				ifTrue: [self printLCSRecursivlyOnPosition: (xIndex - 1)  and: yIndex] 
-				ifFalse: [self printLCSRecursivlyOnPosition: xIndex  and: (yIndex - 1)] ].
+			((directionsMatrix at: (anIndex + 1) and: (anotherIndex + 1)) = #u)
+				ifTrue: [self printLCSRecursivlyStartingFrom: (anIndex - 1)  to: anotherIndex] 
+				ifFalse: [self printLCSRecursivlyStartingFrom: anIndex  to: (anotherIndex - 1)] ].
 	
 	^result 
 ]
 
 { #category : #accessing }
 MJLongestCommonSubSequence >> result [
+	result isNil ifTrue: [self computelcsLenght].
 	^ result
+]
+
+{ #category : #initialize }
+MJLongestCommonSubSequence >> result: aStringOrNil [
+	result := aStringOrNil
 ]
 
 { #category : #accessing }
