@@ -56,7 +56,7 @@ MJLongestCommonSubSequenceTests >> testExportResultAsCVSEntryOn [
 	
 	res :=  lcs lcsLength.
 
-	self assert: (lcs exportCVSEntryHeaderOn: aStream) contents equals: (lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
+	self assert: (lcs exportResultAsCVSEntryOn: aStream) contents equals: (lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
 
 ]
 
