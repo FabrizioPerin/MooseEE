@@ -15,26 +15,36 @@ LCSExperiments class >> on: aModel [
 { #category : #amongFields }
 LCSExperiments >> computeLCSAmongColumnsOf: aTable and: anotherTable andPutResultsOn: aStream [
 	| progr aTablePKs anotherTableColumns |
-
+	
 	aTablePKs := aTable pkColumns.
 	anotherTableColumns := anotherTable columns reject: [ :col | col isPK = true ].
-
+	
 	UIManager default
 		displayProgress: 'Computing LCS among ' , aTable name , ' and ' , anotherTable name
 		at: Sensor cursorPoint
 		from: 1
 		to: aTablePKs size * anotherTableColumns size
 		during: [ :bar | 
-
-			bar value: progr.
+			| counter |
+			counter := 1.
+			bar value: counter.
 			(1 to: aTablePKs size)
 				do: [ :pkColIndex | 
-					(1 to: anotherTable size)
+					(1 to: anotherTableColumns size)
 						do: [ :colIndex | 
 							| lcs |
-							lcs := MJLongestCommonSubSequence of: (aTablePKs at: pkColIndex) and: (anotherTable at: colIndex).
+							lcs := MJLongestCommonSubSequence
+								of: (aTablePKs at: pkColIndex) name
+								and: (anotherTableColumns at: colIndex) name.
+							
 							lcs computelcsLenght.
-							lcs writeResultAsCVSEntryOn: aStream ] ] ]
+							
+							"filtering results"
+							((((aTablePKs at: pkColIndex) name size max: (anotherTableColumns at: colIndex) name size) - lcs result size) < 3)
+								ifTrue: [ lcs writeResultAsCVSEntryOn: aStream ].
+							
+							counter := counter + 1.
+							bar value: counter ] ] ]
 ]
 
 { #category : #amongFields }
@@ -47,7 +57,7 @@ LCSExperiments >> computeLCSAmongColumnsOfAllTables [
 		ifTrue: [ UITheme builder alert: 'Please insert a valid file name' ]
 		ifFalse: [ 
 			| tables |
-			aStream := CrLfFileStream forceNewFileNamed: fileName , '.csv'.
+			aStream := MultiByteFileStream forceNewFileNamed: fileName , '.csv'.
 			MJLongestCommonSubSequence writeCVSEntryHeaderOn: aStream.
 			tables := targetModel allTables.
 		
@@ -55,7 +65,7 @@ LCSExperiments >> computeLCSAmongColumnsOfAllTables [
 				displayProgress: 'Computing LCS among all model''s table'
 				at: Sensor cursorPoint
 				from: 1
-				to: (tables size * tables size \ 2) asInteger
+				to: ((tables size * tables size) / 2) asInteger
 				during: [ :bar | 
 					| counter |
 					counter := 1.
