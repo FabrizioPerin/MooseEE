@@ -31,53 +31,6 @@ MJLongestCommonSubSequenceTests >> testDirectionsMatrix [
 ]
 
 { #category : #tests }
-MJLongestCommonSubSequenceTests >> testExportCVSEntryHeaderOn [
-	| lcs res result aStream |
-	
-	result := ''.
-	aStream := ReadWriteStream on: result.
-	
-	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
-	
-	res :=  lcs lcsLength.
-
-	self assert: (lcs exportCVSEntryHeaderOn: aStream) contents equals: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr)
-
-]
-
-{ #category : #tests }
-MJLongestCommonSubSequenceTests >> testExportResultAsCVSEntryOn [
-	| lcs res result aStream |
-	
-	result := ''.
-	aStream := ReadWriteStream on: result.
-	
-	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
-	
-	res :=  lcs lcsLength.
-
-	self assert: (lcs exportResultAsCVSEntryOn: aStream) contents equals: (lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
-
-]
-
-{ #category : #tests }
-MJLongestCommonSubSequenceTests >> testExportResultAsCVSEntryWithHeaderOn [
-"	aStream nextPutAll: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr).
-	self exportResultAsCVSEntryOn: aStream."
-	| lcs res result aStream |
-	
-	result := ''.
-	aStream := ReadWriteStream on: result.
-	
-	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
-	
-	res :=  lcs lcsLength.
-
-	self assert: (lcs exportResultAsCVSEntryWithHeaderOn: aStream) contents equals: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr , lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
-
-]
-
-{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testFirstSequence [
 	| lcs |
 	
@@ -214,4 +167,46 @@ MJLongestCommonSubSequenceTests >> testValuesMatrix [
 	self assert: (lcs isMemberOf: MJLongestCommonSubSequence).
 
 	self assert: lcs valuesMatrix isNil.
+]
+
+{ #category : #tests }
+MJLongestCommonSubSequenceTests >> testWriteCVSEntryHeaderOn [
+	| aStream |
+	
+	aStream := ReadWriteStream on: ''.
+
+	self assert: (MJLongestCommonSubSequence writeCVSEntryHeaderOn: aStream) contents equals: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr)
+
+]
+
+{ #category : #tests }
+MJLongestCommonSubSequenceTests >> testWriteResultAsCVSEntryOn [
+	| lcs res result aStream |
+	
+	result := ''.
+	aStream := ReadWriteStream on: result.
+	
+	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
+	
+	res :=  lcs lcsLength.
+
+	self assert: (lcs writeResultAsCVSEntryOn: aStream) contents equals: (lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
+
+]
+
+{ #category : #tests }
+MJLongestCommonSubSequenceTests >> testWriteResultAsCVSEntryWithHeaderOn [
+"	aStream nextPutAll: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr).
+	self exportResultAsCVSEntryOn: aStream."
+	| lcs res result aStream |
+	
+	result := ''.
+	aStream := ReadWriteStream on: result.
+	
+	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
+	
+	res :=  lcs lcsLength.
+
+	self assert: (lcs writeResultAsCVSEntryWithHeaderOn: aStream) contents equals: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr , lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
+
 ]
