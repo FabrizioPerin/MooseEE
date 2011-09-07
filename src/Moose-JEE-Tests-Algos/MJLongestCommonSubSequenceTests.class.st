@@ -31,6 +31,53 @@ MJLongestCommonSubSequenceTests >> testDirectionsMatrix [
 ]
 
 { #category : #tests }
+MJLongestCommonSubSequenceTests >> testExportCVSEntryHeaderOn [
+	| lcs res result aStream |
+	
+	result := ''.
+	aStream := ReadWriteStream on: result.
+	
+	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
+	
+	res :=  lcs lcsLength.
+
+	self assert: (lcs exportCVSEntryHeaderOn: aStream) contents equals: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr)
+
+]
+
+{ #category : #tests }
+MJLongestCommonSubSequenceTests >> testExportResultAsCVSEntryOn [
+	| lcs res result aStream |
+	
+	result := ''.
+	aStream := ReadWriteStream on: result.
+	
+	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
+	
+	res :=  lcs lcsLength.
+
+	self assert: (lcs exportCVSEntryHeaderOn: aStream) contents equals: (lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
+
+]
+
+{ #category : #tests }
+MJLongestCommonSubSequenceTests >> testExportResultAsCVSEntryWithHeaderOn [
+"	aStream nextPutAll: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr).
+	self exportResultAsCVSEntryOn: aStream."
+	| lcs res result aStream |
+	
+	result := ''.
+	aStream := ReadWriteStream on: result.
+	
+	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
+	
+	res :=  lcs lcsLength.
+
+	self assert: (lcs exportResultAsCVSEntryWithHeaderOn: aStream) contents equals: ('First Sequence' , ';' , 'Second Sequence' , ';' , 'LCS size' , ';' , 'LCS' , String cr , lcs firstSequence , ';' , lcs secondSequence , ';' , lcs result size asString , ';' , lcs result , String cr)
+
+]
+
+{ #category : #tests }
 MJLongestCommonSubSequenceTests >> testFirstSequence [
 	| lcs |
 	
@@ -103,25 +150,25 @@ MJLongestCommonSubSequenceTests >> testMJLongestCommonSubSequenceCreation [
 ]
 
 { #category : #tests }
-MJLongestCommonSubSequenceTests >> testPrintLCSRecursivlyOnPositionAnd [
+MJLongestCommonSubSequenceTests >> testPrintLCSRecursivlyStartingFromTo [
 	| lcs |
 	
 	lcs := MJLongestCommonSubSequence of: 'tggctgcgaatg' and: 'aacggcgcgaatgasdr'.
 	
 	lcs lcsLength.
 
-	self assert: ((lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) isMemberOf: ByteString).
-	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) size equals: 10.
-	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) equals:  'ggcgcgaatg'.
+	self assert: ((lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) isMemberOf: ByteString).
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) size equals: 10.
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals:  'ggcgcgaatg'.
 	
 	
 	lcs := MJLongestCommonSubSequence of: 'abcbdab' and: 'bdcaba'.
 	
 	lcs lcsLength.
 	
-	self assert: ((lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) isMemberOf: ByteString).
-	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) size equals: 4.
-	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) equals:  'bcba'.
+	self assert: ((lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) isMemberOf: ByteString).
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) size equals: 4.
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals:  'bcba'.
 ]
 
 { #category : #tests }
@@ -132,7 +179,7 @@ MJLongestCommonSubSequenceTests >> testResults [
 	
 	lcs lcsLength.
 
-	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) equals: lcs result.
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals: lcs result.
 	self assert: lcs result equals: 'ggcgcgaatg'.
 
 	
@@ -140,7 +187,7 @@ MJLongestCommonSubSequenceTests >> testResults [
 	
 	lcs lcsLength.
 	
-	self assert: (lcs printLCSRecursivlyOnPosition: lcs firstSequence size and: lcs secondSequence size) equals: lcs result.
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals: lcs result.
 	self assert: lcs result equals: 'bcba'.
 
 	
