@@ -41,7 +41,14 @@ LCSExperiments >> computeLCSAmongColumnsOf: aTable and: anotherTable andPutResul
 							
 							"filtering results"
 							((((aTablePKs at: pkColIndex) name size max: (anotherTableColumns at: colIndex) name size) - lcs result size) < 3)
-								ifTrue: [ lcs writeResultAsCVSEntryOn: aStream ].
+								ifTrue: [aStream nextPutAll: (
+													(aTablePKs at: pkColIndex) ownerTable name , ';' , 
+													(aTablePKs at: pkColIndex) name , ';' ,
+													(anotherTableColumns at: colIndex) ownerTable name , ';' ,
+													(anotherTableColumns at: colIndex) name , ';' , 
+													lcs result size asString , ';' , 
+													lcs result ,
+													String cr)].
 							
 							counter := counter + 1.
 							bar value: counter ] ] ]
