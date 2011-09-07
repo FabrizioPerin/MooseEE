@@ -179,16 +179,16 @@ MJLongestCommonSubSequenceTests >> testResults [
 	
 	lcs lcsLength.
 
-	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals: lcs result.
 	self assert: lcs result equals: 'ggcgcgaatg'.
-
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals: lcs result.
 	
+
 	lcs := MJLongestCommonSubSequence of: 'abcbdab' and: 'bdcaba'.
 	
 	lcs lcsLength.
 	
-	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals: lcs result.
 	self assert: lcs result equals: 'bcba'.
+	self assert: (lcs printLCSRecursivlyStartingFrom: lcs firstSequence size to: lcs secondSequence size) equals: lcs result.
 
 	
 ]
