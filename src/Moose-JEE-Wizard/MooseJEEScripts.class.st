@@ -52,6 +52,32 @@ MooseJEEScripts class >> cleanUpForRelease [
 	Author reset
 ]
 
+{ #category : #cleanup }
+MooseJEEScripts class >> cleanUpFromJenkins [
+
+"Clear Author"
+Author reset.
+
+"Clear Monticello Caches"
+MCCacheRepository instVarNamed: 'default' put: nil.
+MCFileBasedRepository flushAllCaches.
+MCMethodDefinition shutDown.
+MCDefinition clearInstances.
+
+"Cleanup Smalltalk"
+Smalltalk flushClassNameCache.
+Smalltalk organization removeEmptyCategories.
+Smalltalk allClassesAndTraitsDo: [ :each |
+	each organization removeEmptyCategories; sortCategories.
+	each class organization removeEmptyCategories; sortCategories ].
+
+"Cleanup System Memory"
+Smalltalk garbageCollect.
+Symbol compactSymbolTable.
+Deprecation raiseWarning: true.
+
+]
+
 { #category : #'as yet unclassified' }
 MooseJEEScripts class >> cleanUpMethods [
 	"Make sure that all methods in use are restarted"
@@ -77,6 +103,59 @@ MooseJEEScripts class >> cleanUpPackageOrganizer [
 			each methods isEmpty
 				ifTrue: [ PackageOrganizer default unregisterPackage: each ] ]
 		displayingProgress: 'Cleaning Packages'
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> cleanUpScript [
+
+	MooseJEEScripts deepCleanUp.
+	MooseJEEScripts cleanUpFromJenkins.
+	
+	Smalltalk garbageCollect
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> deepCleanUp [
+	"self new cleanUpForProduction"
+	
+	| oldDicts newDicts |
+	
+	"trim MC ancestory information"
+	MCVersionInfo allInstances do: [ :each | each instVarNamed: 'ancestors' put: nil ].	
+
+	"delete logo"	
+	LogoImageMorph default: nil.
+
+	"delete ScriptLoader log"
+	ScriptLoader resetLogStream.
+
+	"Smalltalk globals at: #SUnitUnloader ifPresent:[ :unloader | unloader new unloadAll  ].
+	(MCPackage named: 'HelpSystem-Core') unload.
+	(MCPackage named: 'Deprecated12') unload.
+	(MCPackage named: 'Deprecated13') unload.
+	(MCPackage named: 'ToolBuilder-Morphic') unload.
+	(MCPackage named: 'ToolBuilder-Kernel') unload."
+	
+	"shrink method dictionaries."
+	Smalltalk garbageCollect.
+	oldDicts := MethodDictionary allInstances.
+	newDicts := Array new: oldDicts size.
+	oldDicts withIndexDo: [ :d :index | newDicts at: index put: d rehashWithoutBecome ].
+	oldDicts elementsExchangeIdentityWith: newDicts.
+	oldDicts := newDicts := nil.
+	
+	"self removeDejaVuFonts.
+	(MCPackage named: 'Graphics-Resources') unload.
+	
+	(MCPackage named: 'HostMenus') unload."
+	
+	MooseJEEScripts standardCleanUp.
+	(MCPackage named: MooseJEEScripts scriptLoaderPackageNameForCleanUp) unload.
+	ChangeSet removeChangeSetsNamedSuchThat: [ :each | true ].
+	ChangeSet resetCurrentToNewUnnamedChangeSet.
+	RecentMessageList cleanUp.
+	
+	
 ]
 
 { #category : #'font-settings' }
@@ -196,6 +275,23 @@ MooseJEEScripts class >> largeDemoFontsSetting [
 
 ]
 
+{ #category : #cleanup }
+MooseJEEScripts class >> methodsCleanUp [
+	"Make sure that all methods in use are restarted"
+	"ScriptLoader new cleanUpMethods"
+
+	WeakArray restartFinalizationProcess.
+	MethodChangeRecord allInstancesDo: [:x | x noteNewMethod: nil].
+	WorldState allInstancesDo: [ :ws | ws convertAlarms; convertStepList; resetWorldMenu].
+	WorldState allInstancesDo: [ :ws | ws instVarNamed: 'menuBuilder' put: nil ].
+	ExternalDropHandler initialize.
+	ScrollBar initializeImagesCache.
+	GradientFillStyle initPixelRampCache.
+	ProcessBrowser initialize.
+	Smalltalk garbageCollect.
+	Delay startTimerEventLoop
+]
+
 { #category : #workspace }
 MooseJEEScripts class >> openDoitWorkspaceWith: anArray [ 
 	"self openDoitWorkspaceWith: {'a'. 'b'. 'c'}"
@@ -264,6 +360,69 @@ MooseJEEScripts class >> openWorkspaceWith: aString startingFrom: aStartingPoint
 	position: aStartingPoint;
  	extent: anEndPoint;
    openAsIs
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> packageOrganizerCleanUp [
+
+	PackageOrganizer default packages
+		do: [ :each | 
+			each methods isEmpty
+				ifTrue: [ PackageOrganizer default unregisterPackage: each ] ]
+		displayingProgress: 'Cleaning Packages'
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> scriptLoaderPackageNameForCleanUp [
+	^'ScriptLoader',  CurrentMajorVersionNumber asString copyWithout: $. 
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> standardCleanUp [
+	"self new cleanUpForRelease"
+
+	Author fullName: 'Mr.Cleaner'.
+	self packageOrganizerCleanUp.
+	self methodsCleanUp.
+	Smalltalk cleanUp: true except: #() confirming: false.
+	ImageMorph classPool at: #DefaultForm put: (Form extent: 1 @ 1 depth: 1).
+	Smalltalk organization removeEmptyCategories.
+	Smalltalk globals
+		at: #TTFontDescription
+		ifPresent: [ :c | 
+			c
+				clearDefault;
+				clearDescriptions ].
+	ExternalDropHandler resetRegisteredHandlers.
+	FreeTypeFontProvider current initialize.
+	SystemNavigation default
+		allObjectsDo: [ :each | 
+			(each respondsTo: #releaseCachedState)
+				ifTrue: [ each releaseCachedState ] ].
+	3 timesRepeat: [ 
+		Smalltalk garbageCollect.
+		Symbol compactSymbolTable ].
+	HashedCollection rehashAll.
+	
+	"Remove empty categories, which are not in MC packages, because MC does
+	not do this (this script does not make packages dirty)"
+	Smalltalk organization removeEmptyCategories.
+	Smalltalk
+		allClassesAndTraitsDo: [ :class |
+			[ :each |
+				each
+					removeEmptyCategories;
+					sortCategories ]
+						value: class organization;
+						value: class class organization ].
+	PackageOrganizer default packages
+		do: [ :each | each methods ifEmpty: [ PackageOrganizer default unregisterPackage: each ] ]
+		displayingProgress: 'Cleaning Packages'.
+	Smalltalk organization sortCategories.
+	ChangeSet removeChangeSetsNamedSuchThat: [ :each | true ].
+	ChangeSet resetCurrentToNewUnnamedChangeSet.
+	Smalltalk garbageCollect.
+	Author reset
 ]
 
 { #category : #'as yet unclassified' }
