@@ -4,6 +4,15 @@ Class {
 	#category : #'Moose-JEE-Wizard'
 }
 
+{ #category : #cleanup }
+MooseJEEScripts class >> cleanUpAllTests [
+
+	self cleanUpTests.
+	self cleanUpMooseTests.
+	
+	Smalltalk garbageCollect.
+]
+
 { #category : #'as yet unclassified' }
 MooseJEEScripts class >> cleanUpForRelease [
 	"self new cleanUpForRelease"
@@ -95,6 +104,48 @@ MooseJEEScripts class >> cleanUpMethods [
 	Delay startTimerEventLoop
 ]
 
+{ #category : #cleanup }
+MooseJEEScripts class >> cleanUpMooseTests [
+
+	#('Moose-JEE-Tests-Algos' 'Moose-JEE-Tests-EJBDraftObjs' 'Moose-JEE-Tests-Importers-JSP' 'Moose-JEE-Tests-Importers-SQL' 'Moose-JEE-Tests-Model'
+				'Moose-Tests-Core'
+				'Famix-Tests-Core'
+				'Famix-Tests-Java'
+				'Famix-Tests-Extensions'
+				'Moose-Tests-DistributionMap'
+				'Moose-Tests-Finder'
+				'Moose-Tests-MondrianPaintings'
+				'Moose-Tests-SmalltalkImporter-Core'
+				'Moose-TestResources-Reference-Core'
+				'Moose-TestResources-Reference-PackageOne'
+				'Moose-TestResources-Reference-PackageTwo'
+				'Moose-Tests-SmalltalkImporter-LAN'
+				'Moose-TestResources-LAN'
+				'Moose-Tests-SmalltalkImporter-KGB'
+				'Moose-TestResources-KGB-P4FullInteracted'
+				'Moose-TestResources-KGB-P6InteractedReferee'
+				'Moose-TestResources-KGB-P5FullReferee'
+				'Moose-TestResources-KGB-P1FullReferencer'
+				'Moose-TestResources-KGB-P2InteractedReferencerReferee'
+				'Moose-TestResources-KGB-P3InteractedReferencer'
+				'Moose-TestResources-KGB-P7ReferencerReferee'
+				'Moose-TestResources-KGB-P8FullReferencer'
+				'Moose-TestResources-KGB-P9FullReferencer'
+				'Moose-TestResources-KGB-P10InteractedReferee'
+				'Moose-TestResources-KGB-P11FullReferee'
+				'Moose-TestResources-KGB-P12FullReferencer'
+				'Moose-TestResources-KGB-P13FullReferencer'
+				'Moose-TestResources-KGB-P14FullReferee'
+				'Moose-TestResources-KGB-PExtensions'
+				'Moose-TestResources-PackageBlueprint-P1'
+				'Moose-TestResources-PackageBlueprint-P2'
+				'Moose-TestResources-PackageBlueprint-P3'
+				'Moose-TestResources-PackageBlueprint-P4'
+				'Moose-Tests-MonticelloImporter'
+				'Arki-Tests-Reporter') do: [ :each | (MCPackage named: each) unload ]. 
+
+]
+
 { #category : #'as yet unclassified' }
 MooseJEEScripts class >> cleanUpPackageOrganizer [
 
@@ -111,6 +162,14 @@ MooseJEEScripts class >> cleanUpScript [
 	MooseJEEScripts deepCleanUp.
 	MooseJEEScripts cleanUpFromJenkins.
 	
+	Smalltalk garbageCollect
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> cleanUpTests [
+
+	Smalltalk globals at: #SUnitUnloader ifPresent:[ :unloader | unloader new unloadAll  ].
+
 	Smalltalk garbageCollect
 ]
 
