@@ -129,7 +129,7 @@ ConfigurationOfMooseJEE >> baseline10: spec [
 			
 		spec group: 'Tests' with: #('Moose-JEE-Tests').
 		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-Opax' 'Moose-JEE-Wizard'). 
-		spec group: 'default' with: #('Core' 'Tests').
+		"spec group: 'default' with: #('Core' 'Tests')."
 	].
 ]
 
@@ -175,7 +175,7 @@ ConfigurationOfMooseJEE >> baseline11: spec [
 			
 		spec group: 'Tests' with: #('Moose-JEE-Tests').
 		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-Opax' 'Moose-JEE-Wizard' 'Moose-JEE-Importers-SQL'). 
-		spec group: 'default' with: #('Core' 'Tests').
+		"spec group: 'default' with: #('Core' 'Tests')."
 	].
 ]
 
@@ -212,7 +212,7 @@ ConfigurationOfMooseJEE >> baseline12: spec [
 			
 		spec group: 'Tests' with: #('Moose-JEE-Tests').
 		spec group: 'Core' with: #('Moose-JEE-Model' 'Moose-JEE-EJBDraftObjs' 'Moose-JEE-Wizard' 'Moose-JEE-Importers-SQL'). 
-		spec group: 'default' with: #('Core' 'Tests').
+		"spec group: 'default' with: #('Core' 'Tests')."
 	].
 ]
 
