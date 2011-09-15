@@ -32,7 +32,7 @@ ConfigurationOfMooseJEE class >> loadAllProjectsDefault [
 	
 	(self project version: 'defaultAllProjects') load.
 	
-	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+	(Smalltalk at: #MooseJEEScripts) perform: #openMooseWorkspace.
 	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 ]
@@ -359,6 +359,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
+			package: 'Moose-JEE-Tests-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
@@ -366,7 +367,12 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
-		spec group: 'Tests' with: #( 'Moose-JEE-Tests').
+		spec group: 'Tests' with: #( 
+			'Moose-JEE-Tests-Model'
+			'Moose-JEE-Tests-Importers-SQL'
+			'Moose-JEE-Tests-Importers-JSP'
+			'Moose-JEE-Tests-EJBDraftObjs'
+			'Moose-JEE-Tests-Algos').
 	]
 ]
 
@@ -419,6 +425,7 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Moose-JEE-Model'];
+			package: 'Moose-JEE-Tests-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
@@ -426,7 +433,12 @@ ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
-		spec group: 'Tests' with: #( 'Moose-JEE-Tests').
+		spec group: 'Tests' with: #( 
+			'Moose-JEE-Tests-Model'
+			'Moose-JEE-Tests-Importers-SQL'
+			'Moose-JEE-Tests-Importers-JSP'
+			'Moose-JEE-Tests-EJBDraftObjs'
+			'Moose-JEE-Tests-Algos').
 	]
 
 ]
