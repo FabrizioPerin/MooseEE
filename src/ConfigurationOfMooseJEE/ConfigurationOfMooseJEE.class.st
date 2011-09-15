@@ -281,12 +281,23 @@ ConfigurationOfMooseJEE >> default: spec [
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'].
+		
 		spec group: 'Tests' with: #( 
 			'Moose-JEE-Tests-Model'
 			'Moose-JEE-Tests-Importers-SQL'
 			'Moose-JEE-Tests-Importers-JSP'
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
+		
+		spec group: 'default' with: #( 
+			'Moose-JEE-Model'
+			'Moose-JEE-Importers-SQL'
+			'Moose-JEE-Importers-JSP'
+			'Moose-JEE-EJBDraftObjs'
+			'Moose-JEE-Algos'
+			'Moose-JEE-Browsers'
+			'Moose-JEE-Reports'
+			'Moose-JEE-Wizard').
 	]
 ]
 
