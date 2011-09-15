@@ -331,12 +331,12 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				version: 'default';
 				repository: 'http://www.squeaksource.com/Maze' ].
 			
-		"spec  project: 'Babel for MooseJEE' with: [
+		spec  project: 'Babel for MooseJEE' with: [
 			spec
-				className: 'ConfigurationOfPetitJSPParser';
-				file: 'ConfigurationOfPetitJSPParser';
+				className: 'ConfigurationOfBabel';
+				file: 'ConfigurationOfBabel';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitJSParser' ]."
+				repository: 'http://www.squeaksource.com/Babel' ].
 			
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
