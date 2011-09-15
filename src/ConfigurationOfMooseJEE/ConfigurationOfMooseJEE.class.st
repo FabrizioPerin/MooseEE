@@ -51,19 +51,6 @@ ConfigurationOfMooseJEE class >> loadDefault [
 ]
 
 { #category : #loading }
-ConfigurationOfMooseJEE class >> loadDefaultWithoutMoose [
-
-	"TranscriptWindow openWindow.
-	Transcript show: 'Loading Moose JEE configuration without Moose ...'; cr; show: '--------'; cr; cr."
-	
-	(self project version: 'defaultWithoutMoose') load.
-
-	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
-
-
-]
-
-{ #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion10 [
 	
 	"Transcript open.
@@ -385,73 +372,6 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
 	]
-]
-
-{ #category : #baselines }
-ConfigurationOfMooseJEE >> defaultWithoutMoose: spec [ 
-	<version: 'defaultWithoutMoose'>
-
-	spec for: #common do: [
-		spec blessing: #default.
-		
-		"spec  project: 'XMLSupport for MooseJEE' with: [
-			spec
-				className: 'ConfigurationOfXMLSupport';
-				file: 'ConfigurationOfXMLSupport';
-				version: '1.1.1';
-				repository: 'http://www.squeaksource.com/XMLSupport' ]."
-		
-		spec  project: 'PetitSQLParser for MooseJEE' with: [
-			spec
-				className: 'ConfigurationOfPetitSQLParser';
-				file: 'ConfigurationOfPetitSQLParser';
-				version: 'defaultWithoutPetit';
-				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
-
-		spec  project: 'PetitJSPParser for MooseJEE' with: [
-			spec
-				className: 'ConfigurationOfPetitJSPParser';
-				file: 'ConfigurationOfPetitJSPParser';
-				version: 'defaultWithoutPetit';
-				repository: 'http://www.squeaksource.com/PetitJSParser' ].
-		
-		spec 
-			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
-			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
-
-			package: 'Moose-JEE-Model' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				"spec requires: 'Moose for MooseJEE'"];
-			package: 'Moose-JEE-Reports' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-EJBDraftObjs' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Importers-SQL' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'PetitSQLParser for MooseJEE'];
-			package: 'Moose-JEE-Importers-JSP' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'PetitJSPParser for MooseJEE'];
-			package: 'Moose-JEE-Browsers' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-Tests-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Wizard' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Merlin'].
-		spec group: 'Tests' with: #( 
-			'Moose-JEE-Tests-Model'
-			'Moose-JEE-Tests-Importers-SQL'
-			'Moose-JEE-Tests-Importers-JSP'
-			'Moose-JEE-Tests-EJBDraftObjs'
-			'Moose-JEE-Tests-Algos').
-	]
-
 ]
 
 { #category : #accessing }
