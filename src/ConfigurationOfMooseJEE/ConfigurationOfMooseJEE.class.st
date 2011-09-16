@@ -276,7 +276,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
 		
-		spec group: 'default' with: #( 
+		"spec group: 'default' with: #( 
 			'Moose-JEE-Model'
 			'Moose-JEE-Importers-SQL'
 			'Moose-JEE-Importers-JSP'
@@ -284,7 +284,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			'Moose-JEE-Algos'
 			'Moose-JEE-Browsers'
 			'Moose-JEE-Reports'
-			'Moose-JEE-Wizard').
+			'Moose-JEE-Wizard')."
 	]
 ]
 
