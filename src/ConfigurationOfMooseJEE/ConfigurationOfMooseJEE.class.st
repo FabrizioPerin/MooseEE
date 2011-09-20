@@ -32,7 +32,7 @@ ConfigurationOfMooseJEE class >> loadAllProjectsDefault [
 	
 	(self project version: 'defaultAllProjects') load.
 	
-	(Smalltalk at: #MooseJEEScripts) perform: #openMooseWorkspace.
+	Smalltalk organization sortCategories.
 	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 ]
@@ -45,7 +45,7 @@ ConfigurationOfMooseJEE class >> loadDefault [
 	
 	(self project version: 'default') load.
 	
-	(Smalltalk at: #MooseScripts) perform: #openMooseWorkspace.
+	Smalltalk organization sortCategories.
 	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
 
 ]
