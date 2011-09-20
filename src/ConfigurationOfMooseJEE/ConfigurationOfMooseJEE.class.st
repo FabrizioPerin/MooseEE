@@ -333,7 +333,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			spec
 				className: 'ConfigurationOfBabel';
 				file: 'ConfigurationOfBabel';
-				version: 'default';
+				version: 'defaultWithoutMooseJEE';
 				repository: 'http://www.squeaksource.com/Babel' ].
 			
 		spec 
