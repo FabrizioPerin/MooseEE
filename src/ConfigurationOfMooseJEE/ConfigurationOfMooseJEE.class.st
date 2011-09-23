@@ -337,6 +337,13 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				file: 'ConfigurationOfBabel';
 				version: 'defaultWithoutMooseJEE';
 				repository: 'http://www.squeaksource.com/Babel' ].
+		
+		spec  project: 'Spy for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfSpy';
+				file: 'ConfigurationOfSpy';
+				version: 'default';
+				repository: 'http://www.squeaksource.com/Spy' ].
 			
 		spec 
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
