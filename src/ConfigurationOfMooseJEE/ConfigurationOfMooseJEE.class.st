@@ -238,55 +238,95 @@ ConfigurationOfMooseJEE >> default: spec [
 				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 			
 		spec 
+			"Extra Projects"
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
-			package: 'Moose-JEE-Model' with: [
+			
+			"Models"
+			package: 'Moose-JEE-Core-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec repository: 'XMLSupport for MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
-			package: 'Moose-JEE-Reports' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-EJBDraftObjs' with: [
+			package: 'Moose-JEE-SQL-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-JSP-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-EJB-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tiers-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			
+			
+			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitSQLParser for MooseJEE'];
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Moose-JEE-Model'];
+				spec requires: 'Moose-JEE-Core-Model'];
 			package: 'Moose-JEE-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
 			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			
-			package: 'Moose-JEE-Tests-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.].
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Core' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Algos' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-EJBDraftObjs' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-JSP' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-JSP-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJB' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-EJB-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Extensions' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Tiers' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')].
 			
 		
 		spec group: 'Tests' with: #( 
-			'Moose-JEE-Tests-Model'
+			'Moose-JEE-Tests-Core'
+			'Moose-JEE-Tests-SQL'
+			'Moose-JEE-Tests-JSP'
+			'Moose-JEE-Tests-EJB'
+			'Moose-JEE-Tests-Tiers'
+			'Moose-JEE-Tests-Extensions'
 			'Moose-JEE-Tests-Importers-SQL'
 			'Moose-JEE-Tests-Importers-JSP'
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
 		
-		"spec group: 'default' with: #( 
-			'Moose-JEE-Model'
-			'Moose-JEE-Importers-SQL'
-			'Moose-JEE-Importers-JSP'
-			'Moose-JEE-EJBDraftObjs'
-			'Moose-JEE-Algos'
-			'Moose-JEE-Browsers'
-			'Moose-JEE-Reports'
-			'Moose-JEE-Wizard')."
 	]
 ]
 
@@ -346,43 +386,95 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				repository: 'http://www.squeaksource.com/Spy' ].
 			
 		spec 
+			"Extra Projects"
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
-			package: 'Moose-JEE-Model' with: [
+			
+			"Models"
+			package: 'Moose-JEE-Core-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec repository: 'XMLSupport for MooseJEE'.
 				"spec requires: 'Moose for MooseJEE'"];
-			package: 'Moose-JEE-Reports' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Moose-JEE-Model'];
-			package: 'Moose-JEE-EJBDraftObjs' with: [
+			package: 'Moose-JEE-SQL-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-JSP-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-EJB-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tiers-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			
+			
+			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitSQLParser for MooseJEE'];
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Browsers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'Moose-JEE-Model'];
+				spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
 			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			
-			package: 'Moose-JEE-Tests-Algos' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-Model' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.].
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Core' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Algos' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-EJBDraftObjs' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-JSP' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-JSP-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJB' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-EJB-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Extensions' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Tiers' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')].
 			
+		
 		spec group: 'Tests' with: #( 
-			'Moose-JEE-Tests-Model'
+			'Moose-JEE-Tests-Core'
+			'Moose-JEE-Tests-SQL'
+			'Moose-JEE-Tests-JSP'
+			'Moose-JEE-Tests-EJB'
+			'Moose-JEE-Tests-Tiers'
+			'Moose-JEE-Tests-Extensions'
 			'Moose-JEE-Tests-Importers-SQL'
 			'Moose-JEE-Tests-Importers-JSP'
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
+
 	]
 ]
 
