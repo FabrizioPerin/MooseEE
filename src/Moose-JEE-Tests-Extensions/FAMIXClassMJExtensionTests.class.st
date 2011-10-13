@@ -290,7 +290,7 @@ FAMIXClassMJExtensionTests >> testNOQM [
 	sum := 0.
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 	
-	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOQM ) = 3).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #numberOfQueryingMethods ) = 3).
 	
 	mooseModel allClasses do: [:each | sum := sum + each numberOfQueryingMethods ].
 	self assert: ( sum = 3 ).
@@ -304,7 +304,7 @@ FAMIXClassMJExtensionTests >> testNOTM [
 	sum := 0.
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryWithJavaAndFakeTransaction.
 
-	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #NOTM ) = 13).
+	self assert: ( ( mooseModel allClasses sumOfPropertyNamed: #numberOfTransactionMethods ) = 13).
 
 	mooseModel allClasses do: [:each | sum := sum + each numberOfTransactionMethods ].
 	self assert: ( sum = 13 ).
