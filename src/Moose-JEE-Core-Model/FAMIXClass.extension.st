@@ -184,21 +184,18 @@ FAMIXClass >> isTestClass [
 
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXClass >> numberOfQueryingMethods [
-	<MSEProperty: #NOQM type: #Number>
-	<property: #NOQM	longName: 'Number of querying methods'
-		description: 'The number of methods that execute a query'
-	>
-	^self lookUpPropertyNamed: #NOQM computedAs: [ ( self methods select: [:method | method doesExecuteAQuery ] ) size ]
+	<MSEProperty: #numberOfQueryingMethods type: #Number>
+	<MSEComment: 'The number of methods that execute a query'>
+
+	^self lookUpPropertyNamed: #numberOfQueryingMethods computedAs: [ ( self methods select: [:method | method doesExecuteAQuery ] ) size ]
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXClass >> numberOfTransactionMethods [
-	<MSEProperty: #NOTM type: #Number>
-	<property: #NOTM
-		longName: 'Number of transaction methods'
-		description: 'The number of methods involved in a transaction'
-	>
-	^self lookUpPropertyNamed: #NOTM computedAs: [ ( self methods select: [:method | method isPartOfATransaction ] ) size ]
+	<MSEProperty: #numberOfTransactionMethods type: #Number>
+	<MSEComment: 'The number of methods involved in a transaction'>
+
+	^self lookUpPropertyNamed: #numberOfTransactionMethods computedAs: [ ( self methods select: [:method | method isPartOfATransaction ] ) size ]
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
