@@ -363,6 +363,13 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				file: 'ConfigurationOfPetitJSPParser';
 				version: 'default';
 				repository: 'http://www.squeaksource.com/PetitJSParser' ].
+			
+		spec  project: 'PetitGitLogParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitGitBlameLogParser';
+				file: 'ConfigurationOfPetitGitBlameLogParser';
+				version: 'default';
+				repository: 'http://www.squeaksource.com/PetitGitLogParser' ].
 		
 		spec  project: 'Maze for MooseJEE' with: [
 			spec
@@ -412,6 +419,9 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
+			package: 'Moose-JEE-Importers-GitLog' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'PetitGitLogParser for MooseJEE'];
 			
 			"Other utils"
 			package: 'Moose-JEE-Reports' with: [
