@@ -366,10 +366,10 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			
 		spec  project: 'PetitGitLogParser for MooseJEE' with: [
 			spec
-				className: 'ConfigurationOfPetitGitBlameLogParser';
-				file: 'ConfigurationOfPetitGitBlameLogParser';
+				className: 'ConfigurationOfGitLogParser';
+				file: 'ConfigurationOfGitLogParser';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitGitLogParser' ].
+				repository: 'http://www.squeaksource.com/PetitGitLogParser'].
 		
 		spec  project: 'Maze for MooseJEE' with: [
 			spec
