@@ -9,6 +9,17 @@ Class {
 	#category : #'Moose-JEE-Importers-GitLog'
 }
 
+{ #category : #'initialize-release' }
+MJGitBlameImporter class >> on: aModel [
+	^self new targetModel: aModel.
+]
+
+{ #category : #accessing }
+MJGitBlameImporter >> ensureABlameFileLine: aBlameFileLineNode [
+	
+	
+]
+
 { #category : #accessing }
 MJGitBlameImporter >> gitLogASTParser [
 	^ gitLogASTParser
@@ -19,7 +30,7 @@ MJGitBlameImporter >> gitLogASTVisitor [
 	^ gitLogASTVisitor
 ]
 
-{ #category : #accessing }
+{ #category : #initialization }
 MJGitBlameImporter >> initialize [
 	super initialize.
 	
