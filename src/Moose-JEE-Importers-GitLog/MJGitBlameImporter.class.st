@@ -15,9 +15,38 @@ MJGitBlameImporter class >> on: aModel [
 ]
 
 { #category : #accessing }
+MJGitBlameImporter >> ensureABlameFile: aBlameFileNode [
+	| bf |
+	
+	bf := MJBlameFile new.
+	
+	bf fileName: aBlameFileNode fileName.
+	bf lines: aBlameFileNode lines.
+	
+	^bf
+]
+
+{ #category : #accessing }
 MJGitBlameImporter >> ensureABlameFileLine: aBlameFileLineNode [
+	| bfl |
 	
+	bfl := MJBlameFileLine new.
 	
+	bfl author: aBlameFileLineNode author.
+	bfl revision: aBlameFileLineNode revision.
+	bfl time: aBlameFileLineNode time.
+	bfl number: aBlameFileLineNode number.
+	
+	^bfl
+]
+
+{ #category : #accessing }
+MJGitBlameImporter >> ensureAnAuthor: anAuthorNode [
+	| author |
+	
+	author := MJAuthor named: anAuthorNode authorName.
+	
+	^author
 ]
 
 { #category : #accessing }
