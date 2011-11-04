@@ -41,12 +41,10 @@ MJBlameFileLineTests >> testContent [
 	bfl := MJBlameFileLine new.
 	
 	self assert: bfl content isNil.
-
 	
+	bfl content: '/** a generic java doc comment hofully common in the Java files to parse'.
 	
-	bfl revision: 123.
-	
-	self assert: bfl revision equals: 123.
+	self assert: bfl content equals:  '/** a generic java doc comment hofully common in the Java files to parse'.
 ]
 
 { #category : #tests }
