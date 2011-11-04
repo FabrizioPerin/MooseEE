@@ -35,6 +35,6 @@ MJBlameFile >> lines [
 ]
 
 { #category : #accessing }
-MJBlameFile >> lines: anObject [
-	lines := anObject
+MJBlameFile >> lines: aCollection [
+	lines := aCollection
 ]
