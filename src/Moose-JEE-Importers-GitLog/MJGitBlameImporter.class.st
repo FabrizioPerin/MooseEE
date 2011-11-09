@@ -74,18 +74,19 @@ MJGitBlameImporter >> importBlameFileFrom: aStream [
 { #category : #accessing }
 MJGitBlameImporter >> importBlameFilesInAFolder [
 	
-	| folder files |
+	| folder files index aCollectionOfEnsuredNodes |
 	
 	folder := UITheme builder 
 		chooseDirectory: 'Choose the folder containing the blame files.' 
 		path: '.'.
 
-	files := folder entries select: [:file | file name endsWith: '.blame'].
-
 	folder isNil 
 		ifTrue: [ DialogWindow new alert: 'Folder not found.' ]
 		ifFalse:[
 			
+			index := 1.			
+			files := folder entries select: [:file | file name endsWith: '.blame'].
+			aCollectionOfEnsuredNodes := OrderedCollection new.
 			
 			UIManager default
 				displayProgress: 'Importing information from blame files.'
@@ -93,12 +94,15 @@ MJGitBlameImporter >> importBlameFilesInAFolder [
 				from: 1
 				to: files size
 				during: [ :bar |
-					files := folder entries select: [:file | file name endsWith: '.blame']. 
+					bar value: index.
+					
 					files do: [:file |
-						| nodes aCollectionOfEnsuredNodes | 
-
+						| nodes | 
+					
 						nodes := gitLogASTParser parse: (StandardFileStream readOnlyFileNamed: file fullName) contents.
-						aCollectionOfEnsuredNodes := (nodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]).		 
+						aCollectionOfEnsuredNodes add: (nodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]) first.						
+						index := index + 1.
+						bar value: index.
 						].
 					
 					
