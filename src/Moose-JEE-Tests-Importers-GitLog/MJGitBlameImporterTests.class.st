@@ -19,24 +19,24 @@ MJGitBlameImporterTests >> setUp [
 { #category : #tests }
 MJGitBlameImporterTests >> testEnsureABlameFile [
 
-
 	| bfn line1 author1 now1 author now line2 author2 now2 lines aMJBlameFile |
+		
 	bfn := PGLPBlameFile new.
 	
-	line1 :=  MJBlameFileLine new.
-	author1 := MJAuthor named: 'john'.
+	line1 :=  PGLPBlameFileLine new.
+	author1 := PGLPAuthor new authorName: 'john'.
 	now1 := DateAndTime now.
 	
-	line1 author: author.
+	line1 author: author1.
 	line1 revision: 1000.
 	line1 time: now.
 	line1 number: 10.
 	
-	line2 := MJBlameFileLine new.
-	author2 := MJAuthor named: 'johnDoe'.
+	line2 :=  PGLPBlameFileLine new.
+	author2 := PGLPAuthor new authorName: 'johnDoe'.
 	now2 := DateAndTime now.
 	
-	line2 author: author.
+	line2 author: author2.
 	line2 revision: 1000.
 	line2 time: now.
 	line2 number: 10.
@@ -47,7 +47,7 @@ MJGitBlameImporterTests >> testEnsureABlameFile [
 	bfn lines: lines.
 	
 	aMJBlameFile := gitImporter ensureABlameFile: bfn.
-	
+
 	self assert: aMJBlameFile fileName equals: 'unknown.java'.
 	self assert: aMJBlameFile lines size equals: 2.
 	self assert: (aMJBlameFile lines allSatisfy: [:line | line isMemberOf:  MJBlameFileLine]).
@@ -57,6 +57,9 @@ MJGitBlameImporterTests >> testEnsureABlameFile [
 MJGitBlameImporterTests >> testEnsureABlameFileLine [	
 
 	| bfln author now aMJBlameFileLine |
+	
+	mm := MooseModel new name: 'TestModel'. 
+	gitImporter := MJGitBlameImporter on: mm.
 	
 	bfln := PGLPBlameFileLine new.
 	author := PGLPAuthor new authorName: 'john'.
@@ -69,7 +72,8 @@ MJGitBlameImporterTests >> testEnsureABlameFileLine [
 	
 	aMJBlameFileLine := gitImporter ensureABlameFileLine: bfln.
 	
-	self assert: aMJBlameFileLine author equals: author.
+	self assert: (aMJBlameFileLine author isMemberOf: MJAuthor).
+	self assert: aMJBlameFileLine author name equals: 'john'.	
 	self assert: aMJBlameFileLine revision equals: 1000.
 	self assert: aMJBlameFileLine time equals: now.
 	self assert: aMJBlameFileLine number equals: 10.
