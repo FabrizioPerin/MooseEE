@@ -21,3 +21,10 @@ MJAuthor >> name [
 MJAuthor >> name: anObject [
 	name := anObject
 ]
+
+{ #category : #accessing }
+MJAuthor >> printOn: aStream [
+
+	self name isNil ifFalse: [aStream nextPutAll: self name.].
+	aStream nextPutAll: ' (Author)'
+]

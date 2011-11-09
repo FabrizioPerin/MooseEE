@@ -42,6 +42,13 @@ MJBlameFileLine >> number: aNatural [
 ]
 
 { #category : #accessing }
+MJBlameFileLine >> printOn: aStream [
+
+	self number isNil ifFalse:[aStream nextPutAll: self number asString].
+	aStream nextPutAll: ' (BlameFileLine)'
+]
+
+{ #category : #accessing }
 MJBlameFileLine >> revision [
 	^ revision
 ]

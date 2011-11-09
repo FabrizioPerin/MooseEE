@@ -38,3 +38,10 @@ MJBlameFile >> lines [
 MJBlameFile >> lines: aCollection [
 	lines := aCollection
 ]
+
+{ #category : #accessing }
+MJBlameFile >> printOn: aStream [
+
+	aStream nextPutAll: self fileName asString.
+	aStream nextPutAll: ' (BlameFile)'
+]
