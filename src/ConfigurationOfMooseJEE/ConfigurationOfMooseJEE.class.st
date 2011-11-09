@@ -410,6 +410,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tiers-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-GitLog-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			
 			
 			"importers"
