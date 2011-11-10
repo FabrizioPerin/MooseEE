@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'targetModel',
 		'gitLogASTVisitor',
-		'gitLogASTParser'
+		'gitLogASTParser',
+		'authorsSet'
 	],
 	#category : #'Moose-JEE-Importers-GitLog'
 }
@@ -42,11 +43,18 @@ MJGitBlameImporter >> ensureABlameFileLine: aBlameFileLineNode [
 
 { #category : #accessing }
 MJGitBlameImporter >> ensureAnAuthor: anAuthorNode [
-	| author |
+	| authors |
 	
-	author := MJAuthor named: anAuthorNode authorName.
-	
-	^author
+	authors := authorsSet select: [:author | author name = anAuthorNode authorName].
+	authors isEmpty 
+		ifTrue: [
+			| author |
+			author := MJAuthor named: anAuthorNode authorName.
+			authorsSet add: author.
+			^author]
+		ifFalse: [
+			(authors size > 1) ifTrue: [DialogWindow new alert: 'There is more than one author with the same name.'].
+			 ^authors any]
 ]
 
 { #category : #accessing }
@@ -74,7 +82,7 @@ MJGitBlameImporter >> importBlameFileFrom: aStream [
 { #category : #accessing }
 MJGitBlameImporter >> importBlameFilesInAFolder [
 	
-	| folder files index aCollectionOfEnsuredNodes |
+	| folder files index aCollectionOfEnsuredNodes versions |
 	
 	folder := UITheme builder 
 		chooseDirectory: 'Choose the folder containing the blame files.' 
@@ -96,15 +104,19 @@ MJGitBlameImporter >> importBlameFilesInAFolder [
 				during: [ :bar |
 					bar value: index.
 					
+					"versions := MJBlameFilesVersion new."
+					
 					files do: [:file |
 						| nodes | 
 					
 						nodes := gitLogASTParser parse: (StandardFileStream readOnlyFileNamed: file fullName) contents.
-						aCollectionOfEnsuredNodes add: (nodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]) first.						
+						aCollectionOfEnsuredNodes add: (nodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]) first.
+						"versions addFile: aCollectionOfEnsuredNodes first."
+						
 						index := index + 1.
-						bar value: index.
-						].
+						bar value: index].
 					
+					self populateTheModelWith: aCollectionOfEnsuredNodes.
 					
 					self halt.]]
 ]
@@ -115,7 +127,36 @@ MJGitBlameImporter >> initialize [
 	
 	gitLogASTVisitor := PetitGitLogVisitor new importer: self.
 	gitLogASTParser := PetitGitLogParser new.
+	authorsSet := Set new.
+	
+	^self
+]
 
+{ #category : #accessing }
+MJGitBlameImporter >> populateTheModelWith: aCollectionOfEnsuredNodes [
+
+	| index filesSet |
+	
+	index := 1.
+
+	UIManager default
+		displayProgress: 'Populating the model'
+		at: Sensor cursorPoint
+		from: 1
+		to: aCollectionOfEnsuredNodes size
+		during: [ :bar |
+			bar value: index.
+			
+		self halt.
+			filesSet := Set new.
+			
+			aCollectionOfEnsuredNodes do: [:mjBlameFile |
+				mjBlameFile lines do: [:line | authorsSet add: line author].
+			
+				index := index + 1.
+				bar value: index].
+			
+			].
 ]
 
 { #category : #accessing }
