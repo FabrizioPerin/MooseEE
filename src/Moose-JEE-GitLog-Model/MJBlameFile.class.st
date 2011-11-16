@@ -25,6 +25,7 @@ MJBlameFile >> fileName: anObject [
 
 { #category : #accessing }
 MJBlameFile >> initialize [
+	super initialize.
 	lines := OrderedCollection new.
 	^self
 ]
@@ -42,6 +43,6 @@ MJBlameFile >> lines: aCollection [
 { #category : #accessing }
 MJBlameFile >> printOn: aStream [
 
-	aStream nextPutAll: self fileName asString.
+	self fileName isNil ifFalse: [aStream nextPutAll: self fileName asString].
 	aStream nextPutAll: ' (BlameFile)'
 ]

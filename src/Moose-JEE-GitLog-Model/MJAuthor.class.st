@@ -23,6 +23,16 @@ MJAuthor >> name: anObject [
 ]
 
 { #category : #accessing }
+MJAuthor >> ownedLines [
+	| ownedLines |
+	ownedLines := 0.
+	self mooseModel allBlameFiles
+		do: [ :file | 
+			ownedLines := ownedLines + (file lines select: [:line | line author == self ]) size].
+	^ ownedLines
+]
+
+{ #category : #accessing }
 MJAuthor >> printOn: aStream [
 
 	self name isNil ifFalse: [aStream nextPutAll: self name.].
