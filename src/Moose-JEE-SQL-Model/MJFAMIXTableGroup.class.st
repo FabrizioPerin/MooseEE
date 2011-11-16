@@ -8,7 +8,7 @@ Class {
 MJFAMIXTableGroup class >> annotation [
 
 	<MSEClass: #MJFAMIXTableGroup super: #MJAbstractGroup>
-	<package: #'Moose-JEE-Model'>
+	<package: #'Moose-JEE-SQL-Model'>
 
 ]
 
