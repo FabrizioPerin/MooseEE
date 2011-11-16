@@ -38,6 +38,9 @@ MJGitBlameImporter >> ensureABlameFileLine: aBlameFileLineNode [
 	bfl time: aBlameFileLineNode time.
 	bfl number: aBlameFileLineNode number.
 	
+	"the content is not useful nor used for now"
+	"bfl content: aBlameFileLineNode content."
+	
 	^bfl
 ]
 
@@ -103,22 +106,17 @@ MJGitBlameImporter >> importBlameFilesInAFolder [
 				to: files size
 				during: [ :bar |
 					bar value: index.
-					
-					"versions := MJBlameFilesVersion new."
-					
+
 					files do: [:file |
 						| nodes | 
 					
 						nodes := gitLogASTParser parse: (StandardFileStream readOnlyFileNamed: file fullName) contents.
 						aCollectionOfEnsuredNodes add: (nodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]) first.
-						"versions addFile: aCollectionOfEnsuredNodes first."
-						
+
 						index := index + 1.
 						bar value: index].
 					
-					self populateTheModelWith: aCollectionOfEnsuredNodes.
-					
-					self halt.]]
+					self populateTheModelWith: aCollectionOfEnsuredNodes.]]
 ]
 
 { #category : #initialization }
@@ -135,28 +133,29 @@ MJGitBlameImporter >> initialize [
 { #category : #accessing }
 MJGitBlameImporter >> populateTheModelWith: aCollectionOfEnsuredNodes [
 
-	| index filesSet |
-	
-	index := 1.
-
 	UIManager default
 		displayProgress: 'Populating the model'
 		at: Sensor cursorPoint
 		from: 1
-		to: aCollectionOfEnsuredNodes size
+		to: (aCollectionOfEnsuredNodes size + authorsSet size) 
 		during: [ :bar |
+			| index |
+			index := 1.
 			bar value: index.
 			
-		self halt.
-			filesSet := Set new.
-			
+			"adding the files"
 			aCollectionOfEnsuredNodes do: [:mjBlameFile |
-				mjBlameFile lines do: [:line | authorsSet add: line author].
-			
+				self targetModel withoutAnnounceAdd: mjBlameFile.		
 				index := index + 1.
 				bar value: index].
 			
-			].
+			"adding the authors"
+			authorsSet do: [:author | 
+				self targetModel withoutAnnounceAdd: author.
+				index := index + 1.
+				bar value: index].
+			 ].
+		
 ]
 
 { #category : #accessing }
