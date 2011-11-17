@@ -518,12 +518,13 @@ ConfigurationOfMooseJEE >> defaultSQL: spec [
 				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
 
 			
-		spec 
+		spec
+			"Models"
 			package: 'Moose-JEE-SQL-Model' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.];			
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];	
 			
 			"importers"
-			package: 'Moose-JEE-SQL-Importers' with: [
+			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitSQLParser for MooseJEE'];
 
@@ -531,10 +532,12 @@ ConfigurationOfMooseJEE >> defaultSQL: spec [
 			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			
 			"Tests"
-			package: 'Moose-JEE-Tests-SQL-Importers' with: [
+			package: 'Moose-JEE-Tests-Resources' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-SQL-Importers' 'Moose-JEE-Tests-Resources')];
-			package: 'Moose-JEE-Tests-SQL-Model' with: [
+				spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+				package: 'Moose-JEE-Tests-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')].
 		
