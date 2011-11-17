@@ -522,6 +522,8 @@ ConfigurationOfMooseJEE >> defaultSQL: spec [
 			"Models"
 			package: 'Moose-JEE-SQL-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-EJB-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Core-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				"spec repository: 'XMLSupport for MooseJEE'."
@@ -533,7 +535,8 @@ ConfigurationOfMooseJEE >> defaultSQL: spec [
 				spec requires: 'PetitSQLParser for MooseJEE'];
 
 			"Other utils"
-			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-EJBDraftObjs' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			
 			"Tests"
 			package: 'Moose-JEE-Tests-Resources' with: [
