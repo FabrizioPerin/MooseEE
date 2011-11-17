@@ -521,7 +521,11 @@ ConfigurationOfMooseJEE >> defaultSQL: spec [
 		spec
 			"Models"
 			package: 'Moose-JEE-SQL-Model' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.];	
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Core-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				"spec repository: 'XMLSupport for MooseJEE'."
+				"spec requires: 'Moose for MooseJEE'"];
 			
 			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
