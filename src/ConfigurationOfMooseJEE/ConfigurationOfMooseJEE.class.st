@@ -51,6 +51,19 @@ ConfigurationOfMooseJEE class >> loadDefault [
 ]
 
 { #category : #loading }
+ConfigurationOfMooseJEE class >> loadDefaultSQL [
+	
+	"TranscriptWindow openWindow.
+	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr."
+	
+	(self project version: 'defaultSQL') load.
+	
+	Smalltalk organization sortCategories.
+	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
+
+]
+
+{ #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion10 [
 	
 	"Transcript open.
@@ -487,6 +500,45 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
 
+	]
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> defaultSQL: spec [ 
+	<version: 'defaultSQL'>
+	
+	spec for: #common do: [
+		spec blessing: #default.
+		
+		spec  project: 'PetitSQLParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitSQLParser';
+				file: 'ConfigurationOfPetitSQLParser';
+				version: 'default';
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
+
+			
+		spec 
+			package: 'Moose-JEE-SQL-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];			
+			
+			"importers"
+			package: 'Moose-JEE-SQL-Importers' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'PetitSQLParser for MooseJEE'];
+
+			"Other utils"
+			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-SQL-Importers' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('FAMIX-SQL-Importers' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('FAMIX-SQL-Model' 'Moose-JEE-Tests-Resources')].
+		
+		
 	]
 ]
 
