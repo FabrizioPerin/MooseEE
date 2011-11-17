@@ -533,10 +533,10 @@ ConfigurationOfMooseJEE >> defaultSQL: spec [
 			"Tests"
 			package: 'Moose-JEE-Tests-SQL-Importers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('FAMIX-SQL-Importers' 'Moose-JEE-Tests-Resources')];
+				spec requires: #('Moose-JEE-SQL-Importers' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-SQL-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('FAMIX-SQL-Model' 'Moose-JEE-Tests-Resources')].
+				spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')].
 		
 		
 	]
