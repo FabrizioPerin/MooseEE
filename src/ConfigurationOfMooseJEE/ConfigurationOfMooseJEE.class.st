@@ -438,8 +438,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-GitLog-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			
-			
+						
 			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
@@ -472,6 +471,9 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Tests-Core' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-GitLog' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-GitLog' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Algos' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
