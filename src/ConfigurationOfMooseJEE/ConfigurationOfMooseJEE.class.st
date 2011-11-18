@@ -496,6 +496,9 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Tests-Extensions' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-GitLog' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Importers-GitLog' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Tiers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')].
@@ -510,6 +513,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			'Moose-JEE-Tests-Extensions'
 			'Moose-JEE-Tests-Importers-SQL'
 			'Moose-JEE-Tests-Importers-JSP'
+			'Moose-JEE-Tests-Importers-GitLog'
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos').
 
