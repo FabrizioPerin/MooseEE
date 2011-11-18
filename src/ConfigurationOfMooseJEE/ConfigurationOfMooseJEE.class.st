@@ -473,7 +473,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-GitLog' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-GitLog' 'Moose-JEE-Tests-Resources')];
+				spec requires: #('Moose-JEE-GitLog-Model' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Algos' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
