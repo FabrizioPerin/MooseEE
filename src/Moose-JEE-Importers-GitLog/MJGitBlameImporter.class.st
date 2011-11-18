@@ -71,52 +71,51 @@ MJGitBlameImporter >> gitLogASTVisitor [
 ]
 
 { #category : #accessing }
-MJGitBlameImporter >> importBlameFileFrom: aStream [
-		
-	| blameFileNodes |
+MJGitBlameImporter >> importBlameFilesIn: aFolder [
+	| index files aCollectionOfEnsuredNodes |
 	
-	blameFileNodes := (gitLogASTParser parse: aStream) deepFlatten.
+	index := 1.
+	files := aFolder entries select: [ :file | file name endsWith: '.blame' ].
+	aCollectionOfEnsuredNodes := OrderedCollection new.
 	
-	self populateTargetModelFrom: (blameFileNodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]).
-	
-	^self targetModel.
+	UIManager default
+		displayProgress: 'Importing information from blame files.'
+		at: Sensor cursorPoint
+		from: 1
+		to: files size
+		during: [ :bar | 
+			
+			bar value: index.
+			files
+				do: [ :file | 
+					| nodes |
+					nodes := gitLogASTParser parse: (StandardFileStream readOnlyFileNamed: file fullName) contents.
+					aCollectionOfEnsuredNodes
+						add:
+							(nodes
+								collect: [ :node | 
+									(node isKindOf: PGLPBlameFile)
+										ifTrue: [
+											| aReifiedNode |
+											aReifiedNode := self reifyPGLPBlameFile: node with: (file name removeSuffix: '.blame').
+											aReifiedNode accept: gitLogASTVisitor ] ]) first.
+					index := index + 1.
+					bar value: index ].
+			self populateTargetModelWith: aCollectionOfEnsuredNodes ]
 ]
 
 { #category : #accessing }
 MJGitBlameImporter >> importBlameFilesInAFolder [
 	
-	| folder files index aCollectionOfEnsuredNodes versions |
+	| aFolder files index aCollectionOfEnsuredNodes versions |
 	
-	folder := UITheme builder 
+	aFolder := UITheme builder 
 		chooseDirectory: 'Choose the folder containing the blame files.' 
 		path: '.'.
 
-	folder isNil 
+	aFolder isNil 
 		ifTrue: [ DialogWindow new alert: 'Folder not found.' ]
-		ifFalse:[
-			
-			index := 1.			
-			files := folder entries select: [:file | file name endsWith: '.blame'].
-			aCollectionOfEnsuredNodes := OrderedCollection new.
-			
-			UIManager default
-				displayProgress: 'Importing information from blame files.'
-				at: Sensor cursorPoint
-				from: 1
-				to: files size
-				during: [ :bar |
-					bar value: index.
-
-					files do: [:file |
-						| nodes | 
-					
-						nodes := gitLogASTParser parse: (StandardFileStream readOnlyFileNamed: file fullName) contents.
-						aCollectionOfEnsuredNodes add: (nodes collect: [:node | (node isKindOf: PGLPNode) ifTrue: [ node accept: gitLogASTVisitor]]) first.
-
-						index := index + 1.
-						bar value: index].
-					
-					self populateTheModelWith: aCollectionOfEnsuredNodes.]]
+		ifFalse:[ self importBlameFilesIn: aFolder ]
 ]
 
 { #category : #initialization }
@@ -131,7 +130,7 @@ MJGitBlameImporter >> initialize [
 ]
 
 { #category : #accessing }
-MJGitBlameImporter >> populateTheModelWith: aCollectionOfEnsuredNodes [
+MJGitBlameImporter >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 
 	UIManager default
 		displayProgress: 'Populating the model'
@@ -156,6 +155,12 @@ MJGitBlameImporter >> populateTheModelWith: aCollectionOfEnsuredNodes [
 				bar value: index].
 			 ].
 		
+]
+
+{ #category : #accessing }
+MJGitBlameImporter >> reifyPGLPBlameFile: node with: aFileName [
+	
+	^node fileName: aFileName.
 ]
 
 { #category : #accessing }
