@@ -94,6 +94,28 @@ MJGitBlameImporterTests >> testEnsureAnAuthor [
 ]
 
 { #category : #tests }
+MJGitBlameImporterTests >> testEnsureReifiedBlameFile [
+
+	| bfn aReifiedBlameFileNode anEnsuredBlameFile |
+		
+	bfn := PGLPBlameFile new.
+	
+	bfn fileName: 'unknown.java.blame'.
+	
+	aReifiedBlameFileNode := gitImporter reifyPGLPBlameFile: bfn with: 'unknown.java'.
+
+	self assert: (aReifiedBlameFileNode isMemberOf: PGLPBlameFile).
+	self assert: aReifiedBlameFileNode fileName equals: 'unknown.java'.
+	self assert: aReifiedBlameFileNode lines size equals: 0.
+	
+	anEnsuredBlameFile := gitImporter ensureABlameFile: bfn.
+	
+	self assert: (anEnsuredBlameFile isMemberOf: MJBlameFile).
+	self assert: anEnsuredBlameFile fileName equals: 'unknown.java'.
+	
+]
+
+{ #category : #tests }
 MJGitBlameImporterTests >> testGitLogASTParser [
 	
 	self assert: (gitImporter gitLogASTParser isMemberOf: PetitGitLogParser).
@@ -111,4 +133,37 @@ MJGitBlameImporterTests >> testImporterCreation [
 	self assert: (gitImporter isMemberOf: MJGitBlameImporter).
 	self assert: gitImporter targetModel equals: mm.
 
+]
+
+{ #category : #tests }
+MJGitBlameImporterTests >> testReifyPGLPBlameFileWithBlameExtension [
+
+	| bfn aReifiedBlameFileNode |
+		
+	bfn := PGLPBlameFile new.
+	
+	bfn fileName: 'unknown.java.blame'.
+	
+	aReifiedBlameFileNode := gitImporter reifyPGLPBlameFile: bfn with: 'unknown.java'.
+
+	self assert: (aReifiedBlameFileNode isMemberOf: PGLPBlameFile).
+	self assert: aReifiedBlameFileNode fileName equals: 'unknown.java'.
+	self assert: aReifiedBlameFileNode lines size equals: 0.
+	
+]
+
+{ #category : #tests }
+MJGitBlameImporterTests >> testReifyPGLPBlameFileWithoutBlameExtension [
+
+	| bfn aReifiedBlameFileNode |
+		
+	bfn := PGLPBlameFile new.
+	
+	bfn fileName: 'unknown.java'.
+	
+	aReifiedBlameFileNode := gitImporter reifyPGLPBlameFile: bfn with: 'unknown.java'.
+
+	self assert: aReifiedBlameFileNode fileName equals: 'unknown.java'.
+	self assert: aReifiedBlameFileNode lines size equals: 0.
+	
 ]
