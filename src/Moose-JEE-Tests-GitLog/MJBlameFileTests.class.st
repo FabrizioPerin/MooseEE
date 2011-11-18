@@ -72,4 +72,67 @@ MJBlameFileTests >> testMJBlameFileCreation [
 	self assert: (bf isMemberOf: MJBlameFile).
 	self assert: (bf lines isMemberOf: OrderedCollection).
 	self assert: bf lines isEmpty.
+	self assert: bf fileName isNil.
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testMooseNameOnWithName [
+
+	| bf aStream |
+	
+	bf := MJBlameFile new.
+	
+	bf fileName: 'unknown.java'.
+	aStream := ReadWriteStream on: ''.
+	bf mooseNameOn: aStream.
+
+	self assert: (aStream contents ) equals: 'unknown.java'.
+
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testMooseNameOnWithoutName [
+
+	| bf aStream |
+	
+	bf := MJBlameFile new.
+	
+	aStream := ReadWriteStream on: ''.
+	bf mooseNameOn: aStream.
+	
+	self assert: (aStream contents ) equals: 'nil'.
+
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testPrintOnWithName [
+
+	| bf aStream |
+	
+	bf := MJBlameFile new.
+	
+	self assert: bf fileName isNil.
+	
+	bf fileName: 'unknown.java'.
+	aStream := ReadWriteStream on: ''.
+	bf printOn: aStream.
+
+	self assert: (aStream contents ) equals: 'unknown.java (BlameFile)'.
+
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testPrintOnWithoutName [
+
+	| bf aStream |
+	
+	bf := MJBlameFile new.
+	
+	self assert: bf fileName isNil.
+	
+	aStream := ReadWriteStream on: ''.
+	bf printOn: aStream.
+	
+	self assert: (aStream contents ) equals: ' (BlameFile)'.
+
 ]
