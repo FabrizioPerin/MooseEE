@@ -42,6 +42,12 @@ MJBlameFile >> lines: aCollection [
 ]
 
 { #category : #accessing }
+MJBlameFile >> mooseNameOn: aStream [ 
+	
+	aStream nextPutAll: self fileName asString
+]
+
+{ #category : #accessing }
 MJBlameFile >> printOn: aStream [
 
 	self fileName isNil ifFalse: [aStream nextPutAll: self fileName asString].
