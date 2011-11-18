@@ -27,6 +27,7 @@ MJBlameFile >> fileName: anObject [
 MJBlameFile >> initialize [
 	super initialize.
 	lines := OrderedCollection new.
+	fileName := nil.
 	^self
 ]
 
@@ -44,5 +45,6 @@ MJBlameFile >> lines: aCollection [
 MJBlameFile >> printOn: aStream [
 
 	self fileName isNil ifFalse: [aStream nextPutAll: self fileName asString].
-	aStream nextPutAll: ' (BlameFile)'
+	aStream nextPutAll: ' (BlameFile)'.
+
 ]
