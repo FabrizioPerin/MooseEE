@@ -3,7 +3,7 @@ Class {
 	#superclass : #MJAssociation,
 	#instVars : [
 		'blameFile',
-		'class'
+		'famixClass'
 	],
 	#category : #'Moose-JEE-GitLog-Model'
 }
@@ -25,7 +25,7 @@ MJBlameClassAssociation >> initialize [
 	super initialize.
 	
 	blameFile := nil.
-	class := nil.
+	famixClass := nil.
 ]
 
 { #category : #'as yet unclassified' }
@@ -64,7 +64,7 @@ MJBlameClassAssociation >> targetClass [
 	<MSEProperty: #targetClass type: #FAMIXClass opposite: #associatedBlameFile>
 	<MSEComment: 'Class associated with the blame file.'>
 	
-	^class
+	^famixClass
 ]
 
 { #category : #'as yet unclassified' }
