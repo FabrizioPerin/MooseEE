@@ -68,7 +68,8 @@ MJBlameFile >> initialize [
 	lines := OrderedCollection new.
 	fileName := nil.
 	associatedClass := FMMultivalueLink on: self opposite: #sourceBlameFile:.
-	^self
+	
+	^ self
 ]
 
 { #category : #accessing }

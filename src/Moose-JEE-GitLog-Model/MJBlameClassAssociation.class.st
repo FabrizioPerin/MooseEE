@@ -26,6 +26,8 @@ MJBlameClassAssociation >> initialize [
 	
 	blameFile := nil.
 	famixClass := nil.
+	
+	^ self
 ]
 
 { #category : #'as yet unclassified' }
@@ -70,7 +72,7 @@ MJBlameClassAssociation >> targetClass [
 { #category : #'as yet unclassified' }
 MJBlameClassAssociation >> targetClass: aClass [
 
-	blameFile := FMMultivalueLink
+	famixClass := FMMultivalueLink
 		on: self
 		update: #associatedBlameFile
 		from: self targetClass
