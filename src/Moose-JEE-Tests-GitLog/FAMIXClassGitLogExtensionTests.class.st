@@ -11,7 +11,7 @@ FAMIXClassGitLogExtensionTests >> testAddAssociatedBlame [
 	assoc := MJBlameClassAssociation new.
 	class := FAMIXClass new.
 	
-	class associatedBlameFile add: assoc.
+	class addAssociatedBlame: assoc.
 	
 	self assert: (class associatedBlameFile isMemberOf: FMMultivalueLink).
 	self assert: (class associatedBlameFile size = 1).
@@ -32,7 +32,7 @@ FAMIXClassGitLogExtensionTests >> testAssociatedBlame [
 { #category : #'as yet unclassified' }
 FAMIXClassGitLogExtensionTests >> testDevelpers [
 
-	| bf bl1 bl2 john famixAnchor class mm assoc |
+	| bf bl1 bl2 john famixAnchor class assoc |
 	
 	bf := MJBlameFile new fileName: 'unknown.java'.
 	
@@ -48,19 +48,13 @@ FAMIXClassGitLogExtensionTests >> testDevelpers [
 
 	famixAnchor := FAMIXFileAnchor new fileName: 'unknown.java'.
 	class := FAMIXClass new sourceAnchor: famixAnchor.
-	
-	mm := MooseModel new.
-	mm withoutAnnounceAdd: class.
-	mm withoutAnnounceAdd: famixAnchor.
-	mm withoutAnnounceAdd: bf.
-	mm withoutAnnounceAdd: john.
-	
+		
 	assoc := MJBlameClassAssociation new.
-	mm add: assoc.
-
-	assoc targetClass: class.
-
 	
+	assoc sourceBlameFile: bf.
+	assoc targetClass: class.
+	
+
 	self assert: (class developers isMemberOf: Dictionary).
 	self assert: class developers keys size equals: 1.
 	self assert: class developers keys first equals: john.

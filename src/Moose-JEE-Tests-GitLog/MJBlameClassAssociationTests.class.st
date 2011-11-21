@@ -17,28 +17,23 @@ MJBlameClassAssociationTests >> testCreation [
 { #category : #'as yet unclassified' }
 MJBlameClassAssociationTests >> testCreationWithAssociations [
 
-	| bf john bl1 bl2 class assoc |
-	
-	bf := MJBlameFile new fileName: 'unknown.java'.
-	
-	john := MJAuthor named: 'John'.
-	bl1 := MJBlameFileLine new author: john.
-	bl2 := MJBlameFileLine new author: john.
-	
-	bf addLine: bl1.
-	bf addLine: bl2.
-
-	class := FAMIXClass new.
+	| bf class assoc |
 	
 	assoc := MJBlameClassAssociation new.
-	assoc targetClass: class.
-	assoc sourceBlameFile: bf.
+	class := FAMIXClass new.
+	bf := MJBlameFile new.
 	
-	class addAssociatedBlame: assoc.
 	bf addAssociatedClass: assoc.
+	class addAssociatedBlame: assoc.
 	
-
-	self assert: class expert equals: john.
+	assoc sourceBlameFile: bf.
+	assoc targetClass: class.
+	
+	self assert: assoc targetClass equals: class.
+	self assert: assoc sourceBlameFile equals: bf.
+	
+	
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -81,11 +76,12 @@ MJBlameClassAssociationTests >> testTargetClass [
 	class := FAMIXClass new.	
 	assoc := MJBlameClassAssociation new.
 	
-	assoc targetClass: class.
-	
 	class addAssociatedBlame: assoc.
+	assoc targetClass: class.
 
 	self assert: assoc targetClass equals: class.
+	
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -96,9 +92,8 @@ MJBlameClassAssociationTests >> testTo [
 	class := FAMIXClass new.	
 	assoc := MJBlameClassAssociation new.
 	
-	assoc targetClass: class.
-	
 	class addAssociatedBlame: assoc.
+	assoc targetClass: class.
 
 	self assert: assoc to equals: class.
 ]

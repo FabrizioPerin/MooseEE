@@ -5,6 +5,26 @@ Class {
 }
 
 { #category : #tests }
+MJBlameFileTests >> testAddAssociatedClass [
+
+	| bf blameClassAssoc |
+	
+	bf := MJBlameFile new.
+	
+	blameClassAssoc := MJBlameClassAssociation new sourceBlameFile: bf.
+
+	bf addAssociatedClass: blameClassAssoc.
+	
+	self assert: (bf isMemberOf: MJBlameFile).
+
+	self assert: (bf associatedClass isMemberOf: FMMultivalueLink).
+	self assert: (bf associatedClass size = 1).
+	self assert: (bf associatedClass first = blameClassAssoc).
+	self assert: (bf associatedClass first from = bf).
+
+]
+
+{ #category : #tests }
 MJBlameFileTests >> testAddLine [
 
 	| bf oc bl1 bl2 |
@@ -24,6 +44,24 @@ MJBlameFileTests >> testAddLine [
 	self assert: bf lines first equals: bl1.
 	self assert: bf lines second equals: bl2.
 	
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testAssociatedClass [
+
+	| bf blameClassAssoc |
+	
+	bf := MJBlameFile new.
+	
+	blameClassAssoc := MJBlameClassAssociation new sourceBlameFile: bf.
+
+	bf associatedClass add: blameClassAssoc.
+	
+	self assert: (bf associatedClass isMemberOf: FMMultivalueLink).
+	self assert: (bf associatedClass size = 1).
+	self assert: (bf associatedClass first = blameClassAssoc).
+	self assert: (bf associatedClass first from = bf).
+
 ]
 
 { #category : #tests }
