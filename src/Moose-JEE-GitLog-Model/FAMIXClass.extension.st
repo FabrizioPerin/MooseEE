@@ -28,13 +28,13 @@ FAMIXClass >> associatedBlameFileOLD [
 { #category : #'*moose-jee-gitlog-model' }
 FAMIXClass >> developers [
 	
-	^self associatedBlameFile experts
+	^self associatedBlameFile first from experts
 ]
 
 { #category : #'*moose-jee-gitlog-model' }
 FAMIXClass >> expert [
 	
-	^self associatedBlameFile first target expert
+	^self associatedBlameFile first from expert
 ]
 
 { #category : #'*moose-jee-gitlog-model' }
