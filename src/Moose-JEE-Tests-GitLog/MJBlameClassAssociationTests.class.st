@@ -37,5 +37,37 @@ MJBlameClassAssociationTests >> testCreationWithAssociations [
 	class addAssociatedBlame: assoc.
 	bf addAssociatedClass: assoc.
 	
+
 	self assert: class expert equals: john.
+]
+
+{ #category : #'as yet unclassified' }
+MJBlameClassAssociationTests >> testSourceBlameFile [
+
+	| bf assoc |
+	
+	bf := MJBlameFile new.	
+	assoc := MJBlameClassAssociation new.
+	
+	assoc sourceBlameFile: bf.
+	
+	bf addAssociatedClass: assoc.
+
+	self assert: assoc sourceBlameFile equals: bf.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJBlameClassAssociationTests >> testTargetClass [
+
+	| class assoc |
+	
+	class := FAMIXClass new.	
+	assoc := MJBlameClassAssociation new.
+	
+	assoc targetClass: class.
+	
+	class addAssociatedBlame: assoc.
+
+	self assert: assoc targetClass equals: class.
 ]
