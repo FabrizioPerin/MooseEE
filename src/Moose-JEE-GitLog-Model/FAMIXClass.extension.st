@@ -7,10 +7,10 @@ FAMIXClass >> addAssociatedBlame: aMJBlameClassAssociation [
 
 { #category : #'*moose-jee-gitlog-model' }
 FAMIXClass >> associatedBlameFile [
-	<MSEProperty: #associatedBlameFile type: #MJBlameClassAssociation opposite: #target> <multivalued>  <derived>
+	<MSEProperty: #associatedBlameFile type: #MJBlameClassAssociation opposite: #targetClass> <multivalued>  <derived>
 	<MSEComment: 'Association with the blame file of this class.'>
 	
-	^self privateState attributeAt: #associatedBlameFile ifAbsentPut: [FMMultivalueLink on: self opposite: #target:].
+	^self privateState attributeAt: #associatedBlameFile ifAbsentPut: [FMMultivalueLink on: self opposite: #targetClass:].
 ]
 
 { #category : #'*moose-jee-gitlog-model' }

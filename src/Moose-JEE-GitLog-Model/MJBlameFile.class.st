@@ -21,7 +21,7 @@ MJBlameFile >> addLine: aPGLPFileLine [
 
 { #category : #accessing }
 MJBlameFile >> associatedClass [
-	<MSEProperty: #associatedClass type: #MJBlameClassAssociation opposite: #source> <multivalued> <derived>
+	<MSEProperty: #associatedClass type: #MJBlameClassAssociation opposite: #sourceBlameFile> <multivalued> <derived>
 	<MSEComment: 'Association with the source entity described by this blame file.'>
 	
 	^associatedClass
@@ -67,7 +67,7 @@ MJBlameFile >> initialize [
 	super initialize.
 	lines := OrderedCollection new.
 	fileName := nil.
-	associatedClass := FMMultivalueLink on: self opposite: #source:.
+	associatedClass := FMMultivalueLink on: self opposite: #sourceBlameFile:.
 	^self
 ]
 

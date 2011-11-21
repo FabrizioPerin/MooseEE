@@ -3,14 +3,21 @@ Class {
 	#superclass : #MJAssociation,
 	#instVars : [
 		'blameFile',
-		'sourceEntity'
+		'class'
 	],
 	#category : #'Moose-JEE-GitLog-Model'
 }
 
 { #category : #'as yet unclassified' }
+MJBlameClassAssociation class >> annotation [
+	<MSEClass: #MJBlameClassAssociation super: #MJAssociation>
+	<package: #'Moose-JEE-GitLog-Model'>
+	^self
+]
+
+{ #category : #'as yet unclassified' }
 MJBlameClassAssociation >> from [
-	^self source
+	^self sourceBlameFile
 ]
 
 { #category : #'as yet unclassified' }
@@ -18,7 +25,7 @@ MJBlameClassAssociation >> initialize [
 	super initialize.
 	
 	blameFile := nil.
-	sourceEntity := nil.
+	class := nil.
 ]
 
 { #category : #'as yet unclassified' }
@@ -33,44 +40,44 @@ MJBlameClassAssociation >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-MJBlameClassAssociation >> source [
+MJBlameClassAssociation >> sourceBlameFile [
 	
-	<MSEProperty: #source type: #MJBlameFile opposite: #associatedClass>
+	<MSEProperty: #sourceBlameFile type: #MJBlameFile opposite: #associatedClass>
 	<MSEComment: 'Blame file associated with the class.'>
 	
 	^blameFile
 ]
 
 { #category : #'as yet unclassified' }
-MJBlameClassAssociation >> source: aBlameFile [
+MJBlameClassAssociation >> sourceBlameFile: aBlameFile [
 
 	blameFile := FMMultivalueLink
 		on: self
 		update: #associatedClass
-		from: self source
+		from: self sourceBlameFile
 		to: aBlameFile
 ]
 
 { #category : #'as yet unclassified' }
-MJBlameClassAssociation >> target [
+MJBlameClassAssociation >> targetClass [
 	
-	<MSEProperty: #target type: #FAMIXClass opposite: #associatedBlameFile>
+	<MSEProperty: #targetClass type: #FAMIXClass opposite: #associatedBlameFile>
 	<MSEComment: 'Class associated with the blame file.'>
 	
-	^sourceEntity
+	^class
 ]
 
 { #category : #'as yet unclassified' }
-MJBlameClassAssociation >> target: aSourceEntity [
+MJBlameClassAssociation >> targetClass: aClass [
 
 	blameFile := FMMultivalueLink
 		on: self
 		update: #associatedBlameFile
-		from: self target
-		to: aSourceEntity
+		from: self targetClass
+		to: aClass
 ]
 
 { #category : #'as yet unclassified' }
 MJBlameClassAssociation >> to [
-	^self target
+	^self targetClass 
 ]
