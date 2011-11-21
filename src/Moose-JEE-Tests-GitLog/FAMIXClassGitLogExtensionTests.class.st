@@ -32,7 +32,7 @@ FAMIXClassGitLogExtensionTests >> testAssociatedBlame [
 { #category : #'as yet unclassified' }
 FAMIXClassGitLogExtensionTests >> testDevelpers [
 
-	| bf bl1 bl2 john famixAnchor class mm |
+	| bf bl1 bl2 john famixAnchor class mm assoc |
 	
 	bf := MJBlameFile new fileName: 'unknown.java'.
 	
@@ -54,6 +54,12 @@ FAMIXClassGitLogExtensionTests >> testDevelpers [
 	mm withoutAnnounceAdd: famixAnchor.
 	mm withoutAnnounceAdd: bf.
 	mm withoutAnnounceAdd: john.
+	
+	assoc := MJBlameClassAssociation new.
+	mm add: assoc.
+
+	assoc targetClass: class.
+
 	
 	self assert: (class developers isMemberOf: Dictionary).
 	self assert: class developers keys size equals: 1.
@@ -84,8 +90,8 @@ FAMIXClassGitLogExtensionTests >> testExpert [
 	class := FAMIXClass new sourceAnchor: famixAnchor.
 	
 	assoc := MJBlameClassAssociation new.
-	assoc target: class.
-	assoc source: bf.
+	assoc targetClass: class.
+	assoc sourceBlameFile: bf.
 	
 	class addAssociatedBlame: assoc.
 	bf addAssociatedClass: assoc.
