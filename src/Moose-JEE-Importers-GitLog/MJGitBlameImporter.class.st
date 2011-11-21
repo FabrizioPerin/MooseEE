@@ -16,6 +16,23 @@ MJGitBlameImporter class >> on: aModel [
 ]
 
 { #category : #accessing }
+MJGitBlameImporter >> computeTheConnectionsWithClasses [
+
+	self targetModel allClasses do: [ :class | 
+			self targetModel allBlameFiles select: [ :bf | 
+					class hasSourceAnchor
+						ifTrue: [ (class sourceAnchor fileName endsWith: bf fileName)
+									ifTrue: [ 
+										| assoc |
+										assoc := MJBlameClassAssociation new.
+										assoc target: class.
+										assoc source: bf.
+										class associatedBlameFile 
+										
+										] ] ] ]
+]
+
+{ #category : #accessing }
 MJGitBlameImporter >> ensureABlameFile: aBlameFileNode [
 	| bf |
 	
