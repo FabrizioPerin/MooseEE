@@ -1,13 +1,6 @@
 Class {
 	#name : #MJBlameFileLineTests,
 	#superclass : #TestCase,
-	#instVars : [
-		'lineNumber',
-		'author',
-		'time',
-		'content',
-		'revision'
-	],
 	#category : #'Moose-JEE-Tests-GitLog'
 }
 

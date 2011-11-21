@@ -1,10 +1,6 @@
 Class {
 	#name : #MJBlameFileTests,
 	#superclass : #TestCase,
-	#instVars : [
-		'fileName',
-		'lines'
-	],
 	#category : #'Moose-JEE-Tests-GitLog'
 }
 
@@ -28,6 +24,48 @@ MJBlameFileTests >> testAddLine [
 	self assert: bf lines first equals: bl1.
 	self assert: bf lines second equals: bl2.
 	
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testExpert [
+
+	| bf bl1 bl2 john |
+	
+	bf := MJBlameFile new.
+	
+	self assert: (bf lines isMemberOf: OrderedCollection).
+	self assert: bf lines isEmpty.
+
+	john := MJAuthor named: 'John'.
+	bl1 := MJBlameFileLine new author: john.
+	bl2 := MJBlameFileLine new author: john.
+	
+	bf addLine: bl1.
+	bf addLine: bl2.
+
+	self assert: bf expert equals: john. 
+]
+
+{ #category : #tests }
+MJBlameFileTests >> testExperts [
+
+	| bf bl1 bl2 john |
+	
+	bf := MJBlameFile new.
+	
+	self assert: (bf lines isMemberOf: OrderedCollection).
+	self assert: bf lines isEmpty.
+
+	john := MJAuthor named: 'John'.
+	bl1 := MJBlameFileLine new author: john.
+	bl2 := MJBlameFileLine new author: john.
+	
+	bf addLine: bl1.
+	bf addLine: bl2.
+	
+	self assert: (bf experts isMemberOf: Dictionary).
+	self assert: bf experts size equals: 1.
+	self assert: (bf experts at: john) equals: 2. 
 ]
 
 { #category : #tests }
