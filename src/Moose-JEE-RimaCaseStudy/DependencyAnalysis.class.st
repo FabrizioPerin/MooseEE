@@ -597,55 +597,6 @@ DependencyAnalysis >> couplingWithoutNormalizationDetailingInvokersOn [
 ]
 
 { #category : #view }
-DependencyAnalysis >> displayAllTheHierarchies [
-	
-	| po allSubClasses view rootClasses lonelyRootClasses allSubClassesNotLonely |
-	
-	po := targetModel allTypes select: [:each | each name = 'PO'].
-	
-	(po size = 1) ifFalse: [
-		UIManager default alert: 'More than one PO has been found'.
-		^self].
-	po := po first.
-	
-	allSubClasses := po subclassHierarchyGroup.
-	
-	rootClasses := allSubClasses select: [:each | each isHierarchyRootWithin: allSubClasses].
-	lonelyRootClasses := rootClasses select: [:each | each isLonelyWithin: allSubClasses].
-	rootClasses := rootClasses difference: lonelyRootClasses.
-	
-	view := MOViewRenderer new.
-	
-	rootClasses notEmpty ifTrue: [
-		view shape rectangle withoutBorder; withoutBackground.
-		view node: 'rootClasses' forIt: [
-			(rootClasses asSortedCollection: [:a :b | a name < b name]) do: [:root | 
-				view shape rectangle text: #name.
-				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-				view nodes: root withSubclassHierarchyGroup.
-				
-				view edgesFrom: #superclass.
-				view treeLayout.
-			].
-		].
-	].
-
-	lonelyRootClasses notEmpty ifTrue: [
-		view shape rectangle withoutBorder; withoutBackground.
-		view node: 'lonelyRootClasses' forIt: [
-			view shape rectangle text: #name.  
-			view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-			view nodes: (lonelyRootClasses asSortedCollection: [:a :b | a name < b name]).
-			
-			view flowLayout maxWidth: 300; gapSize: 2.
-		].
-	].
-
-	view open.
-
-]
-
-{ #category : #view }
 DependencyAnalysis >> displayCouplingWithoutNormalizationOn [
 	| view edges deps classes4screens |
 	
@@ -695,6 +646,18 @@ DependencyAnalysis >> exp1TableCoupling [
 	aStream := MultiByteFileStream forceNewFileNamed: 'couplingAmongTables.csv'.
 	
 	self printTableCouplingFrom: result asCSVOn: aStream.
+]
+
+{ #category : #view }
+DependencyAnalysis >> exportAllTheHierarchies [
+	
+	| view |
+	
+	view := MOViewRenderer new.
+	
+	self viewAllTheHierarchiesOn: view.
+	
+	view canvas exportAsPNG.
 ]
 
 { #category : #computations }
@@ -979,4 +942,61 @@ DependencyAnalysis >> targetModel [
 { #category : #accessing }
 DependencyAnalysis >> targetModel: aModel [
 	targetModel := aModel   
+]
+
+{ #category : #view }
+DependencyAnalysis >> viewAllTheHierarchies [
+	
+	| view |
+	view := MOViewRenderer new.
+	
+	self viewAllTheHierarchiesOn: view.
+	
+	view open.
+]
+
+{ #category : #view }
+DependencyAnalysis >> viewAllTheHierarchiesOn: view [
+	
+	| po allSubClasses rootClasses lonelyRootClasses allSubClassesNotLonely |
+	
+	po := targetModel allTypes select: [:each | each name = 'PO'].
+	
+	(po size = 1) ifFalse: [
+		UIManager default alert: 'More than one PO has been found'.
+		^self].
+	po := po first.
+	
+	allSubClasses := po subclassHierarchyGroup.
+	
+	rootClasses := allSubClasses select: [:each | each isHierarchyRootWithin: allSubClasses].
+	lonelyRootClasses := rootClasses select: [:each | each isLonelyWithin: allSubClasses].
+	rootClasses := rootClasses difference: lonelyRootClasses.
+
+	
+	rootClasses notEmpty ifTrue: [
+		view shape rectangle withoutBorder; withoutBackground.
+		view node: 'rootClasses' forIt: [
+			(rootClasses asSortedCollection: [:a :b | a name < b name]) do: [:root | 
+				view shape rectangle text: #name.
+				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+				view nodes: root withSubclassHierarchyGroup.
+				
+				view edgesFrom: #superclass.
+				view treeLayout.
+			].
+		].
+	].
+
+	lonelyRootClasses notEmpty ifTrue: [
+		view shape rectangle withoutBorder; withoutBackground.
+		view node: 'lonelyRootClasses' forIt: [
+			view shape rectangle text: #name.  
+			view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+			view nodes: (lonelyRootClasses asSortedCollection: [:a :b | a name < b name]).
+			
+			view flowLayout maxWidth: 300; gapSize: 2.
+		].
+	].
+
 ]
