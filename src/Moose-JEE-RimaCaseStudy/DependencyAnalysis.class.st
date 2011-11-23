@@ -403,7 +403,7 @@ DependencyAnalysis >> computeCouplingOnTables [
 	^ result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> computeCouplingThroughInterfacesOn [
 	| allClasses allEntity result interfaces4screens commonClasses |
 	
@@ -442,7 +442,7 @@ DependencyAnalysis >> computeCouplingThroughInterfacesOn [
 	^result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn [
 	| classes4screens result normalizationFactor |
 	
@@ -472,7 +472,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithStubClassesOn [
 	^result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> computeCouplingWithNormalizationAndWithoutStubClassesOn [
 	
 	| classes4screens result commonClasses normalizationFactor |
@@ -507,7 +507,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationAndWithoutStubClassesOn [
 	^result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> computeCouplingWithNormalizationOn [
 
 	| classes4screens result normalizationFactor |
@@ -536,7 +536,7 @@ DependencyAnalysis >> computeCouplingWithNormalizationOn [
 	^ result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> computeCouplingWithoutNormalizationOn [
 	
 	| classes4screens result |
@@ -566,7 +566,7 @@ DependencyAnalysis >> computeCouplingWithoutNormalizationOn [
 	^result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> couplingWithoutNormalizationDetailingInvokersOn [
 	
 	| classes4screens result |
@@ -596,7 +596,7 @@ DependencyAnalysis >> couplingWithoutNormalizationDetailingInvokersOn [
 	^result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #view }
 DependencyAnalysis >> displayCouplingWithoutNormalizationOn [
 	| view edges deps classes4screens |
 	
@@ -617,7 +617,7 @@ DependencyAnalysis >> displayCouplingWithoutNormalizationOn [
 	view open.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #view }
 DependencyAnalysis >> displayDependenciesFrom [
 	
 	| classes4screens deps view |
@@ -643,12 +643,12 @@ DependencyAnalysis >> exp1TableCoupling [
 	
 	result := self computeCouplingOnTables.
 	
-	aStream := CrLfFileStream forceNewFileNamed: 'couplingAmongTables.csv'.
+	aStream := MultiByteFileStream forceNewFileNamed: 'couplingAmongTables.csv'.
 	
 	self printTableCouplingFrom: result asCSVOn: aStream.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #computations }
 DependencyAnalysis >> identifyCommonClasses [
 	| classes4screens commonClasses |
 	
@@ -706,7 +706,7 @@ DependencyAnalysis >> interfaces4ScreensIn [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #print }
 DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 	
 	UIManager default
@@ -728,7 +728,7 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 	aStream close.  
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #print }
 DependencyAnalysis >> print: aCollectionOfWeightedEdges withScreensAsCSVOn: aStream [
 	
 	UIManager default
@@ -750,27 +750,27 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges withScreensAsCSVOn: aStr
 	aStream close.  
 ]
 
-{ #category : #now }
+{ #category : #print }
 DependencyAnalysis >> printComputeCouplingBasedOnRefereesWithDetailsInTheEdges [
 	| interestingClasses edges stream |
 	
 	
 	edges := self computeCouplingBasedOnRefereesWithDetailsInTheEdges asSortedCollection: [:a :b | a weight size > b weight size ].
-	stream := CrLfFileStream forceNewFileNamed: 'resultOfCouplingBasedOnReferees.csv'.
+	stream := MultiByteFileStream forceNewFileNamed: 'resultOfCouplingBasedOnReferees.csv'.
 	self print: edges asCSVOn: stream.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #print }
 DependencyAnalysis >> printCouplingWithoutNormalizationDetailingInvokers [
 	| edges stream |
 
 	edges := self couplingWithoutNormalizationDetailingInvokersOn asSortedCollection: [:a :b | a weight size > b weight size].
 	
-	stream := CrLfFileStream forceNewFileNamed: 'resultOfCouplingWithoutNormalizationDetailingInvokers.csv'.
+	stream := MultiByteFileStream forceNewFileNamed: 'resultOfCouplingWithoutNormalizationDetailingInvokers.csv'.
 	self print: edges asCSVOn: stream.
 ]
 
-{ #category : #now }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingBasedOnRefereesIn [
 	| view edges deps |
 	edges := self computeCouplingBasedOnRefereesWDIn asSortedCollection: [:a :b | a weight >b weight].
@@ -782,12 +782,12 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesIn [
 	
 ]
 
-{ #category : #now }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdges [
 	| edges stream |
 	edges := self computeCouplingBasedOnRefereesWDAndEdges asSortedCollection: [:a :b | a weight size > b weight size].
 	
-	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdges.csv'.
+	stream := MultiByteFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdges.csv'.
 	
 	self print: edges asCSVOn: stream.
 	
@@ -795,12 +795,12 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdges [
 	
 ]
 
-{ #category : #now }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
 	| edges stream |
 	edges := self computeCouplingBasedOnRefereesWDAndEdgesOnAllSystem asSortedCollection: [:a :b | a weight size > b weight size].
 	
-	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesOnAllSystem.csv'.
+	stream := MultiByteFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesOnAllSystem.csv'.
 	
 	self print: edges asCSVOn: stream.
 	
@@ -808,12 +808,12 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
 	
 ]
 
-{ #category : #now }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesWithScreens [
 	| edges stream |
 	edges := self computeCouplingBasedOnRefereesWDAndEdges asSortedCollection: [:a :b | a weight size > b weight size].
 	
-	stream := CrLfFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesWithScreens.csv'.
+	stream := MultiByteFileStream forceNewFileNamed: 'couplingBasedOnRefereesWDAndEdgesWithScreens.csv'.
 	
 	self print: edges withScreensAsCSVOn: stream.
 	
@@ -821,7 +821,7 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesWithScreens [
 	
 ]
 
-{ #category : #now }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDIn [
 	| view edges deps |
 	edges := self computeCouplingBasedOnRefereesWDIn asSortedCollection: [:a :b | a value size > b value size].
@@ -832,7 +832,7 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDIn [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingWithNormalizationWithoutStubsOn [
 	| view edges deps classes4screens |
 	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
@@ -845,7 +845,7 @@ DependencyAnalysis >> printSortedCouplingWithNormalizationWithoutStubsOn [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #print }
 DependencyAnalysis >> printSortedCouplingWithoutNormalizationOn [
 	| view edges deps classes4screens |
 	classes4screens := targetModel allClasses select: [:each | self class classesForScreens includes: each name asSymbol].
@@ -858,7 +858,7 @@ DependencyAnalysis >> printSortedCouplingWithoutNormalizationOn [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #print }
 DependencyAnalysis >> printTableCouplingFrom: aCollectionOfWeightedEdges asCSVOn: aStream [
 	
 	UIManager default
@@ -878,12 +878,12 @@ DependencyAnalysis >> printTableCouplingFrom: aCollectionOfWeightedEdges asCSVOn
 	aStream close.  
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 DependencyAnalysis >> targetModel [
 	^targetModel
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 DependencyAnalysis >> targetModel: aModel [
 	targetModel := aModel   
 ]
