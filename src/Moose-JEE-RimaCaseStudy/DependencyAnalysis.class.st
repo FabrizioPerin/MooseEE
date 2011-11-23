@@ -167,7 +167,7 @@ DependencyAnalysis >> allInterestingElementInTheTargetModel [
 	relevantInterfaces := (relevantClasses flatCollect: [:class | class implementedInterfaces ]) asSet reject: #isStub.
 	relevantInterfaces := (relevantInterfaces select: [:interface | 'I_*' match: interface name]).
 	
-	^relevantClasses union: relevantInterfaces.  
+	^relevantClasses union: relevantInterfaces.
 ]
 
 { #category : #now }
@@ -638,6 +638,47 @@ DependencyAnalysis >> displayDependenciesFrom [
 ]
 
 { #category : #now }
+DependencyAnalysis >> entirePOHierarchyButPO [
+	"Apparently the classes that are generate from the database table are the one that subclass PO.java and 
+	start with 'X_' (for the classes) or 'I_' (for the interface). 
+	So this method return all those elements that are contained into the target model"
+	
+	| relevantClasses relevantInterfaces |
+
+	relevantClasses := (targetModel allClasses select: [:class | class name = 'PO' ]) first subclassHierarchy.
+	
+	relevantClasses := relevantClasses flatCollect: [:each | each withSuperclassHierarchy].
+	
+	relevantClasses :=  relevantClasses asSet reject: #isStub.	
+	
+	relevantClasses remove: ((targetModel allClasses select: [:class | class name = 'PO' ]) first).
+	relevantClasses remove: ((targetModel allClasses select: [:class | class name = 'Evaluatee' ]) first).
+	
+	^relevantClasses 
+]
+
+{ #category : #now }
+DependencyAnalysis >> entirePOHierarchyWithoutInterfaces [
+	"Apparently the classes that are generate from the database table are the one that subclass PO.java and 
+	start with 'X_' (for the classes) or 'I_' (for the interface). 
+	So this method return all those elements that are contained into the target model"
+	
+	| relevantClasses relevantInterfaces |
+
+	relevantClasses := (targetModel allClasses select: [:class | class name = 'PO' ]) first subclassHierarchy.
+	
+	relevantClasses := relevantClasses flatCollect: [:each | each withSuperclassHierarchy].
+	
+	relevantClasses :=  relevantClasses asSet reject: #isStub.	
+	
+	relevantClasses remove: ((targetModel allClasses select: [:class | class name = 'PO' ]) first).
+	relevantClasses remove: ((targetModel allClasses select: [:class | class name = 'Evaluatee' ]) first).
+	relevantClasses := relevantClasses reject: #isInterface.
+	
+	^relevantClasses 
+]
+
+{ #category : #now }
 DependencyAnalysis >> exp1TableCoupling [
 	| result aStream |
 	
@@ -802,6 +843,57 @@ DependencyAnalysis >> printCouplingWithoutNormalizationDetailingInvokers [
 	
 	stream := MultiByteFileStream forceNewFileNamed: 'resultOfCouplingWithoutNormalizationDetailingInvokers.csv'.
 	self print: edges asCSVOn: stream.
+]
+
+{ #category : #print }
+DependencyAnalysis >> printGeneratedClassesWithSubclasses [
+	| aStream aHeader aBlock aCollection rootClasses |
+	
+	aCollection := self entirePOHierarchyButPO asMooseGroup.
+	rootClasses := aCollection select: [:each | each isHierarchyRootWithin: aCollection].
+	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclasses.csv'.
+	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
+	aBlock := [:type | type name , ';' , (type subclassHierarchy reject: #isStub) asSet asString , String cr].	
+	
+	self
+		print: rootClasses 
+		asCSVOn: aStream
+		with: aHeader
+		using: aBlock
+]
+
+{ #category : #print }
+DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutInterfaces [
+	| aStream aHeader aBlock aCollection rootClasses |
+	
+	aCollection := self entirePOHierarchyWithoutInterfaces asMooseGroup.
+	rootClasses := aCollection select: [:each | each isHierarchyRootWithin: aCollection].
+	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclassesWithoutInterfaces.csv'.
+	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
+	aBlock := [:type | type name , ';' , (type subclassHierarchy reject: #isStub) asSet asString , String cr].	
+	
+	self
+		print: rootClasses 
+		asCSVOn: aStream
+		with: aHeader
+		using: aBlock
+]
+
+{ #category : #print }
+DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutXClasses [
+	| aStream aHeader aBlock aCollection rootClasses |
+	
+	aCollection := self entirePOHierarchyButPO asMooseGroup.
+	rootClasses := aCollection select: [:each | each isHierarchyRootWithin: aCollection].
+	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclassesWithoutXClasses.csv'.
+	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
+	aBlock := [:type | type name , ';' , ((type subclassHierarchy reject: #isStub) reject: [:class | 'X_*' match: class name]) asSet asString , String cr].	
+	
+	self
+		print: rootClasses 
+		asCSVOn: aStream
+		with: aHeader
+		using: aBlock
 ]
 
 { #category : #print }
