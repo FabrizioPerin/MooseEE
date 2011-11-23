@@ -597,6 +597,55 @@ DependencyAnalysis >> couplingWithoutNormalizationDetailingInvokersOn [
 ]
 
 { #category : #view }
+DependencyAnalysis >> displayAllTheHierarchies [
+	
+	| po allSubClasses view rootClasses lonelyRootClasses allSubClassesNotLonely |
+	
+	po := targetModel allTypes select: [:each | each name = 'PO'].
+	
+	(po size = 1) ifFalse: [
+		UIManager default alert: 'More than one PO has been found'.
+		^self].
+	po := po first.
+	
+	allSubClasses := po subclassHierarchyGroup.
+	
+	rootClasses := allSubClasses select: [:each | each isHierarchyRootWithin: allSubClasses].
+	lonelyRootClasses := rootClasses select: [:each | each isLonelyWithin: allSubClasses].
+	rootClasses := rootClasses difference: lonelyRootClasses.
+	
+	view := MOViewRenderer new.
+	
+	rootClasses notEmpty ifTrue: [
+		view shape rectangle withoutBorder; withoutBackground.
+		view node: 'rootClasses' forIt: [
+			(rootClasses asSortedCollection: [:a :b | a name < b name]) do: [:root | 
+				view shape rectangle text: #name.
+				view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+				view nodes: root withSubclassHierarchyGroup.
+				
+				view edgesFrom: #superclass.
+				view treeLayout.
+			].
+		].
+	].
+
+	lonelyRootClasses notEmpty ifTrue: [
+		view shape rectangle withoutBorder; withoutBackground.
+		view node: 'lonelyRootClasses' forIt: [
+			view shape rectangle text: #name.  
+			view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
+			view nodes: (lonelyRootClasses asSortedCollection: [:a :b | a name < b name]).
+			
+			view flowLayout maxWidth: 300; gapSize: 2.
+		].
+	].
+
+	view open.
+
+]
+
+{ #category : #view }
 DependencyAnalysis >> displayCouplingWithoutNormalizationOn [
 	| view edges deps classes4screens |
 	
@@ -729,6 +778,28 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 ]
 
 { #category : #print }
+DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream with: aHeader using: aBlock [ 
+	
+	UIManager default
+		displayProgress: 'Exporting in CSV'
+		at: Sensor cursorPoint
+		from: 1 
+		to: aCollectionOfWeightedEdges size
+		during: [ :bar | 
+			| index |
+			index := 1.
+			aStream nextPutAll: aHeader.
+			aCollectionOfWeightedEdges
+				do: [ :edge | 
+				
+					aStream nextPutAll: (aBlock value: edge).
+					
+					index := index + 1.
+					bar value: index. ]].
+	aStream close.  
+]
+
+{ #category : #print }
 DependencyAnalysis >> print: aCollectionOfWeightedEdges withScreensAsCSVOn: aStream [
 	
 	UIManager default
@@ -806,6 +877,28 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
 	
 
 	
+]
+
+{ #category : #print }
+DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystemWithSubclasses [
+	| edges stream aHeader aBlock |
+
+	edges := self computeCouplingBasedOnRefereesWDAndEdgesOnAllSystem
+		asSortedCollection: [ :a :b | a weight size > b weight size ].
+
+	stream := MultiByteFileStream
+		forceNewFileNamed: 'printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystemWithSubclasses.csv'.
+	
+	aHeader := 'FROM' , '; ' , 'Subclasses' , '; ' ,'TO' , '; ' , 'Subclasses' , '; ' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr.
+	
+	aBlock := [ :edge | 
+		edge from name printString , '; ' , edge from subclassHierarchy asSet asString , '; ' , edge to name printString , '; ' , edge from subclassHierarchy asSet asString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr ].
+	
+	self
+		print: edges
+		asCSVOn: stream
+		with: aHeader
+		using: aBlock
 ]
 
 { #category : #print }
