@@ -25,7 +25,7 @@ MJFAMIXTableGroupReports >> browser [
 				self halt.
 				distances := edges select: [:each | each weight < self cleanUpThreshold].
 				distances := distances sorted: [:first :second | first weight < second weight ].
-				stream := CrLfFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
+				stream := MultiByteFileStream forceNewFileNamed: 'potential_foreign_keys.txt'.
 				edges do: [:each | self print: each asStringOn: stream].
 				stream close] 
 			entitled: 'Export as string'.
