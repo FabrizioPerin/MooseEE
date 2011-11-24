@@ -1,5 +1,5 @@
 Class {
 	#name : #MJFAMIXDBAccessGroup,
-	#superclass : #MJAbstractGroup,
+	#superclass : #MooseGroup,
 	#category : #'Moose-JEE-SQL-Model'
 }

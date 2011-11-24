@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXColumnGroup,
-	#superclass : #MJAbstractGroup,
+	#superclass : #MooseGroup,
 	#category : #'Moose-JEE-SQL-Model'
 }
 

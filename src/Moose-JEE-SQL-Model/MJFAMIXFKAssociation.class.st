@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXFKAssociation,
-	#superclass : #MJAssociation,
+	#superclass : #FAMIXAssociation,
 	#instVars : [
 		'sourceTable',
 		'targetTable'

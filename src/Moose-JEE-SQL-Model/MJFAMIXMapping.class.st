@@ -14,7 +14,7 @@ maps
 "
 Class {
 	#name : #MJFAMIXMapping,
-	#superclass : #MJAssociation,
+	#superclass : #FAMIXAssociation,
 	#instVars : [
 		'mapSource',
 		'mapTarget'
