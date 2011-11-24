@@ -31,7 +31,7 @@ MooseModel >> cleanUpDuplicatedDeriveDependencies [
 						((dd at: firstDDIndex) rationale = (dd at: secondDDIndex) rationale) ifTrue: [
 							toRemove add: (dd at: secondDDIndex) ]]]]]].
 	
-	self withoutAnnounceRemoveAll: toRemove asSet.  
+	self silentlyRemoveAll: toRemove asSet.  
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
@@ -80,7 +80,7 @@ MooseModel >> fixFileAnchorsFromGUI [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> withoutAnnounceAdd: anElement [ 
+MooseModel >> silentlyAdd: anElement [ 
 	 
 	super add: anElement. 
 	anElement privateSetMooseModel: self.
@@ -88,14 +88,14 @@ MooseModel >> withoutAnnounceAdd: anElement [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> withoutAnnounceAddAll: entities [ 
+MooseModel >> silentlyAddAll: entities [ 
 	 
-	entities do: [:each | self withoutAnnounceAdd: each].
+	entities do: [:each | self silentlyAdd: each].
 	^entities
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> withoutAnnounceRemove: anElement [ 
+MooseModel >> silentlyRemove: anElement [ 
 	
 	self entityStorage remove: anElement. 
 	anElement privateSetMooseModel: nil. 
@@ -104,8 +104,8 @@ MooseModel >> withoutAnnounceRemove: anElement [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> withoutAnnounceRemoveAll: collection [ 
+MooseModel >> silentlyRemoveAll: collection [ 
 	
-	 collection do: [:each | self withoutAnnounceRemove: each]. 
+	 collection do: [:each | self silentlyRemove: each]. 
 	
 ]
