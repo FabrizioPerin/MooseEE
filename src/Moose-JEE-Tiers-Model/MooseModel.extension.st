@@ -43,7 +43,7 @@ MooseModel >> allServiceLayer [
 MooseModel >> cleanUpLayers [
 	<menuItem: 'Clean up all layers' category: 'JEAs Utilities'>
 	
-	MJFAMIXLayer allSubclasses do: [:each | self withoutAnnounceRemoveAll: (self allWithType: each)].
+	MJFAMIXLayer allSubclasses do: [:each | self silentlyRemoveAll: (self allWithType: each)].
 	
 
 ]
