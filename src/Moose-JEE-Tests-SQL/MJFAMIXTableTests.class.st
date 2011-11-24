@@ -10,7 +10,6 @@ MJFAMIXTableTests >> testAddColumn [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
@@ -33,7 +32,6 @@ MJFAMIXTableTests >> testColumns [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
@@ -49,7 +47,6 @@ MJFAMIXTableTests >> testConstraints [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
@@ -73,7 +70,6 @@ MJFAMIXTableTests >> testFKColumns [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
-	mooseModel ejbVersion: #EJB30.
 		
 	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
 	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
@@ -97,7 +93,6 @@ MJFAMIXTableTests >> testHasComposePK [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
-	mooseModel ejbVersion: #EJB30.
 	
 	self assert: (mooseModel allTables select: #hasComposePK) size = 2.
 	
@@ -182,8 +177,8 @@ MJFAMIXTableTests >> testNameAsRegex [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testNameAsRegexIgnoringCase [
-	
 	| col |
+	
 	col := MJFAMIXTable new name: #col1.
 	
 	self assert: (col nameAsRegexIgnoringCase isMemberOf: RxMatcher).
@@ -195,17 +190,13 @@ MJFAMIXTableTests >> testNameAsRegexIgnoringCase [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testNameWithAnnotationAsRegex [
-	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
-
+	| jEETestModel mooseModel table1 |
+	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
 
-						
-	"adding a fake sourceText to the Entities"
-	
 	self assert: (mooseModel allTables size = 3).
 	self assert: (table1 nameWithAnnotationAsRegex matches: jEETestModel fakeSourceText).
 ]
@@ -331,7 +322,6 @@ MJFAMIXTableTests >> testSetColumns [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
@@ -349,7 +339,6 @@ MJFAMIXTableTests >> testWithDeepReferencedByTables [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
@@ -369,7 +358,6 @@ MJFAMIXTableTests >> testWithDeepReferencedByTablesOnTwoLevels [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table1 := (mooseModel allTables select: [:each | each name = 'Tab1']) first.
 
@@ -391,7 +379,6 @@ MJFAMIXTableTests >> testWithDeepReferencesTables [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table3 := (mooseModel allTables select: [:each | each name = 'Tab3']) first.
 
@@ -411,7 +398,6 @@ MJFAMIXTableTests >> testWithDeepReferencesTablesFromTablesWithoutReferencedTabl
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table1 := (mooseModel allTables select: [:each | each name = 'Tab1']) first.
 
@@ -430,7 +416,6 @@ MJFAMIXTableTests >> testWithDeepReferencesTablesFromTablesWithoutReferenceingTa
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table5 := (mooseModel allTables select: [:each | each name = 'Tab5']) first.
 
@@ -449,7 +434,6 @@ MJFAMIXTableTests >> testWithDeepReferencesTablesOnTwoLevels [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingABiggerDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table5 := (mooseModel allTables select: [:each | each name = 'Tab5']) first.
 

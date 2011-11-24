@@ -299,7 +299,6 @@ MJFAMIXColumnTests >> testOwnerTable [
 
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithDB.
-	mooseModel ejbVersion: #EJB30.
 
 	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
 	
