@@ -16,80 +16,24 @@ MJFAMIXRelationalEntityTests >> testBelongsTo [
 
 { #category : #tests }
 MJFAMIXRelationalEntityTests >> testMappedNamedEntities [
-	| mooseModel annotationType famixAnchor entities table1 aCMPEntity root jEETestModel |
-
-	jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	root := jEETestModel root.
-
-	mooseModel ejbVersion: #EJB30.	
-	"define Entity beans"
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	| table class mapping mm |
 	
-	"Creating the annotation type Table"
-	annotationType := FAMIXAnnotationType new name: #Table.
-	mooseModel add: annotationType.
+	mm := MooseModel new.
+	table := MJFAMIXTable new.
+	class := FAMIXClass new.
 	
-	"Creating the instances"
-	mooseModel allEntityBeans do: [:bean | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationType.
-							instance annotatedEntity: bean.
-							mooseModel add: instance.
-							 ].
-						
-	"adding a fake sourceText to the Entities"
-	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
-	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
+	mapping := MJFAMIXMapping new
+		mapTarget: table;
+		mapSource: class.
+	class addMaps: mapping.
+	table addMappedBy: mapping.
 	
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
+	mm add: class.
+	mm add: table.
+	mm add: mapping.
 	
-	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
-	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
-
-	self assert: (table1 mappedNamedEntities size = 1).
-	self assert: (table1 mappedNamedEntities first = aCMPEntity ).
-
-]
-
-{ #category : #tests }
-MJFAMIXRelationalEntityTests >> testMappedNamedEntitiesCaseInsensitive [
-	| mooseModel annotationType famixAnchor entities table1 aCMPEntity root jEETestModel |
-
-	jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	root := jEETestModel root.
-
-	mooseModel ejbVersion: #EJB30.	
-	"define Entity beans"
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
-	
-	"Creating the annotation type Table"
-	annotationType := FAMIXAnnotationType new name: #Table.
-	mooseModel add: annotationType.
-	
-	"Creating the instances"
-	mooseModel allEntityBeans do: [:bean | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationType.
-							instance annotatedEntity: bean.
-							mooseModel add: instance.
-							 ].
-						
-	"adding a fake sourceText to the Entities"
-	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseNames.
-	mooseModel allEntityBeans first sourceAnchor: famixAnchor.
-	
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
-	
-	aCMPEntity := (mooseModel allEntityBeans select: [:bean | bean name = #ACMPEntity]) first. 
-	table1 := (mooseModel allTables select: [:table | table name = 'Table1']) first .
-
-	self assert: (table1 mappedNamedEntities size = 1).
-	self assert: (table1 mappedNamedEntities first = aCMPEntity ).
-
+	self assert: table mappedNamedEntities size = 1.
+	self assert: table mappedNamedEntities first = class
 ]
 
 { #category : #tests }
