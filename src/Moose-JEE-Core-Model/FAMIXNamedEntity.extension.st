@@ -6,11 +6,6 @@ FAMIXNamedEntity >> addIncomingDerivedDependency: aDerivedDependency [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-FAMIXNamedEntity >> addMaps: aMapping [
-	self maps add: aMapping
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXNamedEntity >> addOutgoingDerivedDependency: aDerivedDependency [
 	self outgoingDerivedDependency add: aDerivedDependency
 ]
@@ -41,47 +36,11 @@ FAMIXNamedEntity >> incomingDerivedDependency [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-FAMIXNamedEntity >> mapDirection: directionSymbol on: dependencyList [
-
-	"From a list of dependencies of a given type, select the ones going to or coming from receiver"
-
-	directionSymbol = #mapSource
-				ifTrue: [
-					^ (dependencyList  select: [:each | each to = self]) collect: [:each | each from].
-					].
-	directionSymbol = #mapTarget
-				ifTrue: [
-					^ (dependencyList  select: [:each | each from = self]) collect: [:each | each to].
-					].
-			
-	SyntaxErrorNotification signal: 'second argument should be #maps or #mapped'.
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-FAMIXNamedEntity >> mappedRelationalEntities [
-	^self mapDirection:  #mapTarget on: self mooseModel allMaps.
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-FAMIXNamedEntity >> maps [
-	<MSEProperty: #maps type: #MJFAMIXMapping opposite: #mapSource> <multivalued>  <derived>
-	<MSEComment: 'Map relationship.'>
-	
-	^self privateState attributeAt: #maps ifAbsentPut: [FMMultivalueLink on: self opposite: #mapSource:].
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXNamedEntity >> outgoingDerivedDependency [
 	<MSEProperty: #outgoingDerivedDependency type: #MJFAMIXDerivedDependency opposite: #source> <multivalued>  <derived>
 	<MSEComment: 'Dependency derived from another dependency.'>
 	
 	^self privateState attributeAt: #outgoingDerivedDependency ifAbsentPut: [FMMultivalueLink on: self opposite: #source:].
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-FAMIXNamedEntity >> removePointersToMaps [
-	
-	^self privateState attributeAt: #maps put: (FMMultivalueLink on: self opposite: #mapSource:).
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
