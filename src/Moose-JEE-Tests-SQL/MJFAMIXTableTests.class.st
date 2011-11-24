@@ -112,52 +112,44 @@ MJFAMIXTableTests >> testHasComposePK [
 
 { #category : #'as yet unclassified' }
 MJFAMIXTableTests >> testInUse [
-	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
+	| mm table mapping maps class att1 att2 col1 col2 mapatt1 mapatt2 |
+	
+	mm := MooseModel new.
+	table := MJFAMIXTable new name: #Table1.
+	class := FAMIXClass new.
+	att1 := FAMIXAttribute new.
+	att2 := FAMIXAttribute new.
+	col1 := MJFAMIXColumn new name: #col1.
+	col2 := MJFAMIXColumn new name: #col2.
+	
+	mapping := MJFAMIXMapping new
+		mapTarget: table;
+		mapSource: class.
+	
+	mapatt1 := MJFAMIXMapping new
+		mapTarget: col1;
+		mapSource: att1.
+		
+	mapatt2 := MJFAMIXMapping new
+		mapTarget: col2;
+		mapSource: att2.
+	
+	class addMaps: mapping.
+	table addMappedBy: mapping.
+	
+	mm add: class.
+	mm add: table.
+	mm add: att1.
+	mm add: att2.
+	mm add: col1.
+	mm add: col2.
+	mm add: mapping.
+	mm add: mapatt1.
+	mm add: mapatt2.
 
-	jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	mooseModel ejbVersion: #EJB30.
-	root := jEETestModel root.
-	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
+	self assert: (mm allColumns size = 2).
 	
-	"define Entity beans"
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
-	
-	"Creating the annotation type Table"
-	annotationType := FAMIXAnnotationType new name: #Table.
-	mooseModel add: annotationType.
-	
-	annotationTypeColumn := FAMIXAnnotationType new name: #Column.
-	mooseModel add: annotationTypeColumn.
-	
-	"Creating the Table instances"
-	mooseModel allEntityBeans  do: [:bean | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationType.
-							instance annotatedEntity: bean implementationClass.
-							mooseModel add: instance.
-							 ].
-						
-	"Creating the Columns instances"
-	mooseModel allEntityBeans do: [:bean | 
-			bean implementationClass attributes do: [:attr |
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationTypeColumn.
-							instance annotatedEntity: attr.
-							mooseModel add: instance.
-							 ]].
-						
-	"adding a fake sourceText to the Entities"
-	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
-	mooseModel allEntityBeans first implementationClass sourceAnchor: famixAnchor.
-	
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
-
-	self assert: (mooseModel allColumns size = 6).
-	
-	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXTable]).
+	maps := (mm allMaps select: [:each | each mapTarget isKindOf: MJFAMIXTable]).
 
 	self assert: (maps size = 1).
 
@@ -287,6 +279,7 @@ MJFAMIXTableTests >> testPKColumns [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
+	mooseModel ejbVersion: #EJB30.
 		
 	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
 	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.
