@@ -245,19 +245,6 @@ FAMIXMethod >> isPartOfAnUnsafeTransactionPath [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
-FAMIXMethod >> ownedTable [
-	self flag: #TODOTest.
-	^self privateState attributeAt: #ownedTable ifAbsent: [nil]
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-FAMIXMethod >> ownedTable: anObject [
-
-	self flag: #TODOTest.
-	self privateState attributeAt: #ownedTable put: anObject
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXMethod >> startATransaction [
 	^ self ejbTransactionType = 'RequiresNew' or: [  self ejbTransactionType = 'Required' 
 														or: [  self ejbTransactionType = 'REQUIRES_NEW'
