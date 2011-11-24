@@ -16,7 +16,6 @@ MJFAMIXTableGroupTests >> testComputeDeriveDependenciesFromSourceCode [
 
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithTransAndInvocationsAndDBAndQueryComplex.
-	mooseModel ejbVersion: #EJB30.
 
 	"adding fake mappings"
 	table := (mooseModel allTables select: [:each | each name = #Table1]) first.
