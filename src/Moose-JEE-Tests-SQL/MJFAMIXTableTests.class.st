@@ -287,7 +287,6 @@ MJFAMIXTableTests >> testPKColumns [
 	
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelContainingJustADB.
-	mooseModel ejbVersion: #EJB30.
 		
 	asset := (mooseModel allTables select: [ :each | each name = 'A_Asset' ]) first.
 	user := (mooseModel allTables select: [ :each | each name = 'AD_User' ]) first.

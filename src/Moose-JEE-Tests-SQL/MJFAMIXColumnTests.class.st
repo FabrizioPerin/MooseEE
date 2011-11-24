@@ -74,130 +74,49 @@ MJFAMIXColumnTests >> testDefaultValue [
 
 { #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testInUse [
-	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
-
-	jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	mooseModel ejbVersion: #EJB30.
-	root := jEETestModel root.
-	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
+	| mm table mapping maps class att1 att2 col1 col2 mapatt1 mapatt2 |
 	
-	"define Entity beans"
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	mm := MooseModel new.
+	table := MJFAMIXTable new.
+	class := FAMIXClass new.
+	att1 := FAMIXAttribute new.
+	att2 := FAMIXAttribute new.
+	col1 := MJFAMIXColumn new name: #col1.
+	col2 := MJFAMIXColumn new name: #col2.
 	
-	"Creating the annotation type Table"
-	annotationType := FAMIXAnnotationType new name: #Table.
-	mooseModel add: annotationType.
+	mapping := MJFAMIXMapping new
+		mapTarget: table;
+		mapSource: class.
 	
-	annotationTypeColumn := FAMIXAnnotationType new name: #Column.
-	mooseModel add: annotationTypeColumn.
-	
-	"Creating the Table instances"
-	mooseModel allEntityBeans do: [:bean | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationType.
-							instance annotatedEntity: bean implementationClass.
-							mooseModel add: instance.
-							 ].
-						
-	"Creating the Columns instances"
-	mooseModel allEntityBeans do: [:bean | 
-			bean implementationClass attributes do: [:attr |
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationTypeColumn.
-							instance annotatedEntity: attr.
-							mooseModel add: instance.
-							 ]].
-						
-	"adding a fake sourceText to the Entities"
-	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceTextWithLowerCaseNames.
-	mooseModel allEntityBeans do: [:bean | 
-			bean implementationClass sourceAnchor: famixAnchor.].
-	
-	mooseModel allAttributes do: [:attr |
-		attr name = 'Att1' ifTrue: [attr declaredType: (FAMIXClass new	name: 'WorkUnitAuthOperation'; yourself)].
-		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
-		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
-	
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
-
-	self assert: (mooseModel allColumns size = 6).
-
-	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]).
-
-	self assert: (maps size = 3).
+	mapatt1 := MJFAMIXMapping new
+		mapTarget: col1;
+		mapSource: att1.
 		
-	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column2 and: [map mapTarget inUse]]).
-	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column4 and: [map mapTarget inUse]]).
-	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column6 and: [map mapTarget inUse]]).
-
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXColumnTests >> testInUseCaseInsensitive [
-	| mooseModel annotationType jEETestModel root table1 annotationTypeColumn famixAnchor maps |
-
-	jEETestModel := JEETestModels new.
-	mooseModel := jEETestModel sampleMooseModelWithDB.
-	mooseModel ejbVersion: #EJB30.
-	root := jEETestModel root.
-	table1 := (mooseModel allTables select: [:each | each name = 'Table1']) first.
+	mapatt2 := MJFAMIXMapping new
+		mapTarget: col2;
+		mapSource: att2.
 	
-	"define Entity beans"
-	(root allElements select: [:each | each class = MJEntityElement]) do: [:each | each populate: mooseModel].
+	class addMaps: mapping.
+	table addMappedBy: mapping.
 	
-	"Creating the annotation type Table"
-	annotationType := FAMIXAnnotationType new name: #Table.
-	mooseModel add: annotationType.
-	
-	annotationTypeColumn := FAMIXAnnotationType new name: #Column.
-	mooseModel add: annotationTypeColumn.
-	
-	"Creating the Table instances"
-	mooseModel allEntityBeans do: [:bean | 
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationType.
-							instance annotatedEntity: bean implementationClass.
-							mooseModel add: instance.
-							 ].
-						
-	"Creating the Columns instances"
-	mooseModel allEntityBeans do: [:bean | 
-			bean implementationClass attributes do: [:attr |
-							| instance |
-							instance := FAMIXAnnotationInstance new.
-							instance annotationType: annotationTypeColumn.
-							instance annotatedEntity: attr.
-							mooseModel add: instance.
-							 ]].
-						
-	"adding a fake sourceText to the Entities"
-	famixAnchor := FAMIXSourceTextAnchor new source: jEETestModel fakeSourceText.
-	mooseModel allEntityBeans do: [:bean | 
-			bean implementationClass sourceAnchor: famixAnchor.].
-	
-	mooseModel allAttributes do: [:attr |
-		attr name = 'Att1' ifTrue: [attr declaredType: (FAMIXClass new	name: 'WorkUnitAuthOperation'; yourself)].
-		attr name = 'Att2' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].
-		attr name = 'Att3' ifTrue: [attr declaredType: (FAMIXClass new	name: 'String'; yourself)].].
-	
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongDBTablesAndClasses.
-	(MJMappingStrategy on: mooseModel) buildRelationsAmongTableColumnsAndMethodsAndAttributes.
+	mm add: class.
+	mm add: table.
+	mm add: att1.
+	mm add: att2.
+	mm add: col1.
+	mm add: col2.
+	mm add: mapatt1.
+	mm add: mapatt2.
 
-	self assert: (mooseModel allColumns size = 6).
-
-	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]).
-
-	self assert: (maps size = 3).
-		
-	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column2 and: [map mapTarget inUse]]).
-	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column4 and: [map mapTarget inUse]]).
-	self assert: (maps anySatisfy: [:map | map mapTarget name = #Column6 and: [map mapTarget inUse]]).
-
+	
+	self assert: mm allColumns size = 2.
+	
+	maps := mm allMaps select: [ :each | each mapTarget isKindOf: MJFAMIXColumn ].
+	
+	self assert: maps size = 2.
+	
+	self assert: (maps anySatisfy: [ :map | map mapTarget name = #col1 and: [ map mapTarget inUse ] ]).
+	self assert: (maps anySatisfy: [ :map | map mapTarget name = #col2 and: [ map mapTarget inUse ] ]).
 ]
 
 { #category : #'as yet unclassified' }
