@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXFKAssociationGroupTests,
-	#superclass : #MJAbstractGroupTests,
+	#superclass : #TestCase,
 	#category : #'Moose-JEE-Tests-SQL'
 }
 
