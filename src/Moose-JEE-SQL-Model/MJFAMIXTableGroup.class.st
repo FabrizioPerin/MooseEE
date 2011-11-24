@@ -53,7 +53,7 @@ MJFAMIXTableGroup >> computeDeriveDependenciesFromSourceCode [
 				
 					(tableToConnect at: rowIndex) addOutgoingDerivedDependency: dep.
 					(tableToConnect at: colIndex) addIncomingDerivedDependency: dep.
-					self mooseModel withoutAnnounceAdd: dep]]]
+					self mooseModel silentlyAdd: dep]]]
 	]
 	
 ]

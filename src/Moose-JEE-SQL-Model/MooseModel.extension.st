@@ -79,7 +79,7 @@ MooseModel >> buildMappingBetweenSoftwareEntityAndRelationalElements [
 { #category : #'*moose-jee-sql-model' }
 MooseModel >> cleanUpAllMaps [
 	
-	self withoutAnnounceRemoveAll: (self allWithType: MJFAMIXMapping).
+	self silentlyRemoveAll: (self allWithType: MJFAMIXMapping).
 	self allClasses do: [:class | class removePointersToMaps ].
 	self allTables do: [:table | table removePointersToMaps ]
 ]
@@ -109,7 +109,7 @@ MooseModel >> cleanUpDuplicatedMaps [
 				((maps at: firstMapIndex) mapTarget = (maps at: secondMapIndex) mapTarget) ifTrue: [
 					toRemove add: (maps at: secondMapIndex) ]]]].
 	
-	self withoutAnnounceRemoveAll: toRemove asSet.  
+	self silentlyRemoveAll: toRemove asSet.  
 ]
 
 { #category : #'*moose-jee-sql-model' }
