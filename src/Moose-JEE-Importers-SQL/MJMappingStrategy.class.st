@@ -48,7 +48,7 @@ MJMappingStrategy >> buildRelationsAmongDBTablesAndClasses [
 									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 									class addMaps: mapping.
 									table addMappedBy: mapping.
-									targetModel withoutAnnounceAdd: mapping.].
+									targetModel silentlyAdd: mapping.].
 								counter := counter+1.
 								bar value: counter]]]]
 	ifFalse:[
@@ -72,7 +72,7 @@ MJMappingStrategy >> buildRelationsAmongDBTablesAndClasses [
 										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
 										table addMappedBy: mapping.
-										targetModel withoutAnnounceAdd: mapping.].
+										targetModel silentlyAdd: mapping.].
 								counter := counter+1.
 								bar value: counter.
 								]]]].
@@ -137,7 +137,7 @@ MJMappingStrategy >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 										mapping := MJFAMIXMapping new mapTarget: column; mapSource: method.
 										method addMaps: mapping.
 										column addMappedBy: mapping.
-										targetModel withoutAnnounceAdd: mapping]]]].
+										targetModel silentlyAdd: mapping]]]].
 				
 					
 					"now try to match the rest"
@@ -185,7 +185,7 @@ MJMappingStrategy >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 										mapping := MJFAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
 										currentAtt addMaps: mapping.
 										currentCol addMappedBy: mapping.
-										targetModel withoutAnnounceAdd: mapping.
+										targetModel silentlyAdd: mapping.
 										currentAtt := currentCol := nil.].
 								
 								internalCounter := internalCounter + 1.
@@ -219,7 +219,7 @@ MJMappingStrategy >> buildRelationsAmongTablesAndAllClassesByName [
 									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
 									class addMaps: mapping.
 									table addMappedBy: mapping.
-									targetModel withoutAnnounceAdd: mapping.].
+									targetModel silentlyAdd: mapping.].
 							counter := counter+1.
 							bar value: counter.
 							]]].
@@ -249,7 +249,7 @@ MJMappingStrategy >> buildRelationsAmongTablesAndInterfacesByName [
 									mapping := MJFAMIXMapping new mapTarget: table; mapSource: interface.
 									interface addMaps: mapping.
 									table addMappedBy: mapping.
-									targetModel withoutAnnounceAdd: mapping.].
+									targetModel silentlyAdd: mapping.].
 							counter := counter+1.
 							bar value: counter.
 							]]].

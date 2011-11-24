@@ -186,13 +186,13 @@ MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 
 			bar value: ('Adding ', tables size asString ,' tables').
 			tables valuesDo: [:table | 
-				self targetModel withoutAnnounceAdd: table.
+				self targetModel silentlyAdd: table.
 				counter := counter + 1.
 				bar value: counter].
 			
 			bar value: ('Adding' , columns size asString , 'attributes').	
 			columns do: [:col |
-				self targetModel withoutAnnounceAdd: col.
+				self targetModel silentlyAdd: col.
 				counter := counter + 1.
 				bar value: counter].	
 				
@@ -203,7 +203,7 @@ MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 			self computePrimaryKeys.
 			
 			bar value: 'Computing foreign keys constraints'.			
-			self targetModel withoutAnnounceAddAll: self computeForeignKeys.].
+			self targetModel silentlyAddAll: self computeForeignKeys.].
 	
 	^self targetModel
 	
