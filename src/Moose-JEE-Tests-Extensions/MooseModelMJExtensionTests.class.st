@@ -165,14 +165,14 @@ MooseModelMJExtensionTests >> testCleanUpAllMaps [
 	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
-	mooseModel withoutAnnounceAdd: mapping.
+	mooseModel silentlyAdd: mapping.
 	
 	table := (mooseModel allTables select: [:each | each name = #Table2]) first.
 	class := (mooseModel allClasses select: [:each | each name = #Class4]) first.
 	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
-	mooseModel withoutAnnounceAdd: mapping.
+	mooseModel silentlyAdd: mapping.
 						
 	self assert: (mooseModel allMaps size = 2).
 

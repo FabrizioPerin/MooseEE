@@ -215,7 +215,7 @@ FAMIXNamedEntityMJExtensionTests >> testRemovePointersToMaps [
 	self assert: (aCMPEntity mappedRelationalEntities size = 1).
 	self assert: (aCMPEntity mappedRelationalEntities first = table1 ).
 	
-	mooseModel withoutAnnounceRemoveAll: (mooseModel allWithType: MJFAMIXMapping).
+	mooseModel silentlyRemoveAll: (mooseModel allWithType: MJFAMIXMapping).
 	
 	aCMPEntity implementationClass removePointersToMaps.
 	
