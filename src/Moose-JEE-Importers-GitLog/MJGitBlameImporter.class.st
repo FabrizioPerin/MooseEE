@@ -161,13 +161,13 @@ MJGitBlameImporter >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 			
 			"adding the files"
 			aCollectionOfEnsuredNodes do: [:mjBlameFile |
-				self targetModel withoutAnnounceAdd: mjBlameFile.		
+				self targetModel silentlyAdd: mjBlameFile.		
 				index := index + 1.
 				bar value: index].
 			
 			"adding the authors"
 			authorsSet do: [:author | 
-				self targetModel withoutAnnounceAdd: author.
+				self targetModel silentlyAdd: author.
 				index := index + 1.
 				bar value: index].
 			 ].
