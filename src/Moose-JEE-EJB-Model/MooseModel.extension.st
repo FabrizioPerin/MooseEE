@@ -71,7 +71,7 @@ MooseModel >> createAnnotationForTransactionScope [
 	( transactionScopeTypeGroup isNil or: [ transactionScopeTypeGroup isEmpty ] )
 			ifTrue: [ transactionScopeType := FAMIXAnnotationType new name: #transactionScope]
 			ifFalse: [transactionScopeType := transactionScopeTypeGroup first].
-	self withoutAnnounceAdd: transactionScopeType.
+	self silentlyAdd: transactionScopeType.
 
 	
 	"Creation of the annotation istances for method and classes for transactionScope"
@@ -84,7 +84,7 @@ MooseModel >> createAnnotationForTransactionScope [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: transactionScopeType.
 							instance annotatedEntity: namespace.
-							self withoutAnnounceAdd: instance.
+							self silentlyAdd: instance.
 							 ].
 	
 	interestingClasses do: [:class | 
@@ -92,7 +92,7 @@ MooseModel >> createAnnotationForTransactionScope [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: transactionScopeType.
 							instance annotatedEntity: class.
-							self withoutAnnounceAdd: instance.
+							self silentlyAdd: instance.
 							 ].		
 
 	allInterestingMethods do: [:method | 
@@ -100,7 +100,7 @@ MooseModel >> createAnnotationForTransactionScope [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: transactionScopeType.
 							instance annotatedEntity: method.
-							self withoutAnnounceAdd: instance.
+							self silentlyAdd: instance.
 							 ].	
 
 	^self
@@ -116,7 +116,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 	( unsafeQueryTypeGroup isNil or: [ unsafeQueryTypeGroup isEmpty ] )
 			ifTrue: [ unsafeQueryType := FAMIXAnnotationType new name: #unsafeQuery]
 			ifFalse: [unsafeQueryType := unsafeQueryTypeGroup first].
-	self withoutAnnounceAdd: unsafeQueryType.
+	self silentlyAdd: unsafeQueryType.
 
 	
 	"Creation of annotation instances on methods and classes for Unsafe Query "
@@ -133,7 +133,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: namespace.
-							self withoutAnnounceAdd: instance.
+							self silentlyAdd: instance.
 							 ].	
 
 	interestingClassesWithoutLonelyClasses do: [:class | 
@@ -141,7 +141,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: class.
-							self withoutAnnounceAdd: instance.
+							self silentlyAdd: instance.
 							 ].		
 	
 	allInterestingMethods do: [:method | 
@@ -149,7 +149,7 @@ MooseModel >> createAnnotationForUnsafeQuery [
 							instance := FAMIXAnnotationInstance new.
 							instance annotationType: unsafeQueryType.
 							instance annotatedEntity: method.
-							self withoutAnnounceAdd: instance.
+							self silentlyAdd: instance.
 							 ].	
 
 	^self
@@ -310,7 +310,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					bean implementationClass: each.].
 				counter := counter +1.
 				bar value: counter.
-				self withoutAnnounceAdd: bean ].
+				self silentlyAdd: bean ].
 
 			bar value: 'Importing Message Driven Beans'.
 			messageDrivenBeansAnnotations do: [:annotation | 
@@ -322,7 +322,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					bean implementationClass: each.].
 				counter := counter +1.
 				bar value: counter.
-				self withoutAnnounceAdd: bean ].
+				self silentlyAdd: bean ].
 	
 			bar value: 'Importing Session Beans'.
 			sessionBeansAnnotations do: [:annotation | 
@@ -335,7 +335,7 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					bean implementationClass: each.].
 				counter := counter +1.
 				bar value: counter.
-				self withoutAnnounceAdd: bean].
+				self silentlyAdd: bean].
 	
 			bar value: 'Importing Transaction Attributes'.
 			transactionAttributes do: [:annotation |
