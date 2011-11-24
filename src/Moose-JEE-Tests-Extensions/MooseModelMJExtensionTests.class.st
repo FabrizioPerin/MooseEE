@@ -155,7 +155,6 @@ MooseModelMJExtensionTests >> testCleanUpAllMaps [
 
 	jEETestModel := JEETestModels new.
 	mooseModel := jEETestModel sampleMooseModelWithTransAndInvocationsAndDBAndQueryComplex.
-	mooseModel ejbVersion: #EJB30.
 	
 	self assert: (mooseModel allMaps size = 0).
 
