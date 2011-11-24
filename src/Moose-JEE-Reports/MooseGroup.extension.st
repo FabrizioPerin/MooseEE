@@ -20,5 +20,5 @@ MooseGroup >> fullyConnectGroupElementsThroughDependencies [
 			
 			dependencies add: dependency.]].
 	
-	self mooseModel withoutAnnounceAddAll: dependencies.
+	self mooseModel silentlyAddAll: dependencies.
 ]
