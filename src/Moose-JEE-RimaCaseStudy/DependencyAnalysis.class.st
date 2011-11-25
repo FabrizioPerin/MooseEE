@@ -942,12 +942,12 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystemWit
 		asSortedCollection: [ :a :b | a weight size > b weight size ].
 
 	stream := MultiByteFileStream
-		forceNewFileNamed: 'printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystemWithSubclasses.csv'.
+		forceNewFileNamed: 'CouplingBasedOnAllSystemWithSubclasses.csv'.
 	
 	aHeader := 'FROM' , '; ' , 'Subclasses' , '; ' ,'TO' , '; ' , 'Subclasses' , '; ' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr.
 	
 	aBlock := [ :edge | 
-		edge from name printString , '; ' , edge from subclassHierarchy asSet asString , '; ' , edge to name printString , '; ' , edge from subclassHierarchy asSet asString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr ].
+		edge from name printString , '; ' , edge from subclassHierarchy asSet asString , '; ' , edge to name printString , '; ' , edge to subclassHierarchy asSet asString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr ].
 	
 	self
 		print: edges
