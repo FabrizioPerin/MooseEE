@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 MJFAMIXMappingGroupTests >> testAnnotation [
-	self assert: MJFAMIXMappingGroup annotation == MJFAMIXMappingGroup.
+	self assert: FAMIXMappingGroup annotation == FAMIXMappingGroup.
 ]
 
 { #category : #tests }
@@ -16,7 +16,7 @@ MJFAMIXMappingGroupTests >> testSaveListOfMapsOnFileNamed [
 	mooseModel := JEETestModels new sampleMooseModelWithDB.
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
-	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
 	mooseModel add: mapping.

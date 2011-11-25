@@ -6,14 +6,14 @@ Class {
 
 { #category : #tests }
 MJFAMIXDataBaseTests >> testAnnotation [
-	self assert: MJFAMIXDataBase annotation == MJFAMIXDataBase.
+	self assert: FAMIXDataBase annotation == FAMIXDataBase.
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXDataBaseTests >> testPrintOn [
 	| db stream |
 
-	db := MJFAMIXDataBase new name: 'Database1'.
+	db := FAMIXDataBase new name: 'Database1'.
 	
 	stream := ReadWriteStream on: ''.
 	db printOn: stream.
@@ -25,15 +25,15 @@ MJFAMIXDataBaseTests >> testPrintOn [
 MJFAMIXDataBaseTests >> testTables [
 	| db stream |
 
-	db := MJFAMIXDataBase new name: 'Database1'.
+	db := FAMIXDataBase new name: 'Database1'.
 	
 	self assert: (db tables isMemberOf: OrderedCollection).
 	
-	db tables: (OrderedCollection with: (MJFAMIXTable new name: 'table1') with: (MJFAMIXTable new name: 'table2')).
+	db tables: (OrderedCollection with: (FAMIXTable new name: 'table1') with: (FAMIXTable new name: 'table2')).
 	
 	self assert: (db tables isMemberOf: OrderedCollection).
 	self assert: (db tables size = 2).
-	self assert: (db tables first isMemberOf: MJFAMIXTable).
+	self assert: (db tables first isMemberOf: FAMIXTable).
 	self assert: (db tables first name = 'table1').
 	
 

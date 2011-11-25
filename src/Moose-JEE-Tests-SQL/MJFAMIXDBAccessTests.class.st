@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 MJFAMIXDBAccessTests >> testAnnotation [
-	self assert: MJFAMIXDBAccess annotation == MJFAMIXDBAccess.
+	self assert: FAMIXDBAccess annotation == FAMIXDBAccess.
 ]
 
 { #category : #testsOnJEEModel }
@@ -15,14 +15,14 @@ MJFAMIXDBAccessTests >> testMJFAMIXDBAccessCreateWithAccessorAndAccessed [
 	| sourcedEntity table dbAccess |
 	
 	sourcedEntity := FAMIXSourcedEntity new.
-	table := MJFAMIXTable new name: #Table1.
+	table := FAMIXTable new name: #Table1.
 	
-	dbAccess := MJFAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
+	dbAccess := FAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
 	
 	sourcedEntity addDBAccess: dbAccess.
 	table addSourceAccessors: dbAccess.
 	
-	self assert: (dbAccess isMemberOf: MJFAMIXDBAccess).
+	self assert: (dbAccess isMemberOf: FAMIXDBAccess).
 	self assert: (dbAccess accessorEntity = sourcedEntity).
 	self assert: (dbAccess accessedEntity = table).
 	self assert: (dbAccess from = sourcedEntity).
@@ -37,9 +37,9 @@ MJFAMIXDBAccessTests >> testMJFAMIXDBAccessCreation [
 	
 	| mooseModel sourcedEntity table dbAccess |
 		
-	dbAccess := MJFAMIXDBAccess new.
+	dbAccess := FAMIXDBAccess new.
 	
-	self assert: (dbAccess isMemberOf: MJFAMIXDBAccess).
+	self assert: (dbAccess isMemberOf: FAMIXDBAccess).
 	self assert: (dbAccess accessedEntity = nil).
 	self assert: (dbAccess accessorEntity = nil).
 ]
@@ -50,14 +50,14 @@ MJFAMIXDBAccessTests >> testPrintOn [
 	| sourcedEntity table dbAccess stream |
 	
 	sourcedEntity := FAMIXSourcedEntity new.
-	table := MJFAMIXTable new name: #Table1.
+	table := FAMIXTable new name: #Table1.
 	
-	dbAccess := MJFAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
+	dbAccess := FAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
 	
 	sourcedEntity addDBAccess: dbAccess.
 	table addSourceAccessors: dbAccess.
 	
-	self assert: (dbAccess isMemberOf: MJFAMIXDBAccess).
+	self assert: (dbAccess isMemberOf: FAMIXDBAccess).
 	self assert: (dbAccess accessorEntity = sourcedEntity).
 	self assert: (dbAccess accessedEntity = table).
 	self assert: (dbAccess from = sourcedEntity).

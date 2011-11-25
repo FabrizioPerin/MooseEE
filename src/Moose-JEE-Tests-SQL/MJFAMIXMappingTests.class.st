@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 MJFAMIXMappingTests >> testAnnotation [
-	self assert: MJFAMIXMapping annotation == MJFAMIXMapping.
+	self assert: FAMIXMapping annotation == FAMIXMapping.
 ]
 
 { #category : #testsOnJEEModel }
@@ -20,7 +20,7 @@ MJFAMIXMappingTests >> testFAMIXMappingCreation [
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
 	
-	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 	
 	class addMaps: mapping.
 	table addMappedBy: mapping.
@@ -88,9 +88,9 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulation [
 	self assert: (mooseModel allTables size = 3).
 	self assert: (mooseModel allColumns size = 6).
 	
-	self assert: ((mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]) size = 3).
+	self assert: ((mooseModel allMaps select: [:each | each mapTarget isKindOf: FAMIXColumn]) size = 3).
 	
-	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]).
+	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: FAMIXColumn]).
 	
 	self assert: (maps anySatisfy: [:map | (map mapTarget name = #Column6) and: [map mapSource name = 'Att3']]).
 	self assert: (maps anySatisfy: [:map | (map mapTarget name  = #Column4) and: [map mapSource name = 'Att2']]).
@@ -151,9 +151,9 @@ MJFAMIXMappingTests >> testFAMIXMappingModelColumnsPopulationCaseInsensitive [
 	self assert: (mooseModel allTables size = 3).
 	self assert: (mooseModel allColumns size = 6).
 	
-	self assert: ((mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]) size = 3).
+	self assert: ((mooseModel allMaps select: [:each | each mapTarget isKindOf: FAMIXColumn]) size = 3).
 	
-	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]).
+	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: FAMIXColumn]).
 	
 	self assert: (maps anySatisfy: [:map | (map mapTarget name = #Column6) and: [map mapSource name = 'Att3']]).
 	self assert: (maps anySatisfy: [:map | (map mapTarget name  = #Column4) and: [map mapSource name = 'Att2']]).
@@ -326,7 +326,7 @@ MJFAMIXMappingTests >> testPrintOn [
 	class := mooseModel entityNamed: #'anotherPackage::ABMPEntityBean'.
 	table := mooseModel entityNamed: #Table1.
 	
-	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 	
 	class addMaps: mapping.
 	table addMappedBy: mapping.

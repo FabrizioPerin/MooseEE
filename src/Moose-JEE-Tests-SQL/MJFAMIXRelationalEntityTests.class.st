@@ -6,12 +6,12 @@ Class {
 
 { #category : #tests }
 MJFAMIXRelationalEntityTests >> testAnnotation [
-	self assert: MJFAMIXRelationalEntity annotation == MJFAMIXRelationalEntity.
+	self assert: FAMIXRelationalEntity annotation == FAMIXRelationalEntity.
 ]
 
 { #category : #tests }
 MJFAMIXRelationalEntityTests >> testBelongsTo [
-	self assert: MJFAMIXRelationalEntity new belongsTo = ''.
+	self assert: FAMIXRelationalEntity new belongsTo = ''.
 ]
 
 { #category : #tests }
@@ -19,10 +19,10 @@ MJFAMIXRelationalEntityTests >> testMappedNamedEntities [
 	| table class mapping mm |
 	
 	mm := MooseModel new.
-	table := MJFAMIXTable new.
+	table := FAMIXTable new.
 	class := FAMIXClass new.
 	
-	mapping := MJFAMIXMapping new
+	mapping := FAMIXMapping new
 		mapTarget: table;
 		mapSource: class.
 	class addMaps: mapping.
@@ -41,13 +41,13 @@ MJFAMIXRelationalEntityTests >> testSourceAccessors [
 	
 	| table dbAccess |
 	
-	table := MJFAMIXTable new name: #Table1.
+	table := FAMIXTable new name: #Table1.
 	
-	dbAccess := MJFAMIXDBAccess new accessedEntity: table.
+	dbAccess := FAMIXDBAccess new accessedEntity: table.
 	
 	table addSourceAccessors: dbAccess.
 	
-	self assert: (table isMemberOf: MJFAMIXTable).
+	self assert: (table isMemberOf: FAMIXTable).
 
 	self assert: (table sourceAccessors isMemberOf: FMMultivalueLink).
 	self assert: (table sourceAccessors first = dbAccess).

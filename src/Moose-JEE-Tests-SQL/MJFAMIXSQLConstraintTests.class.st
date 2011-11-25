@@ -8,7 +8,7 @@ Class {
 MJFAMIXSQLConstraintTests >> testAddFKColumnName [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 
 	const addFKColumnName: #Col1.
 	const addFKColumnName: #Col2.
@@ -22,7 +22,7 @@ MJFAMIXSQLConstraintTests >> testAddFKColumnName [
 MJFAMIXSQLConstraintTests >> testAddPKColumnName [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 
 	const addPKColumnName: #Col1.
 	const addPKColumnName: #Col2.
@@ -36,7 +36,7 @@ MJFAMIXSQLConstraintTests >> testAddPKColumnName [
 MJFAMIXSQLConstraintTests >> testAddUniqueColumnName [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 
 	const addUniqueColumnName: 'uniqueColumn'.
 	
@@ -46,14 +46,14 @@ MJFAMIXSQLConstraintTests >> testAddUniqueColumnName [
 
 { #category : #tests }
 MJFAMIXSQLConstraintTests >> testAnnotation [
-	self assert: MJFAMIXSQLConstraint annotation == MJFAMIXSQLConstraint.
+	self assert: FAMIXSQLConstraint annotation == FAMIXSQLConstraint.
 ]
 
 { #category : #initialization }
 MJFAMIXSQLConstraintTests >> testIsCheck [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 	
 	const isCheck: true.
 	
@@ -69,7 +69,7 @@ MJFAMIXSQLConstraintTests >> testIsCheck [
 MJFAMIXSQLConstraintTests >> testIsFKConstraint [	
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 
 	self assert: (const isFKConstraint = nil).
 	
@@ -82,7 +82,7 @@ MJFAMIXSQLConstraintTests >> testIsFKConstraint [
 MJFAMIXSQLConstraintTests >> testIsPKConstraint [	
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 
 	self assert: (const isPKConstraint = nil).
 	
@@ -95,7 +95,7 @@ MJFAMIXSQLConstraintTests >> testIsPKConstraint [
 MJFAMIXSQLConstraintTests >> testIsUnique [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 
 	self assert: (const isUnique = nil).
 	
@@ -108,11 +108,11 @@ MJFAMIXSQLConstraintTests >> testIsUnique [
 MJFAMIXSQLConstraintTests >> testName [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 	
 	self assert: (const name = nil).
 	
-	const := MJFAMIXSQLConstraint new name: 'Constraint_1'.
+	const := FAMIXSQLConstraint new name: 'Constraint_1'.
 	
 	self assert: (const name = 'Constraint_1').
 ]
@@ -121,7 +121,7 @@ MJFAMIXSQLConstraintTests >> testName [
 MJFAMIXSQLConstraintTests >> testReferencedTableName [
 	| const |
 
-	const := MJFAMIXSQLConstraint new.
+	const := FAMIXSQLConstraint new.
 	
 	self assert: (const referencedTableName = nil).
 	

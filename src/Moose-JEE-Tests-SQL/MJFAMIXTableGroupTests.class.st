@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 MJFAMIXTableGroupTests >> testAnnotation [
-	self assert: MJFAMIXTableGroup annotation == MJFAMIXTableGroup.
+	self assert: FAMIXTableGroup annotation == FAMIXTableGroup.
 ]
 
 { #category : #tests }
@@ -20,14 +20,14 @@ MJFAMIXTableGroupTests >> testComputeDeriveDependenciesFromSourceCode [
 	"adding fake mappings"
 	table := (mooseModel allTables select: [:each | each name = #Table1]) first.
 	class := (mooseModel allClasses select: [:each | each name = #AStatelessSessionBean]) first.
-	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table ; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
 	mooseModel silentlyAdd: mapping.
 	
 	table := (mooseModel allTables select: [:each | each name = #Table2]) first.
 	class := (mooseModel allClasses select: [:each | each name = #Class4]) first.
-	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table ; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
 	mooseModel silentlyAdd: mapping.
@@ -110,50 +110,50 @@ MJFAMIXTableGroupTests >> testLevenshteinDistancesAmongFieldsTable [
 	self assert: (distances size = 6).
 	self assert: (distances allSatisfy: [:each | each isMemberOf: MalWeightedEdge]).
 	
-	self assert: ((distances at: 1) from isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 1) from isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 1) from name = 'AD_Org_ID'). 
 	self assert: ((distances at: 1) from ownerTable name = 'AD_User'). 
-	self assert: ((distances at: 1) to isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 1) to isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 1) to name = 'AD_OrgTrx_ID'). 
 	self assert: ((distances at: 1) to ownerTable name = 'AD_User').
 	self assert: ((distances at: 1) weight = 3). 
 		
-	self assert: ((distances at: 2) from isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 2) from isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 2) from name = 'AD_Client_ID'). 
 	self assert: ((distances at: 2) from ownerTable name = 'AD_User'). 
-	self assert: ((distances at: 2) to isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 2) to isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 2) to name = 'AD_Client_ID'). 
 	self assert: ((distances at: 2) to ownerTable name = 'A_Asset_Group').
 	self assert: ((distances at: 2) weight = 0).
 	
-	self assert: ((distances at: 3) from isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 3) from isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 3) from name = 'AD_Org_ID'). 
 	self assert: ((distances at: 3) from ownerTable name = 'AD_User'). 
-	self assert: ((distances at: 3) to isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 3) to isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 3) to name = 'AD_Org_ID'). 
 	self assert: ((distances at: 3) to ownerTable name = 'A_Asset_Group').
 	self assert: ((distances at: 3) weight = 0). 
 	
-	self assert: ((distances at: 4) from isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 4) from isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 4) from name = 'AD_Org_ID'). 
 	self assert: ((distances at: 4) from ownerTable name = 'A_Asset'). 
-	self assert: ((distances at: 4) to isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 4) to isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 4) to name = 'AD_OrgTrx_ID'). 
 	self assert: ((distances at: 4) to ownerTable name = 'AD_User').
 	self assert: ((distances at: 4) weight = 3). 
 	
-	self assert: ((distances at: 5) from isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 5) from isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 5) from name = 'AD_Client_ID'). 
 	self assert: ((distances at: 5) from ownerTable name = 'A_Asset'). 
-	self assert: ((distances at: 5) to isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 5) to isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 5) to name = 'AD_Client_ID'). 
 	self assert: ((distances at: 5) to ownerTable name = 'A_Asset_Group').
 	self assert: ((distances at: 5) weight = 0). 
 	
-	self assert: ((distances at: 6) from isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 6) from isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 6) from name = 'AD_Org_ID'). 
 	self assert: ((distances at: 6) from ownerTable name = 'A_Asset'). 
-	self assert: ((distances at: 6) to isMemberOf: MJFAMIXColumn).
+	self assert: ((distances at: 6) to isMemberOf: FAMIXColumn).
 	self assert: ((distances at: 6) to name = 'AD_Org_ID'). 
 	self assert: ((distances at: 6) to ownerTable name = 'A_Asset_Group').
 	self assert: ((distances at: 6) weight = 0). 

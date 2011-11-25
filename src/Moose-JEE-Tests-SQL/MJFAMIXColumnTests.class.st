@@ -6,18 +6,18 @@ Class {
 
 { #category : #tests }
 MJFAMIXColumnTests >> testAnnotation [
-	self assert: MJFAMIXColumn annotation == MJFAMIXColumn.
+	self assert: FAMIXColumn annotation == FAMIXColumn.
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXColumnTests >> testCanBeNull [
 	| col |
 
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2;
 					canBeNull: true.
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: col canBeNull.  
 	
@@ -48,10 +48,10 @@ MJFAMIXColumnTests >> testCanBeNullFromAModel [
 MJFAMIXColumnTests >> testCreation [
 	| col |
 	
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2..
 					
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 ]
 
@@ -59,11 +59,11 @@ MJFAMIXColumnTests >> testCreation [
 MJFAMIXColumnTests >> testDefaultValue [
 	| col |
 
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2;
 					defaultValue: 0.
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: (col defaultValue = 0).  
 	
@@ -77,22 +77,22 @@ MJFAMIXColumnTests >> testInUse [
 	| mm table mapping maps class att1 att2 col1 col2 mapatt1 mapatt2 |
 	
 	mm := MooseModel new.
-	table := MJFAMIXTable new.
+	table := FAMIXTable new.
 	class := FAMIXClass new.
 	att1 := FAMIXAttribute new.
 	att2 := FAMIXAttribute new.
-	col1 := MJFAMIXColumn new name: #col1.
-	col2 := MJFAMIXColumn new name: #col2.
+	col1 := FAMIXColumn new name: #col1.
+	col2 := FAMIXColumn new name: #col2.
 	
-	mapping := MJFAMIXMapping new
+	mapping := FAMIXMapping new
 		mapTarget: table;
 		mapSource: class.
 	
-	mapatt1 := MJFAMIXMapping new
+	mapatt1 := FAMIXMapping new
 		mapTarget: col1;
 		mapSource: att1.
 		
-	mapatt2 := MJFAMIXMapping new
+	mapatt2 := FAMIXMapping new
 		mapTarget: col2;
 		mapSource: att2.
 	
@@ -112,7 +112,7 @@ MJFAMIXColumnTests >> testInUse [
 	
 	self assert: mm allColumns size = 2.
 	
-	maps := mm allMaps select: [ :each | each mapTarget isKindOf: MJFAMIXColumn ].
+	maps := mm allMaps select: [ :each | each mapTarget isKindOf: FAMIXColumn ].
 	
 	self assert: maps size = 2.
 	
@@ -174,7 +174,7 @@ MJFAMIXColumnTests >> testInUseCaseInsensitive [
 
 	self assert: (mooseModel allColumns size = 6).
 
-	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: MJFAMIXColumn]).
+	maps := (mooseModel allMaps select: [:each | each mapTarget isKindOf: FAMIXColumn]).
 
 	self assert: (maps size = 3).
 		
@@ -188,10 +188,10 @@ MJFAMIXColumnTests >> testInUseCaseInsensitive [
 MJFAMIXColumnTests >> testIsFK [
 	| col |
 
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2.
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: (col isFK isNil).  
 	
@@ -204,10 +204,10 @@ MJFAMIXColumnTests >> testIsFK [
 MJFAMIXColumnTests >> testIsPK [
 	| col |
 
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2.
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: (col isPK isNil).  
 	
@@ -220,10 +220,10 @@ MJFAMIXColumnTests >> testIsPK [
 MJFAMIXColumnTests >> testIsUnique [
 	| col |
 
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2.
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: (col isUnique isNil).  
 	
@@ -251,15 +251,15 @@ MJFAMIXColumnTests >> testIsUniqueFromAModel [
 MJFAMIXColumnTests >> testMJFAMIXColumnCreateAll [
 	| col |
 
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2;
 					isPK: true;
 					isFK: false;
-					ownerTable:  (MJFAMIXTable new name: #tab1);
+					ownerTable:  (FAMIXTable new name: #tab1);
 					canBeNull: false;
 					type: 'integer'.
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: col isPK.
 	self deny: col isFK.
@@ -271,9 +271,9 @@ MJFAMIXColumnTests >> testMJFAMIXColumnCreateAll [
 MJFAMIXColumnTests >> testMJFAMIXColumnCreation [
 	| col |
 
-	col := MJFAMIXColumn new name: #Column2.  
+	col := FAMIXColumn new name: #Column2.  
 	
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 ]
 
@@ -302,10 +302,10 @@ MJFAMIXColumnTests >> testOwnerTable [
 MJFAMIXColumnTests >> testPrintOn [
 	| col stream |
 	
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2..
 					
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	
 	stream := ReadWriteStream on: ''.
@@ -319,14 +319,14 @@ MJFAMIXColumnTests >> testPrintOn [
 MJFAMIXColumnTests >> testPrintOnWithTable [
 	| col stream tab |
 	
-	col := MJFAMIXColumn new
+	col := FAMIXColumn new
 					name: #Column2.
 					
-	tab := MJFAMIXTable new name: 'Table1'.
+	tab := FAMIXTable new name: 'Table1'.
 	
 	col ownerTable: tab.
 					
-	self assert: (col isMemberOf: MJFAMIXColumn).
+	self assert: (col isMemberOf: FAMIXColumn).
 	self assert: (col name = #Column2).
 	self assert: (col ownerTable = tab).
 

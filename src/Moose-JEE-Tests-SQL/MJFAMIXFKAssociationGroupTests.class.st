@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 MJFAMIXFKAssociationGroupTests >> testAnnotation [
-	self assert: MJFAMIXFKAssociationGroup annotation == MJFAMIXFKAssociationGroup.
+	self assert: FAMIXFKAssociationGroup annotation == FAMIXFKAssociationGroup.
 ]
 
 { #category : #tests }

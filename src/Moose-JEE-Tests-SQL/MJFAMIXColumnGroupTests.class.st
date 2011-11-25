@@ -6,5 +6,5 @@ Class {
 
 { #category : #tests }
 MJFAMIXColumnGroupTests >> testAnnotation [
-	self assert: MJFAMIXColumnGroup annotation == MJFAMIXColumnGroup.
+	self assert: FAMIXColumnGroup annotation == FAMIXColumnGroup.
 ]
