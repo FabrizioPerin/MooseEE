@@ -7,7 +7,7 @@ MooseModel >> allColumns [
 	| group |
 	
 	
-	group := self allWithType: MJFAMIXColumn ofGroupClass: MJFAMIXColumnGroup.
+	group := self allWithType: FAMIXColumn ofGroupClass: FAMIXColumnGroup.
 	group description: 'All Table Columns'.
 	^group
 ]
@@ -18,7 +18,7 @@ MooseModel >> allDBAccesses [
 
 	| group |
 	
-	group :=  self allWithType: MJFAMIXDBAccess.
+	group :=  self allWithType: FAMIXDBAccess.
 	group description: 'All DB accessses'.
 	^group
 ]
@@ -26,7 +26,7 @@ MooseModel >> allDBAccesses [
 { #category : #'*moose-jee-sql-model' }
 MooseModel >> allDatabases [
 
-	^self allWithType: MJFAMIXDataBase "asMetaDescription"
+	^self allWithType: FAMIXDataBase "asMetaDescription"
 ]
 
 { #category : #'*moose-jee-sql-model' }
@@ -35,7 +35,7 @@ MooseModel >> allFKAssociations [
 
 	| group |
 	
-	group :=  self allWithType: MJFAMIXFKAssociation ofGroupClass: MJFAMIXFKAssociationGroup.
+	group :=  self allWithType: FAMIXFKAssociation ofGroupClass: FAMIXFKAssociationGroup.
 	group description: 'All FK associations'.
 	^group
 ]
@@ -46,7 +46,7 @@ MooseModel >> allMaps [
 
 	| group |
 	
-	group :=  self allWithType: MJFAMIXMapping ofGroupClass: MJFAMIXMappingGroup.
+	group :=  self allWithType: FAMIXMapping ofGroupClass: FAMIXMappingGroup.
 	group description: 'All Maps'.
 	^group
 ]
@@ -57,7 +57,7 @@ MooseModel >> allTables [
 	
 	| group |
 	
-	group :=  self allWithType: MJFAMIXTable ofGroupClass: MJFAMIXTableGroup.
+	group :=  self allWithType: FAMIXTable ofGroupClass: FAMIXTableGroup.
 	group description: 'All Data Base Tables'.
 	^group
 ]
@@ -79,7 +79,7 @@ MooseModel >> buildMappingBetweenSoftwareEntityAndRelationalElements [
 { #category : #'*moose-jee-sql-model' }
 MooseModel >> cleanUpAllMaps [
 	
-	self silentlyRemoveAll: (self allWithType: MJFAMIXMapping).
+	self silentlyRemoveAll: (self allWithType: FAMIXMapping).
 	self allClasses do: [:class | class removePointersToMaps ].
 	self allTables do: [:table | table removePointersToMaps ]
 ]

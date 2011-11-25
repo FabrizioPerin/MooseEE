@@ -34,7 +34,7 @@ FAMIXSourcedEntity >> addDBAccess: aDBAccess [
 
 { #category : #'*moose-jee-sql-model' }
 FAMIXSourcedEntity >> dbAccesses [
-	<MSEProperty: #dbAccesses type: #MJFAMIXDBAccess opposite: #accessorEntity> <multivalued>  <derived>
+	<MSEProperty: #dbAccesses type: #FAMIXDBAccess opposite: #accessorEntity> <multivalued>  <derived>
 	<MSEComment: 'Database access relationship.'>
 	
 	^self privateState attributeAt: #dbAccesses ifAbsentPut: [FMMultivalueLink on: self opposite: #accessorEntity:].
