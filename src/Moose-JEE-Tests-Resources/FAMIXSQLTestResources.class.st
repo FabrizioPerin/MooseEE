@@ -421,21 +421,21 @@ FAMIXSQLTestResources >> sampleMooseModelWithDB [
 
 	
 	"instanciating relational elements"
-	database := MJFAMIXDataBase new name: #database1.
+	database := FAMIXDataBase new name: #database1.
 
-	dbTable1 := MJFAMIXTable new
+	dbTable1 := FAMIXTable new
 			name: 'Table1';
 			ownerDataBase: database.
 	
-	dbTable2 := MJFAMIXTable new
+	dbTable2 := FAMIXTable new
 			name: 'Table2';
 			ownerDataBase: database.
 
-	dbTable3 := MJFAMIXTable new
+	dbTable3 := FAMIXTable new
 			name: 'Table3';
 			ownerDataBase: database.
 
-	tableColumn1 := MJFAMIXColumn new
+	tableColumn1 := FAMIXColumn new
 						name: #Column2;
 						isPK: true;
 						isFK: false;
@@ -443,7 +443,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithDB [
 						canBeNull: false;
 						type: 'integer'.
 	
-	tableColumn2 := MJFAMIXColumn new
+	tableColumn2 := FAMIXColumn new
 						name: #Column4;
 						isPK: false;
 						isFK: false;
@@ -452,7 +452,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithDB [
 						isUnique: true;
 						type: 'string'.
 	
-	tableColumn3 := MJFAMIXColumn new
+	tableColumn3 := FAMIXColumn new
 						name: #Column6;
 						isPK: false;
 						isFK: false;
@@ -466,14 +466,14 @@ FAMIXSQLTestResources >> sampleMooseModelWithDB [
 	dbTable1 addColumn: tableColumn3.
 	
 	
-	tableColumn4 := MJFAMIXColumn new
+	tableColumn4 := FAMIXColumn new
 						name: #Column1;
 						isPK: true;
 						isFK: false;
 						ownerTable:  dbTable2;
 						type: 'integer'.
 	
-	tableColumn5 := MJFAMIXColumn new
+	tableColumn5 := FAMIXColumn new
 						name: #Column3;
 						isPK: false;
 						isFK: true;
@@ -483,7 +483,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithDB [
 	dbTable2 addColumn: tableColumn4.
 	dbTable2 addColumn: tableColumn5.
 						
-	tableColumn6 := MJFAMIXColumn new
+	tableColumn6 := FAMIXColumn new
 						name: #Column5;
 						isPK: true;
 						isFK: false;
@@ -828,21 +828,21 @@ FAMIXSQLTestResources >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryCom
 	aMethod addIncomingInvocation: invocation19.
 
 	"instanciating relational elements"
-	database := MJFAMIXDataBase new name: #database1.
+	database := FAMIXDataBase new name: #database1.
 
-	dbTable1 := MJFAMIXTable new
+	dbTable1 := FAMIXTable new
 			name: 'Table1';
 			ownerDataBase: database.
 	
-	dbTable2 := MJFAMIXTable new
+	dbTable2 := FAMIXTable new
 			name: 'Table2';
 			ownerDataBase: database.
 
-	dbTable3 := MJFAMIXTable new
+	dbTable3 := FAMIXTable new
 			name: 'Table3';
 			ownerDataBase: database.
 
-	tableColumn := MJFAMIXColumn new
+	tableColumn := FAMIXColumn new
 						name: #Column2;
 						isPK: true;
 						isFK: false;
@@ -850,7 +850,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryCom
 						type: 'integer'.
 	dbTable1 addColumn: tableColumn.
 	
-	tableColumn := MJFAMIXColumn new
+	tableColumn := FAMIXColumn new
 						name: #Column4;
 						isPK: false;
 						isFK: false;
@@ -858,7 +858,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryCom
 						type: 'string'.
 	dbTable1 addColumn: tableColumn.
 	
-	tableColumn := MJFAMIXColumn new
+	tableColumn := FAMIXColumn new
 						name: #Column6;
 						isPK: false;
 						isFK: false;
@@ -867,7 +867,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryCom
 	dbTable1 addColumn: tableColumn.
 						
 	
-	tableColumn := MJFAMIXColumn new
+	tableColumn := FAMIXColumn new
 						name: #Column1;
 						isPK: true;
 						isFK: false;
@@ -875,7 +875,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryCom
 						type: 'integer'.
 	dbTable2 addColumn: tableColumn.
 	
-	tableColumn := MJFAMIXColumn new
+	tableColumn := FAMIXColumn new
 						name: #Column3;
 						isPK: false;
 						isFK: true;
@@ -883,7 +883,7 @@ FAMIXSQLTestResources >> sampleMooseModelWithTransAndInvocationsAndDBAndQueryCom
 						type: 'integer'.
 	dbTable2 addColumn: tableColumn.
 						
-	tableColumn := MJFAMIXColumn new
+	tableColumn := FAMIXColumn new
 						name: #Column5;
 						isPK: true;
 						isFK: false;
