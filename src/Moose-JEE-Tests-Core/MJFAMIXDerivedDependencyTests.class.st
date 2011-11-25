@@ -40,8 +40,8 @@ MJFAMIXDerivedDependencyTests >> testDerivedDependencyCreationSourceAndTarget [
 	
 	self assert: (dep isMemberOf: MJFAMIXDerivedDependency).
 	
-	tab1 := (MJFAMIXTable new name: #Table1).
-	tab2 := (MJFAMIXTable new name: #Table2).
+	tab1 := (FAMIXTable new name: #Table1).
+	tab2 := (FAMIXTable new name: #Table2).
 	
 	dep source: tab1.
 	dep target: tab2.
@@ -71,8 +71,8 @@ MJFAMIXDerivedDependencyTests >> testPrintOn [
 	
 	self assert: (dep isMemberOf: MJFAMIXDerivedDependency).
 	
-	tab1 := (MJFAMIXTable new name: #Table1).
-	tab2 := (MJFAMIXTable new name: #Table2).
+	tab1 := (FAMIXTable new name: #Table1).
+	tab2 := (FAMIXTable new name: #Table2).
 	
 	dep source: tab1.
 	dep target: tab2.
