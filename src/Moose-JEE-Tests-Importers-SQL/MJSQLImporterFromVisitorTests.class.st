@@ -34,7 +34,7 @@ MJSQLImporterFromVisitorTests >> testEnsureAColumn [
 	
 	famixCol := importer ensureAColumn: col.
 	
-	self assert: (famixCol isMemberOf: MJFAMIXColumn).
+	self assert: (famixCol isMemberOf: FAMIXColumn).
 	self assert: (famixCol name = #col1).
 	self assert: (famixCol type = 'integer').
 ]
@@ -57,7 +57,7 @@ MJSQLImporterFromVisitorTests >> testEnsureAColumnWithConstraints [
 	
 	famixCol := importer ensureAColumn: col.
 	
-	self assert: (famixCol isMemberOf: MJFAMIXColumn).
+	self assert: (famixCol isMemberOf: FAMIXColumn).
 	self assert: (famixCol name = #col1).
 	self assert: (famixCol type = 'integer').
 ]
@@ -75,7 +75,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATable [
 	
 	famixTab := importer ensureATable: tab.
 	
-	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 
 ]
@@ -98,7 +98,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumns [
 	
 	famixTab := importer ensureATable: tab.
 	
-	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 	self assert: (famixTab columns size = 1).
 	self assert: (famixTab columns first name = #col1).
@@ -121,7 +121,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstraints [
 	
 	famixTab := importer ensureATable: tab.
 	
-	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 
 ]
@@ -148,7 +148,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstrant [
 	
 	famixTab := importer ensureATable: tab.
 	
-	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 	self assert: (famixTab columns size = 1).
 	self assert: (famixTab columns first name = #col1).
@@ -249,7 +249,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 	
 	famixTab1 := mm allTables first.
 	
-	self assert: (famixTab1 isMemberOf: MJFAMIXTable).
+	self assert: (famixTab1 isMemberOf: FAMIXTable).
 	self assert: (famixTab1 name = #tab1).
 	self assert: (famixTab1 columns size = 1).
 	self assert: (famixTab1 columns first name = #col1).
@@ -258,7 +258,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 	
 	famixTab2 := mm allTables second.
 	
-	self assert: (famixTab2 isMemberOf: MJFAMIXTable).
+	self assert: (famixTab2 isMemberOf: FAMIXTable).
 	self assert: (famixTab2 name = #tab2).
 	self assert: (famixTab2 columns size = 1).
 	self assert: (famixTab2 columns first name = #col2).
@@ -297,7 +297,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 	
 	famixTab := mm allTables first.
 	
-	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 	self assert: (famixTab columns size = 1).
 	self assert: (famixTab columns first name = #col1).
@@ -324,7 +324,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 	
 	famixTab := importer ensureATable: tab.
 	
-	self assert: (famixTab isMemberOf: MJFAMIXTable).
+	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 	
 	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
