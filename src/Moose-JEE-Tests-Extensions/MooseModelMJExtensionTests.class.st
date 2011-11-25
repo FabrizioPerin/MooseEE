@@ -161,14 +161,14 @@ MooseModelMJExtensionTests >> testCleanUpAllMaps [
 	"adding fake mappings"
 	table := (mooseModel allTables select: [:each | each name = #Table1]) first.
 	class := (mooseModel allClasses select: [:each | each name = #AStatelessSessionBean]) first.
-	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table ; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
 	mooseModel silentlyAdd: mapping.
 	
 	table := (mooseModel allTables select: [:each | each name = #Table2]) first.
 	class := (mooseModel allClasses select: [:each | each name = #Class4]) first.
-	mapping := MJFAMIXMapping new mapTarget: table ; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table ; mapSource: class.
 	class addMaps: mapping.
 	table addMappedBy: mapping.
 	mooseModel silentlyAdd: mapping.

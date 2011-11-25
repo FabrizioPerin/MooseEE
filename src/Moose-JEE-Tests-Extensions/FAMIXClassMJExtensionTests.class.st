@@ -16,7 +16,7 @@ FAMIXClassMJExtensionTests >> testAccessATableSettingAutomaticallyConsideringThe
 	
 	self deny: class accessATable.
 	
-	mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+	mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 	
 	class addMaps: mapping.
 	table addMappedBy: mapping.

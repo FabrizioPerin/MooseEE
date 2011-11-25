@@ -10,9 +10,9 @@ FAMIXSourcedEntityMJExtensionTests >> testAccessedRelationalEntities [
 	| sourcedEntity dbAccess table mm |
 	
 	sourcedEntity := FAMIXSourcedEntity new.
-	table := MJFAMIXTable new name: #table1.
+	table := FAMIXTable new name: #table1.
 	
-	dbAccess := MJFAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
+	dbAccess := FAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
 
 	sourcedEntity addDBAccess: dbAccess.
 	table addSourceAccessors: dbAccess.
@@ -33,9 +33,9 @@ FAMIXSourcedEntityMJExtensionTests >> testAccessorRelationalEntities [
 	| sourcedEntity dbAccess table mm |
 	
 	sourcedEntity := FAMIXSourcedEntity new.
-	table := MJFAMIXTable new name: #table1.
+	table := FAMIXTable new name: #table1.
 	
-	dbAccess := MJFAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
+	dbAccess := FAMIXDBAccess new accessorEntity: sourcedEntity; accessedEntity: table.
 
 	sourcedEntity addDBAccess: dbAccess.
 	table addSourceAccessors: dbAccess.
@@ -58,7 +58,7 @@ FAMIXSourcedEntityMJExtensionTests >> testDBAccesses [
 	
 	sourcedEntity := FAMIXSourcedEntity new.
 	
-	dbAccess := MJFAMIXDBAccess new accessorEntity: sourcedEntity.
+	dbAccess := FAMIXDBAccess new accessorEntity: sourcedEntity.
 
 	sourcedEntity addDBAccess: dbAccess.
 	
