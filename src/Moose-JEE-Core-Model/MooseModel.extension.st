@@ -1,15 +1,6 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> add: anElement [ 
-	 
-	super add: anElement. 
-	anElement privateSetMooseModel: self.
-	"self announcer announce: (MooseEntityAdded new entity: anElement)."
-	^anElement
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
 MooseModel >> allDerivedDependencies [
 
 	^self allWithType: MJFAMIXDerivedDependency "asMetaDescription"
@@ -77,35 +68,4 @@ MooseModel >> fixFileAnchorsFromGUI [
 	aFolder isNil
 		ifTrue: [DialogWindow new alert: 'Folder not found.']
 		ifFalse: [self fixFileAnchorsFrom: aFolder]
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> silentlyAdd: anElement [ 
-	 
-	super add: anElement. 
-	anElement privateSetMooseModel: self.
-	^anElement
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> silentlyAddAll: entities [ 
-	 
-	entities do: [:each | self silentlyAdd: each].
-	^entities
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> silentlyRemove: anElement [ 
-	
-	self entityStorage remove: anElement. 
-	anElement privateSetMooseModel: nil. 
-	self privateState flushGroups. 
-	^anElement
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> silentlyRemoveAll: collection [ 
-	
-	 collection do: [:each | self silentlyRemove: each]. 
-	
 ]
