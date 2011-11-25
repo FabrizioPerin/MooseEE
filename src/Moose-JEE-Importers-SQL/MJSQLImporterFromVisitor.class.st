@@ -38,7 +38,7 @@ MJSQLImporterFromVisitor >> computeForeignKeys [
 					fkTableColumn isFK: true.
 						
 					"creation of the association"	
-					fkAssoc := MJFAMIXFKAssociation new targetColumn: referencedTableColumn; sourceColumn: fkTableColumn.
+					fkAssoc := FAMIXFKAssociation new targetColumn: referencedTableColumn; sourceColumn: fkTableColumn.
 					referencedTableColumn addReferencedBy: fkAssoc.
 					fkTableColumn addReferences: fkAssoc.
 					
@@ -63,7 +63,7 @@ MJSQLImporterFromVisitor >> computePrimaryKeys [
 MJSQLImporterFromVisitor >> ensureAColumn: anASTColumnNode [
 	| att constraint |
 	
-	att := MJFAMIXColumn new.
+	att := FAMIXColumn new.
 	att name: anASTColumnNode name.
 	att type: anASTColumnNode type.
 	
@@ -83,7 +83,7 @@ MJSQLImporterFromVisitor >> ensureATable: aTableNode [
 	
 	| tab |
 
-	tab := MJFAMIXTable new name: aTableNode name.
+	tab := FAMIXTable new name: aTableNode name.
 	tab columns: (aTableNode columns collect: [:aColumnNode | aColumnNode accept: sqlASTVisitor]) asMooseGroup. 
 
 	"setting up the primary keys"
@@ -119,7 +119,7 @@ MJSQLImporterFromVisitor >> ensureSelectStmtNode: aSelectStmtNode [
 MJSQLImporterFromVisitor >> ensureTableConstraintNode: aTableConstraintNode [
 	| newConstr |
 
-	newConstr := MJFAMIXSQLConstraint new.
+	newConstr := FAMIXSQLConstraint new.
 
 	newConstr isPKConstraint: aTableConstraintNode isPKConstraint.
 	newConstr isFKConstraint: aTableConstraintNode isFKConstraint.
@@ -165,7 +165,7 @@ MJSQLImporterFromVisitor >> populateTargetModelFrom: aCollectionOfEnsuredNodes [
 
 	| dataBases counter aBlackBoard |
 	
-	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: MJFAMIXDataBase].
+	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: FAMIXDataBase].
 	alterTableStatements do: [:alterTable | self reifyAnAlterTableStatementFrom: alterTable.].  
 	tables keysAndValuesDo: [:key :value | columns addAll: value columns].
 	

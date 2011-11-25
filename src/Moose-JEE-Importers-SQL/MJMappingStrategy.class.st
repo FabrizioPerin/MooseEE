@@ -45,7 +45,7 @@ MJMappingStrategy >> buildRelationsAmongDBTablesAndClasses [
 							"(table nameWithAnnotationAsRegex matches: class sourceText)"
 							((class sourceText findString: ('@Table(name = "',table name,'"') startingAt: 1 caseSensitive: false) > 0)
 								ifTrue:[ |mapping|
-									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+									mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 									class addMaps: mapping.
 									table addMappedBy: mapping.
 									targetModel silentlyAdd: mapping.].
@@ -69,7 +69,7 @@ MJMappingStrategy >> buildRelationsAmongDBTablesAndClasses [
 					tableEntities do: [:class |
 						((class sourceText findString: table name) > 0)
 								ifTrue:[ |mapping|
-										mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+										mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 										class addMaps: mapping.
 										table addMappedBy: mapping.
 										targetModel silentlyAdd: mapping.].
@@ -134,7 +134,7 @@ MJMappingStrategy >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 
 									((method sourceText findString: ('@Column(name = "',column name,'"') startingAt: 1 caseSensitive: false) > 0) ifTrue: [
 										| mapping |
-										mapping := MJFAMIXMapping new mapTarget: column; mapSource: method.
+										mapping := FAMIXMapping new mapTarget: column; mapSource: method.
 										method addMaps: mapping.
 										column addMappedBy: mapping.
 										targetModel silentlyAdd: mapping]]]].
@@ -182,7 +182,7 @@ MJMappingStrategy >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 							
 								(currentCol isNil not and: [currentAtt isNil not]) 
 									ifTrue: [
-										mapping := MJFAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
+										mapping := FAMIXMapping new mapTarget: currentCol; mapSource: currentAtt.
 										currentAtt addMaps: mapping.
 										currentCol addMappedBy: mapping.
 										targetModel silentlyAdd: mapping.
@@ -216,7 +216,7 @@ MJMappingStrategy >> buildRelationsAmongTablesAndAllClassesByName [
 				classes do: [:class |
 						(('.*',table name,'$') asRegexIgnoringCase matches: class name)
 							ifTrue:[ |mapping|
-									mapping := MJFAMIXMapping new mapTarget: table; mapSource: class.
+									mapping := FAMIXMapping new mapTarget: table; mapSource: class.
 									class addMaps: mapping.
 									table addMappedBy: mapping.
 									targetModel silentlyAdd: mapping.].
@@ -246,7 +246,7 @@ MJMappingStrategy >> buildRelationsAmongTablesAndInterfacesByName [
 				interfaces do: [:interface |
 						(('.*',table name,'$') asRegexIgnoringCase matches: interface name)
 							ifTrue:[ |mapping|
-									mapping := MJFAMIXMapping new mapTarget: table; mapSource: interface.
+									mapping := FAMIXMapping new mapTarget: table; mapSource: interface.
 									interface addMaps: mapping.
 									table addMappedBy: mapping.
 									targetModel silentlyAdd: mapping.].
