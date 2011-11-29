@@ -86,66 +86,80 @@ FAMIXTableGroupTests >> testComputeDeriveDependenciesFromSourceCodeNoDependencie
 
 { #category : #'*moose-jee-tests-sql' }
 FAMIXTableGroupTests >> testLevenshteinDistancesAmongFieldsTable [
-
 	| mooseModel distances transposed |
-	
-	
 	mooseModel := FAMIXSQLTestResources new sampleMooseModelContainingJustADB.
-	
-	self assert: (mooseModel allTables size = 3).
-	self assert: (mooseModel allFKAssociations size = 2).
-	self assert: (mooseModel allColumns size = 75).
-
+	self assert: mooseModel allTables size = 3.
+	self assert: mooseModel allFKAssociations size = 2.
+	self assert: mooseModel allColumns size = 75.
 	distances := mooseModel allTables levenshteinDistancesAmongFieldsTable.
+	self assert: distances size = 6.
+	self assert: (distances allSatisfy: [ :each | each isMemberOf: MalWeightedEdge ]).
+	self assert: (distances allSatisfy: [ :each | each from isMemberOf: FAMIXColumn ]).
+	self assert: (distances allSatisfy: [ :each | each to isMemberOf: FAMIXColumn ]).	
 	
-	self assert: (distances size = 6).
-	self assert: (distances allSatisfy: [:each | each isMemberOf: MalWeightedEdge]).
-	
-	self assert: ((distances at: 1) from isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 1) from name = 'AD_Org_ID'). 
-	self assert: ((distances at: 1) from ownerTable name = 'AD_User'). 
-	self assert: ((distances at: 1) to isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 1) to name = 'AD_OrgTrx_ID'). 
-	self assert: ((distances at: 1) to ownerTable name = 'AD_User').
-	self assert: ((distances at: 1) weight = 3). 
-		
-	self assert: ((distances at: 2) from isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 2) from name = 'AD_Client_ID'). 
-	self assert: ((distances at: 2) from ownerTable name = 'AD_User'). 
-	self assert: ((distances at: 2) to isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 2) to name = 'AD_Client_ID'). 
-	self assert: ((distances at: 2) to ownerTable name = 'A_Asset_Group').
-	self assert: ((distances at: 2) weight = 0).
-	
-	self assert: ((distances at: 3) from isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 3) from name = 'AD_Org_ID'). 
-	self assert: ((distances at: 3) from ownerTable name = 'AD_User'). 
-	self assert: ((distances at: 3) to isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 3) to name = 'AD_Org_ID'). 
-	self assert: ((distances at: 3) to ownerTable name = 'A_Asset_Group').
-	self assert: ((distances at: 3) weight = 0). 
-	
-	self assert: ((distances at: 4) from isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 4) from name = 'AD_Org_ID'). 
-	self assert: ((distances at: 4) from ownerTable name = 'A_Asset'). 
-	self assert: ((distances at: 4) to isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 4) to name = 'AD_OrgTrx_ID'). 
-	self assert: ((distances at: 4) to ownerTable name = 'AD_User').
-	self assert: ((distances at: 4) weight = 3). 
-	
-	self assert: ((distances at: 5) from isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 5) from name = 'AD_Client_ID'). 
-	self assert: ((distances at: 5) from ownerTable name = 'A_Asset'). 
-	self assert: ((distances at: 5) to isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 5) to name = 'AD_Client_ID'). 
-	self assert: ((distances at: 5) to ownerTable name = 'A_Asset_Group').
-	self assert: ((distances at: 5) weight = 0). 
-	
-	self assert: ((distances at: 6) from isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 6) from name = 'AD_Org_ID'). 
-	self assert: ((distances at: 6) from ownerTable name = 'A_Asset'). 
-	self assert: ((distances at: 6) to isMemberOf: FAMIXColumn).
-	self assert: ((distances at: 6) to name = 'AD_Org_ID'). 
-	self assert: ((distances at: 6) to ownerTable name = 'A_Asset_Group').
-	self assert: ((distances at: 6) weight = 0). 
+	self
+		assert:
+			(distances
+				select: [ :each | 
+					each from name = 'AD_Client_ID'
+						and: [ each from ownerTable name = 'AD_User'
+							and: [ each to name = 'AD_Client_ID' 
+								and: [ each to ownerTable name = 'A_Asset_Group' 
+									and: [ each weight = 0 ] ] ] ] ]) size				
+		equals: 1.
+
+	self
+		assert:
+			(distances
+				select: [ :each | 
+					each from name = 'AD_Org_ID'
+						and: [ each from ownerTable name = 'A_Asset'
+							and: [ each to name = 'AD_Org_ID' 
+								and: [ each to ownerTable name = 'A_Asset_Group' 
+									and: [ each weight = 0 ] ] ] ] ]) size				
+		equals: 1.
+
+	self
+		assert:
+			(distances
+				select: [ :each | 
+					each from name = 'AD_Org_ID'
+						and: [ each from ownerTable name = 'AD_User'
+							and: [ each to name = 'AD_OrgTrx_ID' 
+								and: [ each to ownerTable name = 'AD_User' 
+									and: [ each weight = 3 ] ] ] ] ]) size				
+		equals: 1.
+
+	self
+		assert:
+			(distances
+				select: [ :each | 
+					each from name = 'AD_Client_ID'
+						and: [ each from ownerTable name = 'A_Asset'
+							and: [ each to name = 'AD_Client_ID' 
+								and: [ each to ownerTable name = 'A_Asset_Group' 
+									and: [ each weight = 0 ] ] ] ] ]) size				
+		equals: 1.
+
+	self
+		assert:
+			(distances
+				select: [ :each | 
+					each from name = 'AD_Org_ID'
+						and: [ each from ownerTable name = 'A_Asset'
+							and: [ each to name = 'AD_OrgTrx_ID' 
+								and: [ each to ownerTable name = 'AD_User' 
+									and: [ each weight = 3 ] ] ] ] ]) size				
+		equals: 1.
+
+	self
+		assert:
+			(distances
+				select: [ :each | 
+					each from name = 'AD_Org_ID'
+						and: [ each from ownerTable name = 'AD_User'
+							and: [ each to name = 'AD_Org_ID' 
+								and: [ each to ownerTable name = 'A_Asset_Group' 
+									and: [ each weight = 0 ] ] ] ] ]) size				
+		equals: 1.
 ]
