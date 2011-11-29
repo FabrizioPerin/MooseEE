@@ -242,12 +242,12 @@ ConfigurationOfMooseJEE >> default: spec [
 					version: 'default';
 					repository: 'http://www.squeaksource.com/Moose' ].
 		
-		spec  project: 'XMLSupport for MooseJEE' with: [
+		"spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
 				version: '1.2.0';
-				repository: 'http://www.squeaksource.com/XMLSupport' ].
+				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
 		spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
@@ -271,7 +271,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			"Models"
 			package: 'Moose-JEE-Core-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec repository: 'XMLSupport for MooseJEE'.
+				"spec repository: 'XMLSupport for MooseJEE'."
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-SQL-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
@@ -369,12 +369,12 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 					version: 'default';
 					repository: 'http://www.squeaksource.com/Moose' ].
 		
-		spec  project: 'XMLSupport for MooseJEE' with: [
+		"spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfXMLSupport';
 				file: 'ConfigurationOfXMLSupport';
 				version: '1.2.0';
-				repository: 'http://www.squeaksource.com/XMLSupport' ].
+				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
 		spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
@@ -426,7 +426,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			"Models"
 			package: 'Moose-JEE-Core-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec repository: 'XMLSupport for MooseJEE'.
+				"spec repository: 'XMLSupport for MooseJEE'."
 				"spec requires: 'Moose for MooseJEE'"];
 			package: 'Moose-JEE-SQL-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
