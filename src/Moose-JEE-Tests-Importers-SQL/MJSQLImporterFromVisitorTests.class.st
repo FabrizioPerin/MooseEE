@@ -25,7 +25,7 @@ MJSQLImporterFromVisitorTests >> stringWithATableAndAnAlterTableRename [
 MJSQLImporterFromVisitorTests >> testEnsureAColumn [
 	| importer col famixCol |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	col := SQLColumnDefNode new 
 				name: #col1;
@@ -43,7 +43,7 @@ MJSQLImporterFromVisitorTests >> testEnsureAColumn [
 MJSQLImporterFromVisitorTests >> testEnsureAColumnWithConstraints [
 	| importer col famixCol const |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	const := SQLColumnConstraintNode new
 					defaultValue: 0;
 					isPK: true;
@@ -66,7 +66,7 @@ MJSQLImporterFromVisitorTests >> testEnsureAColumnWithConstraints [
 MJSQLImporterFromVisitorTests >> testEnsureATable [
 	| importer tab famixTab |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	tab := SQLCreateTableStmtNode new 
 				name: #tab1;
@@ -84,7 +84,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATable [
 MJSQLImporterFromVisitorTests >> testEnsureATableWithColumns [
 	| importer tab famixTab col |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	col := SQLColumnDefNode new 
 				name: #col1;
@@ -112,7 +112,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumns [
 MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstraints [
 	| importer tab famixTab |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	tab := SQLCreateTableStmtNode new 
 				name: #tab1;
@@ -130,7 +130,7 @@ MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstraints [
 MJSQLImporterFromVisitorTests >> testEnsureATableWithColumnsAndConstrant [
 	| importer tab famixTab col const |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	col := SQLColumnDefNode new 
 				name: #col1;
@@ -168,7 +168,7 @@ MJSQLImporterFromVisitorTests >> testImportSQLCreateScriptFromAStream [
 	
 	mm := MooseModel new.
 	
-	importer := MJSQLImporterFromVisitor new targetModel: mm.
+	importer := MooseSQLiteImporter new targetModel: mm.
 	populatedModel := importer importSQLCreateScriptFrom: self stringWithACoupleOfTables.
 	
 	self assert: (populatedModel = mm).
@@ -188,7 +188,7 @@ MJSQLImporterFromVisitorTests >> testImportSQLCreateScriptFromAStreamWithAlterTa
 	
 	mm := MooseModel new.
 	
-	importer := MJSQLImporterFromVisitor new targetModel: mm.
+	importer := MooseSQLiteImporter new targetModel: mm.
 	populatedModel := importer importSQLCreateScriptFrom: self stringWithATableAndAnAlterTableRename.
 	
 	self assert: (populatedModel = mm).
@@ -206,7 +206,7 @@ MJSQLImporterFromVisitorTests >> testImportSQLCreateScriptFromAStreamWithAlterTa
 MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTableFK [
 	| importer tab col alterTab mm tab2 alterTabFK famixTab1 famixTab2 |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	col := SQLColumnDefNode new 
 				name: #col1;
@@ -242,7 +242,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 													referencedTableName: #tab1).
 					
 
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	mm := importer populateTargetModelFrom: ((Array with: tab with: tab2 with: alterTab with: alterTabFK) collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: importer sqlASTVisitor]]).
 	
 	self assert: (mm allTables size = 2).  
@@ -270,7 +270,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTablePK [
 	| importer tab famixTab col alterTab mm |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	col := SQLColumnDefNode new 
 				name: #col1;
@@ -290,7 +290,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 													addPKColumnName: #col1).
 					
 
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	mm := importer populateTargetModelFrom: ((Array with: tab with: alterTab) collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: importer sqlASTVisitor]]).
 	
 	self assert: (mm allTables size = 1).  
@@ -310,7 +310,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 	
 	| importer alterTabStmt tab famixTab mm |
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	
 	alterTabStmt := SQLAlterTableStmtNode new 
 				nameOfTableToAlter: #tab1;
@@ -327,7 +327,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 	self assert: (famixTab isMemberOf: FAMIXTable).
 	self assert: (famixTab name = #tab1).
 	
-	importer :=  MJSQLImporterFromVisitor new targetModel: MooseModel new.
+	importer :=  MooseSQLiteImporter new targetModel: MooseModel new.
 	mm := importer populateTargetModelFrom: ((Array with: tab with: alterTabStmt) collect: [:node | (node isKindOf: SQLASTNode) ifTrue: [ node accept: importer sqlASTVisitor]]).
 	
 	self assert: (mm allTables size = 1).
@@ -338,7 +338,7 @@ MJSQLImporterFromVisitorTests >> testReifyAnAlterTableStatementFromWithAnAlterTa
 MJSQLImporterFromVisitorTests >> testSqlASTParser [
 	
 	| importer |
-	importer := MJSQLImporterFromVisitor new.
+	importer := MooseSQLiteImporter new.
 
 	self assert: (importer sqlASTParser isMemberOf: PetitSQLiteASTNodesParser).
 ]
@@ -347,7 +347,7 @@ MJSQLImporterFromVisitorTests >> testSqlASTParser [
 MJSQLImporterFromVisitorTests >> testSqlASTVisitor [
 	
 	| importer |
-	importer := MJSQLImporterFromVisitor new.
+	importer := MooseSQLiteImporter new.
 
 	self assert: (importer sqlASTVisitor isMemberOf: SQLASTConcreteVisitor).
 ]
@@ -359,7 +359,7 @@ MJSQLImporterFromVisitorTests >> testTargetModel [
 	
 	mm := MooseModel new.
 	
-	importer := MJSQLImporterFromVisitor new targetModel: mm.
+	importer := MooseSQLiteImporter new targetModel: mm.
 	
 	self assert: (importer targetModel = mm).
 ]
