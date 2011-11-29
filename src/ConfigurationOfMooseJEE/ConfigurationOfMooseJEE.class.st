@@ -422,6 +422,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			"Extra Projects"
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
+			package: 'Famix-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'];
+			package: 'Famix-Tests-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'];
 			
 			"Models"
 			package: 'Moose-JEE-Core-Model' with: [
