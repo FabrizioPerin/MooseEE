@@ -2073,7 +2073,7 @@ JEETestModels >> sampleMooseModelContainingABiggerDB [
 	
 	PPParserResource reset.
 	
-	importer := MJSQLImporterFromVisitor on: mooseModel.
+	importer := MooseSQLiteImporter on: mooseModel.
 	
 	^importer importSQLCreateScriptFrom: self fiveTablesConnectedThroughForeignKey.
 ]
@@ -2088,7 +2088,7 @@ JEETestModels >> sampleMooseModelContainingJustADB [
 	
 	PPParserResource reset.
 	
-	importer := MJSQLImporterFromVisitor on: mooseModel.
+	importer := MooseSQLiteImporter on: mooseModel.
 	
 	^importer importSQLCreateScriptFrom: self threeTablesConnectedThroughForeignKey.
 ]
