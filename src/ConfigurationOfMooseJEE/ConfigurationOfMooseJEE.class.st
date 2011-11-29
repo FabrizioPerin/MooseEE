@@ -249,12 +249,19 @@ ConfigurationOfMooseJEE >> default: spec [
 				version: '1.2.0';
 				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
-		spec  project: 'PetitSQLParser for MooseJEE' with: [
+		"spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfPetitSQLParser';
 				file: 'ConfigurationOfPetitSQLParser';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ]."
+			
+		spec  project: 'FAMIX SQL for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfFamixSQL';
+				file: 'ConfigurationOfFamixSQL';
+				version: 'default';
+				repository: 'http://www.squeaksource.com/Moose' ].
 
 		spec  project: 'PetitJSPParser for MooseJEE' with: [
 			spec
@@ -376,12 +383,19 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				version: '1.2.0';
 				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
-		spec  project: 'PetitSQLParser for MooseJEE' with: [
+		"spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfPetitSQLParser';
 				file: 'ConfigurationOfPetitSQLParser';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ]."
+			
+		spec  project: 'FAMIX SQL for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfFamixSQL';
+				file: 'ConfigurationOfFamixSQL';
+				version: 'default';
+				repository: 'http://www.squeaksource.com/Moose' ].
 
 		spec  project: 'PetitJSPParser for MooseJEE' with: [
 			spec
@@ -422,8 +436,6 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			"Extra Projects"
 			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
 			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
-			package: 'Famix-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'];
-			package: 'Famix-Tests-SQL' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'];
 			
 			"Models"
 			package: 'Moose-JEE-Core-Model' with: [
