@@ -293,7 +293,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'PetitSQLParser for MooseJEE'];
+				spec requires: 'FAMIX SQL for MooseJEE'];
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
@@ -456,7 +456,7 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: 'PetitSQLParser for MooseJEE'];
+				spec requires: 'FAMIX SQL for MooseJEE'];
 			package: 'Moose-JEE-Importers-JSP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitJSPParser for MooseJEE'];
