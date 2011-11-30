@@ -44,11 +44,12 @@ MJGitBlameImporterTests >> testEnsureABlameFile [
 	lines := OrderedCollection with: line1 with: line2.
 	
 	bfn fileName: 'unknown.java'.
+	bfn fileFolderName: 'unknown'.
 	bfn lines: lines.
 	
 	aMJBlameFile := gitImporter ensureABlameFile: bfn.
 
-	self assert: aMJBlameFile fileName equals: 'unknown.java'.
+	self assert: aMJBlameFile name equals: 'unknown.java'.
 	self assert: aMJBlameFile lines size equals: 2.
 	self assert: (aMJBlameFile lines allSatisfy: [:line | line isMemberOf:  MJBlameFileLine]).
 ]
@@ -108,10 +109,11 @@ MJGitBlameImporterTests >> testEnsureReifiedBlameFile [
 	self assert: aReifiedBlameFileNode fileName equals: 'unknown.java'.
 	self assert: aReifiedBlameFileNode lines size equals: 0.
 	
+	bfn fileFolderName: ''.
 	anEnsuredBlameFile := gitImporter ensureABlameFile: bfn.
 	
 	self assert: (anEnsuredBlameFile isMemberOf: MJBlameFile).
-	self assert: anEnsuredBlameFile fileName equals: 'unknown.java'.
+	self assert: anEnsuredBlameFile name equals: 'unknown.java'.
 	
 ]
 
