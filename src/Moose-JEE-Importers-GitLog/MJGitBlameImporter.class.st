@@ -36,9 +36,10 @@ MJGitBlameImporter >> computeTheConnectionsWithClasses [
 MJGitBlameImporter >> ensureABlameFile: aBlameFileNode [
 	| bf aContainerFolder |
 	
-	aContainerFolder := FAMIXFolder named: aBlameFileNode fileFolderName filedIn: nil.
+	aContainerFolder := FAMIXFolder named: aBlameFileNode fileFolderName filedIn: ''.
 	bf := MJBlameFile named: aBlameFileNode fileName filedIn: aContainerFolder.
-	aContainerFolder addFile: bf. 
+	aContainerFolder addFile: bf.
+	bf lines: (aBlameFileNode lines collect: [:line | line accept: gitLogASTVisitor]).
 
 	^bf
 
