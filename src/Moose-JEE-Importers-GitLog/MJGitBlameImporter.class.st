@@ -34,14 +34,14 @@ MJGitBlameImporter >> computeTheConnectionsWithClasses [
 
 { #category : #accessing }
 MJGitBlameImporter >> ensureABlameFile: aBlameFileNode [
-	| bf |
+	| bf aContainerFolder |
 	
-	bf := MJBlameFile new.
-	
-	bf fileName: aBlameFileNode fileName.
-	bf lines: (aBlameFileNode lines collect: [:line | line accept: gitLogASTVisitor]).
-	
+	aContainerFolder := FAMIXFolder named: aBlameFileNode fileFolderName filedIn: nil.
+	bf := MJBlameFile named: aBlameFileNode fileName filedIn: aContainerFolder.
+	aContainerFolder addFile: bf. 
+
 	^bf
+
 ]
 
 { #category : #accessing }
@@ -110,7 +110,7 @@ MJGitBlameImporter >> importBlameFilesIn: aFolder [
 					aCollectionOfEnsuredNodes
 						add:
 							(nodes
-								collect: [ :node | self halt.
+								collect: [ :node |
 									(node isKindOf: PGLPBlameFile)
 										ifTrue: [
 											| aReifiedNode fileFullName fileName fileFolder fileFullNameArray |
@@ -188,7 +188,7 @@ MJGitBlameImporter >> reifyPGLPBlameFile: node with: aFileName [
 { #category : #accessing }
 MJGitBlameImporter >> reifyPGLPBlameFile: node with: aFileName and: aFileFolderName [
 	
-	node fileFolder: aFileFolderName.
+	node fileFolderName: aFileFolderName.
 	^self reifyPGLPBlameFile: node with: aFileName
 ]
 
