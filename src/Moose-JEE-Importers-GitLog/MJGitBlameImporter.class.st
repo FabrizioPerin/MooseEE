@@ -110,11 +110,16 @@ MJGitBlameImporter >> importBlameFilesIn: aFolder [
 					aCollectionOfEnsuredNodes
 						add:
 							(nodes
-								collect: [ :node | 
+								collect: [ :node | self halt.
 									(node isKindOf: PGLPBlameFile)
 										ifTrue: [
-											| aReifiedNode |
-											aReifiedNode := self reifyPGLPBlameFile: node with: (file name removeSuffix: '.blame').
+											| aReifiedNode fileFullName fileName fileFolder fileFullNameArray |
+											fileFullName := (file name removeSuffix: '.blame').
+											fileFullNameArray := fileFullName subStrings: #. .
+											fileName := (fileFullNameArray at: (fileFullNameArray size - 1)) , '.' , (fileFullNameArray at: fileFullNameArray size).
+											fileFolder := (fileFullName removeSuffix: '.' , fileName) replaceAllRegex: '\.' with: FileDirectory pathNameDelimiter asString.
+											
+											aReifiedNode := self reifyPGLPBlameFile: node with: fileName and: fileFolder.
 											aReifiedNode accept: gitLogASTVisitor ] ]) first.
 					index := index + 1.
 					bar value: index ].
@@ -178,6 +183,13 @@ MJGitBlameImporter >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 MJGitBlameImporter >> reifyPGLPBlameFile: node with: aFileName [
 	
 	^node fileName: aFileName.
+]
+
+{ #category : #accessing }
+MJGitBlameImporter >> reifyPGLPBlameFile: node with: aFileName and: aFileFolderName [
+	
+	node fileFolder: aFileFolderName.
+	^self reifyPGLPBlameFile: node with: aFileName
 ]
 
 { #category : #accessing }
