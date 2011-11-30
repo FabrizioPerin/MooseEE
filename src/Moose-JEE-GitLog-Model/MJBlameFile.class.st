@@ -1,6 +1,6 @@
 Class {
 	#name : #MJBlameFile,
-	#superclass : #MooseEntity,
+	#superclass : #FAMIXFile,
 	#instVars : [
 		'fileName',
 		'lines',
