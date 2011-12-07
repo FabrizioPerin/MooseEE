@@ -33,7 +33,7 @@ MJImportInformationForEJB30 >> actionsToPerform [
 			sqlFileNamePath isNil 
 				ifTrue:[ DialogWindow new alert: 'File not found.']
 				ifFalse: [ 
-					mooseModel importDBFromSQLFileUsingAST: (StandardFileStream readOnlyFileNamed: sqlFileNamePath) ].
+					mooseModel importDBStructureFrom: (StandardFileStream readOnlyFileNamed: sqlFileNamePath) ].
 			progBar value: 4.
 	
 			mooseModel fixFileAnchorsFrom: (FileDirectory on: sourcePath).
