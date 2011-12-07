@@ -13,3 +13,22 @@ MooseModel >> buildMappingBetweenSoftwareEntityAndRelationalElements [
 		ifFalse: [
 			(MJMappingStrategy on: self) perform: strategy asSymbol ].
 ]
+
+{ #category : #'*moose-jee-importers-sql' }
+MooseModel >> mapSoftwareEntityOnRelationalElements [
+	<menuItem: 'Map source code entities on relational entities' category: 'JEAs Importers'>
+	| question strategyName |
+
+	strategyName := UITheme builder
+		chooseDropList: 'Choose the method to use for the mapping '
+		list:
+			((MJMapper allMethodsInCategory: #strategies)
+				collect: [ :method | method selector asString ]).
+
+	strategyName isNil
+		ifTrue: [ DialogWindow new alert: 'Strategy not selected, operation aborted.' ]
+		ifFalse: [ 
+			| mapper |
+			mapper := MJMapper new perform: strategyName asSymbol.
+			mapper buildOn: self]
+]

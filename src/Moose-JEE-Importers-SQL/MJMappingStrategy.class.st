@@ -14,6 +14,11 @@ MJMappingStrategy class >> on: aMooseModel [
 ]
 
 { #category : #'as yet unclassified' }
+MJMappingStrategy >> buildMapsOn: aTargetModel [
+	self subclassResponsibility.
+]
+
+{ #category : #toRemove }
 MJMappingStrategy >> buildRelationsAmongDBTablesAndClasses [
 	"<menuItem: 'Build Relations Among Tables And Classes' category: 'JEAs Importers'>"
 
@@ -78,7 +83,7 @@ MJMappingStrategy >> buildRelationsAmongDBTablesAndClasses [
 								]]]].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #toRemove }
 MJMappingStrategy >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 	"<menuItem: 'Build Relations Among Columns And Methods' category: 'JEAs Importers'>"
 
@@ -195,7 +200,7 @@ MJMappingStrategy >> buildRelationsAmongTableColumnsAndMethodsAndAttributes [
 					bar value: counter]].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #toRemove }
 MJMappingStrategy >> buildRelationsAmongTablesAndAllClassesByName [
 	"<menuItem: 'Build Relations Among Tables And All Classes by name' category: 'JEAs Importers'>"
 
@@ -225,7 +230,7 @@ MJMappingStrategy >> buildRelationsAmongTablesAndAllClassesByName [
 							]]].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #toRemove }
 MJMappingStrategy >> buildRelationsAmongTablesAndInterfacesByName [
 	"<menuItem: 'Build Relations Among Tables And Interfaces by name' category: 'JEAs Importers'>"
 
@@ -253,12 +258,4 @@ MJMappingStrategy >> buildRelationsAmongTablesAndInterfacesByName [
 							counter := counter+1.
 							bar value: counter.
 							]]].
-]
-
-{ #category : #initialization }
-MJMappingStrategy >> initialize: aMooseModel [
-
-	targetModel := aMooseModel.
-	
-	^self
 ]
