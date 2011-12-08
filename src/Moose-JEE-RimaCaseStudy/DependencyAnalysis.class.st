@@ -850,7 +850,7 @@ DependencyAnalysis >> printGeneratedClassesWithSubclasses [
 	| aStream aHeader aBlock aCollection rootClasses |
 	
 	aCollection := self entirePOHierarchyButPO asMooseGroup.
-	rootClasses := aCollection select: [:each | each isHierarchyRootWithin: aCollection].
+	rootClasses := (aCollection select: [:each | each isHierarchyRootWithin: aCollection]) sorted: [:a :b | a name < b name].
 	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclasses.csv'.
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [:type | type name , ';' , (type subclassHierarchy reject: #isStub) asSet asString , String cr].	
