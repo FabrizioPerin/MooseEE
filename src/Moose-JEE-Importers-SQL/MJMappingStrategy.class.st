@@ -259,3 +259,9 @@ MJMappingStrategy >> buildRelationsAmongTablesAndInterfacesByName [
 							bar value: counter.
 							]]].
 ]
+
+{ #category : #toRemove }
+MJMappingStrategy >> initialize: aMooseModel [
+	targetModel := aMooseModel.
+	^self 
+]
