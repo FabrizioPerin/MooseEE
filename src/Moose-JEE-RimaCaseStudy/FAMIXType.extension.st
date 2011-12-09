@@ -26,11 +26,6 @@ FAMIXType >> accesses [
 ]
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
-FAMIXType >> allReferedTypes [
-	^(self returnedTypes union: (self invokedTypes union: self accessedTypes)). 
-]
-
-{ #category : #'*Moose-JEE-RimaCaseStudy' }
 FAMIXType >> invokedTypes [
 	^((self outgoingInvocations flatCollect: #candidates) collect: #belongsTo) reject: #isStub.        
 ]
@@ -38,7 +33,7 @@ FAMIXType >> invokedTypes [
 { #category : #'*Moose-JEE-RimaCaseStudy' }
 FAMIXType >> privateReferencingTypes [
 	^self mooseModel allTypes select: [:each|
-		each referedTypes includes: self.
+		each referedTypesSet includes: self.
 		]
 ]
 
@@ -49,7 +44,12 @@ FAMIXType >> referedTypes [
 	result := self returnedTypes.
 	result addAll: self invokedTypes.
 	result addAll: self accessedTypes.
-	^result asSet. 
+	^result
+]
+
+{ #category : #'*Moose-JEE-RimaCaseStudy' }
+FAMIXType >> referedTypesSet [
+	^self referedTypes asSet. 
 ]
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }

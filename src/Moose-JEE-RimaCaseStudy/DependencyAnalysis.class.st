@@ -846,6 +846,46 @@ DependencyAnalysis >> printCouplingWithoutNormalizationDetailingInvokers [
 ]
 
 { #category : #print }
+DependencyAnalysis >> printDirectConnectionsForAllInterestingClasses [
+	| edges stream aHeader aBlock allInterestingElements result |
+	
+	result := OrderedCollection new.
+	
+	stream  := MultiByteFileStream
+		forceNewFileNamed: 'CouplingBasedOnAllSystemWithSubclasses.csv'.
+	
+	stream  := MultiByteFileStream
+		forceNewFileNamed: 'DirectCouplingBetweenInterestingClasses.csv'.
+	aHeader := 'FROM' , '; ' , 'TO' ,  ';' , 'Number of connections' , String cr.	
+	
+	allInterestingElements := self allInterestingElementInTheTargetModel asOrderedCollection reject: [:each | each isMemberOf: FAMIXPrimitiveType].
+	
+	aBlock := [:edge | edge from name printString , '; ' , edge to name printString , '; ' , edge weight asString , String cr].	
+	
+	 (1 to: allInterestingElements size) do: [:index |
+		| type referedTypes counter |
+		counter := Dictionary new.
+		type := allInterestingElements at: index.
+		referedTypes := (allInterestingElements at: index) referedTypes reject: [:each | each isMemberOf: FAMIXPrimitiveType].
+		referedTypes do: [:referedType | counter at: referedType ifPresent: [:value | counter at: referedType put: value + 1] ifAbsent: [counter at: referedType put: 1] ].
+		
+		counter keysAndValuesDo: [:key :value |
+			| edge |
+			edge := MalWeightedEdge with: targetModel.
+			edge from: type.
+			edge to: key.
+			edge weight: value.
+			
+			result add: edge] ].
+	
+	self
+		print: result
+		asCSVOn: stream
+		with: aHeader
+		using: aBlock
+]
+
+{ #category : #print }
 DependencyAnalysis >> printGeneratedClassesWithSubclasses [
 	| aStream aHeader aBlock aCollection rootClasses |
 	
