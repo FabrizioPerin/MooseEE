@@ -2308,11 +2308,6 @@ JEETestModels >> sampleMooseModelWithDB [
 			yourself
 		);
 		add: (FAMIXClass new
-			name: #ABMPEntity;
-			container: anotherPackage;
-			yourself
-		);
-		add: (FAMIXClass new
 			name: #AMessageBean;
 			container: aPackage;
 			yourself
