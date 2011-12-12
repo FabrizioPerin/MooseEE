@@ -3,21 +3,15 @@ Extension { #name : #FAMIXType }
 { #category : #'*Moose-JEE-RimaCaseStudy' }
 FAMIXType >> accessedTypes [
 	| allAccessedType result |
-
-	allAccessedType := self accessedVariables collect: [:access | access variable belongsTo]. 
 	
 	result := OrderedCollection new.
 	
-	result addAll: (allAccessedType select: [:each | each isKindOf: FAMIXType]).
+	allAccessedType := self notNilAccesses collect: [ :access | access variable belongsTo ].
 	
-	result addAll: ((allAccessedType select: [:each | each isMemberOf: FAMIXMethod]) collect: [:each | each belongsTo]).
+	result addAll: (allAccessedType select: [ :each | each isKindOf: FAMIXType ]).
+	result addAll: ((allAccessedType select: [ :each | each isMemberOf: FAMIXMethod ]) collect: [ :each | each belongsTo ]).
 	
-	^result
-]
-
-{ #category : #'*Moose-JEE-RimaCaseStudy' }
-FAMIXType >> accessedVariables [
-	^self accesses reject: [:access | access variable isNil]
+	^ result
 ]
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
@@ -28,6 +22,16 @@ FAMIXType >> accesses [
 { #category : #'*Moose-JEE-RimaCaseStudy' }
 FAMIXType >> invokedTypes [
 	^((self outgoingInvocations flatCollect: #candidates) collect: #belongsTo) reject: #isStub.        
+]
+
+{ #category : #'*Moose-JEE-RimaCaseStudy' }
+FAMIXType >> methodWithReturnType [
+	^self methods reject: [:each | each declaredType isNil]
+]
+
+{ #category : #'*Moose-JEE-RimaCaseStudy' }
+FAMIXType >> notNilAccesses [
+	^self accesses reject: [:access | access variable isNil]
 ]
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
@@ -62,5 +66,5 @@ FAMIXType >> referencingTypes [
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
 FAMIXType >> returnedTypes [
-	^((self methods reject: [:each | each declaredType isNil]) collect: #declaredType) reject: #isStub.
+	^(self methodWithReturnType collect: #declaredType) reject: #isStub.
 ]

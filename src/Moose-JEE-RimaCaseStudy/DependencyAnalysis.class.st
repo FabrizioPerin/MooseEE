@@ -846,6 +846,110 @@ DependencyAnalysis >> printCouplingWithoutNormalizationDetailingInvokers [
 ]
 
 { #category : #print }
+DependencyAnalysis >> printDirectConnectionsForAllClasses [
+	| edges stream aHeader aBlock allInterestingElements result |
+	
+	result := OrderedCollection new.
+	
+	stream  := MultiByteFileStream
+		forceNewFileNamed: 'DirectCouplingBetweenAllClasses.csv'.
+	aHeader := 'FROM' , '; ' , 'TO' ,  ';' , 'Number of connections' , String cr.	
+	
+	allInterestingElements := (self targetModel allModelClasses reject: #isStub) asOrderedCollection.
+ 
+	aBlock := [:edge | edge from name printString , '; ' , edge to name printString , '; ' , edge weight asString , String cr].	
+	
+	 (1 to: allInterestingElements size) do: [:index |
+		| type referedTypes counter |
+		counter := Dictionary new.
+		type := allInterestingElements at: index.
+		referedTypes := (allInterestingElements at: index) referedTypes reject: [:each | each isMemberOf: FAMIXPrimitiveType].
+		referedTypes do: [:referedType | counter at: referedType ifPresent: [:value | counter at: referedType put: value + 1] ifAbsent: [counter at: referedType put: 1] ].
+		
+		counter keysAndValuesDo: [:key :value |
+			| edge |
+			edge := MalWeightedEdge with: targetModel.
+			edge from: type.
+			edge to: key.
+			edge weight: value.
+			
+			result add: edge] ].
+	
+	self
+		print: result
+		asCSVOn: stream
+		with: aHeader
+		using: aBlock
+]
+
+{ #category : #print }
+DependencyAnalysis >> printDirectConnectionsForAllClassesWithDetails [
+	| result stream aHeader allInterestingElements aBlock |
+
+	result := OrderedCollection new.
+	
+	stream  := MultiByteFileStream
+		forceNewFileNamed: 'DirectCouplingBetweenAllClassesWithDetails.csv'.
+	aHeader := 'FROM' , '; ' , 'TO' ,  ';' , 'Number of connections' , ';' , 'Method invokations' , ';' , 'Methods Returned type' , ';' , 'Accesses' , String cr.	
+	
+	allInterestingElements := (self targetModel allModelClasses reject: #isStub) asOrderedCollection.
+ 
+	aBlock := [:entry |
+			(entry at: 'from') name printString , '; ' , 
+			(entry at: 'to') name printString , '; ' , 
+			(entry at: 'numberOfConnections') asString , ';' , 
+			(entry at: 'methodInvocations') asString , ';' , 
+			(entry at: 'methodReturningSomething') asString , ';' , 
+			(entry at: 'accessedVariables') asString , 
+		
+			String cr].	
+	
+	 (1 to: allInterestingElements size) do: [:index |
+		| type referedTypes methodsReturningSomething accessedVariables methodInvocations counter parityCheck |
+
+		type := allInterestingElements at: index.
+		counter := Dictionary new.
+		
+		methodsReturningSomething := type methodWithReturnType.
+		accessedVariables := type notNilAccesses. "self accessor asString , ' -> ' , self variable asString"
+		methodInvocations := type outgoingInvocations reject: [:invocation | (((invocation candidates collect: #belongsTo) reject: #isStub) reject: [:each | each isMemberOf: FAMIXPrimitiveType]) isEmpty ].	
+
+		referedTypes := ((type referedTypes reject: [:each | each isMemberOf: FAMIXPrimitiveType]) reject: [:each | each = type]) reject: #isStub.
+		referedTypes do: [:referedType | counter at: referedType ifPresent: [:value | counter at: referedType put: value + 1] ifAbsent: [counter at: referedType put: 1] ].
+		parityCheck := 0.
+		
+		referedTypes asSet do: [:referedType |
+			| entry |
+			entry := Dictionary new.
+
+			entry at: 'from'	put: type.
+			entry at: 'to' put: referedType.
+
+			entry at: 'methodInvocations' put: (methodInvocations reject: [:invocation | (invocation candidates select: [:candidate | candidate belongsTo = referedType]) isEmpty]).
+			entry at: 'methodReturningSomething' put: (methodsReturningSomething select: [:method | method declaredType = referedType]).
+			
+			entry at: 'accessedVariables' put: (accessedVariables select: [:access | access variable belongsTo = referedType]).
+			(entry at: 'accessedVariables') addAll: ((accessedVariables select: [:each | each variable belongsTo isMemberOf: FAMIXMethod]) select: [:each | each variable belongsTo belongsTo = referedType]).
+	
+			entry at: 'numberOfConnections' put: ((entry at: 'methodInvocations') size + (entry at: 'methodReturningSomething') size + (entry at: 'accessedVariables') size).
+			
+			parityCheck := parityCheck + (entry at: 'numberOfConnections').
+			
+			entry at: 'parityCheck' put: parityCheck.
+			
+			result add: entry ].
+
+		(referedTypes size = parityCheck) ifFalse: [self halt.].
+	 ].
+
+	self
+		print: result
+		asCSVOn: stream
+		with: aHeader
+		using: aBlock
+]
+
+{ #category : #print }
 DependencyAnalysis >> printDirectConnectionsForAllInterestingClasses [
 	| edges stream aHeader aBlock allInterestingElements result |
 	
