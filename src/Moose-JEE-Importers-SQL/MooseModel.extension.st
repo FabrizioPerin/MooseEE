@@ -22,13 +22,13 @@ MooseModel >> mapSoftwareEntityOnRelationalElements [
 	strategyName := UITheme builder
 		chooseDropList: 'Choose the method to use for the mapping '
 		list:
-			((MJMapper allMethodsInCategory: #strategies)
-				collect: [ :method | method selector asString ]).
+			((MJMappingStrategy allSubclasses)
+				collect: [ :class | class name removeSuffix: ' class' ]).
 
 	strategyName isNil
 		ifTrue: [ DialogWindow new alert: 'Strategy not selected, operation aborted.' ]
 		ifFalse: [ 
 			| mapper |
-			mapper := MJMapper new perform: strategyName asSymbol.
+			mapper := strategyName new buildMapsOn: self.
 			mapper buildOn: self]
 ]
