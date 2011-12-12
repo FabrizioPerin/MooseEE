@@ -27,8 +27,5 @@ MooseModel >> mapSoftwareEntityOnRelationalElements [
 
 	strategyName isNil
 		ifTrue: [ DialogWindow new alert: 'Strategy not selected, operation aborted.' ]
-		ifFalse: [ 
-			| mapper |
-			mapper := strategyName new buildMapsOn: self.
-			mapper buildOn: self]
+		ifFalse: [((Smalltalk at: strategyName) perform: #new) buildMapsOn: self]
 ]
