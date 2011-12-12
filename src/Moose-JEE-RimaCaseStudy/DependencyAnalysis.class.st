@@ -1090,7 +1090,13 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystemWit
 	aHeader := 'FROM' , '; ' , 'Subclasses' , '; ' ,'TO' , '; ' , 'Subclasses' , '; ' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr.
 	
 	aBlock := [ :edge | 
-		edge from name printString , '; ' , edge from subclassHierarchy asSet asString , '; ' , edge to name printString , '; ' , edge to subclassHierarchy asSet asString , '; ' , edge weight asString , '; ' , edge weight size asString , String cr ].
+		edge from name , '; ' ,
+		(edge from subclassHierarchy inject: '' into: [:total :subtotal | total , subtotal name , ' (Class) ']) asString , ';' , 
+		edge to name , '; ' ,
+		(edge to subclassHierarchy inject: '' into: [:total :subtotal | total , subtotal name , ' (Class) ']) asString , ';' , 
+		(edge weight inject: '' into: [:total :subtotal | total , subtotal name , ' (Class) ']) asString , ';' ,
+		edge weight size asString , 
+		String cr ].
 	
 	self
 		print: edges
