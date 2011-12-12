@@ -895,13 +895,12 @@ DependencyAnalysis >> printDirectConnectionsForAllClassesWithDetails [
 	allInterestingElements := (self targetModel allModelClasses reject: #isStub) asOrderedCollection.
  
 	aBlock := [:entry |
-			(entry at: 'from') name printString , '; ' , 
-			(entry at: 'to') name printString , '; ' , 
-			(entry at: 'numberOfConnections') asString , ';' , 
-			(entry at: 'methodInvocations') asString , ';' , 
-			(entry at: 'methodReturningSomething') asString , ';' , 
-			(entry at: 'accessedVariables') asString , 
-		
+			(entry at: 'from') printName , '; ' , 
+			(entry at: 'to') printName , '; ' , 
+			(entry at: 'numberOfConnections') asString , ';' ,
+			((entry at: 'methodInvocations') inject: '' into: [:total :subtotal | total , subtotal asString , ' ']) asString , ';' , 
+			((entry at: 'methodReturningSomething') inject: '' into: [:total :subtotal | total , subtotal asString , ' ']) asString , ';' , 
+			((entry at: 'accessedVariables') inject: '' into: [:total :subtotal | total , subtotal asString , ' ']) asString ,		
 			String cr].	
 	
 	 (1 to: allInterestingElements size) do: [:index |

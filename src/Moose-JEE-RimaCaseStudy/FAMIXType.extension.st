@@ -35,6 +35,20 @@ FAMIXType >> notNilAccesses [
 ]
 
 { #category : #'*Moose-JEE-RimaCaseStudy' }
+FAMIXType >> printName [
+	| parent aStream |
+	
+	aStream := ReadWriteStream on: ''.
+	parent := self container.
+	parent ifNotNil: [
+		parent printNameOn: aStream.
+		aStream nextPut: $. ].
+	self name ifNotNil: [aStream nextPutAll: self name ].
+	
+	^aStream contents
+]
+
+{ #category : #'*Moose-JEE-RimaCaseStudy' }
 FAMIXType >> privateReferencingTypes [
 	^self mooseModel allTypes select: [:each|
 		each referedTypesSet includes: self.
