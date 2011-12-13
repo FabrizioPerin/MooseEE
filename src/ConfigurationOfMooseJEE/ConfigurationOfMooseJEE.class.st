@@ -411,6 +411,13 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				version: 'default';
 				repository: 'http://www.squeaksource.com/PetitGitLogParser'].
 		
+		spec  project: 'PetitPHPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitPHPParser';
+				file: 'ConfigurationOfPetitPHPParser';
+				version: 'default';
+				repository: 'http://www.squeaksource.com/PetitPHPParser'].
+		
 		spec  project: 'Maze for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfMaze';
