@@ -235,23 +235,23 @@ DependencyAnalysis >> computeCouplingBasedOnRefereesWDAndEdges [
 
 { #category : #now }
 DependencyAnalysis >> computeCouplingBasedOnRefereesWDAndEdgesOnAllSystem [
-	| interf4scr deps view result commonTypes |
+	| generatedClasses deps view result commonTypes |
 	
-	interf4scr := self allInterestingElementInTheTargetModel asOrderedCollection.
+	generatedClasses := self allInterestingElementInTheTargetModel asOrderedCollection.
 	result := OrderedCollection new.
-	commonTypes := self identifyCommonRefereeClassesFor: interf4scr.
+	commonTypes := self identifyCommonRefereeClassesFor: generatedClasses.
 	
-	(1 to: interf4scr size) 
+	(1 to: generatedClasses size) 
 		do: [ :rowIndex | 
 			| fromClass fromClassInvokingClasses |
 			
-			fromClass := interf4scr at: rowIndex.
+			fromClass := generatedClasses at: rowIndex.
 			fromClassInvokingClasses := fromClass referencingTypes asSet.
 			
-			(rowIndex + 1 to: interf4scr size)
+			(rowIndex + 1 to: generatedClasses size)
 				do: [ :colIndex | 
 					| toClass toClassInvokingClasses edge interestingClasses |
-					toClass := interf4scr at: colIndex.
+					toClass := generatedClasses at: colIndex.
 					toClassInvokingClasses := toClass referencingTypes asSet.
 					interestingClasses := (fromClassInvokingClasses intersection: toClassInvokingClasses)
 						reject: [ :each | commonTypes includes: each ].
@@ -770,7 +770,7 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges asCSVOn: aStream [
 		during: [ :bar | 
 			| index |
 			index := 1.
-			aStream nextPutAll: ('FROM' , '; ' , 'TO' , '; ' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr).
+			aStream nextPutAll: ('Source' , '; ' , 'Target' , '; ' , 'Classes involved the couplig' , '; ' , 'COUPLING VALUE' , String cr).
 			aCollectionOfWeightedEdges
 				do: [ :edge | 
 				
@@ -814,7 +814,7 @@ DependencyAnalysis >> print: aCollectionOfWeightedEdges withScreensAsCSVOn: aStr
 		during: [ :bar | 
 			| index |
 			index := 1.
-			aStream nextPutAll: ('Screen for FROM' , ';' , 'FROM' , '; ' , 'TO' , '; ' , 'Screen for TO' , ';' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr).
+			aStream nextPutAll: ('Screen for Source' , ';' , 'Source' , '; ' , 'Target' , '; ' , 'Screen for Target' , ';' , 'Classes involved the couplig' , '; ' , 'COUPLING VALUE' , String cr).
 			aCollectionOfWeightedEdges
 				do: [ :edge | 
 				
@@ -853,7 +853,7 @@ DependencyAnalysis >> printDirectConnectionsForAllClasses [
 	
 	stream  := MultiByteFileStream
 		forceNewFileNamed: 'DirectCouplingBetweenAllClasses.csv'.
-	aHeader := 'FROM' , '; ' , 'TO' ,  ';' , 'Number of connections' , String cr.	
+	aHeader := 'Source' , '; ' , 'Target' ,  ';' , 'Number of connections' , String cr.	
 	
 	allInterestingElements := (self targetModel allModelClasses reject: #isStub) asOrderedCollection.
  
@@ -890,7 +890,7 @@ DependencyAnalysis >> printDirectConnectionsForAllClassesWithDetails [
 	
 	stream  := MultiByteFileStream
 		forceNewFileNamed: 'DirectCouplingBetweenAllClassesWithDetails.csv'.
-	aHeader := 'FROM' , '; ' , 'TO' ,  ';' , 'Number of connections' , ';' , 'Method invokations' , ';' , 'Methods Returned type' , ';' , 'Accesses' , String cr.	
+	aHeader := 'Source' , '; ' , 'Target' ,  ';' , 'Number of connections' , ';' , 'Method invokations' , ';' , 'Methods Returned type' , ';' , 'Accesses' , String cr.	
 	
 	allInterestingElements := (self targetModel allModelClasses reject: #isStub) asOrderedCollection.
  
@@ -959,7 +959,7 @@ DependencyAnalysis >> printDirectConnectionsForAllInterestingClasses [
 	
 	stream  := MultiByteFileStream
 		forceNewFileNamed: 'DirectCouplingBetweenInterestingClasses.csv'.
-	aHeader := 'FROM' , '; ' , 'TO' ,  ';' , 'Number of connections' , String cr.	
+	aHeader := 'Source' , '; ' , 'Target' ,  ';' , 'Number of connections' , String cr.	
 	
 	allInterestingElements := self allInterestingElementInTheTargetModel asOrderedCollection reject: [:each | each isMemberOf: FAMIXPrimitiveType].
 	
@@ -990,16 +990,21 @@ DependencyAnalysis >> printDirectConnectionsForAllInterestingClasses [
 
 { #category : #print }
 DependencyAnalysis >> printGeneratedClassesWithSubclasses [
-	| aStream aHeader aBlock aCollection rootClasses |
+	| aStream aHeader aBlock aCollection rootClasses fileName |
 	
 	aCollection := self entirePOHierarchyButPO asMooseGroup.
-	rootClasses := (aCollection select: [:each | each isHierarchyRootWithin: aCollection]) sorted: [:a :b | a name < b name].
-	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclasses.csv'.
+	fileName := 'GeneratedClassesWithSubclasses.csv'.
+	
+	rootClasses := (aCollection select: [ :each | each isHierarchyRootWithin: aCollection ]) sorted: [ :a :b | a name < b name ].
+	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
-	aBlock := [:type | type name , ';' , (type subclassHierarchy reject: #isStub) asSet asString , String cr].	
+	aBlock := [ :type | 
+		type name , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal name , ' (Class) ' ]) , ';' , 
+		String cr ].
 	
 	self
-		print: rootClasses 
+		print: rootClasses
 		asCSVOn: aStream
 		with: aHeader
 		using: aBlock
@@ -1007,13 +1012,18 @@ DependencyAnalysis >> printGeneratedClassesWithSubclasses [
 
 { #category : #print }
 DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutInterfaces [
-	| aStream aHeader aBlock aCollection rootClasses |
+	| aStream aHeader aBlock aCollection rootClasses fileName |
 	
 	aCollection := self entirePOHierarchyWithoutInterfaces asMooseGroup.
-	rootClasses := aCollection select: [:each | each isHierarchyRootWithin: aCollection].
-	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclassesWithoutInterfaces.csv'.
+	fileName := 'GeneratedClassesWithSubclassesWithoutInterfaces.csv'.
+	
+	rootClasses := (aCollection select: [ :each | each isHierarchyRootWithin: aCollection]) sorted: [ :a :b | a name < b name ].
+	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
-	aBlock := [:type | type name , ';' , (type subclassHierarchy reject: #isStub) asSet asString , String cr].	
+	aBlock := [ :type | 
+		type name , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal name , ' (Class) ' ]) , ';' , 
+		String cr ].
 	
 	self
 		print: rootClasses 
@@ -1024,13 +1034,18 @@ DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutInterfaces [
 
 { #category : #print }
 DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutXClasses [
-	| aStream aHeader aBlock aCollection rootClasses |
+	| aStream aHeader aBlock aCollection rootClasses fileName |
 	
 	aCollection := self entirePOHierarchyButPO asMooseGroup.
-	rootClasses := aCollection select: [:each | each isHierarchyRootWithin: aCollection].
-	aStream := MultiByteFileStream forceNewFileNamed: 'GeneratedClassesWithSubclassesWithoutXClasses.csv'.
+	fileName := 'GeneratedClassesWithSubclassesWithoutXClasses.csv'.
+	
+	rootClasses := (aCollection select: [ :each | each isHierarchyRootWithin: aCollection]) sorted: [ :a :b | a name < b name ].
+	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
-	aBlock := [:type | type name , ';' , ((type subclassHierarchy reject: #isStub) reject: [:class | 'X_*' match: class name]) asSet asString , String cr].	
+	aBlock := [ :type | 
+		type name , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal name , ' (Class) ' ]) , ';' , 
+		String cr ].
 	
 	self
 		print: rootClasses 
@@ -1087,7 +1102,7 @@ DependencyAnalysis >> printSortedCouplingBasedOnRefereesWDAndEdgesOnAllSystemWit
 	stream := MultiByteFileStream
 		forceNewFileNamed: 'CouplingBasedOnAllSystemWithSubclasses.csv'.
 	
-	aHeader := 'FROM' , '; ' , 'Subclasses' , '; ' ,'TO' , '; ' , 'Subclasses' , '; ' , 'Classes concretizing the couplig' , '; ' , 'COUPLING VALUE' , String cr.
+	aHeader := 'Source' , '; ' , 'Source Subclasses' , '; ' ,'Target' , '; ' , 'Target Subclasses' , '; ' , 'Classes involved in the couplig' , '; ' , 'COUPLING VALUE' , String cr.
 	
 	aBlock := [ :edge | 
 		edge from name , '; ' ,
