@@ -999,8 +999,8 @@ DependencyAnalysis >> printGeneratedClassesWithSubclasses [
 	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [ :type | 
-		type printName , ' (Class) ' , ';' ,
-		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , ' (Class) ' ]) , ';' ,
+		type printName , (type isInterface ifFalse:[' (Class) '] ifTrue:[' (Interface) ']) , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , (subtotal isInterface ifFalse:[' (Class) '] ifTrue:[' (Interface) ']) ]) , ';' ,
 		String cr ].
 	
 	self
@@ -1021,8 +1021,8 @@ DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutInterfaces [
 	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [ :type | 
-		type printName , ' (Class) ' , ';' ,
-		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , ' (Class) ' ]) , ';' ,
+		type printName , (type isInterface ifFalse:[' (Class) '] ifTrue:[' (Interface) ']) , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , (subtotal isInterface ifFalse:[' (Class) '] ifTrue:[' (Interface) ']) ]) , ';' ,
 		String cr ].
 	
 	self
@@ -1043,8 +1043,8 @@ DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutXClasses [
 	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [ :type | 
-		type printName , ' (Class) ' , ';' ,
-		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , ' (Class) ' ]) , ';' ,
+		type printName , (type isInterface ifFalse:[' (Class) '] ifTrue:[' (Interface) ']) , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , (subtotal isInterface ifFalse:[' (Class) '] ifTrue:[' (Interface) ']) ]) , ';' ,
 		String cr ].
 	
 	self
