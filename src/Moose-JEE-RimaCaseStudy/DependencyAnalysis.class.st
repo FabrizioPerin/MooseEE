@@ -993,14 +993,14 @@ DependencyAnalysis >> printGeneratedClassesWithSubclasses [
 	| aStream aHeader aBlock aCollection rootClasses fileName |
 	
 	aCollection := self entirePOHierarchyButPO asMooseGroup.
-	fileName := 'GeneratedClassesWithSubclasses.csv'.
+	fileName := 'generatedClassesWithSubclasses.csv'.
 	
 	rootClasses := (aCollection select: [ :each | each isHierarchyRootWithin: aCollection ]) sorted: [ :a :b | a name < b name ].
 	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [ :type | 
-		type name , ';' ,
-		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal name , ' (Class) ' ]) , ';' , 
+		type printName , ' (Class) ' , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , ' (Class) ' ]) , ';' ,
 		String cr ].
 	
 	self
@@ -1015,14 +1015,14 @@ DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutInterfaces [
 	| aStream aHeader aBlock aCollection rootClasses fileName |
 	
 	aCollection := self entirePOHierarchyWithoutInterfaces asMooseGroup.
-	fileName := 'GeneratedClassesWithSubclassesWithoutInterfaces.csv'.
+	fileName := 'generatedClassesWithSubclassesWithoutInterfaces.csv'.
 	
 	rootClasses := (aCollection select: [ :each | each isHierarchyRootWithin: aCollection]) sorted: [ :a :b | a name < b name ].
 	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [ :type | 
-		type name , ';' ,
-		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal name , ' (Class) ' ]) , ';' , 
+		type printName , ' (Class) ' , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , ' (Class) ' ]) , ';' ,
 		String cr ].
 	
 	self
@@ -1037,14 +1037,14 @@ DependencyAnalysis >> printGeneratedClassesWithSubclassesWithoutXClasses [
 	| aStream aHeader aBlock aCollection rootClasses fileName |
 	
 	aCollection := self entirePOHierarchyButPO asMooseGroup.
-	fileName := 'GeneratedClassesWithSubclassesWithoutXClasses.csv'.
+	fileName := 'generatedClassesWithSubclassesWithoutXClasses.csv'.
 	
 	rootClasses := (aCollection select: [ :each | each isHierarchyRootWithin: aCollection]) sorted: [ :a :b | a name < b name ].
 	aStream := MultiByteFileStream forceNewFileNamed: (FileDirectory default pathName , FileDirectory pathNameDelimiter asString , 'output' , FileDirectory pathNameDelimiter asString , fileName).
 	aHeader := 'Type' , ';' , 'Subclasses' , String cr.
 	aBlock := [ :type | 
-		type name , ';' ,
-		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal name , ' (Class) ' ]) , ';' , 
+		type printName , ' (Class) ' , ';' ,
+		((type subclassHierarchy reject: #isStub) asSet inject: '' into: [ :total :subtotal | total , subtotal printName , ' (Class) ' ]) , ';' ,
 		String cr ].
 	
 	self
