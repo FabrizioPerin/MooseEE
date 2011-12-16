@@ -120,7 +120,7 @@ MJGitBlameImporterTests >> testEnsureReifiedBlameFile [
 { #category : #tests }
 MJGitBlameImporterTests >> testGitLogASTParser [
 	
-	self assert: (gitImporter gitLogASTParser isMemberOf: PetitGitLogParser).
+	self assert: (gitImporter gitLogASTParser isMemberOf: PetitGitBlameFileParser).
 ]
 
 { #category : #tests }
