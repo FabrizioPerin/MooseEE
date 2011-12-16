@@ -26,6 +26,11 @@ FAMIXClass >> associatedBlameFileOLD [
 ]
 
 { #category : #'*moose-jee-gitlog-model' }
+FAMIXClass >> cleanAssociatedBlameFile [
+	^self privateState attributeAt: #associatedBlameFile put: [FMMultivalueLink on: self opposite: #targetClass:].
+]
+
+{ #category : #'*moose-jee-gitlog-model' }
 FAMIXClass >> developers [
 	
 	^self associatedBlameFile first from experts
