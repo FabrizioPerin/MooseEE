@@ -49,12 +49,14 @@ MooseModel >> fixFileAnchorsFrom: aFolder [
 		during: [:bar | 
 			bar value: index.
 
-			self allClasses
+			(self allClasses reject: #isStub)
 				do: [:class | 
 					javaFiles do: [:file |
 						(class name , '.java' = file name) ifTrue: [
 							"| fileStream |
 							fileStream := CrLfFileStream new open: file fullName forWrite: false."
+							"class sourceAnchor isNil ifTrue: [class sourceAnchor: FAMIXFileAnchor new.]."
+								
 							class sourceAnchor fileName: (file fullName copyFrom: (self rootFolder size + 1) to: file fullName size)].
 						index := index + 1.
 						bar value: index]]]
