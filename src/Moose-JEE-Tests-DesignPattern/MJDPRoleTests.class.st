@@ -1,9 +1,6 @@
 Class {
 	#name : #MJDPRoleTests,
 	#superclass : #TestCase,
-	#instVars : [
-		'associatedClass'
-	],
 	#category : #'Moose-JEE-Tests-DesignPattern'
 }
 
@@ -15,17 +12,26 @@ MJDPRoleTests class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-MJDPRoleTests >> initialize [
-	super initialize.
-	
-	associatedClass := FMMultivalueLink on: self opposite: #role:.
-	
-	^self
+MJDPRoleTests >> testAnnotation [
+	self assert: MJDPRole annotation == MJDPRole.
 ]
 
 { #category : #'as yet unclassified' }
-MJDPRoleTests >> testAnnotation [
-	self assert: MJDPRole annotation == MJDPRole.
+MJDPRoleTests >> testAssociatedClass [
+	| role classRoleAssoc |
+	
+	role := MJDPRole new.
+	classRoleAssoc := MJDPRoleAssociation new.
+	
+	self assert: (role isMemberOf: MJDPRole).
+	self assert: (role associatedClass isMemberOf: FMMultivalueLink).
+	self assert: role associatedClass isEmpty.
+	
+	role associatedClass: classRoleAssoc.
+	
+	self assert: (role associatedClass isMemberOf: FMMultivalueLink).
+	self assert: role associatedClass size equals: 1.	
+	self assert: role associatedClass first equals: classRoleAssoc.
 ]
 
 { #category : #'as yet unclassified' }
@@ -37,5 +43,4 @@ MJDPRoleTests >> testMJDPRoleCreation [
 	self assert: (role isMemberOf: MJDPRole).
 	self assert: (role associatedClass isMemberOf: FMMultivalueLink).
 	self assert: role associatedClass isEmpty.
-	
 ]

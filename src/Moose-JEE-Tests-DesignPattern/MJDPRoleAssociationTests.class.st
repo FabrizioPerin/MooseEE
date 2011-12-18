@@ -1,10 +1,6 @@
 Class {
 	#name : #MJDPRoleAssociationTests,
-	#superclass : #FAMIXAssociation,
-	#instVars : [
-		'role',
-		'implementor'
-	],
+	#superclass : #TestCase,
 	#category : #'Moose-JEE-Tests-DesignPattern'
 }
 
@@ -12,40 +8,6 @@ Class {
 MJDPRoleAssociationTests class >> annotation [
 	<MSEClass: #MJDPRoleAssociation super: #FAMIXAssociation>
 	<package: #'Moose-JEE-DesignPattern'>
-	^self
-]
-
-{ #category : #'as yet unclassified' }
-MJDPRoleAssociationTests >> from [
-	^ self role
-]
-
-{ #category : #'as yet unclassified' }
-MJDPRoleAssociationTests >> implementor [
-	<MSEProperty: #implementor type: #FAMIXType opposite: #dpRole>
-	<MSEComment: 'FamixType participating the pattern'>
-	
-	^implementor
-]
-
-{ #category : #'as yet unclassified' }
-MJDPRoleAssociationTests >> implementor: aFamixType [
-
-	implementor := FMMultivalueLink 
-					on: self
-					update: #role:
-					from: self class  
-					to: aFamixType
-]
-
-{ #category : #'as yet unclassified' }
-MJDPRoleAssociationTests >> initialize [
-
-	super initialize.
-	
-	role := nil.
-	implementor := nil.
-	
 	^self
 ]
 
@@ -61,14 +23,73 @@ MJDPRoleAssociationTests >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-MJDPRoleAssociationTests >> role [
-	<MSEProperty: #role type: #MJDPRole opposite: #associatedClass>
-	<MSEComment: 'Design Pattern role'>
-	
-	^role
+MJDPRoleAssociationTests >> testAnnotation [
+	self assert: MJDPRoleAssociation annotation == MJDPRoleAssociation.
 ]
 
 { #category : #'as yet unclassified' }
-MJDPRoleAssociationTests >> to [
-	^ self implementor
+MJDPRoleAssociationTests >> testFrom [
+	| assoc role |
+
+	assoc := MJDPRoleAssociation new.
+	role := MJDPRole new.
+
+	self assert: (assoc isMemberOf: MJDPRoleAssociation).
+
+	assoc role: role.
+
+	self assert: assoc from equals: role.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPRoleAssociationTests >> testImplementor [
+	| assoc class |
+
+	assoc := MJDPRoleAssociation new.
+	class := FAMIXType new.
+
+	self assert: (assoc isMemberOf: MJDPRoleAssociation).
+
+	assoc implementor: class.
+
+	self assert: assoc implementor equals: class.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPRoleAssociationTests >> testMJDPRoleAssociationCreation [
+	| assoc |
+
+	assoc := MJDPRoleAssociation new.
+	
+	self assert: (assoc isMemberOf: MJDPRoleAssociation).
+	self assert: assoc from isNil.
+	self assert: assoc to isNil.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPRoleAssociationTests >> testRole [
+	| assoc role |
+
+	assoc := MJDPRoleAssociation new.
+	role := MJDPRole new.
+
+	self assert: (assoc isMemberOf: MJDPRoleAssociation).
+
+	assoc role: role.
+
+	self assert: assoc role equals: role.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPRoleAssociationTests >> testTo [
+	| assoc class |
+
+	assoc := MJDPRoleAssociation new.
+	class := FAMIXType new.
+
+	self assert: (assoc isMemberOf: MJDPRoleAssociation).
+
+	assoc implementor: class.
+
+	self assert: assoc to equals: class.
 ]

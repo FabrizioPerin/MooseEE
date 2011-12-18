@@ -12,30 +12,52 @@ MJDPLevelInstanceTests class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-MJDPLevelInstanceTests >> testContainers [
-	| levelInstance level |
+MJDPLevelInstanceTests >> testAddContainedLevels [
+	| levelInstance containmentRelation |
 
-	levelInstance := MJDPLevelInstance new.
-	level := MJDPLevel new.
+	levelInstance :=  MJDPLevelInstance new.
+	containmentRelation := MJDPLIToLContainment new.
 	
-	self assert: levelInstance containers isEmpty.
+	self assert: levelInstance containedLevels isEmpty.
 	
-	levelInstance containers: (OrderedCollection with: level).
+	levelInstance addContainedLevel: containmentRelation.
 	
-	self assert: (levelInstance containers isMemberOf: FMMultivalueLink).
-	self assert: levelInstance containers size equals: 1.
-	self assert: levelInstance containers equals: level.
+	self assert: (levelInstance containedLevels isMemberOf: FMMultivalueLink).
+	self assert: levelInstance containedLevels size equals: 1.
+	self assert: levelInstance containedLevels first equals: containmentRelation.
 	
 ]
 
 { #category : #'as yet unclassified' }
-MJDPLevelInstanceTests >> testMKDPLevelInstanceCreation [
+MJDPLevelInstanceTests >> testAnnotation [
+	self assert: MJDPLevelInstance annotation == MJDPLevelInstance.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPLevelInstanceTests >> testContainedLevels [
+	| levelInstance containmentRelation |
+
+	levelInstance :=  MJDPLevelInstance new.
+	containmentRelation := MJDPLIToLContainment new.
+	
+	self assert: levelInstance containedLevels isEmpty.
+	
+	levelInstance containedLevels: (OrderedCollection with: containmentRelation).
+	
+	self assert: (levelInstance containedLevels isMemberOf: FMMultivalueLink).
+	self assert: levelInstance containedLevels size equals: 1.
+	self assert: levelInstance containedLevels first equals: containmentRelation.
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJDPLevelInstanceTests >> testMJDPLevelInstanceCreation [
 	| levelInstance |
 
 	levelInstance := MJDPLevelInstance new.
 	
 	self assert: (levelInstance isMemberOf: MJDPLevelInstance).
-	self assert: (levelInstance containers isMemberOf: FMMultivalueLink).
-	self assert: levelInstance containers isEmpty.
+	self assert: (levelInstance containedLevels isMemberOf: FMMultivalueLink).
+	self assert: levelInstance containedLevels isEmpty.
 	
 ]
