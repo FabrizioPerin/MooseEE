@@ -22,6 +22,15 @@ MJDPRole >> associatedClass [
 ]
 
 { #category : #'as yet unclassified' }
+MJDPRole >> associatedClass: aFamixType [
+
+		associatedClass := FMMultivalueLink on: self
+					update: #role
+					from: self associatedClass					
+					to: aFamixType
+]
+
+{ #category : #'as yet unclassified' }
 MJDPRole >> initialize [
 	super initialize.
 	
