@@ -16,25 +16,24 @@ MJDPRole class >> annotation [
 
 { #category : #'as yet unclassified' }
 MJDPRole >> associatedClass [
-	<MSEProperty: #associatedClass type: #FAMIXType opposite: #implementedRole>
+	<MSEProperty: #associatedClass type: #MJDPRoleAssociation opposite: #role>
 	<MSEComment: 'Association with the source entity implementing this role.'>
 	^associatedClass
 ]
 
 { #category : #'as yet unclassified' }
-MJDPRole >> associatedClass: aFamixType [
+MJDPRole >> associatedClass: aMJDPRoleAssociation [
 
-		associatedClass := FMMultivalueLink on: self
-					update: #role
-					from: self associatedClass					
-					to: aFamixType
+	self associatedClass value: (OrderedCollection with: aMJDPRoleAssociation).
 ]
 
 { #category : #'as yet unclassified' }
 MJDPRole >> initialize [
 	super initialize.
 	
-	associatedClass := FMMultivalueLink on: self opposite: #role:.
+	associatedClass := FMMultivalueLink 
+		on: self
+		opposite: #role:.
 	
 	^self
 ]

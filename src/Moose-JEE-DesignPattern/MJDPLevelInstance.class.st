@@ -15,8 +15,8 @@ MJDPLevelInstance class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-MJDPLevelInstance >> addContainers: aMJDPLevel [
-	self containers add: aMJDPLevel.
+MJDPLevelInstance >> addContainedLevel: aMJDPLToLIContainment [
+	self containedLevels add: aMJDPLToLIContainment.
 ]
 
 { #category : #'as yet unclassified' }

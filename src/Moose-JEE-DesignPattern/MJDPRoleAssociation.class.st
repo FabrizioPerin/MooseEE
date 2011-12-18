@@ -22,7 +22,7 @@ MJDPRoleAssociation >> from [
 
 { #category : #'as yet unclassified' }
 MJDPRoleAssociation >> implementor [
-	<MSEProperty: #implementor type: #FAMIXType opposite: #dpRole>
+	<MSEProperty: #implementor type: #FAMIXType opposite: #implementedRole>
 	<MSEComment: 'FamixType participating the pattern'>
 	
 	^implementor
@@ -33,8 +33,8 @@ MJDPRoleAssociation >> implementor: aFamixType [
 
 	implementor := FMMultivalueLink 
 					on: self
-					update: #role:
-					from: self class  
+					update: #implementedRole
+					from: self implementor  
 					to: aFamixType
 ]
 
@@ -56,8 +56,8 @@ MJDPRoleAssociation >> printOn: aStream [
 		ifFalse: [aStream nextPutAll: self from name].
 	aStream nextPutAll: ' -> '.
 	self to isNil	
-		ifFalse: [aStream nextPutAll: self to mooseName].
-	aStream nextPutAll: ' (DPRoleAssociation)'
+		ifFalse: [aStream nextPutAll: self to name].
+	aStream nextPutAll: ' (Role to Class Association)'
 ]
 
 { #category : #'as yet unclassified' }
@@ -73,8 +73,8 @@ MJDPRoleAssociation >> role: aMJDPRole [
 
 	role := FMMultivalueLink 
 					on: self
-					update: #associatedClass:
-					from: self class  
+					update: #associatedClass
+					from: self role  
 					to: aMJDPRole
 ]
 
