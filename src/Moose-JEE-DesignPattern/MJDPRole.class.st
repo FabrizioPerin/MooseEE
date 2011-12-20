@@ -23,7 +23,7 @@ MJDPRole >> associatedClass [
 
 { #category : #'as yet unclassified' }
 MJDPRole >> associatedClass: aMJDPRoleAssociation [
-
+	"This method contains a work around to make possible a 1to 1 relation with the MJDPRoleAssociation instance"
 	self associatedClass value: (OrderedCollection with: aMJDPRoleAssociation).
 ]
 

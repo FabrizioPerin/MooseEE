@@ -56,7 +56,7 @@ MJDPRoleAssociation >> printOn: aStream [
 		ifFalse: [aStream nextPutAll: self from name].
 	aStream nextPutAll: ' -> '.
 	self to isNil	
-		ifFalse: [aStream nextPutAll: self to name].
+		ifFalse: [aStream nextPutAll: self to mooseName ].
 	aStream nextPutAll: ' (Role to Class Association)'
 ]
 

@@ -60,6 +60,11 @@ MJDPLevel >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+MJDPLevel >> isRoot [
+	^self parentLevel isNil
+]
+
+{ #category : #'as yet unclassified' }
 MJDPLevel >> parentLevel [
 	<MSEProperty: #parentLevel type: #MJDPLevel opposite: #childLevels>
 	<MSEComment: 'parent level of this level'>

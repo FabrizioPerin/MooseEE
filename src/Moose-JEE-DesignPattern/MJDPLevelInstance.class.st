@@ -2,7 +2,8 @@ Class {
 	#name : #MJDPLevelInstance,
 	#superclass : #FAMIXEntity,
 	#instVars : [
-		'containedLevels'
+		'containedLevels',
+		'patternDefinition'
 	],
 	#category : #'Moose-JEE-DesignPattern'
 }
@@ -37,6 +38,21 @@ MJDPLevelInstance >> initialize [
 	super initialize.
 	
 	containedLevels := FMMultivalueLink on: self opposite: #levelInstance:.
+	patternDefinition := FMMultivalueLink on: self opposite: #levelInstance:.
 	
 	^ self
+]
+
+{ #category : #'as yet unclassified' }
+MJDPLevelInstance >> patternDefinition [
+	<MSEProperty: #patternDefinition type: #MJDPPatternInstanceAssoc opposite: #levelInstance>
+	<MSEComment: 'Association to the pattern defition implemented by this level instance'>
+	
+	^patternDefinition
+]
+
+{ #category : #'as yet unclassified' }
+MJDPLevelInstance >> patternDefinition: aMJDPPatternInstanceAssoc [
+	
+	self patternDefinition value: (OrderedCollection with: aMJDPPatternInstanceAssoc).
 ]
