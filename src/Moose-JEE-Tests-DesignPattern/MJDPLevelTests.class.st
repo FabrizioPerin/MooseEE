@@ -72,6 +72,24 @@ MJDPLevelTests >> testContainedLevelInstances [
 ]
 
 { #category : #'as yet unclassified' }
+MJDPLevelTests >> testIsRoot [
+	| level child |
+
+	level := MJDPLevel new.
+	child := MJDPLevel new.
+
+	self assert: child isRoot.
+	
+	child parentLevel: level.
+	
+	self deny: child isRoot.
+	
+	child parentLevel: nil.
+	
+	self assert: child isRoot. 
+]
+
+{ #category : #'as yet unclassified' }
 MJDPLevelTests >> testMJDPLevelCreation [
 	| level |
 
