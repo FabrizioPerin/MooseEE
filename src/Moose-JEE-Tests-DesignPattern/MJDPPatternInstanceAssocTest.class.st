@@ -9,36 +9,24 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-MJDPPatternInstanceAssocTest >> from [
-	^self patternDefinition
-]
+MJDPPatternInstanceAssocTest >> testFrom [
+	| pd pia pd2 |
 
-{ #category : #'as yet unclassified' }
-MJDPPatternInstanceAssocTest >> initialize [
-	super initialize.
+	pd := MJDPDefinition new.
+	pd2 := MJDPDefinition new.
+	pia := MJDPPatternInstanceAssoc new.
+
+	self assert: pia patternDefinition isNil.
+
+	pia patternDefinition: pd. 
 	
-	patternDefinition := nil.
-	levelInstance := nil.
+	self assert: (pia from isMemberOf: MJDPDefinition).
+	self assert: pia from equals: pd.
 	
-	^self 
-]
-
-{ #category : #'as yet unclassified' }
-MJDPPatternInstanceAssocTest >> levelInstance [
-	<MSEProperty: #levelInstance type: #MJDPLevelInstance opposite: #implementedPattern>
-	<MSEComment: 'Level Instance containing a Level'>
+	pia patternDefinition: pd2. 
 	
-	^levelInstance 
-]
-
-{ #category : #'as yet unclassified' }
-MJDPPatternInstanceAssocTest >> levelInstance: aLevelInstance [
-
-	levelInstance := FMMultivalueLink 
-								on: self
-								update: #implementedPattern
-								from: self levelInstance  
-								to: aLevelInstance
+	self assert: (pia from isMemberOf: MJDPDefinition).
+	self assert: pia from equals: pd2.
 ]
 
 { #category : #'as yet unclassified' }
@@ -57,6 +45,27 @@ MJDPPatternInstanceAssocTest >> testLevelInstance [
 	self assert: pia levelInstance equals: lI.
 	
 	pia levelInstance: lI2. 
+	
+	self assert: (pia levelInstance isMemberOf: MJDPLevelInstance).
+	self assert: pia levelInstance equals: lI2.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPPatternInstanceAssocTest >> testLevelInstanceSelfUpdate [
+	| lI pia lI2 |
+
+	lI := MJDPLevelInstance new.
+	lI2 := MJDPLevelInstance new.
+	pia := MJDPPatternInstanceAssoc new.
+
+	self assert: pia levelInstance isNil.
+
+	lI patternDefinition: pia. 
+	
+	self assert: (pia levelInstance isMemberOf: MJDPLevelInstance).
+	self assert: pia levelInstance equals: lI.
+	
+	 lI2 patternDefinition: pia. 
 	
 	self assert: (pia levelInstance isMemberOf: MJDPLevelInstance).
 	self assert: pia levelInstance equals: lI2.
@@ -95,6 +104,43 @@ MJDPPatternInstanceAssocTest >> testPatternDefinition [
 ]
 
 { #category : #'as yet unclassified' }
-MJDPPatternInstanceAssocTest >> to [
-	^self levelInstance
+MJDPPatternInstanceAssocTest >> testPatternDefinitionSelfUpdate [
+	| pd pia pd2 |
+
+	pd := MJDPDefinition new.
+	pd2 := MJDPDefinition new.
+	pia := MJDPPatternInstanceAssoc new.
+
+	self assert: pia patternDefinition isNil.
+
+	pd implementedPattern: pia. 
+	
+	self assert: (pia patternDefinition isMemberOf: MJDPDefinition).
+	self assert: pia patternDefinition equals: pd.
+	
+	pd2 implementedPattern: pia. 
+	
+	self assert: (pia patternDefinition isMemberOf: MJDPDefinition).
+	self assert: pia patternDefinition equals: pd2.
+]
+
+{ #category : #'as yet unclassified' }
+MJDPPatternInstanceAssocTest >> testTo [
+	| lI pia lI2 |
+
+	lI := MJDPLevelInstance new.
+	lI2 := MJDPLevelInstance new.
+	pia := MJDPPatternInstanceAssoc new.
+
+	self assert: pia levelInstance isNil.
+
+	pia levelInstance: lI. 
+	
+	self assert: (pia to isMemberOf: MJDPLevelInstance).
+	self assert: pia to equals: lI.
+	
+	 pia levelInstance: lI2. 
+	
+	self assert: (pia to isMemberOf: MJDPLevelInstance).
+	self assert: pia to equals: lI2.
 ]
