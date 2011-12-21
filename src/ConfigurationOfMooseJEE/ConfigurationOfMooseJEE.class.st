@@ -455,6 +455,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-EJB-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-DesignPattern' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Tiers-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-GitLog-Model' with: [
@@ -524,7 +526,10 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec requires: #('Moose-JEE-Importers-GitLog' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Tiers' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')].
+				spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-DesignPattern' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-DesignPattern')].
 			
 		
 		spec group: 'Tests' with: #( 
@@ -538,7 +543,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			'Moose-JEE-Tests-Importers-JSP'
 			'Moose-JEE-Tests-Importers-GitLog'
 			'Moose-JEE-Tests-EJBDraftObjs'
-			'Moose-JEE-Tests-Algos').
+			'Moose-JEE-Tests-Algos'
+			'Moose-JEE-Tests-DesignPattern').
 
 	]
 ]
