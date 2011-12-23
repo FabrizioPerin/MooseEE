@@ -12,5 +12,5 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXJSPAttribute class >> annotation [
 	<MSEClass: #MJFAMIXJSPAttribute super: #FAMIXNamedEntity>
-	<package: #'Moose-JEE-Model'>
+	<package: #'Moose-JEE-JSP-Model'>
 ]

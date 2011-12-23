@@ -8,6 +8,12 @@ Class {
 	#category : #'Moose-JEE-JSP-Model'
 }
 
+{ #category : #'as yet unclassified' }
+MJFAMIXJSPInvocation class >> annotation [
+	<MSEClass: #MJFAMIXJSPInvocation super: #MJAssociation>
+	<package: #'Moose-JEE-JSP-Model'>
+]
+
 { #category : #accessing }
 MJFAMIXJSPInvocation >> from [
 

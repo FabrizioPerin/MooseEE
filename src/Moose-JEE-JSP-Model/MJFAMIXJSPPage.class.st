@@ -11,7 +11,7 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXJSPPage class >> annotation [
 	<MSEClass: #MJFAMIXJSPPage super: #FAMIXNamedEntity>
-	<package: #'Moose-JEE-Model'>
+	<package: #'Moose-JEE-JSP-Model'>
 ]
 
 { #category : #accessing }
