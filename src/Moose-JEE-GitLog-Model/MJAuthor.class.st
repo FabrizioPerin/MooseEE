@@ -8,6 +8,13 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+MJAuthor class >> annotation [
+	<MSEClass: #MJAuthor super: #MooseEntity>
+	<package: #'Moose-JEE-GitLog-Model'>
+	^self
+]
+
+{ #category : #'as yet unclassified' }
 MJAuthor class >> named: aString [
 	^self new name: aString
 ]

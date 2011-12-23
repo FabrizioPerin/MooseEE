@@ -7,6 +7,13 @@ Class {
 	#category : #'Moose-JEE-GitLog-Model'
 }
 
+{ #category : #'as yet unclassified' }
+MJBlameFilesVersion class >> annotation [
+	<MSEClass: #MJBlameFilesVersion super: #MJAbstractGroup>
+	<package: #'Moose-JEE-GitLog-Model'>
+	^self
+]
+
 { #category : #accessing }
 MJBlameFilesVersion >> versionNumber [
 	^ versionNumber

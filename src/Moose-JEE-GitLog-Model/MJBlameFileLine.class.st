@@ -11,6 +11,13 @@ Class {
 	#category : #'Moose-JEE-GitLog-Model'
 }
 
+{ #category : #'as yet unclassified' }
+MJBlameFileLine class >> annotation [
+	<MSEClass: #MJBlameFileLine super: #MooseEntity>
+	<package: #'Moose-JEE-GitLog-Model'>
+	^self
+]
+
 { #category : #accessing }
 MJBlameFileLine >> author [
 	^ author

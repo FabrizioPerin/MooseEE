@@ -9,6 +9,13 @@ Class {
 	#category : #'Moose-JEE-GitLog-Model'
 }
 
+{ #category : #'as yet unclassified' }
+MJBlameFile class >> annotation [
+	<MSEClass: #MJBlameFile super: #FAMIXFile>
+	<package: #'Moose-JEE-GitLog-Model'>
+	^self
+]
+
 { #category : #accessing }
 MJBlameFile >> addAssociatedClass: aMJBlameClassAssociation [
 	^self associatedClass add: aMJBlameClassAssociation 
