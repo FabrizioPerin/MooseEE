@@ -10,13 +10,18 @@ Class {
 }
 
 { #category : #accessing }
+MJCCPClones >> addClasses: aCloneClasses [
+	classes addLast: aCloneClasses
+]
+
+{ #category : #accessing }
 MJCCPClones >> classes [
 	^ classes
 ]
 
 { #category : #accessing }
-MJCCPClones >> classes: anObject [
-	classes := anObject
+MJCCPClones >> classes: aCollectionOfCloneClasses [
+	classes := aCollectionOfCloneClasses
 ]
 
 { #category : #accessing }
