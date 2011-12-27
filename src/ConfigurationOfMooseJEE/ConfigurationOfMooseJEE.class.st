@@ -461,6 +461,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-GitLog-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-CCProject-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 						
 			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
@@ -486,6 +488,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Wizard' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'Merlin'];
+			package: 'Moose-JEE-CCProject-XMLElements' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			
 			"Tests"
@@ -529,7 +533,16 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-DesignPattern' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-DesignPattern')].
+				spec requires: #('Moose-JEE-DesignPattern')];
+			package: 'Moose-JEE-CCProject-Tests-Model' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-CCProject-Model')];
+			package: 'Moose-JEE-CCProject-Tests-Importer' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-CCProject-Model')];
+			package: 'Moose-JEE-CCProject-Tests-XMLElements' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-CCProject-XMLElements')].
 			
 		
 		spec group: 'Tests' with: #( 
@@ -544,7 +557,9 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			'Moose-JEE-Tests-Importers-GitLog'
 			'Moose-JEE-Tests-EJBDraftObjs'
 			'Moose-JEE-Tests-Algos'
-			'Moose-JEE-Tests-DesignPattern').
+			'Moose-JEE-Tests-DesignPattern'
+			'Moose-JEE-CCProject-Tests-Model'
+			'Moose-JEE-CCProject-Tests-XMLElements').
 
 	]
 ]
