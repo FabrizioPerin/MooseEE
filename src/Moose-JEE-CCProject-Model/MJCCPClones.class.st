@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #accessing }
-MJCCPClones >> addClasses: aCloneClasses [
+MJCCPClones >> addToClasses: aCloneClasses [
 	classes addLast: aCloneClasses
 ]
 
@@ -32,6 +32,15 @@ MJCCPClones >> classinfo [
 { #category : #accessing }
 MJCCPClones >> classinfo: anObject [
 	classinfo := anObject
+]
+
+{ #category : #accessing }
+MJCCPClones >> initialize [
+	
+	systeminfo := nil.
+	classinfo := nil. 
+	
+	classes := OrderedCollection new.
 ]
 
 { #category : #accessing }

@@ -3,7 +3,11 @@ Class {
 	#superclass : #FAMIXAssociation,
 	#instVars : [
 		'cloneClass',
-		'codeClass'
+		'codeClass',
+		'startLine',
+		'endLine',
+		'pcid',
+		'file'
 	],
 	#category : #'Moose-JEE-CCProject-Model'
 }
@@ -26,4 +30,44 @@ MJCCPSource >> codeClass [
 { #category : #accessing }
 MJCCPSource >> codeClass: anObject [
 	codeClass := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> endLine [
+	^ endLine
+]
+
+{ #category : #accessing }
+MJCCPSource >> endLine: anObject [
+	endLine := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> file [
+	^ file
+]
+
+{ #category : #accessing }
+MJCCPSource >> file: anObject [
+	file := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> pcid [
+	^ pcid
+]
+
+{ #category : #accessing }
+MJCCPSource >> pcid: anObject [
+	pcid := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> startLine [
+	^ startLine
+]
+
+{ #category : #accessing }
+MJCCPSource >> startLine: anObject [
+	startLine := anObject
 ]
