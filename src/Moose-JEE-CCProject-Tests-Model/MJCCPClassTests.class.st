@@ -1,51 +1,73 @@
 Class {
 	#name : #MJCCPClassTests,
-	#superclass : #FAMIXEntity,
+	#superclass : #TestCase,
 	#instVars : [
-		'id',
-		'numberOfLines',
-		'numberOfFragments',
-		'sources'
+		'class'
 	],
 	#category : #'Moose-JEE-CCProject-Tests-Model'
 }
 
 { #category : #accessing }
-MJCCPClassTests >> id [
-	^ id
+MJCCPClassTests >> setUp [
+	
+	class := MJCCPClass new.
+	
 ]
 
 { #category : #accessing }
-MJCCPClassTests >> id: anObject [
-	id := anObject
+MJCCPClassTests >> testId [
+
+	self assert: class id equals: nil.
+	
+	class id: 5.
+	
+	self assert: class id equals: 5.
+	
+	
+
+
 ]
 
 { #category : #accessing }
-MJCCPClassTests >> numberOfFragments [
-	^ numberOfFragments
+MJCCPClassTests >> testMJCCPClassCreation [
+	
+	self assert: (class isMemberOf: MJCCPClass).
+	
+	self assert: class id equals: nil.
+	self assert: class numberOfLines equals: nil.
+	self assert: class numberOfFragments equals: nil.
+	self assert: class sources equals: nil.
 ]
 
 { #category : #accessing }
-MJCCPClassTests >> numberOfFragments: anObject [
-	numberOfFragments := anObject
+MJCCPClassTests >> testNumberOfFragments [
+	
+	self assert: class numberOfFragments equals: nil.
+	
+	class numberOfFragments: 12.
+	
+	self assert: class numberOfFragments equals: 12.
+	
+
 ]
 
 { #category : #accessing }
-MJCCPClassTests >> numberOfLines [
-	^ numberOfLines
+MJCCPClassTests >> testNumberOfLines [
+
+	self assert: class numberOfLines equals: nil.
+	
+	class numberOfLines: 100.
+	
+	self assert: class numberOfLines equals: 100.
+	
 ]
 
 { #category : #accessing }
-MJCCPClassTests >> numberOfLines: anObject [
-	numberOfLines := anObject
-]
-
-{ #category : #accessing }
-MJCCPClassTests >> sources [
-	^ sources
-]
-
-{ #category : #accessing }
-MJCCPClassTests >> sources: anObject [
-	sources := anObject
+MJCCPClassTests >> testSources [
+	self assert: class sources equals: nil.
+	
+	class sources: 'TestClass.java'.
+	
+	self assert: class sources equals: 'TestClass.java'.
+	
 ]
