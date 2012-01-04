@@ -12,7 +12,7 @@ MJCCPSourceNode >> createElementFrom: aMooseModel [
 	
 	source endLine: self endLine.
 	source file: self file.
-	source id: self id.
+	source pcid: self id.
 	source startLine: self startLine.
 	
 	^source
