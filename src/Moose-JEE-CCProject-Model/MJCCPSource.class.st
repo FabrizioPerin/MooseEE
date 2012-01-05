@@ -14,12 +14,19 @@ Class {
 
 { #category : #accessing }
 MJCCPSource >> cloneClass [
+	<MSEProperty: #cloneClass type: #MJCCPClass opposite: #sources>
+	<MSEComment: 'The clone class representing a chunk of classes containing clones with one another'>
+	
 	^ cloneClass
 ]
 
 { #category : #accessing }
-MJCCPSource >> cloneClass: anObject [
-	cloneClass := anObject
+MJCCPSource >> cloneClass: aMJCCPClass [
+	cloneClass := FMMultivalueLink 
+						on: self
+						update: #sources
+						from: self cloneClass  
+						to: aMJCCPClass
 ]
 
 { #category : #accessing }
@@ -50,6 +57,14 @@ MJCCPSource >> file [
 { #category : #accessing }
 MJCCPSource >> file: anObject [
 	file := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> initialize [
+	super initialize.
+	
+	cloneClass := nil.
+	codeClass := nil.
 ]
 
 { #category : #accessing }

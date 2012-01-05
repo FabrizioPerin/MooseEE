@@ -11,6 +11,16 @@ Class {
 }
 
 { #category : #accessing }
+MJCCPClass >> addAllSources: aCollectionOfMJCCPSource [
+	self sources addAll: aCollectionOfMJCCPSource. 
+]
+
+{ #category : #accessing }
+MJCCPClass >> addSource: aMJCCPSource [
+	self sources add: aMJCCPSource. 
+]
+
+{ #category : #accessing }
 MJCCPClass >> id [
 	^ id
 ]
@@ -18,6 +28,13 @@ MJCCPClass >> id [
 { #category : #accessing }
 MJCCPClass >> id: anObject [
 	id := anObject
+]
+
+{ #category : #accessing }
+MJCCPClass >> initialize [
+	super initialize.
+ 
+	sources := FMMultivalueLink on: self opposite: #cloneClass:.
 ]
 
 { #category : #accessing }
@@ -42,10 +59,8 @@ MJCCPClass >> numberOfLines: anObject [
 
 { #category : #accessing }
 MJCCPClass >> sources [
+	<MSEProperty: #sources type: #MJCCPSource opposite: #cloneClass> <multivalued> <derived>
+	<MSEComment: 'Contains all peaces of a clone class'>
+	
 	^ sources
-]
-
-{ #category : #accessing }
-MJCCPClass >> sources: anObject [
-	sources := anObject
 ]

@@ -36,6 +36,7 @@ MJCCPClones >> classinfo: anObject [
 
 { #category : #accessing }
 MJCCPClones >> initialize [
+	super initialize.
 	
 	systeminfo := nil.
 	classinfo := nil. 
