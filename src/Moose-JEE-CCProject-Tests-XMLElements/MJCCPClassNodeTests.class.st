@@ -31,6 +31,36 @@ MJCCPClassNodeTests >> testClassElementCreation [
 ]
 
 { #category : #'as yet unclassified' }
+MJCCPClassNodeTests >> testClassElementResolving [
+
+	| parser factory doc mm result |
+	parser := XMLDOMParser on: MJCCPSampleReports smallReport readStream.
+	
+	factory := XMLPluggableElementFactory new
+				elementClass: MJCCPAbstractReportNode;
+				handleElement: 'class' withClass: MJCCPClassNode;
+				handleElement: 'source' withClass: MJCCPSourceNode.
+
+	parser nodeFactory: factory. 
+	
+	doc := parser parseDocument.
+	root := doc root.
+
+	mm := MooseModel new.
+		
+	result := (root allElements select: [:each | each isMemberOf: MJCCPClassNode]) collect: [:each | each createElementFrom: mm].
+	
+	self assert: (result isMemberOf: XMLOrderedList).
+	self assert: result size equals: 5.
+	self assert: (result first isMemberOf: MJCCPClass).
+	self assert: (result first sources isMemberOf: FMMultivalueLink). 
+	self assert: result first sources size equals: 2.
+	self assert: (result first sources allSatisfy: [:class | class isMemberOf: MJCCPSource ]).
+	self assert: result first sources first cloneClass equals: result first. 		
+
+]
+
+{ #category : #'as yet unclassified' }
 MJCCPClassNodeTests >> testId [
 	| classes |
 

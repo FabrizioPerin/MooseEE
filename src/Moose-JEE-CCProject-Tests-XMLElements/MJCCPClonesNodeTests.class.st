@@ -106,9 +106,38 @@ MJCCPClonesNodeTests >> testClonesElementCreation [
 
 { #category : #'as yet unclassified' }
 MJCCPClonesNodeTests >> testClonesElementResolving [
+	| mm result parser factory doc |
 
 	self assert: (root allElements select: [:each | each isMemberOf: MJCCPClonesNode]) size equals: 1.
 	self assert: (root allElements reject: [:each | each isMemberOf: MJCCPClonesNode]) size equals: 24.
+
+	parser := XMLDOMParser on: MJCCPSampleReports smallReport readStream.
+	
+	factory := XMLPluggableElementFactory new
+				elementClass: MJCCPAbstractReportNode;
+				handleElement: 'classinfo' withClass: MJCCPClassInfoNode;
+				handleElement: 'class' withClass: MJCCPClassNode;
+				handleElement: 'clones' withClass: MJCCPClonesNode;
+				handleElement: 'systeminfo' withClass: MJCCPSystemInfoNode;
+				handleElement: 'source' withClass: MJCCPSourceNode.
+
+	parser nodeFactory: factory. 
+	
+	doc := parser parseDocument.
+	root := doc root.
+
+	mm := MooseModel new.
+		
+	result := (root allElements select: [:each | each isMemberOf: MJCCPClonesNode]) collect: [:each | each createElementFrom: mm].
+	
+	self assert: (result isMemberOf: XMLOrderedList).
+	self assert: result size equals: 1.
+	self assert: (result first isMemberOf: MJCCPClones).
+	self assert: (result first systeminfo isMemberOf: MJCCPSysteminfo).
+	self assert: (result first classinfo isMemberOf: MJCCPClassinfo).
+	self assert: (result first classes isMemberOf: XMLOrderedList).
+	self assert: result first classes size equals: 5.
+	self assert: (result first classes allSatisfy: [:class | class isMemberOf: MJCCPClass ]).
 ]
 
 { #category : #'as yet unclassified' }
