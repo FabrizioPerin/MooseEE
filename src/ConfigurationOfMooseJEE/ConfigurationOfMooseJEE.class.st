@@ -534,15 +534,17 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Tests-DesignPattern' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-DesignPattern')];
+			package: 'Moose-JEE-CCProject-Tests-Resources' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-CCProject-Tests-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-CCProject-Model')];
+				spec requires: #('Moose-JEE-CCProject-Model' 'Moose-JEE-CCProject-Tests-Resources')];
 			package: 'Moose-JEE-CCProject-Tests-Importer' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-CCProject-Model')];
+				spec requires: #('Moose-JEE-CCProject-Model' 'Moose-JEE-CCProject-Tests-Resources')];
 			package: 'Moose-JEE-CCProject-Tests-XMLElements' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-CCProject-XMLElements')].
+				spec requires: #('Moose-JEE-CCProject-XMLElements' 'Moose-JEE-CCProject-Tests-Resources')].
 			
 		
 		spec group: 'Tests' with: #( 
@@ -559,7 +561,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			'Moose-JEE-Tests-Algos'
 			'Moose-JEE-Tests-DesignPattern'
 			'Moose-JEE-CCProject-Tests-Model'
-			'Moose-JEE-CCProject-Tests-XMLElements').
+			'Moose-JEE-CCProject-Tests-XMLElements'
+			'Moose-JEE-CCProject-Tests-Importer').
 
 	]
 ]
