@@ -10,10 +10,10 @@ MJCCPSourceNode >> createElementFrom: aMooseModel [
 	
 	source := MJCCPSource new.
 	
-	source endLine: self endLine.
+	source endLine: self endLine asNumber.
 	source file: self file.
-	source pcid: self id.
-	source startLine: self startLine.
+	source pcid: self id asNumber.
+	source startLine: self startLine asNumber.
 	
 	^source
 	

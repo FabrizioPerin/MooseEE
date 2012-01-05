@@ -6,7 +6,17 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJCCPClassNode >> createElementFrom: aMooseModel [
-	self subclassResponsibility.
+	| class sources |
+	
+	class := MJCCPClass new.
+	
+	class id: self id asNumber.
+	class numberOfFragments: self numberOfFragments asNumber.
+	class numberOfLines: self numberOfLines asNumber.
+	
+	(self sources collect: [:each | each createElementFrom: aMooseModel]) do: [:source | source cloneClass: class ].
+		
+	^class
 ]
 
 { #category : #'as yet unclassified' }
@@ -22,4 +32,9 @@ MJCCPClassNode >> numberOfFragments [
 { #category : #'as yet unclassified' }
 MJCCPClassNode >> numberOfLines [
 	^self attributes at: 'nlines' ifAbsent: [nil].
+]
+
+{ #category : #'as yet unclassified' }
+MJCCPClassNode >> sources [
+	^self elements select: [:each | each name = 'source'].
 ]
