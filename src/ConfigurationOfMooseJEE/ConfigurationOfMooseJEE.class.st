@@ -474,6 +474,9 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			package: 'Moose-JEE-Importers-GitLog' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: 'PetitGitLogParser for MooseJEE'];
+			package: 'Moose-JEE-CCProject-Importer' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'PetitGitLogParser for MooseJEE'];
 			
 			"Other utils"
 			package: 'Moose-JEE-Reports' with: [
