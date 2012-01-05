@@ -36,7 +36,8 @@ MJCCPClassTests >> testMJCCPClassCreation [
 	self assert: class id equals: nil.
 	self assert: class numberOfLines equals: nil.
 	self assert: class numberOfFragments equals: nil.
-	self assert: class sources equals: nil.
+	self assert: (class sources isMemberOf: FMMultivalueLink).
+	self assert: class sources isEmpty.
 ]
 
 { #category : #accessing }
@@ -64,10 +65,15 @@ MJCCPClassTests >> testNumberOfLines [
 
 { #category : #accessing }
 MJCCPClassTests >> testSources [
-	self assert: class sources equals: nil.
+	| source |
+	self assert: (class sources isMemberOf: FMMultivalueLink).
+	self assert: class sources isEmpty.
 	
-	class sources: 'TestClass.java'.
+	source := MJCCPSource new.
 	
-	self assert: class sources equals: 'TestClass.java'.
+	class addSource: source.
+	
+	self assert: class sources size equals: 1.
+	self assert: class sources first equals: source.
 	
 ]

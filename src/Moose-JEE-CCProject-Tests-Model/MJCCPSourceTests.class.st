@@ -15,6 +15,27 @@ MJCCPSourceTests >> setUp [
 ]
 
 { #category : #accessing }
+MJCCPSourceTests >> testCloneClass [
+	| cc |
+	
+	self assert: source cloneClass equals: nil.
+	
+	cc := MJCCPClass new.
+	
+	source cloneClass: cc.
+	
+	self assert: source cloneClass equals: cc.
+]
+
+{ #category : #accessing }
+MJCCPSourceTests >> testCodeClass [
+
+	self assert: source cloneClass equals: nil.
+	
+	MJCCPClass
+]
+
+{ #category : #accessing }
 MJCCPSourceTests >> testEndLine [
 
 	self assert: source endLine equals: nil.
@@ -56,6 +77,9 @@ MJCCPSourceTests >> testMJCCPSourceCreation [
 	self assert: source file equals: nil.
 	self assert: source pcid equals: nil.
 	self assert: source startLine equals: nil.
+	self assert: source cloneClass equals: nil.
+	self assert: source codeClass equals: nil.
+	
 	
 ]
 
