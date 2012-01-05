@@ -15,6 +15,6963 @@ MJCCPSampleReports class >> fullReportWithCode [
 <systeminfo  system="org" granularity="blocks" threshold="30%" minlines="5" maxlines="500"/>
 <classinfo npcs="51492" nclones="7913" nfragments="8817" npairs="7764021" nclasses="904"/>
 <runinfo ncompares="33081912" cputime="18970000"/>
+
+<class id="1" nlines="166" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MSequence.java" startline="643" endline="892" pcid="26812"><![CDATA[
+	{
+		if (C_DocType_ID == 0)
+		{
+			s_log.severe ("C_DocType_ID=0");
+			return null;
+		}
+
+		MDocType dt = MDocType.get (Env.getCtx(), C_DocType_ID);	//	wrong for SERVER, but r/o
+		if (dt != null && !dt.isDocNoControlled())
+		{
+			s_log.finer("DocType_ID=" + C_DocType_ID + " Not DocNo controlled");
+			return null;
+		}
+		if (definite && ! dt.isOverwriteSeqOnComplete()) {
+			s_log.finer("DocType_ID=" + C_DocType_ID + " Not Sequence Overwrite on Complete");
+			return null;
+		}
+		if (dt == null || dt.getDocNoSequence_ID() == 0)
+		{
+			s_log.warning ("No Sequence for DocType - " + dt);
+			return null;
+		}
+		if (definite && dt.getDefiniteSequence_ID() == 0)
+		{
+			s_log.warning ("No Definite Sequence for DocType - " + dt);
+			return null;
+		}
+
+		//	Check AdempiereSys
+		boolean adempiereSys = Ini.isPropertyBool(Ini.P_ADEMPIERESYS);
+		if (CLogMgt.isLevel(LOGLEVEL))
+			s_log.log(LOGLEVEL, "DocType_ID=" + C_DocType_ID + " [" + trxName + "]");
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		boolean isStartNewYear = false;
+		String dateColumn = null;
+
+		if (!adempiereSys)
+		{
+			// Get the Start New Year & Sequence Type
+			String startNewYearSQL = "SELECT StartNewYear, DateColumn FROM AD_Sequence "
+					+ "WHERE AD_Sequence_ID = ? AND IsActive = ''Y'' AND IsTableID = ''N'' AND IsAutoSequence=''Y''";
+			try {
+				pstmt = DB.prepareStatement(startNewYearSQL, trxName);
+				pstmt.setInt(1, definite ? dt.getDefiniteSequence_ID() : dt
+						.getDocNoSequence_ID());
+				rs = pstmt.executeQuery();
+				if (rs.next()) {
+					isStartNewYear = "Y".equals(rs.getString(1));
+					dateColumn = rs.getString(2);
+				}
+			} catch (Exception e) {
+				s_log.log(Level.SEVERE, "(Table) [" + trxName + "]", e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+			}
+		}
+
+		String selectSQL = null;
+		if (DB.isOracle() == false)
+		{
+			if (isStartNewYear)
+			{
+				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, s.Prefix, s.Suffix, s.DecimalPattern, s.AD_Client_ID, s.AD_Sequence_ID "
+						+ "FROM AD_Sequence_No y, AD_Sequence s "
+						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
+						+ "AND s.AD_Sequence_ID = ? "
+						+ "AND y.CalendarYear = ? "
+						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' "
+						+ "FOR UPDATE OF y";
+			}
+			else
+			{
+				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Client_ID, AD_Sequence_ID "
+						+ "FROM AD_Sequence "
+						+ "WHERE AD_Sequence_ID = ? "
+						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' "
+						+ "FOR UPDATE OF AD_Sequence";
+			}
+			USE_PROCEDURE=false;
+		}
+		else
+		{
+			if (isStartNewYear) {
+				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, s.Prefix, s.Suffix, s.DecimalPattern, s.AD_Client_ID, s.AD_Sequence_ID "
+						+ "FROM AD_Sequence_No y, AD_Sequence s "
+						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
+						+ "AND s.AD_Sequence_ID = ? "
+						+ "AND y.CalendarYear = ? "
+						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' ";
+			} else {
+				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Client_ID, AD_Sequence_ID "
+						+ "FROM AD_Sequence "
+						+ "WHERE AD_Sequence_ID = ? "
+						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' ";
+			}
+			USE_PROCEDURE = true;
+		}
+		Connection conn = null;
+		Trx trx = trxName == null ? null : Trx.get(trxName, true);
+		//
+		int AD_Sequence_ID = 0;
+		int incrementNo = 0;
+		int next = -1;
+		String prefix = "";
+		String suffix = "";
+		String decimalPattern = "";
+		String calendarYear = "";
+		try
+		{
+			if (trx != null)
+				conn = trx.getConnection();
+			else
+				conn = DB.getConnectionID();
+			//	Error
+			if (conn == null)
+				return null;
+
+			if (isStartNewYear)
+			{
+				if (po != null && dateColumn != null && dateColumn.length() > 0)
+				{
+					Date docDate = (Date)po.get_Value(dateColumn);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+					calendarYear = sdf.format(docDate);
+				}
+				else
+				{
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+					calendarYear = sdf.format(new Date());
+				}
+			}
+
+			pstmt = conn.prepareStatement(selectSQL,
+				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			if (definite)
+				pstmt.setInt(1, dt.getDefiniteSequence_ID());
+			else
+				pstmt.setInt(1, dt.getDocNoSequence_ID());
+			if (isStartNewYear)
+				pstmt.setString(2, calendarYear);
+
+			//
+			if (!USE_PROCEDURE && DB.getDatabase().isQueryTimeoutSupported())
+				pstmt.setQueryTimeout(QUERY_TIME_OUT);
+			rs = pstmt.executeQuery();
+		//	s_log.fine("AC=" + conn.getAutoCommit() + " -Iso=" + conn.getTransactionIsolation()
+		//		+ " - Type=" + pstmt.getResultSetType() + " - Concur=" + pstmt.getResultSetConcurrency());
+			if (rs.next())
+			{
+				incrementNo = rs.getInt(3);
+				prefix = rs.getString(4);
+				suffix = rs.getString(5);
+				decimalPattern = rs.getString(6);
+				int AD_Client_ID = rs.getInt(7);
+				if (adempiereSys && AD_Client_ID > 11)
+					adempiereSys = false;
+				AD_Sequence_ID = rs.getInt(8);
+
+				if (USE_PROCEDURE)
+				{
+					next = isStartNewYear
+						? nextIDByYear(conn, AD_Sequence_ID, incrementNo, calendarYear)
+						: nextID(conn, AD_Sequence_ID, adempiereSys);
+				}
+				else
+				{
+					PreparedStatement updateSQL = null;
+					try
+					{
+						if (adempiereSys) {
+							updateSQL = conn
+									.prepareStatement("UPDATE AD_Sequence SET CurrentNextSys = CurrentNextSys + ? WHERE AD_Sequence_ID = ?");
+							next = rs.getInt(2);
+						} else {
+							String sql = isStartNewYear
+								? "UPDATE AD_Sequence_No SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ? AND CalendarYear = ?"
+								: "UPDATE AD_Sequence SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ?";
+							updateSQL = conn.prepareStatement(sql);
+							next = rs.getInt(1);
+						}
+						updateSQL.setInt(1, incrementNo);
+						updateSQL.setInt(2, AD_Sequence_ID);
+						if (isStartNewYear)
+							updateSQL.setString(3, calendarYear);
+						updateSQL.executeUpdate();
+					}
+					finally
+					{
+						DB.close(updateSQL);
+					}
+				}
+			}
+			else
+			{
+				s_log.warning ("(DocType)- no record found - " + dt);
+				next = -2;
+			}
+			//	Commit
+			if (trx == null)
+			{
+				conn.commit();
+			}
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, "(DocType) [" + trxName + "]", e);
+			if (DBException.isTimeout(e))
+				throw new AdempiereException("GenerateDocumentNoTimeOut", e);
+			else
+				throw new AdempiereException("GenerateDocumentNoError", e);
+		}
+		finally
+		{
+			//	Finish
+			try
+			{
+				DB.close(rs, pstmt);
+				if (trx == null && conn != null) {
+					conn.close();
+					conn = null;
+				}
+			}
+			catch (Exception e)
+			{
+				s_log.log(Level.SEVERE, "(DocType) - finish", e);
+			}
+		}
+		//	Error
+		if (next < 0)
+			return null;
+
+		//	create DocumentNo
+		StringBuffer doc = new StringBuffer();
+		if (prefix != null && prefix.length() > 0)
+			doc.append(Env.parseVariable(prefix, po, trxName, false));
+		if (decimalPattern != null && decimalPattern.length() > 0)
+			doc.append(new DecimalFormat(decimalPattern).format(next));
+		else
+			doc.append(next);
+		if (suffix != null && suffix.length() > 0)
+			doc.append(Env.parseVariable(suffix, po, trxName, false));
+		String documentNo = doc.toString();
+		s_log.finer (documentNo + " (" + incrementNo + ")"
+				+ " - C_DocType_ID=" + C_DocType_ID + " [" + trx + "]");
+		return documentNo;
+	}	//	getDocumentNo
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MSequence.java" startline="372" endline="608" pcid="26780"><![CDATA[
+	{
+		if (TableName == null || TableName.length() == 0)
+			throw new IllegalArgumentException("TableName missing");
+
+		//	Check AdempiereSys
+		boolean adempiereSys = Ini.isPropertyBool(Ini.P_ADEMPIERESYS);
+		if (adempiereSys && AD_Client_ID > 11)
+			adempiereSys = false;
+		//
+		if (CLogMgt.isLevel(LOGLEVEL))
+			s_log.log(LOGLEVEL, TableName + " - AdempiereSys=" + adempiereSys  + " [" + trxName + "]");
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		boolean isStartNewYear = false;
+		String dateColumn = null;
+
+		if (!adempiereSys)
+		{
+			// Get the Start New Year flag
+			String startNewYearSQL = "SELECT StartNewYear, DateColumn FROM AD_Sequence "
+					+ "WHERE Name = ? AND IsActive = ''Y'' AND IsTableID = ''N'' AND IsAutoSequence=''Y'' AND AD_Client_ID = ?";
+			try
+			{
+				pstmt = DB.prepareStatement(startNewYearSQL, trxName);
+				pstmt.setString(1, PREFIX_DOCSEQ + TableName);
+				pstmt.setInt(2, AD_Client_ID);
+				rs = pstmt.executeQuery();
+				if (rs.next()) {
+					isStartNewYear = "Y".equals(rs.getString(1));
+					dateColumn = rs.getString(2);
+				}
+			}
+			catch (Exception e)
+			{
+				s_log.log(Level.SEVERE, "(Table) [" + trxName + "]", e);
+			}
+			finally
+			{
+				DB.close(rs, pstmt);
+			}
+		}
+
+
+		String selectSQL = null;
+		if (DB.isOracle() == false)
+		{
+			if (isStartNewYear) {
+				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, s.Prefix, s.Suffix, s.DecimalPattern, s.AD_Sequence_ID "
+						+ "FROM AD_Sequence_No y, AD_Sequence s "
+						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
+						+ "AND s.Name = ? "
+						+ "AND s.AD_Client_ID = ? "
+						+ "AND y.CalendarYear = ? "
+						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' "
+						+ "ORDER BY s.AD_Client_ID DESC "
+						+ "FOR UPDATE OF y";
+			} else {
+				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Sequence_ID "
+						+ "FROM AD_Sequence "
+						+ "WHERE Name = ? "
+						+ "AND AD_Client_ID = ? "
+						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' "
+						+ "ORDER BY AD_Client_ID DESC "
+						+ "FOR UPDATE OF AD_Sequence";
+			}
+			USE_PROCEDURE=false;
+		}
+		else
+		{
+			if (isStartNewYear) {
+				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, Prefix, Suffix, DecimalPattern, s.AD_Sequence_ID "
+						+ "FROM AD_Sequence_No y, AD_Sequence s "
+						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
+						+ "AND s.Name = ? "
+						+ "AND s.AD_Client_ID = ? "
+						+ "AND y.CalendarYear = ? "
+						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' "
+						+ "ORDER BY s.AD_Client_ID DESC";
+			} else {
+				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Sequence_ID "
+						+ "FROM AD_Sequence "
+						+ "WHERE Name = ? "
+						+ "AND AD_Client_ID = ? "
+						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' "
+						+ "ORDER BY AD_Client_ID DESC";
+			}
+			USE_PROCEDURE = true;
+		}
+		Connection conn = null;
+		Trx trx = trxName == null ? null : Trx.get(trxName, true);
+		//
+		int AD_Sequence_ID = 0;
+		int incrementNo = 0;
+		int next = -1;
+		String prefix = "";
+		String suffix = "";
+		String decimalPattern = "";
+		String calendarYear = "";
+		try
+		{
+			if (trx != null)
+				conn = trx.getConnection();
+			else
+				conn = DB.getConnectionID();
+			//	Error
+			if (conn == null)
+				return null;
+
+			if (isStartNewYear)
+			{
+				if (po != null && dateColumn != null && dateColumn.length() > 0)
+				{
+					Date docDate = (Date)po.get_Value(dateColumn);
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+					calendarYear = sdf.format(docDate);
+				}
+				else
+				{
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
+					calendarYear = sdf.format(new Date());
+				}
+			}
+
+			//
+			pstmt = conn.prepareStatement(selectSQL,
+				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+			pstmt.setString(1, PREFIX_DOCSEQ + TableName);
+			pstmt.setInt(2, AD_Client_ID);
+			if (isStartNewYear)
+				pstmt.setString(3, calendarYear);
+
+			//
+			if (!USE_PROCEDURE && DB.getDatabase().isQueryTimeoutSupported())
+				pstmt.setQueryTimeout(QUERY_TIME_OUT);
+			rs = pstmt.executeQuery();
+		//	s_log.fine("AC=" + conn.getAutoCommit() + " -Iso=" + conn.getTransactionIsolation()
+		//		+ " - Type=" + pstmt.getResultSetType() + " - Concur=" + pstmt.getResultSetConcurrency());
+			if (rs.next())
+			{
+				AD_Sequence_ID = rs.getInt(7);
+				prefix = rs.getString(4);
+				suffix = rs.getString(5);
+				decimalPattern = rs.getString(6);
+				incrementNo = rs.getInt(3);
+				if (USE_PROCEDURE)
+				{
+					next = isStartNewYear
+						? nextIDByYear(conn, AD_Sequence_ID, incrementNo, calendarYear)
+						: nextID(conn, AD_Sequence_ID, adempiereSys);
+				}
+				else
+				{
+					PreparedStatement updateSQL = null;
+					try
+					{
+						if (adempiereSys) {
+							updateSQL = conn
+									.prepareStatement("UPDATE AD_Sequence SET CurrentNextSys = CurrentNextSys + ? WHERE AD_Sequence_ID = ?");
+							next = rs.getInt(2);
+						} else {
+							String sql = isStartNewYear
+								? "UPDATE AD_Sequence_No SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ? AND CalendarYear = ?"
+								: "UPDATE AD_Sequence SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ?";
+							updateSQL = conn
+									.prepareStatement(sql);
+							next = rs.getInt(1);
+						}
+						updateSQL.setInt(1, incrementNo);
+						updateSQL.setInt(2, AD_Sequence_ID);
+						if (isStartNewYear)
+							updateSQL.setString(3, calendarYear);
+						updateSQL.executeUpdate();
+					}
+					finally
+					{
+						DB.close(updateSQL);
+					}
+				}
+			}
+			else
+			{
+				s_log.warning ("(Table) - no record found - " + TableName);
+				MSequence seq = new MSequence (Env.getCtx(), AD_Client_ID, TableName, null);
+				next = seq.getNextID();
+				seq.save();
+			}
+			//	Commit
+			if (trx == null)
+			{
+				conn.commit();
+			}
+		}
+		catch (Exception e)
+		{
+			s_log.log(Level.SEVERE, "(Table) [" + trxName + "]", e);
+			if (DBException.isTimeout(e))
+				throw new AdempiereException("GenerateDocumentNoTimeOut", e);
+			else
+				throw new AdempiereException("GenerateDocumentNoError", e);
+		}
+		finally
+		{
+			//Finish
+			DB.close(rs, pstmt);
+			try
+			{
+				if (trx == null && conn != null) {
+					conn.close();
+					conn = null;
+				}
+			}
+			catch (Exception e)
+			{
+				s_log.log(Level.SEVERE, "(Table) - finish", e);
+			}
+		}
+
+		//	Error
+		if (next < 0)
+			return null;
+
+		//	create DocumentNo
+		StringBuffer doc = new StringBuffer();
+		if (prefix != null && prefix.length() > 0)
+			doc.append(Env.parseVariable(prefix, po, trxName, false));
+		if (decimalPattern != null && decimalPattern.length() > 0)
+			doc.append(new DecimalFormat(decimalPattern).format(next));
+		else
+			doc.append(next);
+		if (suffix != null && suffix.length() > 0)
+			doc.append(Env.parseVariable(suffix, po, trxName, false));
+		String documentNo = doc.toString();
+		s_log.finer (documentNo + " (" + incrementNo + ")"
+				+ " - Table=" + TableName + " [" + trx + "]");
+		return documentNo;
+	}	//	getDocumentNo
+]]></source>
+</class>
+
+<class id="2" nlines="113" nfragments="3">
+<source file="/home/saeed/code/org/compiere/FA/Depreciation.java" startline="364" endline="493" pcid="47559"><![CDATA[
+	{		
+		  BigDecimal v_DB = new BigDecimal(0.0);		 
+		  BigDecimal v_Accum_Dep = new BigDecimal(0.0);
+		  BigDecimal v_SL = new BigDecimal(0.0);
+		  BigDecimal A_Period_Exp = new BigDecimal(0.0);
+		  double v_Var = 0.0;
+		  int v_counter = 0;
+		  double v_months = 0;
+		  int v_firstyr = 0;
+		  double v_monthadj = 0;
+		  BigDecimal v_adj = new BigDecimal(0.0);		  
+		  BigDecimal v_Base_Amount = new BigDecimal(0.0);
+		  BigDecimal v_Salvage_Amount = new BigDecimal(0.0);
+		  double v_Life_Periods = 0;
+		  double v_Life_Years = 0;
+		  String v_con_type = null;
+		 
+		  StringBuffer sqlB = new StringBuffer ("SELECT A.A_ASSET_COST, A.A_SALVAGE_VALUE, A.A_LIFE_PERIOD, A.A_ASSET_LIFE_YEARS, A.DATEACCT,"
+			+ " D.ASSETSERVICEDATE, C.CONVENTIONTYPE, A_DEPRECIATION_VARIABLE_PERC  "
+			+ " FROM A_DEPRECIATION_WORKFILE A, A_ASSET_ACCT B,A_ASSET D,A_DEPRECIATION_CONVENTION C "
+			+ " WHERE A.A_ASSET_ID = " + p_A_ASSET_ID  
+			+ " AND B.A_ASSET_ID = " + p_A_ASSET_ID
+			+ " AND A_PERIOD_POSTED+1 >= A_PERIOD_START AND A_PERIOD_POSTED+1 <= A_PERIOD_END "
+			+ " AND A.POSTINGTYPE = ''" +  p_POSTINGTYPE
+			+ "'' AND B.POSTINGTYPE = ''" +  p_POSTINGTYPE
+			+ "'' AND B.A_ASSET_ACCT_ID = " +  p_A_ASSET_ACCT_ID
+			+ " AND D.A_ASSET_ID = " + p_A_ASSET_ID
+			+ " AND B.A_DEPRECIATION_CONV_ID = C.A_DEPRECIATION_CONVENTION_ID");		
+		  //System.out.println("DBVAR: "+sqlB.toString());
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  ResultSet rs = null;
+		  try {				
+				rs = pstmt.executeQuery();
+				while (rs.next()){				  				 
+				  v_counter = 0;
+				  v_months = 0;
+				  v_firstyr = 0;
+				  v_monthadj = 0;
+				  v_Var=rs.getDouble("A_DEPRECIATION_VARIABLE_PERC");
+				  v_adj = new BigDecimal(0.0);				  
+				  v_Base_Amount = rs.getBigDecimal("A_ASSET_COST");
+				  v_Salvage_Amount = rs.getBigDecimal("A_SALVAGE_VALUE");
+				  v_Life_Periods = rs.getDouble("A_LIFE_PERIOD");
+				  v_Life_Years = rs.getDouble("A_ASSET_LIFE_YEARS");
+				  v_con_type = rs.getString("CONVENTIONTYPE");
+				  Calendar calendar = new GregorianCalendar();
+				  calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
+				  int AssetServiceDateYear = calendar.get(Calendar.YEAR);
+				  int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
+				  calendar.setTime(rs.getDate("DATEACCT"));
+				  int DateAcctYear = calendar.get(Calendar.YEAR);
+				  
+				  double v_period = DateAcctYear - AssetServiceDateYear;				  
+				    while (v_counter <= v_period){				      
+				        if(v_firstyr == 0){
+				        v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(v_Var/v_Life_Years));
+				        v_months = 12 - AssetServiceDateMonth +1;				        
+				        if (v_con_type.compareTo("HYCON") ==0){
+				          v_adj = new BigDecimal(Conventions.HYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));
+				          v_monthadj = 6-v_months;
+				        }
+				        else if (v_con_type.compareTo("FYCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.FYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,0,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));				          
+				          v_monthadj = 12-v_months;
+				        }
+				        else if (v_con_type.compareTo("DYCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.DYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));				          
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("MQCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.MQCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
+				          v_DB =(v_DB.divide(new BigDecimal(v_months),2, BigDecimal.ROUND_HALF_UP));				          				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("FMCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.FMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(new BigDecimal(v_months)));				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("MMCON") ==0){
+				        	
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(.5)).add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(v_months-1));
+				          v_adj = new BigDecimal(Conventions.MMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateMonth+1));
+				          v_DB = (v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP).multiply(v_adj));
+				          v_monthadj = 0;
+				        }
+				        v_firstyr = 1;
+				        }
+				     else{				    	
+				    	v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(v_Var/v_Life_Years));				        
+				        v_Accum_Dep = v_Accum_Dep.add(v_DB);
+				        v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				     }
+			        v_counter = v_counter+1;				     
+				    }
+				    A_Period_Exp = v_DB;					 
+					 if (p_SL ==1 ){   
+						 if (v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)>0 )					 
+							 v_SL = ((v_Base_Amount.subtract(v_Salvage_Amount).subtract(p_Accum_Dep)).divide(new BigDecimal(v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)),2, BigDecimal.ROUND_HALF_UP));				 
+		
+						 if (A_Period_Exp.compareTo(v_SL)==-1)				   
+						   A_Period_Exp = v_SL;				 
+						  
+						 if (v_Base_Amount.subtract(p_Accum_Dep).subtract(A_Period_Exp).compareTo(v_Salvage_Amount)==-1 )
+							  A_Period_Exp =v_Base_Amount.subtract(p_Accum_Dep).subtract(v_Salvage_Amount);
+					 }		
+				}
+				//System.out.println("DBVAR: "+A_Period_Exp);
+				return A_Period_Exp;
+			}
+		  catch (Exception e)
+		  {
+			  System.out.println("DBVAR: "+e);
+		  }
+		  finally
+		  {
+			  DB.close(rs, pstmt);
+			  rs = null; pstmt = null;
+		  }
+		  return A_Period_Exp;		
+	}
+]]></source>
+<source file="/home/saeed/code/org/compiere/FA/Depreciation.java" startline="232" endline="360" pcid="47544"><![CDATA[
+	{		
+		  BigDecimal v_DB = new BigDecimal(0.0);		 
+		  BigDecimal v_Accum_Dep = new BigDecimal(0.0);
+		  BigDecimal v_SL = new BigDecimal(0.0);
+		  BigDecimal A_Period_Exp = new BigDecimal(0.0);
+		  int v_counter = 0;
+		  double v_months = 0;
+		  int v_firstyr = 0;
+		  double v_monthadj = 0;
+		  BigDecimal v_adj = new BigDecimal(0.0);		  
+		  BigDecimal v_Base_Amount = new BigDecimal(0.0);
+		  BigDecimal v_Salvage_Amount = new BigDecimal(0.0);
+		  double v_Life_Periods = 0;
+		  double v_Life_Years = 0;
+		  String v_con_type = null;
+		 
+		  StringBuffer sqlB = new StringBuffer ("SELECT A.A_ASSET_COST, A.A_SALVAGE_VALUE, A.A_LIFE_PERIOD, A.A_ASSET_LIFE_YEARS, A.DATEACCT,"
+			+ " D.ASSETSERVICEDATE, C.CONVENTIONTYPE "
+			+ " FROM A_DEPRECIATION_WORKFILE A, A_ASSET_ACCT B,A_ASSET D,A_DEPRECIATION_CONVENTION C "
+			+ " WHERE A.A_ASSET_ID = " + p_A_ASSET_ID 
+			+ " AND B.A_ASSET_ID = " + p_A_ASSET_ID 
+			+ " AND A_PERIOD_POSTED+1 >= A_PERIOD_START AND A_PERIOD_POSTED+1 <= A_PERIOD_END "
+			+ " AND A.POSTINGTYPE = ''" +  p_POSTINGTYPE
+			+ "'' AND B.POSTINGTYPE = ''" +  p_POSTINGTYPE
+			+ "'' AND B.A_ASSET_ACCT_ID = " +  p_A_ASSET_ACCT_ID
+			+ " AND D.A_ASSET_ID = " + p_A_ASSET_ID
+			+ " AND B.A_DEPRECIATION_CONV_ID = C.A_DEPRECIATION_CONVENTION_ID");		
+		  //System.out.println("DB200: "+sqlB.toString());
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  ResultSet rs = null;
+		  try {				
+				rs = pstmt.executeQuery();
+				while (rs.next()){
+				  Calendar calendar = new GregorianCalendar();
+				  calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
+				  int AssetServiceDateYear = calendar.get(Calendar.YEAR);
+				  int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
+				  calendar.setTime(rs.getDate("DATEACCT"));
+				  int DateAcctYear = calendar.get(Calendar.YEAR);
+				  v_counter = 0;
+				  v_months = 0;
+				  v_firstyr = 0;
+				  v_monthadj = 0;
+				  v_adj = new BigDecimal(0.0);				  
+				  v_Base_Amount = rs.getBigDecimal("A_ASSET_COST");
+				  v_Salvage_Amount = rs.getBigDecimal("A_SALVAGE_VALUE");
+				  v_Life_Periods = rs.getDouble("A_LIFE_PERIOD");
+				  v_Life_Years = rs.getDouble("A_ASSET_LIFE_YEARS");
+				  v_con_type = rs.getString("CONVENTIONTYPE");
+				  
+				  double v_period = DateAcctYear - AssetServiceDateYear;				  
+				    while (v_counter <= v_period){				      
+				        if(v_firstyr == 0){
+				        v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(2/v_Life_Years));				        
+				        v_months = 12 - AssetServiceDateMonth +1;				        
+				        if (v_con_type.compareTo("HYCON") ==0){
+				          v_adj = new BigDecimal(Conventions.HYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));
+				          v_monthadj = 6-v_months;
+				        }
+				        else if (v_con_type.compareTo("FYCON") ==0){
+				        	
+				          v_adj = new BigDecimal(Conventions.FYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,0,AssetServiceDateYear));				          
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));				          
+				          v_monthadj = 12-v_months;
+				        }
+				        else if (v_con_type.compareTo("DYCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.DYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));				          
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("MQCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.MQCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
+				          v_DB =(v_DB.divide(new BigDecimal(v_months),2, BigDecimal.ROUND_HALF_UP));				          				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("FMCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.FMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(new BigDecimal(v_months)));				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("MMCON") ==0){
+				        	
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(.5)).add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(v_months-1));
+				          v_adj = new BigDecimal(Conventions.MMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateMonth+1));
+				          v_DB = (v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(v_adj);
+				          v_monthadj = 0;
+				        }
+				        v_firstyr = 1;
+				        }
+				     else{				    	
+				    	v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(2/v_Life_Years));				        
+				        v_Accum_Dep = v_Accum_Dep.add(v_DB);
+				        v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				     }
+			        v_counter = v_counter+1;				     
+				    }
+				    A_Period_Exp = v_DB;					 
+					 if (p_SL ==1 ){   
+						 if (v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)>0 )
+							 v_SL = ((v_Base_Amount.subtract(v_Salvage_Amount).subtract(p_Accum_Dep)).divide(new BigDecimal(v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)),2, BigDecimal.ROUND_HALF_UP));						     				 
+		
+						 if (A_Period_Exp.compareTo(v_SL)==-1)				   
+						   A_Period_Exp = v_SL;				 
+						  
+						 if (v_Base_Amount.subtract(p_Accum_Dep).subtract(A_Period_Exp).compareTo(v_Salvage_Amount)==-1 )
+							  A_Period_Exp =v_Base_Amount.subtract(p_Accum_Dep).subtract(v_Salvage_Amount);
+					 }		
+				}
+				//System.out.println("DB200: "+A_Period_Exp);
+				return A_Period_Exp;
+			}
+		  catch (Exception e)
+		  {
+			  System.out.println("DB200: "+e);
+		  }
+		  finally
+		  {
+			  DB.close(rs, pstmt);
+			  rs = null; pstmt = null;
+		  }
+		  return A_Period_Exp;		
+	}
+]]></source>
+<source file="/home/saeed/code/org/compiere/FA/Depreciation.java" startline="98" endline="228" pcid="47527"><![CDATA[
+	{		
+		  BigDecimal v_DB = new BigDecimal(0.0);
+		  BigDecimal v_Accum_Dep = new BigDecimal(0.0);
+		  BigDecimal v_SL = new BigDecimal(0.0);
+		  BigDecimal A_Period_Exp = new BigDecimal(0.0);
+		  int v_counter = 0;
+		  double v_months = 0;
+		  int v_firstyr = 0;
+		  double v_monthadj = 0;
+		  BigDecimal v_adj = new BigDecimal(0.0);		  
+		  BigDecimal v_Base_Amount = new BigDecimal(0.0);
+		  BigDecimal v_Salvage_Amount = new BigDecimal(0.0);
+		  double v_Life_Periods = 0;
+		  double v_Life_Years = 0;
+		  String v_con_type = null;
+		  
+		  StringBuffer sqlB = new StringBuffer ("SELECT A.A_ASSET_COST, A.A_SALVAGE_VALUE, A.A_LIFE_PERIOD, A.A_ASSET_LIFE_YEARS, A.DATEACCT,"
+			+ " D.ASSETSERVICEDATE, C.CONVENTIONTYPE "
+			+ " FROM A_DEPRECIATION_WORKFILE A, A_ASSET_ACCT B,A_ASSET D,A_DEPRECIATION_CONVENTION C "
+			+ " WHERE A.A_ASSET_ID = " + p_A_ASSET_ID  
+			+ " AND B.A_ASSET_ID = " + p_A_ASSET_ID 
+			+ " AND A_PERIOD_POSTED+1 >= A_PERIOD_START AND A_PERIOD_POSTED+1 <= A_PERIOD_END "
+			+ " AND A.POSTINGTYPE = ''" +  p_POSTINGTYPE
+			+ "'' AND B.POSTINGTYPE = ''" +  p_POSTINGTYPE
+			+ "'' AND B.A_ASSET_ACCT_ID = " +  p_A_ASSET_ACCT_ID
+			+ " AND D.A_ASSET_ID = " + p_A_ASSET_ID
+			+ " AND B.A_DEPRECIATION_CONV_ID = C.A_DEPRECIATION_CONVENTION_ID");		
+		  //System.out.println("DB150: "+sqlB.toString());
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  try {				
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()){
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
+					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
+					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
+					calendar.setTime(rs.getDate("DATEACCT"));
+					int DateAcctYear = calendar.get(Calendar.YEAR);
+					
+				  v_Base_Amount = rs.getBigDecimal("A_ASSET_COST");
+				  v_Salvage_Amount = rs.getBigDecimal("A_SALVAGE_VALUE");
+				  v_Life_Periods = rs.getDouble("A_LIFE_PERIOD");
+				  v_Life_Years = rs.getDouble("A_ASSET_LIFE_YEARS");
+				  v_con_type = rs.getString("CONVENTIONTYPE");
+				  
+				  double v_period = DateAcctYear - AssetServiceDateYear;				  
+				    while (v_counter <= v_period){				      
+				        if(v_firstyr == 0){
+				        v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(1.5/v_Life_Years));
+				        v_months = 12 - AssetServiceDateMonth +1;				        
+				        if (v_con_type.compareTo("HYCON") ==0){
+				          v_adj = new BigDecimal(Conventions.HYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));				          
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));
+				          v_monthadj = 6-v_months;
+				        }
+				        else if (v_con_type.compareTo("FYCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.FYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,0,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));				          
+				          v_monthadj = 12-v_months;
+				        }
+				        else if (v_con_type.compareTo("DYCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.DYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("MQCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.MQCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
+				          v_DB =(v_DB.divide(new BigDecimal(v_months),2, BigDecimal.ROUND_HALF_UP));				          				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("FMCON") ==0){				        
+				          v_adj = new BigDecimal(Conventions.FMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(new BigDecimal(v_months)));				          
+				          v_monthadj = 0;
+				        }
+				        else if (v_con_type.compareTo("MMCON") ==0){
+				        	
+				          v_Accum_Dep = v_Accum_Dep.add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(.5)).add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(v_months-1));
+				          v_adj = new BigDecimal(Conventions.MMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateMonth+1));
+				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(v_adj);				          
+				          v_monthadj = 0;
+				        }
+				        v_firstyr = 1;
+				        }
+				     else{				    	
+				    	v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(1.5/v_Life_Years));				        
+				        v_Accum_Dep = v_Accum_Dep.add(v_DB);
+				        v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				        
+				     }
+			        v_counter = v_counter+1;				     
+				    }				 
+				 A_Period_Exp = v_DB;
+				 
+				 if (p_SL ==1 ){   
+					 if (v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)>0 )					 
+					     v_SL = ((v_Base_Amount.subtract(v_Salvage_Amount).subtract(p_Accum_Dep)).divide(new BigDecimal(v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)),2, BigDecimal.ROUND_HALF_UP));				 
+	
+					 if (A_Period_Exp.compareTo(v_SL)==-1)				   
+					   A_Period_Exp = v_SL;				 
+					  
+					 if (v_Base_Amount.subtract(p_Accum_Dep).subtract(A_Period_Exp).compareTo(v_Salvage_Amount)==-1 )
+						  A_Period_Exp =v_Base_Amount.subtract(p_Accum_Dep).subtract(v_Salvage_Amount);
+				 }
+				 
+				}
+				//System.out.println("DB150: "+A_Period_Exp);
+				return A_Period_Exp;
+			}
+		  catch (Exception e)
+		  {
+			  System.out.println("DB150: "+e);
+		  }
+		  finally
+		  {
+			  try
+			  {
+				  if (pstmt != null)
+					  pstmt.close ();
+			  }
+			  catch (Exception e)
+				{}
+				pstmt = null;
+		  }
+		  return A_Period_Exp;		
+	}
+]]></source>
+</class>
+
+<class id="3" nlines="108" nfragments="2">
+<source file="/home/saeed/code/org/compiere/FA/CreateInvoicedAsset.java" startline="154" endline="264" pcid="47841"><![CDATA[
+							{
+								assetacct.setPostingType(assetgrpacct.getPostingType());
+								assetacct.setA_Split_Percent(assetgrpacct.getA_Split_Percent());
+								assetacct.setA_Depreciation_Conv_ID(assetgrpacct.getConventionType());
+								assetacct.setA_Asset_ID(asset.getA_Asset_ID());
+								assetacct.setA_Depreciation_ID(assetgrpacct.getDepreciationType());
+								assetacct.setA_Asset_Spread_ID(assetgrpacct.getA_Asset_Spread_Type());
+								assetacct.setA_Period_Start(1);										
+				
+								if (asset.getUseLifeMonths() == 0 & asset.getUseLifeYears() == 0){
+									assetacct.setA_Period_End(assetgrpacct.getUseLifeMonths());
+									asset.setUseLifeYears(assetgrpacct.getUseLifeYears());
+									asset.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
+									asset.setIsDepreciated(true);
+									asset.setIsOwned(true);
+									asset.save();
+									uselifemonths = assetgrpacct.getUseLifeMonths();
+									uselifeyears = assetgrpacct.getUseLifeYears();
+									
+									}
+								else if(asset.getUseLifeMonths() == 0){
+									assetacct.setA_Period_End(asset.getUseLifeYears()*12);
+									asset.setUseLifeMonths(asset.getUseLifeYears()*12);
+									asset.setIsDepreciated(true);
+									asset.setIsOwned(true);
+									asset.save();
+									uselifemonths = asset.getUseLifeYears()*12;
+									uselifeyears = asset.getUseLifeYears();						
+									}
+								else{
+									assetacct.setA_Period_End(asset.getUseLifeMonths());
+									uselifemonths = asset.getUseLifeMonths();
+									uselifeyears = asset.getUseLifeYears();}
+								
+								assetacct.setA_Depreciation_Method_ID(assetgrpacct.getA_Depreciation_Calc_Type());
+								assetacct.setA_Asset_Acct(assetgrpacct.getA_Asset_Acct());
+								assetacct.setC_AcctSchema_ID(assetgrpacct.getC_AcctSchema_ID());
+								assetacct.setA_Accumdepreciation_Acct(assetgrpacct.getA_Accumdepreciation_Acct());
+								assetacct.setA_Depreciation_Acct(assetgrpacct.getA_Depreciation_Acct());
+								assetacct.setA_Disposal_Revenue(assetgrpacct.getA_Disposal_Revenue());
+								assetacct.setA_Disposal_Loss(assetgrpacct.getA_Disposal_Loss());
+								assetacct.setA_Salvage_Value(new BigDecimal(0.0));
+								assetacct.setA_Reval_Accumdep_Offset_Cur(assetgrpacct.getA_Reval_Accumdep_Offset_Cur());
+								assetacct.setA_Reval_Accumdep_Offset_Prior(assetgrpacct.getA_Reval_Accumdep_Offset_Prior());
+								assetacct.setA_Reval_Cal_Method(assetgrpacct.getA_Reval_Cal_Method());
+								assetacct.setA_Reval_Cost_Offset(assetgrpacct.getA_Reval_Cost_Offset());
+								assetacct.setA_Reval_Cost_Offset_Prior(assetgrpacct.getA_Reval_Cost_Offset_Prior());
+								assetacct.setA_Reval_Depexp_Offset(assetgrpacct.getA_Reval_Depexp_Offset());
+								assetacct.setA_Depreciation_Manual_Amount(assetgrpacct.getA_Depreciation_Manual_Amount());
+								assetacct.setA_Depreciation_Manual_Period(assetgrpacct.getA_Depreciation_Manual_Period());
+								assetacct.setA_Depreciation_Table_Header_ID(assetgrpacct.getA_Depreciation_Table_Header_ID());
+								assetacct.setA_Depreciation_Variable_Perc(assetgrpacct.getA_Depreciation_Variable_Perc());
+								assetacct.setProcessing(false);
+								assetacct.getAD_Client_ID();
+								assetacct.save();
+								
+								MAssetChange change = new MAssetChange (getCtx(), 0, get_TrxName());						
+								change.setPostingType(assetacct.getPostingType());
+								change.setA_Split_Percent(assetacct.getA_Split_Percent());
+								change.setConventionType(assetacct.getA_Depreciation_Conv_ID());
+								change.setA_Asset_ID(asset.getA_Asset_ID());								
+								change.setDepreciationType(assetacct.getA_Depreciation_ID());
+								change.setA_Asset_Spread_Type(assetacct.getA_Asset_Spread_ID());
+								change.setA_Period_Start(assetacct.getA_Period_Start());
+								change.setA_Period_End(assetacct.getA_Period_End());
+								change.setIsInPosession(asset.isOwned());
+								change.setIsDisposed(asset.isDisposed());
+								change.setIsDepreciated(asset.isDepreciated());
+								change.setIsFullyDepreciated(asset.isFullyDepreciated());					
+								change.setA_Depreciation_Calc_Type(assetacct.getA_Depreciation_Method_ID());
+								change.setA_Asset_Acct(assetacct.getA_Asset_Acct());
+								change.setC_AcctSchema_ID(assetacct.getC_AcctSchema_ID());
+								change.setA_Accumdepreciation_Acct(assetacct.getA_Accumdepreciation_Acct());
+								change.setA_Depreciation_Acct(assetacct.getA_Depreciation_Acct());
+								change.setA_Disposal_Revenue(assetacct.getA_Disposal_Revenue());
+								change.setA_Disposal_Loss(assetacct.getA_Disposal_Loss());
+								change.setA_Reval_Accumdep_Offset_Cur(assetacct.getA_Reval_Accumdep_Offset_Cur());
+								change.setA_Reval_Accumdep_Offset_Prior(assetacct.getA_Reval_Accumdep_Offset_Prior());
+								change.setA_Reval_Cal_Method(assetacct.getA_Reval_Cal_Method());
+								change.setA_Reval_Cost_Offset(assetacct.getA_Reval_Cost_Offset());
+								change.setA_Reval_Cost_Offset_Prior(assetacct.getA_Reval_Cost_Offset_Prior());
+								change.setA_Reval_Depexp_Offset(assetacct.getA_Reval_Depexp_Offset());
+								change.setA_Depreciation_Manual_Amount(assetacct.getA_Depreciation_Manual_Amount());
+								change.setA_Depreciation_Manual_Period(assetacct.getA_Depreciation_Manual_Period());
+								change.setA_Depreciation_Table_Header_ID(assetacct.getA_Depreciation_Table_Header_ID());
+								change.setA_Depreciation_Variable_Perc(assetacct.getA_Depreciation_Variable_Perc());
+								change.setA_Parent_Asset_ID(asset.getA_Parent_Asset_ID());
+							    change.setChangeType("CRT");	
+								change.setTextDetails(MRefList.getListDescription (getCtx(),"A_Update_Type" , "CRT"));		    
+							    change.setIsInPosession(asset.isOwned());
+								change.setIsDisposed(asset.isDisposed());
+								change.setIsDepreciated(asset.isDepreciated());
+								change.setIsFullyDepreciated(asset.isFullyDepreciated());
+								change.setLot(asset.getLot());
+								change.setSerNo(asset.getSerNo());
+								change.setVersionNo(asset.getVersionNo());
+							    change.setUseLifeMonths(asset.getUseLifeMonths());
+							    change.setUseLifeYears(asset.getUseLifeYears());
+							    change.setLifeUseUnits(asset.getLifeUseUnits());
+							    change.setAssetDisposalDate(asset.getAssetDisposalDate());
+							    change.setAssetServiceDate(asset.getAssetServiceDate());
+							    change.setC_BPartner_Location_ID(asset.getC_BPartner_Location_ID());
+							    change.setC_BPartner_ID(asset.getC_BPartner_ID());
+							    change.setAssetValueAmt(InvoiceLine.getLineTotalAmt());
+							    change.setA_QTY_Current(InvoiceLine.getQtyEntered());
+							    change.setA_QTY_Original(InvoiceLine.getQtyEntered());
+							    change.setA_Asset_CreateDate(asset.getA_Asset_CreateDate());
+							    change.setAD_User_ID(asset.getAD_User_ID());
+							    change.setC_Location_ID(asset.getC_Location_ID());
+							    change.save();
+							}
+]]></source>
+<source file="/home/saeed/code/org/compiere/FA/CreateGLAsset.java" startline="134" endline="242" pcid="47724"><![CDATA[
+									{
+										assetacct.setPostingType(assetgrpacct.getPostingType());										
+										assetacct.setA_Split_Percent(assetgrpacct.getA_Split_Percent());
+										assetacct.setA_Depreciation_Conv_ID(assetgrpacct.getConventionType());
+										assetacct.setA_Asset_ID(asset.getA_Asset_ID());								
+										assetacct.setA_Depreciation_ID(assetgrpacct.getDepreciationType());
+										assetacct.setA_Asset_Spread_ID(assetgrpacct.getA_Asset_Spread_Type());
+										assetacct.setA_Period_Start(1);										
+						
+										if (asset.getUseLifeMonths() == 0 & asset.getUseLifeYears() == 0){
+											assetacct.setA_Period_End(assetgrpacct.getUseLifeMonths());
+											asset.setUseLifeYears(assetgrpacct.getUseLifeYears());
+											asset.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
+											asset.setIsDepreciated(true);
+											asset.setIsOwned(true);
+											asset.save();
+//											uselifemonths = assetgrpacct.getUseLifeMonths();
+//											uselifeyears = assetgrpacct.getUseLifeYears();
+											
+											}
+										else if(asset.getUseLifeMonths() == 0){
+											assetacct.setA_Period_End(asset.getUseLifeYears()*12);
+											asset.setUseLifeMonths(asset.getUseLifeYears()*12);
+											asset.setIsDepreciated(true);
+											asset.setIsOwned(true);
+											asset.save();
+//											uselifemonths = asset.getUseLifeYears()*12;
+//											uselifeyears = asset.getUseLifeYears();						
+											}
+										else{
+											assetacct.setA_Period_End(asset.getUseLifeMonths());
+//											uselifemonths = asset.getUseLifeMonths();
+//											uselifeyears = asset.getUseLifeYears();
+											}
+										
+										assetacct.setA_Depreciation_Method_ID(assetgrpacct.getA_Depreciation_Calc_Type());
+										assetacct.setA_Asset_Acct(assetgrpacct.getA_Asset_Acct());
+										assetacct.setC_AcctSchema_ID(assetgrpacct.getC_AcctSchema_ID());
+										assetacct.setA_Salvage_Value(new BigDecimal (0.0));
+										assetacct.setA_Accumdepreciation_Acct(assetgrpacct.getA_Accumdepreciation_Acct());
+										assetacct.setA_Depreciation_Acct(assetgrpacct.getA_Depreciation_Acct());
+										assetacct.setA_Disposal_Revenue(assetgrpacct.getA_Disposal_Revenue());
+										assetacct.setA_Disposal_Loss(assetgrpacct.getA_Disposal_Loss());										
+										assetacct.setA_Reval_Accumdep_Offset_Cur(assetgrpacct.getA_Reval_Accumdep_Offset_Cur());
+										assetacct.setA_Reval_Accumdep_Offset_Prior(assetgrpacct.getA_Reval_Accumdep_Offset_Prior());
+										assetacct.setA_Reval_Cal_Method(assetgrpacct.getA_Reval_Cal_Method());
+										assetacct.setA_Reval_Cost_Offset(assetgrpacct.getA_Reval_Cost_Offset());
+										assetacct.setA_Reval_Cost_Offset_Prior(assetgrpacct.getA_Reval_Cost_Offset_Prior());
+										assetacct.setA_Reval_Depexp_Offset(assetgrpacct.getA_Reval_Depexp_Offset());
+										assetacct.setA_Depreciation_Manual_Amount(assetgrpacct.getA_Depreciation_Manual_Amount());
+										assetacct.setA_Depreciation_Manual_Period(assetgrpacct.getA_Depreciation_Manual_Period());
+										assetacct.setA_Depreciation_Table_Header_ID(assetgrpacct.getA_Depreciation_Table_Header_ID());
+										assetacct.setA_Depreciation_Variable_Perc(assetgrpacct.getA_Depreciation_Variable_Perc());
+										assetacct.setProcessing(false);
+										assetacct.save();
+										
+										MAssetChange change = new MAssetChange (getCtx(), 0, get_TrxName());						
+										change.setPostingType(assetacct.getPostingType());
+										change.setA_Split_Percent(assetacct.getA_Split_Percent());
+										change.setConventionType(assetacct.getA_Depreciation_Conv_ID());
+										change.setA_Asset_ID(asset.getA_Asset_ID());								
+										change.setDepreciationType(assetacct.getA_Depreciation_ID());
+										change.setA_Asset_Spread_Type(assetacct.getA_Asset_Spread_ID());
+										change.setA_Period_Start(assetacct.getA_Period_Start());
+										change.setA_Period_End(assetacct.getA_Period_End());
+										change.setIsInPosession(asset.isOwned());
+										change.setIsDisposed(asset.isDisposed());
+										change.setIsDepreciated(asset.isDepreciated());
+										change.setIsFullyDepreciated(asset.isFullyDepreciated());					
+										change.setA_Depreciation_Calc_Type(assetacct.getA_Depreciation_Method_ID());
+										change.setA_Asset_Acct(assetacct.getA_Asset_Acct());
+										change.setC_AcctSchema_ID(assetacct.getC_AcctSchema_ID());
+										change.setA_Accumdepreciation_Acct(assetacct.getA_Accumdepreciation_Acct());
+										change.setA_Depreciation_Acct(assetacct.getA_Depreciation_Acct());
+										change.setA_Disposal_Revenue(assetacct.getA_Disposal_Revenue());
+										change.setA_Disposal_Loss(assetacct.getA_Disposal_Loss());
+										change.setA_Reval_Accumdep_Offset_Cur(assetacct.getA_Reval_Accumdep_Offset_Cur());
+										change.setA_Reval_Accumdep_Offset_Prior(assetacct.getA_Reval_Accumdep_Offset_Prior());
+										change.setA_Reval_Cal_Method(assetacct.getA_Reval_Cal_Method());
+										change.setA_Reval_Cost_Offset(assetacct.getA_Reval_Cost_Offset());
+										change.setA_Reval_Cost_Offset_Prior(assetacct.getA_Reval_Cost_Offset_Prior());
+										change.setA_Reval_Depexp_Offset(assetacct.getA_Reval_Depexp_Offset());
+										change.setA_Depreciation_Manual_Amount(assetacct.getA_Depreciation_Manual_Amount());
+										change.setA_Depreciation_Manual_Period(assetacct.getA_Depreciation_Manual_Period());
+										change.setA_Depreciation_Table_Header_ID(assetacct.getA_Depreciation_Table_Header_ID());
+										change.setA_Depreciation_Variable_Perc(assetacct.getA_Depreciation_Variable_Perc());
+										change.setA_Parent_Asset_ID(asset.getA_Parent_Asset_ID());
+									    change.setChangeType("CRT");
+									    change.setTextDetails(MRefList.getListDescription (getCtx(),"A_Update_Type" , "CRT"));		    
+									    change.setIsInPosession(asset.isOwned());
+										change.setIsDisposed(asset.isDisposed());
+										change.setIsDepreciated(asset.isDepreciated());
+										change.setIsFullyDepreciated(asset.isFullyDepreciated());
+										change.setLot(asset.getLot());
+										change.setSerNo(asset.getSerNo());
+										change.setVersionNo(asset.getVersionNo());
+									    change.setUseLifeMonths(asset.getUseLifeMonths());
+									    change.setUseLifeYears(asset.getUseLifeYears());
+									    change.setLifeUseUnits(asset.getLifeUseUnits());
+									    change.setAssetDisposalDate(asset.getAssetDisposalDate());
+									    change.setAssetServiceDate(asset.getAssetServiceDate());
+									    change.setC_BPartner_Location_ID(asset.getC_BPartner_Location_ID());
+									    change.setC_BPartner_ID(asset.getC_BPartner_ID());
+									    change.setAssetValueAmt(JVLine.getAmtAcctDr().subtract(JVLine.getAmtAcctCr()));									    
+									    change.setA_Asset_CreateDate(asset.getA_Asset_CreateDate());
+									    change.setAD_User_ID(asset.getAD_User_ID());
+									    change.setC_Location_ID(asset.getC_Location_ID());
+									    change.save();
+									}
+]]></source>
+</class>
+
+<class id="4" nlines="89" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="1000" endline="1125" pcid="23810"><![CDATA[
+	{
+		String sql = "SELECT t.MovementQty, mi.Qty, il.QtyInvoiced, il.PriceActual,"
+			+ " i.C_Currency_ID, i.DateAcct, i.C_ConversionType_ID, i.AD_Client_ID, i.AD_Org_ID, t.M_Transaction_ID "
+			+ "FROM M_Transaction t"
+			+ " INNER JOIN M_MatchInv mi ON (t.M_InOutLine_ID=mi.M_InOutLine_ID)"
+			+ " INNER JOIN C_InvoiceLine il ON (mi.C_InvoiceLine_ID=il.C_InvoiceLine_ID)"
+			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
+			+ "WHERE t.M_Product_ID=?";
+		if (AD_Org_ID != 0)
+			sql += " AND t.AD_Org_ID=?";
+		else if (M_AttributeSetInstance_ID != 0)
+			sql += " AND t.M_AttributeSetInstance_ID=?";
+		sql += " ORDER BY t.M_Transaction_ID";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		//
+		int oldTransaction_ID = 0;
+		ArrayList<QtyCost> fifo = new ArrayList<QtyCost>();
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, product.getM_Product_ID());
+			if (AD_Org_ID != 0)
+				pstmt.setInt (2, AD_Org_ID);
+			else if (M_AttributeSetInstance_ID != 0)
+				pstmt.setInt (2, M_AttributeSetInstance_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				BigDecimal movementQty = rs.getBigDecimal(1);
+				int M_Transaction_ID = rs.getInt(10);
+				if (M_Transaction_ID == oldTransaction_ID)
+					continue;	//	assuming same price for receipt
+				M_Transaction_ID = oldTransaction_ID;
+				//
+				BigDecimal matchQty = rs.getBigDecimal(2);
+				if (matchQty == null)	//	out (negative)
+				{
+					if (fifo.size() > 0)
+					{
+						QtyCost pp = (QtyCost)fifo.get(0);
+						pp.Qty = pp.Qty.add(movementQty);
+						BigDecimal remainder = pp.Qty;
+						if (remainder.signum() == 0)
+							fifo.remove(0);
+						else
+						{
+							while (remainder.signum() != 0)
+							{
+								if (fifo.size() == 1)	//	Last
+								{
+									pp.Cost = Env.ZERO;
+									remainder = Env.ZERO;
+								}
+								else
+								{
+									fifo.remove(0);
+									pp = (QtyCost)fifo.get(0);
+									pp.Qty = pp.Qty.add(movementQty);
+									remainder = pp.Qty;
+								}
+							}
+						}
+					}
+					else
+					{
+						QtyCost pp = new QtyCost (movementQty, Env.ZERO);
+						fifo.add(pp);
+					}
+					s_log.finer("Movement=" + movementQty + ", Size=" + fifo.size());
+					continue;
+				}
+				//	Assumption: everything is matched
+				BigDecimal price = rs.getBigDecimal(4);
+				int C_Currency_ID = rs.getInt(5);
+				Timestamp DateAcct = rs.getTimestamp(6);
+				int C_ConversionType_ID = rs.getInt(7);
+				int Client_ID = rs.getInt(8);
+				int Org_ID = rs.getInt(9);
+				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
+					C_Currency_ID, as.getC_Currency_ID(),
+					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
+
+				//	Add Stock
+				boolean used = false;
+				if (fifo.size() == 1)
+				{
+					QtyCost pp = (QtyCost)fifo.get(0);
+					if (pp.Qty.signum() < 0)
+					{
+						pp.Qty = pp.Qty.add(movementQty);
+						if (pp.Qty.signum() == 0)
+							fifo.remove(0);
+						else
+							pp.Cost = cost;
+						used = true;
+					}
+
+				}
+				if (!used)
+				{
+					QtyCost pp = new QtyCost (movementQty, cost);
+					fifo.add(pp);
+				}
+				s_log.finer("Movement=" + movementQty + ", Size=" + fifo.size());
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		if (fifo.size() == 0)
+		{
+			return null;
+		}
+		QtyCost pp = (QtyCost)fifo.get(0);
+		s_log.finer(product.getName() + " = " + pp.Cost);
+		return pp.Cost;
+	}	//	calculateFiFo
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="1137" endline="1244" pcid="23826"><![CDATA[
+	{
+		String sql = "SELECT t.MovementQty, mi.Qty, il.QtyInvoiced, il.PriceActual,"
+			+ " i.C_Currency_ID, i.DateAcct, i.C_ConversionType_ID, i.AD_Client_ID, i.AD_Org_ID, t.M_Transaction_ID "
+			+ "FROM M_Transaction t"
+			+ " INNER JOIN M_MatchInv mi ON (t.M_InOutLine_ID=mi.M_InOutLine_ID)"
+			+ " INNER JOIN C_InvoiceLine il ON (mi.C_InvoiceLine_ID=il.C_InvoiceLine_ID)"
+			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
+			+ "WHERE t.M_Product_ID=?";
+		if (AD_Org_ID != 0)
+			sql += " AND t.AD_Org_ID=?";
+		else if (M_AttributeSetInstance_ID != 0)
+			sql += " AND t.M_AttributeSetInstance_ID=?";
+		//	Starting point?
+		sql += " ORDER BY t.M_Transaction_ID DESC";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		//
+		int oldTransaction_ID = 0;
+		ArrayList<QtyCost> lifo = new ArrayList<QtyCost>();
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, product.getM_Product_ID());
+			if (AD_Org_ID != 0)
+				pstmt.setInt (2, AD_Org_ID);
+			else if (M_AttributeSetInstance_ID != 0)
+				pstmt.setInt (2, M_AttributeSetInstance_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				BigDecimal movementQty = rs.getBigDecimal(1);
+				int M_Transaction_ID = rs.getInt(10);
+				if (M_Transaction_ID == oldTransaction_ID)
+					continue;	//	assuming same price for receipt
+				M_Transaction_ID = oldTransaction_ID;
+				//
+				BigDecimal matchQty = rs.getBigDecimal(2);
+				if (matchQty == null)	//	out (negative)
+				{
+					if (lifo.size() > 0)
+					{
+						QtyCost pp = (QtyCost)lifo.get(lifo.size()-1);
+						pp.Qty = pp.Qty.add(movementQty);
+						BigDecimal remainder = pp.Qty;
+						if (remainder.signum() == 0)
+							lifo.remove(lifo.size()-1);
+						else
+						{
+							while (remainder.signum() != 0)
+							{
+								if (lifo.size() == 1)	//	Last
+								{
+									pp.Cost = Env.ZERO;
+									remainder = Env.ZERO;
+								}
+								else
+								{
+									lifo.remove(lifo.size()-1);
+									pp = (QtyCost)lifo.get(lifo.size()-1);
+									pp.Qty = pp.Qty.add(movementQty);
+									remainder = pp.Qty;
+								}
+							}
+						}
+					}
+					else
+					{
+						QtyCost pp = new QtyCost (movementQty, Env.ZERO);
+						lifo.add(pp);
+					}
+					s_log.finer("Movement=" + movementQty + ", Size=" + lifo.size());
+					continue;
+				}
+				//	Assumption: everything is matched
+				BigDecimal price = rs.getBigDecimal(4);
+				int C_Currency_ID = rs.getInt(5);
+				Timestamp DateAcct = rs.getTimestamp(6);
+				int C_ConversionType_ID = rs.getInt(7);
+				int Client_ID = rs.getInt(8);
+				int Org_ID = rs.getInt(9);
+				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
+					C_Currency_ID, as.getC_Currency_ID(),
+					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
+				//
+				QtyCost pp = new QtyCost (movementQty, cost);
+				lifo.add(pp);
+				s_log.finer("Movement=" + movementQty + ", Size=" + lifo.size());
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		if (lifo.size() == 0)
+		{
+			return null;
+		}
+		QtyCost pp = (QtyCost)lifo.get(lifo.size()-1);
+		s_log.finer(product.getName() + " = " + pp.Cost);
+		return pp.Cost;
+	}	//	calculateLiFo
+]]></source>
+</class>
+
+<class id="5" nlines="79" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MAttachment.java" startline="715" endline="804" pcid="31370"><![CDATA[
+	private boolean loadLOBDataFromFileSystem(){
+		if("".equals(m_attachmentPathRoot)){
+			log.severe("no attachmentPath defined");
+			return false;
+		}
+		// Reset
+		m_items = new ArrayList<MAttachmentEntry>();
+		//
+		byte[] data = getBinaryData();
+		if (data == null)
+			return true;
+		log.fine("TextFileSize=" + data.length);
+		if (data.length == 0)
+			return true;
+
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+		try {
+			final DocumentBuilder builder = factory.newDocumentBuilder();
+			final Document document = builder.parse(new ByteArrayInputStream(data));
+			final NodeList entries = document.getElementsByTagName("entry");
+			for (int i = 0; i < entries.getLength(); i++) {
+				final Node entryNode = entries.item(i);
+				final NamedNodeMap attributes = entryNode.getAttributes();
+				final Node fileNode = attributes.getNamedItem("file");
+				final Node nameNode = attributes.getNamedItem("name");
+				if(fileNode==null || nameNode==null){
+					log.severe("no filename for entry " + i);
+					m_items = null;
+					return false;
+				}
+				log.fine("name: " + nameNode.getNodeValue());
+				String filePath = fileNode.getNodeValue();
+				log.fine("filePath: " + filePath);
+				if(filePath!=null){
+					filePath = filePath.replaceFirst(ATTACHMENT_FOLDER_PLACEHOLDER, m_attachmentPathRoot.replaceAll("\\\\","\\\\\\\\"));
+					//just to be shure...
+					String replaceSeparator = File.separator;
+					if(!replaceSeparator.equals("/")){
+						replaceSeparator = "\\\\";
+					}
+					filePath = filePath.replaceAll("/", replaceSeparator);
+					filePath = filePath.replaceAll("\\\\", replaceSeparator);
+				}
+				log.fine("filePath: " + filePath);
+				final File file = new File(filePath);
+				if (file.exists()) {
+					// read files into byte[]
+					final byte[] dataEntry = new byte[(int) file.length()];
+					try {
+						final FileInputStream fileInputStream = new FileInputStream(file);
+						fileInputStream.read(dataEntry);
+						fileInputStream.close();
+					} catch (FileNotFoundException e) {
+						log.severe("File Not Found.");
+						e.printStackTrace();
+					} catch (IOException e1) {
+						log.severe("Error Reading The File.");
+						e1.printStackTrace();
+					}
+					final MAttachmentEntry entry = new MAttachmentEntry(filePath,
+							dataEntry, m_items.size() + 1);
+					m_items.add(entry);
+				} else {
+					log.severe("file not found: " + file.getAbsolutePath());
+				}
+			}
+
+		} catch (SAXException sxe) {
+			// Error generated during parsing)
+			Exception x = sxe;
+			if (sxe.getException() != null)
+				x = sxe.getException();
+			x.printStackTrace();
+			log.severe(x.getMessage());
+
+		} catch (ParserConfigurationException pce) {
+			// Parser with specified options can''t be built
+			pce.printStackTrace();
+			log.severe(pce.getMessage());
+
+		} catch (IOException ioe) {
+			// I/O error
+			ioe.printStackTrace();
+			log.severe(ioe.getMessage());
+		}
+
+		return true;
+
+	}
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MArchive.java" startline="238" endline="318" pcid="29851"><![CDATA[
+	private byte[] getBinaryDataFromFileSystem() {
+		if ("".equals(m_archivePathRoot)) {
+			throw new IllegalArgumentException("no attachmentPath defined");
+		}
+		byte[] data = super.getBinaryData();
+		m_deflated = null;
+		m_inflated = null;
+		if (data == null) {
+			return null;
+		}
+
+		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+
+		try {
+			final DocumentBuilder builder = factory.newDocumentBuilder();
+			final Document document = builder.parse(new ByteArrayInputStream(data));
+			final NodeList entries = document.getElementsByTagName("entry");
+			if(entries.getLength()!=1){
+				log.severe("no archive entry found");
+			}
+				final Node entryNode = entries.item(0);
+				final NamedNodeMap attributes = entryNode.getAttributes();
+				final Node fileNode = attributes.getNamedItem("file");
+				if(fileNode==null ){
+					log.severe("no filename for entry");
+					return null;
+				}
+				String filePath = fileNode.getNodeValue();
+				log.fine("filePath: " + filePath);
+				if(filePath!=null){
+					filePath = filePath.replaceFirst(ARCHIVE_FOLDER_PLACEHOLDER, m_archivePathRoot.replaceAll("\\\\","\\\\\\\\"));
+					//just to be shure...
+					String replaceSeparator = File.separator;
+					if(!replaceSeparator.equals("/")){
+						replaceSeparator = "\\\\";
+					}
+					filePath = filePath.replaceAll("/", replaceSeparator);
+					filePath = filePath.replaceAll("\\\\", replaceSeparator);
+				}
+				log.fine("filePath: " + filePath);
+				final File file = new File(filePath);
+				if (file.exists()) {
+					// read files into byte[]
+					final byte[] dataEntry = new byte[(int) file.length()];
+					try {
+						final FileInputStream fileInputStream = new FileInputStream(file);
+						fileInputStream.read(dataEntry);
+						fileInputStream.close();
+					} catch (FileNotFoundException e) {
+						log.severe("File Not Found.");
+						e.printStackTrace();
+					} catch (IOException e1) {
+						log.severe("Error Reading The File.");
+						e1.printStackTrace();
+					}
+					return dataEntry;
+				} else {
+					log.severe("file not found: " + file.getAbsolutePath());
+					return null;
+				}
+
+		} catch (SAXException sxe) {
+			// Error generated during parsing)
+			Exception x = sxe;
+			if (sxe.getException() != null)
+				x = sxe.getException();
+			x.printStackTrace();
+			log.severe(x.getMessage());
+
+		} catch (ParserConfigurationException pce) {
+			// Parser with specified options can''t be built
+			pce.printStackTrace();
+			log.severe(pce.getMessage());
+
+		} catch (IOException ioe) {
+			// I/O error
+			ioe.printStackTrace();
+			log.severe(ioe.getMessage());
+		}
+		return null;
+	}
+]]></source>
+</class>
+
+<class id="6" nlines="77" nfragments="2">
+<source file="/home/saeed/code/org/compiere/report/MReportSource.java" startline="119" endline="246" pcid="9956"><![CDATA[
+	private String getWhereCombination(int PA_Hierarchy_ID) {
+		StringBuffer whcomb = new StringBuffer();
+		if (getC_ElementValue_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Account, getC_ElementValue_ID());
+			if (isIncludeNullsElementValue())
+				whcomb.append(" AND (Account_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsElementValue())
+				whcomb.append(" AND Account_ID IS NULL");
+
+		if (getC_Activity_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Activity, getC_Activity_ID());
+			if (isIncludeNullsActivity())
+				whcomb.append(" AND (C_Activity_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsActivity())
+				whcomb.append(" AND C_Activity_ID IS NULL");
+
+		if (getC_BPartner_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_BPartner, getC_BPartner_ID());
+			if (isIncludeNullsBPartner())
+				whcomb.append(" AND (C_BPartner_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsBPartner())
+				whcomb.append(" AND C_BPartner_ID IS NULL");
+
+		if (getC_Campaign_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Campaign, getC_Campaign_ID());
+			if (isIncludeNullsCampaign())
+				whcomb.append(" AND (C_Campaign_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsCampaign())
+				whcomb.append(" AND C_Campaign_ID IS NULL");
+
+		if (getC_Location_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_LocationFrom, getC_Location_ID());
+			if (isIncludeNullsLocation())
+				whcomb.append(" AND (C_LocFrom_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsLocation())
+				whcomb.append(" AND C_LocFrom_ID IS NULL");
+
+		if (getOrg_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Organization, getOrg_ID());
+			if (isIncludeNullsOrg())
+				whcomb.append(" AND (AD_Org_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsOrg())
+				whcomb.append(" AND AD_Org_ID IS NULL");
+		
+		if (getAD_OrgTrx_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_OrgTrx, getAD_OrgTrx_ID());
+			if (isIncludeNullsOrgTrx())
+				whcomb.append(" AND (AD_OrgTrx_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsOrgTrx())
+				whcomb.append(" AND AD_OrgTrx_ID IS NULL");
+
+		if (getM_Product_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Product, getM_Product_ID());
+			if (isIncludeNullsProduct())
+				whcomb.append(" AND (M_Product_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsProduct())
+				whcomb.append(" AND M_Product_ID IS NULL");
+
+		if (getC_Project_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Project, getC_Project_ID());
+			if (isIncludeNullsProject())
+				whcomb.append(" AND (C_Project_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsProject())
+				whcomb.append(" AND C_Project_ID IS NULL");
+
+		if (getC_SalesRegion_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_SalesRegion, getC_SalesRegion_ID());
+			if (isIncludeNullsSalesRegion())
+				whcomb.append(" AND (C_SalesRegion_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsSalesRegion())
+				whcomb.append(" AND C_SalesRegion_ID IS NULL");
+
+		if (getUserElement1_ID() > 0) {
+			String whtree = "UserElement1_ID=" + getUserElement1_ID(); // No Tree
+			if (isIncludeNullsUserElement1())
+				whcomb.append(" AND (UserElement1_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsUserElement1())
+				whcomb.append(" AND UserElement1_ID IS NULL");
+
+		if (getUserElement2_ID() > 0) {
+			String whtree = "UserElement2_ID=" + getUserElement2_ID(); // No Tree
+			if (isIncludeNullsUserElement2())
+				whcomb.append(" AND (UserElement2_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsUserElement2())
+				whcomb.append(" AND UserElement2_ID IS NULL");
+		
+		// drop the first " AND "
+		if (whcomb.length() > 5 && whcomb.toString().startsWith(" AND "))
+			whcomb.delete(0, 5);
+
+		return whcomb.toString();
+	}
+]]></source>
+<source file="/home/saeed/code/org/compiere/report/MReportColumn.java" startline="213" endline="337" pcid="9557"><![CDATA[
+	private String getWhereCombination(int PA_Hierarchy_ID) {
+		StringBuffer whcomb = new StringBuffer();
+		if (getC_ElementValue_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Account, getC_ElementValue_ID());
+			if (isIncludeNullsElementValue())
+				whcomb.append(" AND (Account_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsElementValue())
+				whcomb.append(" AND Account_ID IS NULL");
+
+		if (getC_Activity_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Activity, getC_Activity_ID());
+			if (isIncludeNullsActivity())
+				whcomb.append(" AND (C_Activity_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsActivity())
+				whcomb.append(" AND C_Activity_ID IS NULL");
+
+		if (getC_BPartner_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_BPartner, getC_BPartner_ID());
+			if (isIncludeNullsBPartner())
+				whcomb.append(" AND (C_BPartner_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsBPartner())
+				whcomb.append(" AND C_BPartner_ID IS NULL");
+
+		if (getC_Campaign_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Campaign, getC_Campaign_ID());
+			if (isIncludeNullsCampaign())
+				whcomb.append(" AND (C_Campaign_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsCampaign())
+				whcomb.append(" AND C_Campaign_ID IS NULL");
+
+		if (getC_Location_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_LocationFrom, getC_Location_ID());
+			if (isIncludeNullsLocation())
+				whcomb.append(" AND (C_LocFrom_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsLocation())
+				whcomb.append(" AND C_LocFrom_ID IS NULL");
+
+		if (getOrg_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Organization, getOrg_ID());
+			if (isIncludeNullsOrg())
+				whcomb.append(" AND (AD_Org_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsOrg())
+				whcomb.append(" AND AD_Org_ID IS NULL");
+		
+		if (getAD_OrgTrx_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_OrgTrx, getAD_OrgTrx_ID());
+			if (isIncludeNullsOrgTrx())
+				whcomb.append(" AND (AD_OrgTrx_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsOrgTrx())
+				whcomb.append(" AND AD_OrgTrx_ID IS NULL");
+		
+
+		if (getM_Product_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Product, getM_Product_ID());
+			if (isIncludeNullsProduct())
+				whcomb.append(" AND (M_Product_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsProduct())
+				whcomb.append(" AND M_Product_ID IS NULL");
+
+		if (getC_Project_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Project, getC_Project_ID());
+			if (isIncludeNullsProject())
+				whcomb.append(" AND (C_Project_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsProject())
+				whcomb.append(" AND C_Project_ID IS NULL");
+
+		if (getC_SalesRegion_ID() > 0) {
+			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_SalesRegion, getC_SalesRegion_ID());
+			if (isIncludeNullsSalesRegion())
+				whcomb.append(" AND (C_SalesRegion_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsSalesRegion())
+				whcomb.append(" AND C_SalesRegion_ID IS NULL");
+
+		if (getUserElement1_ID() > 0) {
+			String whtree = "UserElement1_ID=" + getUserElement1_ID(); // No Tree
+			if (isIncludeNullsUserElement1())
+				whcomb.append(" AND (UserElement1_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsUserElement1())
+				whcomb.append(" AND UserElement1_ID IS NULL");
+
+		if (getUserElement2_ID() > 0) {
+			String whtree = "UserElement2_ID=" + getUserElement2_ID(); // No Tree
+			if (isIncludeNullsUserElement2())
+				whcomb.append(" AND (UserElement2_ID IS NULL OR ").append(whtree).append(")");
+			else
+				whcomb.append(" AND ").append(whtree);
+		} else
+			if (isIncludeNullsUserElement2())
+				whcomb.append(" AND UserElement2_ID IS NULL");
+
+		return whcomb.toString();
+	}
+]]></source>
+</class>
+
+<class id="7" nlines="75" nfragments="3">
+<source file="/home/saeed/code/org/compiere/process/ImportOrder.java" startline="503" endline="616" pcid="5020"><![CDATA[
+		{
+			PreparedStatement pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
+			ResultSet rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				X_I_Order imp = new X_I_Order (getCtx (), rs, get_TrxName());
+				if (imp.getBPartnerValue () == null)
+				{
+					if (imp.getEMail () != null)
+						imp.setBPartnerValue (imp.getEMail ());
+					else if (imp.getName () != null)
+						imp.setBPartnerValue (imp.getName ());
+					else
+						continue;
+				}
+				if (imp.getName () == null)
+				{
+					if (imp.getContactName () != null)
+						imp.setName (imp.getContactName ());
+					else
+						imp.setName (imp.getBPartnerValue ());
+				}
+				//	BPartner
+				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
+				if (bp == null)
+				{
+					bp = new MBPartner (getCtx (), -1, get_TrxName());
+					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
+					bp.setValue (imp.getBPartnerValue ());
+					bp.setName (imp.getName ());
+					if (!bp.save ())
+						continue;
+				}
+				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
+				
+				//	BP Location
+				MBPartnerLocation bpl = null; 
+				MBPartnerLocation[] bpls = bp.getLocations(true);
+				for (int i = 0; bpl == null && i < bpls.length; i++)
+				{
+					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
+						bpl = bpls[i];
+					//	Same Location ID
+					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
+						bpl = bpls[i];
+					//	Same Location Info
+					else if (imp.getC_Location_ID() == 0)
+					{
+						MLocation loc = bpls[i].getLocation(false);
+						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(), 
+								imp.getPostal(), "", imp.getCity(), 
+								imp.getAddress1(), imp.getAddress2()))
+							bpl = bpls[i];
+					}
+				}
+				if (bpl == null)
+				{
+					//	New Location
+					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
+					loc.setAddress1 (imp.getAddress1 ());
+					loc.setAddress2 (imp.getAddress2 ());
+					loc.setCity (imp.getCity ());
+					loc.setPostal (imp.getPostal ());
+					if (imp.getC_Region_ID () != 0)
+						loc.setC_Region_ID (imp.getC_Region_ID ());
+					loc.setC_Country_ID (imp.getC_Country_ID ());
+					if (!loc.save ())
+						continue;
+					//
+					bpl = new MBPartnerLocation (bp);
+					bpl.setC_Location_ID (loc.getC_Location_ID ());
+					if (!bpl.save ())
+						continue;
+				}
+				imp.setC_Location_ID (bpl.getC_Location_ID ());
+				imp.setBillTo_ID (bpl.getC_BPartner_Location_ID ());
+				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
+				
+				//	User/Contact
+				if (imp.getContactName () != null 
+					|| imp.getEMail () != null 
+					|| imp.getPhone () != null)
+				{
+					MUser[] users = bp.getContacts(true);
+					MUser user = null;
+					for (int i = 0; user == null && i < users.length;  i++)
+					{
+						String name = users[i].getName();
+						if (name.equals(imp.getContactName()) 
+							|| name.equals(imp.getName()))
+						{
+							user = users[i];
+							imp.setAD_User_ID (user.getAD_User_ID ());
+						}
+					}
+					if (user == null)
+					{
+						user = new MUser (bp);
+						if (imp.getContactName () == null)
+							user.setName (imp.getName ());
+						else
+							user.setName (imp.getContactName ());
+						user.setEMail (imp.getEMail ());
+						user.setPhone (imp.getPhone ());
+						if (user.save ())
+							imp.setAD_User_ID (user.getAD_User_ID ());
+					}
+				}
+				imp.save ();
+			}	//	for all new BPartners
+			rs.close ();
+			pstmt.close ();
+			//
+		}
+]]></source>
+<source file="/home/saeed/code/org/compiere/process/ImportInvoice.java" startline="487" endline="599" pcid="4044"><![CDATA[
+		{
+			PreparedStatement pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
+			ResultSet rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				X_I_Invoice imp = new X_I_Invoice (getCtx(), rs, get_TrxName());
+				if (imp.getBPartnerValue () == null)
+				{
+					if (imp.getEMail () != null)
+						imp.setBPartnerValue (imp.getEMail ());
+					else if (imp.getName () != null)
+						imp.setBPartnerValue (imp.getName ());
+					else
+						continue;
+				}
+				if (imp.getName () == null)
+				{
+					if (imp.getContactName () != null)
+						imp.setName (imp.getContactName ());
+					else
+						imp.setName (imp.getBPartnerValue ());
+				}
+				//	BPartner
+				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
+				if (bp == null)
+				{
+					bp = new MBPartner (getCtx (), -1, get_TrxName());
+					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
+					bp.setValue (imp.getBPartnerValue ());
+					bp.setName (imp.getName ());
+					if (!bp.save ())
+						continue;
+				}
+				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
+				
+				//	BP Location
+				MBPartnerLocation bpl = null; 
+				MBPartnerLocation[] bpls = bp.getLocations(true);
+				for (int i = 0; bpl == null && i < bpls.length; i++)
+				{
+					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
+						bpl = bpls[i];
+					//	Same Location ID
+					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
+						bpl = bpls[i];
+					//	Same Location Info
+					else if (imp.getC_Location_ID() == 0)
+					{
+						MLocation loc = bpls[i].getLocation(false);
+						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(), 
+								imp.getPostal(), "", imp.getCity(), 
+								imp.getAddress1(), imp.getAddress2()))
+							bpl = bpls[i];
+					}
+				}
+				if (bpl == null)
+				{
+					//	New Location
+					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
+					loc.setAddress1 (imp.getAddress1 ());
+					loc.setAddress2 (imp.getAddress2 ());
+					loc.setCity (imp.getCity ());
+					loc.setPostal (imp.getPostal ());
+					if (imp.getC_Region_ID () != 0)
+						loc.setC_Region_ID (imp.getC_Region_ID ());
+					loc.setC_Country_ID (imp.getC_Country_ID ());
+					if (!loc.save ())
+						continue;
+					//
+					bpl = new MBPartnerLocation (bp);
+					bpl.setC_Location_ID (imp.getC_Location_ID() > 0 ? imp.getC_Location_ID() : loc.getC_Location_ID());
+					if (!bpl.save ())
+						continue;
+				}
+				imp.setC_Location_ID (bpl.getC_Location_ID ());
+				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
+				
+				//	User/Contact
+				if (imp.getContactName () != null 
+					|| imp.getEMail () != null 
+					|| imp.getPhone () != null)
+				{
+					MUser[] users = bp.getContacts(true);
+					MUser user = null;
+					for (int i = 0; user == null && i < users.length;  i++)
+					{
+						String name = users[i].getName();
+						if (name.equals(imp.getContactName()) 
+							|| name.equals(imp.getName()))
+						{
+							user = users[i];
+							imp.setAD_User_ID (user.getAD_User_ID ());
+						}
+					}
+					if (user == null)
+					{
+						user = new MUser (bp);
+						if (imp.getContactName () == null)
+							user.setName (imp.getName ());
+						else
+							user.setName (imp.getContactName ());
+						user.setEMail (imp.getEMail ());
+						user.setPhone (imp.getPhone ());
+						if (user.save ())
+							imp.setAD_User_ID (user.getAD_User_ID ());
+					}
+				}
+				imp.save ();
+			}	//	for all new BPartners
+			rs.close ();
+			pstmt.close ();
+			//
+		}
+]]></source>
+<source file="/home/saeed/code/org/compiere/process/ImportInvoice.java" startline="491" endline="595" pcid="4045"><![CDATA[
+			{
+				X_I_Invoice imp = new X_I_Invoice (getCtx(), rs, get_TrxName());
+				if (imp.getBPartnerValue () == null)
+				{
+					if (imp.getEMail () != null)
+						imp.setBPartnerValue (imp.getEMail ());
+					else if (imp.getName () != null)
+						imp.setBPartnerValue (imp.getName ());
+					else
+						continue;
+				}
+				if (imp.getName () == null)
+				{
+					if (imp.getContactName () != null)
+						imp.setName (imp.getContactName ());
+					else
+						imp.setName (imp.getBPartnerValue ());
+				}
+				//	BPartner
+				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
+				if (bp == null)
+				{
+					bp = new MBPartner (getCtx (), -1, get_TrxName());
+					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
+					bp.setValue (imp.getBPartnerValue ());
+					bp.setName (imp.getName ());
+					if (!bp.save ())
+						continue;
+				}
+				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
+				
+				//	BP Location
+				MBPartnerLocation bpl = null; 
+				MBPartnerLocation[] bpls = bp.getLocations(true);
+				for (int i = 0; bpl == null && i < bpls.length; i++)
+				{
+					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
+						bpl = bpls[i];
+					//	Same Location ID
+					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
+						bpl = bpls[i];
+					//	Same Location Info
+					else if (imp.getC_Location_ID() == 0)
+					{
+						MLocation loc = bpls[i].getLocation(false);
+						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(), 
+								imp.getPostal(), "", imp.getCity(), 
+								imp.getAddress1(), imp.getAddress2()))
+							bpl = bpls[i];
+					}
+				}
+				if (bpl == null)
+				{
+					//	New Location
+					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
+					loc.setAddress1 (imp.getAddress1 ());
+					loc.setAddress2 (imp.getAddress2 ());
+					loc.setCity (imp.getCity ());
+					loc.setPostal (imp.getPostal ());
+					if (imp.getC_Region_ID () != 0)
+						loc.setC_Region_ID (imp.getC_Region_ID ());
+					loc.setC_Country_ID (imp.getC_Country_ID ());
+					if (!loc.save ())
+						continue;
+					//
+					bpl = new MBPartnerLocation (bp);
+					bpl.setC_Location_ID (imp.getC_Location_ID() > 0 ? imp.getC_Location_ID() : loc.getC_Location_ID());
+					if (!bpl.save ())
+						continue;
+				}
+				imp.setC_Location_ID (bpl.getC_Location_ID ());
+				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
+				
+				//	User/Contact
+				if (imp.getContactName () != null 
+					|| imp.getEMail () != null 
+					|| imp.getPhone () != null)
+				{
+					MUser[] users = bp.getContacts(true);
+					MUser user = null;
+					for (int i = 0; user == null && i < users.length;  i++)
+					{
+						String name = users[i].getName();
+						if (name.equals(imp.getContactName()) 
+							|| name.equals(imp.getName()))
+						{
+							user = users[i];
+							imp.setAD_User_ID (user.getAD_User_ID ());
+						}
+					}
+					if (user == null)
+					{
+						user = new MUser (bp);
+						if (imp.getContactName () == null)
+							user.setName (imp.getName ());
+						else
+							user.setName (imp.getContactName ());
+						user.setEMail (imp.getEMail ());
+						user.setPhone (imp.getPhone ());
+						if (user.save ())
+							imp.setAD_User_ID (user.getAD_User_ID ());
+					}
+				}
+				imp.save ();
+			}	//	for all new BPartners
+]]></source>
+</class>
+
+<class id="8" nlines="70" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/CalloutInvoice.java" startline="133" endline="258" pcid="40118"><![CDATA[
+	{
+		Integer C_BPartner_ID = (Integer)value;
+		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
+			return "";
+
+		String sql = "SELECT p.AD_Language,p.C_PaymentTerm_ID,"
+			+ " COALESCE(p.M_PriceList_ID,g.M_PriceList_ID) AS M_PriceList_ID, p.PaymentRule,p.POReference,"
+			+ " p.SO_Description,p.IsDiscountPrinted,"
+			+ " p.SO_CreditLimit, p.SO_CreditLimit-p.SO_CreditUsed AS CreditAvailable,"
+			+ " l.C_BPartner_Location_ID,c.AD_User_ID,"
+			+ " COALESCE(p.PO_PriceList_ID,g.PO_PriceList_ID) AS PO_PriceList_ID, p.PaymentRulePO,p.PO_PaymentTerm_ID " 
+			+ "FROM C_BPartner p"
+			+ " INNER JOIN C_BP_Group g ON (p.C_BP_Group_ID=g.C_BP_Group_ID)"			
+			+ " LEFT OUTER JOIN C_BPartner_Location l ON (p.C_BPartner_ID=l.C_BPartner_ID AND l.IsBillTo=''Y'' AND l.IsActive=''Y'')"
+			+ " LEFT OUTER JOIN AD_User c ON (p.C_BPartner_ID=c.C_BPartner_ID) "
+			+ "WHERE p.C_BPartner_ID=? AND p.IsActive=''Y''";		//	#1
+
+		boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, C_BPartner_ID.intValue());
+			rs = pstmt.executeQuery();
+			//
+			if (rs.next())
+			{
+				//	PriceList & IsTaxIncluded & Currency
+				Integer ii = new Integer(rs.getInt(IsSOTrx ? "M_PriceList_ID" : "PO_PriceList_ID"));
+				if (!rs.wasNull())
+					mTab.setValue("M_PriceList_ID", ii);
+				else
+				{	//	get default PriceList
+					int i = Env.getContextAsInt(ctx, "#M_PriceList_ID");
+					if (i != 0)
+						mTab.setValue("M_PriceList_ID", new Integer(i));
+				}
+
+				//	PaymentRule
+				String s = rs.getString(IsSOTrx ? "PaymentRule" : "PaymentRulePO");
+				if (s != null && s.length() != 0)
+				{
+					if (Env.getContext(ctx, WindowNo, "DocBaseType").endsWith("C"))	//	Credits are Payment Term
+						s = "P";
+					else if (IsSOTrx && (s.equals("S") || s.equals("U")))	//	No Check/Transfer for SO_Trx
+						s = "P";											//  Payment Term
+					mTab.setValue("PaymentRule", s);
+				}
+				//  Payment Term
+				ii = new Integer(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
+				if (!rs.wasNull())
+					mTab.setValue("C_PaymentTerm_ID", ii);
+
+				//	Location
+				int locID = rs.getInt("C_BPartner_Location_ID");
+				//	overwritten by InfoBP selection - works only if InfoWindow
+				//	was used otherwise creates error (uses last value, may belong to differnt BP)
+				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
+				{
+					String loc = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_Location_ID");
+					if (loc.length() > 0)
+						locID = Integer.parseInt(loc);
+				}
+				if (locID == 0)
+					mTab.setValue("C_BPartner_Location_ID", null);
+				else
+					mTab.setValue("C_BPartner_Location_ID", new Integer(locID));
+
+				//	Contact - overwritten by InfoBP selection
+				int contID = rs.getInt("AD_User_ID");
+				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
+				{
+					String cont = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "AD_User_ID");
+					if (cont.length() > 0)
+						contID = Integer.parseInt(cont);
+				}
+				if (contID == 0)
+					mTab.setValue("AD_User_ID", null);
+				else
+					mTab.setValue("AD_User_ID", new Integer(contID));
+
+				//	CreditAvailable
+				if (IsSOTrx)
+				{
+					double CreditLimit = rs.getDouble("SO_CreditLimit");
+					if (CreditLimit != 0)
+					{
+						double CreditAvailable = rs.getDouble("CreditAvailable");
+						if (!rs.wasNull() && CreditAvailable < 0)
+							mTab.fireDataStatusEEvent("CreditLimitOver",
+								DisplayType.getNumberFormat(DisplayType.Amount).format(CreditAvailable),
+								false);
+					}
+				}
+				
+				//	PO Reference
+				s = rs.getString("POReference");
+				if (s != null && s.length() != 0)
+					mTab.setValue("POReference", s);
+				else
+					mTab.setValue("POReference", null);
+				//	SO Description
+				s = rs.getString("SO_Description");
+				if (s != null && s.trim().length() != 0)
+					mTab.setValue("Description", s);
+				//	IsDiscountPrinted
+				s = rs.getString("IsDiscountPrinted");
+				if (s != null && s.length() != 0)
+					mTab.setValue("IsDiscountPrinted", s);
+				else
+					mTab.setValue("IsDiscountPrinted", "N");
+			}
+		}
+		catch (SQLException e)
+		{
+			log.log(Level.SEVERE, "bPartner", e);
+			return e.getLocalizedMessage();
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		return "";
+	}	//	bPartner
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/CalloutInvoiceBatch.java" startline="77" endline="175" pcid="26712"><![CDATA[
+	{
+		Integer C_BPartner_ID = (Integer)value;
+		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
+			return "";
+
+		String sql = "SELECT p.AD_Language,p.C_PaymentTerm_ID,"
+			+ " COALESCE(p.M_PriceList_ID,g.M_PriceList_ID) AS M_PriceList_ID, p.PaymentRule,p.POReference,"
+			+ " p.SO_Description,p.IsDiscountPrinted,"
+			+ " p.SO_CreditLimit, p.SO_CreditLimit-p.SO_CreditUsed AS CreditAvailable,"
+			+ " l.C_BPartner_Location_ID,c.AD_User_ID,"
+			+ " COALESCE(p.PO_PriceList_ID,g.PO_PriceList_ID) AS PO_PriceList_ID, p.PaymentRulePO,p.PO_PaymentTerm_ID " 
+			+ "FROM C_BPartner p"
+			+ " INNER JOIN C_BP_Group g ON (p.C_BP_Group_ID=g.C_BP_Group_ID)"
+			+ " LEFT OUTER JOIN C_BPartner_Location l ON (p.C_BPartner_ID=l.C_BPartner_ID AND l.IsBillTo=''Y'' AND l.IsActive=''Y'')"
+			+ " LEFT OUTER JOIN AD_User c ON (p.C_BPartner_ID=c.C_BPartner_ID) "
+			+ "WHERE p.C_BPartner_ID=? AND p.IsActive=''Y''";		//	#1
+
+		boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, C_BPartner_ID.intValue());
+			rs = pstmt.executeQuery();
+			//
+			if (rs.next())
+			{
+				//	PaymentRule
+				String s = rs.getString(IsSOTrx ? "PaymentRule" : "PaymentRulePO");
+				if (s != null && s.length() != 0)
+				{
+					if (Env.getContext(ctx, WindowNo, "DocBaseType").endsWith("C"))	//	Credits are Payment Term
+						s = "P";
+					else if (IsSOTrx && (s.equals("S") || s.equals("U")))	//	No Check/Transfer for SO_Trx
+						s = "P";											//  Payment Term
+			//		mTab.setValue("PaymentRule", s);
+				}
+				//  Payment Term
+				Integer ii = new Integer(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
+				if (!rs.wasNull())
+					mTab.setValue("C_PaymentTerm_ID", ii);
+
+				//	Location
+				int locID = rs.getInt("C_BPartner_Location_ID");
+				//	overwritten by InfoBP selection - works only if InfoWindow
+				//	was used otherwise creates error (uses last value, may belong to differnt BP)
+				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
+				{
+					String loc = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_Location_ID");
+					if (loc.length() > 0)
+						locID = Integer.parseInt(loc);
+				}
+				if (locID == 0)
+					mTab.setValue("C_BPartner_Location_ID", null);
+				else
+					mTab.setValue("C_BPartner_Location_ID", new Integer(locID));
+
+				//	Contact - overwritten by InfoBP selection
+				int contID = rs.getInt("AD_User_ID");
+				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
+				{
+					String cont = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "AD_User_ID");
+					if (cont.length() > 0)
+						contID = Integer.parseInt(cont);
+				}
+				if (contID == 0)
+					mTab.setValue("AD_User_ID", null);
+				else
+					mTab.setValue("AD_User_ID", new Integer(contID));
+
+				//	CreditAvailable
+				if (IsSOTrx)
+				{
+					double CreditLimit = rs.getDouble("SO_CreditLimit");
+					if (CreditLimit != 0)
+					{
+						double CreditAvailable = rs.getDouble("CreditAvailable");
+						if (!rs.wasNull() && CreditAvailable < 0)
+							mTab.fireDataStatusEEvent("CreditLimitOver",
+								DisplayType.getNumberFormat(DisplayType.Amount).format(CreditAvailable),
+								false);
+					}
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			return e.getLocalizedMessage();
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+		}
+		//
+		setDocumentNo(ctx, WindowNo, mTab);
+		return tax (ctx, WindowNo, mTab, mField, value);
+	}	//	bPartner
+]]></source>
+</class>
+
+<class id="9" nlines="68" nfragments="2">
+<source file="/home/saeed/code/org/compiere/util/WebUser.java" startline="164" endline="271" pcid="5582"><![CDATA[
+	{
+		log.info(email + " - AD_Client_ID=" + m_AD_Client_ID);
+		String sql = "SELECT * "
+			+ "FROM AD_User "
+			+ "WHERE AD_Client_ID=?"
+			+ " AND TRIM(EMail)=?";
+		if (email == null)
+			email = "";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_AD_Client_ID);
+			pstmt.setString(2, email.trim());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				m_bpc = new MUser (m_ctx, rs, null);
+				log.fine("Found BPC=" + m_bpc);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		//	Check Password
+		m_passwordOK = false;
+		/**	User has no password
+		if (m_bpc != null && m_bpc.getPassword() == null)
+		{
+			if (password != null)
+				m_bpc.setPassword(password);
+			m_passwordOK = true;
+		}	**/
+		//	We have a password
+		if (m_bpc != null && password != null && password.equals(m_bpc.getPassword()))
+			m_passwordOK = true;
+		if (m_passwordOK || m_bpc == null)
+			m_passwordMessage = null;
+		else
+			setPasswordOK (false, password);
+
+		//	Load BPartner
+		if (m_bpc != null)
+		{
+			m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
+			log.fine("Found BP=" + m_bp);
+		}
+		else
+			m_bp = null;
+		//	Load Loacation
+		if (m_bpc != null)
+		{
+			if (m_bpc.getC_BPartner_Location_ID() != 0)
+			{
+				m_bpl = new MBPartnerLocation (m_ctx, m_bpc.getC_BPartner_Location_ID (), null);
+				log.fine("Found BPL=" + m_bpl);
+			}
+			else
+			{
+				MBPartnerLocation[] bpls = m_bp.getLocations(false);
+				if (bpls != null && bpls.length > 0)
+				{
+					m_bpl = bpls[0];
+					log.fine("Found BPL=" + m_bpl);
+				}
+			}
+			if (m_bpl != null)
+			{
+				m_loc = MLocation.get (m_ctx, m_bpl.getC_Location_ID(), null);
+				log.fine("Found LOC=" + m_loc);
+			}
+			else
+				m_loc = null;
+		}
+		else
+		{
+			m_bpl = null;
+			m_loc = null;
+		}
+
+		//	Make sure that all entities exist
+		if (m_bpc == null)
+		{
+			m_bpc = new MUser (m_ctx, 0, null);
+			m_bpc.setEMail(email);
+			m_bpc.setPassword(password);
+		}
+		if (m_bp == null)
+		{
+			m_bp = new MBPartner (m_ctx); //	template
+			m_bp.setIsCustomer(true);
+		}
+		if (m_bpl == null)
+			m_bpl = new MBPartnerLocation (m_bp);
+		if (m_loc == null)
+			m_loc = new MLocation (m_ctx, 0, null);
+		//
+		log.config(m_bp + " - " + m_bpc);
+	}	//	load
+]]></source>
+<source file="/home/saeed/code/org/compiere/util/WebUser.java" startline="278" endline="370" pcid="5596"><![CDATA[
+	{
+		log.info("ID=" + AD_User_ID + ", AD_Client_ID=" + m_AD_Client_ID);
+		String sql = "SELECT * "
+			+ "FROM AD_User "
+			+ "WHERE AD_Client_ID=?"
+			+ " AND AD_User_ID=?";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_AD_Client_ID);
+			pstmt.setInt(2, AD_User_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				m_bpc = new MUser (m_ctx, rs, null);
+				log.fine("= found BPC=" + m_bpc);
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+
+		//	Password not entered
+		m_passwordOK = false;
+		m_loggedIn = false;
+
+		//	Load BPartner
+		if (m_bpc != null)
+		{
+			m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
+			log.fine("= Found BP=" + m_bp);
+		}
+		else
+			m_bp = null;
+		//	Load Loacation
+		if (m_bpc != null)
+		{
+			if (m_bpc.getC_BPartner_Location_ID() != 0)
+			{
+				m_bpl = new MBPartnerLocation (m_ctx, m_bpc.getC_BPartner_Location_ID (), null);
+				log.fine("= Found BPL=" + m_bpl);
+			}
+			else
+			{
+				MBPartnerLocation[] bpls = m_bp.getLocations(false);
+				if (bpls != null && bpls.length > 0)
+				{
+					m_bpl = bpls[0];
+					log.fine("= Found BPL=" + m_bpl);
+				}
+			}
+			if (m_bpl != null)
+			{
+				m_loc = MLocation.get (m_ctx, m_bpl.getC_Location_ID(), null);
+				log.fine("= Found LOC=" + m_loc);
+			}
+			else
+				m_loc = null;
+		}
+		else
+		{
+			m_bpl = null;
+			m_loc = null;
+		}
+
+		//	Make sure that all entities exist
+		if (m_bpc == null)
+		{
+			m_bpc = new MUser (m_ctx, 0, null);
+			m_bpc.setEMail("?");
+			m_bpc.setPassword("?");
+		}
+		if (m_bp == null)
+		{
+			m_bp = new MBPartner (m_ctx); //	template
+			m_bp.setIsCustomer(true);
+		}
+		if (m_bpl == null)
+			m_bpl = new MBPartnerLocation (m_bp);
+		if (m_loc == null)
+			m_loc = new MLocation (m_ctx, 0, null);
+		//
+		log.info("= " + m_bp + " - " + m_bpc);
+	}	//	load
+]]></source>
+</class>
+
+<class id="10" nlines="68" nfragments="2">
+<source file="/home/saeed/code/org/adempiere/util/GenerateModelJPA.java" startline="534" endline="640" pcid="48732"><![CDATA[
+	{
+		StringBuffer retValue = new StringBuffer();
+		retValue.append("\n/** ").append(columnName).append(" AD_Reference_ID=").append(AD_Reference_ID) .append(" */\n")
+			.append("public static final int ").append(columnName.toUpperCase())
+			.append("_AD_Reference_ID=").append(AD_Reference_ID).append(";");
+		//
+		boolean found = false;
+		StringBuffer values = new StringBuffer("Reference_ID=")
+			.append(AD_Reference_ID);
+		StringBuffer statement = new StringBuffer();
+		if (nullable)
+			statement.append("if (").append(columnName).append(" == null");
+		//
+		String sql = "SELECT Value, Name FROM AD_Ref_List WHERE AD_Reference_ID=?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, AD_Reference_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				String value = rs.getString(1);
+				values.append(" - ").append(value);
+				if (statement.length() == 0)
+					statement.append("if (").append(columnName)
+						.append(".equals(\"").append(value).append("\")");
+				else
+					statement.append(" || ").append(columnName)
+						.append(".equals(\"").append(value).append("\")");
+				if (!found)
+				{
+					found = true;
+					sb.append("if (")
+						.append (columnName).append (" == null)"
+							+ " throw new IllegalArgumentException (\"")
+						.append(columnName).append(" is mandatory\");");
+				}
+				//	Name (SmallTalkNotation)
+				String name = rs.getString(2);
+				char[] nameArray = name.toCharArray();
+				StringBuffer nameClean = new StringBuffer();
+				boolean initCap = true;
+				for (int i = 0; i < nameArray.length; i++)
+				{
+					char c = nameArray[i];
+					if (Character.isJavaIdentifierPart(c))
+					{
+						if (initCap)
+							nameClean.append(Character.toUpperCase(c));
+						else
+							nameClean.append(c);
+						initCap = false;
+					}
+					else
+					{
+						if (c == ''+'')
+							nameClean.append("Plus");
+						else if (c == ''-'')
+							nameClean.append("_");
+						else if (c == ''>'')
+						{
+							if (name.indexOf(''<'') == -1)	//	ignore <xx>
+								nameClean.append("Gt");
+						}
+						else if (c == ''<'')
+						{
+							if (name.indexOf(''>'') == -1)	//	ignore <xx>
+								nameClean.append("Le");
+						}
+						else if (c == ''!'')
+							nameClean.append("Not");
+						else if (c == ''='')
+							nameClean.append("Eq");
+						else if (c == ''~'')
+							nameClean.append("Like");
+						initCap = true;
+					}
+				}
+				retValue.append("/** ").append(name).append(" = ").append(value).append(" */\n");
+				retValue.append("public static final String ").append(columnName.toUpperCase())
+					.append("_").append(nameClean)
+					.append(" = \"").append(value).append("\";");
+			}
+ 		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			found = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		statement.append(")"
+			+ "; "
+			+ "else "
+			+ "throw new IllegalArgumentException (\"").append(columnName)
+			.append(" Invalid value - \" + ").append(columnName)
+			.append(" + \" - ").append(values).append("\");");
+		//
+		if (found && !columnName.equals("EntityType"))
+			sb.append (statement);
+		return retValue.toString();
+	}	//	addListValidation
+]]></source>
+<source file="/home/saeed/code/org/adempiere/util/ModelClassGenerator.java" startline="589" endline="692" pcid="48666"><![CDATA[
+	{
+		StringBuffer retValue = new StringBuffer();
+		retValue.append("\n\t/** ").append(columnName).append(" AD_Reference_ID=").append(AD_Reference_ID) .append(" */")
+			.append("\n\tpublic static final int ").append(columnName.toUpperCase())
+			.append("_AD_Reference_ID=").append(AD_Reference_ID).append(";");
+		//
+		boolean found = false;
+		StringBuffer values = new StringBuffer("Reference_ID=")
+			.append(AD_Reference_ID);
+		StringBuffer statement = new StringBuffer();
+		//
+		String sql = "SELECT Value, Name FROM AD_Ref_List WHERE AD_Reference_ID=? ORDER BY AD_Ref_List_ID";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, AD_Reference_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				String value = rs.getString(1);
+				values.append(" - ").append(value);
+				if (statement.length() == 0)
+					statement.append("\n\t\tif (").append(columnName)
+						.append(".equals(\"").append(value).append("\")");
+				else
+					statement.append(" || ").append(columnName)
+						.append(".equals(\"").append(value).append("\")");
+				//
+				if (!found)
+				{
+					found = true;
+				}
+
+
+				//	Name (SmallTalkNotation)
+				String name = rs.getString(2);
+				char[] nameArray = name.toCharArray();
+				StringBuffer nameClean = new StringBuffer();
+				boolean initCap = true;
+				for (int i = 0; i < nameArray.length; i++)
+				{
+					char c = nameArray[i];
+					if (Character.isJavaIdentifierPart(c))
+					{
+						if (initCap)
+							nameClean.append(Character.toUpperCase(c));
+						else
+							nameClean.append(c);
+						initCap = false;
+					}
+					else
+					{
+						if (c == ''+'')
+							nameClean.append("Plus");
+						else if (c == ''-'')
+							nameClean.append("_");
+						else if (c == ''>'')
+						{
+							if (name.indexOf(''<'') == -1)	//	ignore <xx>
+								nameClean.append("Gt");
+						}
+						else if (c == ''<'')
+						{
+							if (name.indexOf(''>'') == -1)	//	ignore <xx>
+								nameClean.append("Le");
+						}
+						else if (c == ''!'')
+							nameClean.append("Not");
+						else if (c == ''='')
+							nameClean.append("Eq");
+						else if (c == ''~'')
+							nameClean.append("Like");
+						initCap = true;
+					}
+				}
+				retValue.append("\n\t/** ").append(name).append(" = ").append(value).append(" */");
+				retValue.append("\n\tpublic static final String ").append(columnName.toUpperCase())
+					.append("_").append(nameClean)
+					.append(" = \"").append(value).append("\";");
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		statement.append(")"
+			+ "; "
+			+ "else "
+			+ "throw new IllegalArgumentException (\"").append(columnName)
+			.append(" Invalid value - \" + ").append(columnName)
+			.append(" + \" - ").append(values).append("\");");
+		// [1762461] - Remove hardcoded list items checking in generated models
+		// if (found && !columnName.equals("EntityType"))
+		//	sb.append (statement);
+		sb.append("\n");
+		return retValue.toString();
+	}	//	addListValidation
+]]></source>
+</class>
+
+<class id="11" nlines="67" nfragments="2">
+<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="480" endline="584" pcid="46949"><![CDATA[
+		{
+			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+			BigDecimal serviceAmt = Env.ZERO;
+
+			//  Charge          DR
+			fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
+				getC_Currency_ID(), getAmount(Doc.AMTTYPE_Charge), null);
+			//  TaxCredit       DR
+			for (int i = 0; i < m_taxes.length; i++)
+			{
+				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
+					getC_Currency_ID(), m_taxes[i].getAmount(), null);
+				if (tl != null)
+					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+			}
+			//  Expense         DR
+			for (int i = 0; i < p_lines.length; i++)
+			{
+				DocLine line = p_lines[i];
+				boolean landedCost = landedCost(as, fact, line, true);
+				if (landedCost && as.isExplicitCostAdjustment())
+				{
+					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+						getC_Currency_ID(), line.getAmtSource(), null);
+					//
+					FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+						getC_Currency_ID(), null, line.getAmtSource());
+					String desc = line.getDescription();
+					if (desc == null)
+						desc = "100%";
+					else
+						desc += " 100%";
+					fl.setDescription(desc);
+				}
+				if (!landedCost)
+				{
+					MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+					if (line.isItem())
+						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
+					BigDecimal amt = line.getAmtSource();
+					BigDecimal dAmt = null;
+					if (as.isTradeDiscountPosted() && !line.isItem())
+					{
+						BigDecimal discount = line.getDiscount();
+						if (discount != null && discount.signum() != 0)
+						{
+							amt = amt.add(discount);
+							dAmt = discount;
+							MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+							fact.createLine (line, tradeDiscountReceived,
+									getC_Currency_ID(), null, dAmt);
+						}
+					}
+					fact.createLine (line, expense,
+						getC_Currency_ID(), amt, null);
+					if (!line.isItem())
+					{
+						grossAmt = grossAmt.subtract(amt);
+						serviceAmt = serviceAmt.add(amt);
+					}
+					//
+					if (line.getM_Product_ID() != 0
+						&& line.getProduct().isService())	//	otherwise Inv Matching
+						MCostDetail.createInvoice(as, line.getAD_Org_ID(), 
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,		//	No Cost Element
+							line.getAmtSource(), line.getQty(),
+							line.getDescription(), getTrxName());
+				}
+			}
+			//  Set Locations
+			FactLine[] fLines = fact.getLines();
+			for (int i = 0; i < fLines.length; i++)
+			{
+				if (fLines[i] != null)
+				{
+					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), true);  //  from Loc
+					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
+				}
+			}
+
+			//  Liability               CR
+			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
+			int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
+			if (m_allLinesItem || !as.isPostServices() 
+				|| payables_ID == payablesServices_ID)
+			{
+				grossAmt = getAmount(Doc.AMTTYPE_Gross);
+				serviceAmt = Env.ZERO;
+			}
+			else if (m_allLinesService)
+			{
+				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
+				grossAmt = Env.ZERO;
+			}
+			if (grossAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), payables_ID),
+					getC_Currency_ID(), null, grossAmt);
+			if (serviceAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
+					getC_Currency_ID(), null, serviceAmt);
+			//
+			updateProductPO(as);	//	Only API
+			updateProductInfo (as.getC_AcctSchema_ID());    //  only API
+		}
+]]></source>
+<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="587" endline="686" pcid="46961"><![CDATA[
+		{
+			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+			BigDecimal serviceAmt = Env.ZERO;
+			//  Charge                  CR
+			fact.createLine (null, getAccount(Doc.ACCTTYPE_Charge, as),
+				getC_Currency_ID(), null, getAmount(Doc.AMTTYPE_Charge));
+			//  TaxCredit               CR
+			for (int i = 0; i < m_taxes.length; i++)
+			{
+				FactLine tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
+					getC_Currency_ID(), null, m_taxes[i].getAmount());
+				if (tl != null)
+					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+			}
+			//  Expense                 CR
+			for (int i = 0; i < p_lines.length; i++)
+			{
+				DocLine line = p_lines[i];
+				boolean landedCost = landedCost(as, fact, line, false);
+				if (landedCost && as.isExplicitCostAdjustment())
+				{
+					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+						getC_Currency_ID(), null, line.getAmtSource());
+					//
+					FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
+						getC_Currency_ID(), line.getAmtSource(), null);
+					String desc = line.getDescription();
+					if (desc == null)
+						desc = "100%";
+					else
+						desc += " 100%";
+					fl.setDescription(desc);
+				}
+				if (!landedCost)
+				{
+					MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
+					if (line.isItem())
+						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
+					BigDecimal amt = line.getAmtSource();
+					BigDecimal dAmt = null;
+					if (as.isTradeDiscountPosted() && !line.isItem())
+					{
+						BigDecimal discount = line.getDiscount();
+						if (discount != null && discount.signum() != 0)
+						{
+							amt = amt.add(discount);
+							dAmt = discount;
+							MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
+							fact.createLine (line, tradeDiscountReceived,
+									getC_Currency_ID(), dAmt, null);
+						}
+					}
+					fact.createLine (line, expense,
+						getC_Currency_ID(), null, amt);
+					if (!line.isItem())
+					{
+						grossAmt = grossAmt.subtract(amt);
+						serviceAmt = serviceAmt.add(amt);
+					}
+					//
+					if (line.getM_Product_ID() != 0
+						&& line.getProduct().isService())	//	otherwise Inv Matching
+						MCostDetail.createInvoice(as, line.getAD_Org_ID(), 
+							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+							line.get_ID(), 0,		//	No Cost Element
+							line.getAmtSource().negate(), line.getQty(),
+							line.getDescription(), getTrxName());
+				}
+			}
+			//  Set Locations
+			FactLine[] fLines = fact.getLines();
+			for (int i = 0; i < fLines.length; i++)
+			{
+				if (fLines[i] != null)
+				{
+					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), true);  //  from Loc
+					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
+				}
+			}
+			//  Liability       DR
+			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
+			int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
+			if (m_allLinesItem || !as.isPostServices() 
+				|| payables_ID == payablesServices_ID)
+			{
+				grossAmt = getAmount(Doc.AMTTYPE_Gross);
+				serviceAmt = Env.ZERO;
+			}
+			else if (m_allLinesService)
+			{
+				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
+				grossAmt = Env.ZERO;
+			}
+			if (grossAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), payables_ID),
+					getC_Currency_ID(), grossAmt, null);
+			if (serviceAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
+					getC_Currency_ID(), serviceAmt, null);
+		}
+]]></source>
+</class>
+
+<class id="12" nlines="61" nfragments="2">
+<source file="/home/saeed/code/org/compiere/acct/Doc_InOut.java" startline="163" endline="260" pcid="46852"><![CDATA[
+		{
+			for (int i = 0; i < p_lines.length; i++)
+			{
+				DocLine line = p_lines[i];
+				// MZ Goodwill
+				// if Shipment CostDetail exist then get Cost from Cost Detail 
+				BigDecimal costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+				// end MZ
+				if (costs == null || costs.signum() == 0)	//	zero costs OK
+				{
+					MProduct product = line.getProduct();
+					if (product.isStocked())
+					{
+						p_Error = "No Costs for " + line.getProduct().getName();
+						log.log(Level.WARNING, p_Error);
+						return null;
+					}
+					else	//	ignore service
+						continue;
+				}
+				//  CoGS            DR
+				dr = fact.createLine(line,
+					line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
+					as.getC_Currency_ID(), costs, null);
+				if (dr == null)
+				{
+					p_Error = "FactLine DR not created: " + line;
+					log.log(Level.WARNING, p_Error);
+					return null;
+				}
+				dr.setM_Locator_ID(line.getM_Locator_ID());
+				dr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
+				dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+				dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
+				dr.setQty(line.getQty().negate());
+				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
+						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
+				{
+					//	Set AmtAcctDr from Original Shipment/Receipt
+					if (!dr.updateReverseLine (MInOut.Table_ID, 
+							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+					{
+						p_Error = "Original Shipment/Receipt not posted yet";
+						return null;
+					}
+				}
+				
+				//  Inventory               CR
+				cr = fact.createLine(line,
+					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
+					as.getC_Currency_ID(), null, costs);
+				if (cr == null)
+				{
+					p_Error = "FactLine CR not created: " + line;
+					log.log(Level.WARNING, p_Error);
+					return null;
+				}
+				cr.setM_Locator_ID(line.getM_Locator_ID());
+				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+				cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
+				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
+						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
+				{
+					//	Set AmtAcctCr from Original Shipment/Receipt
+					if (!cr.updateReverseLine (MInOut.Table_ID, 
+							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+					{
+						p_Error = "Original Shipment/Receipt not posted yet";
+						return null;
+					}
+					costs = cr.getAcctBalance(); //get original cost
+				}
+				//
+				if (line.getM_Product_ID() != 0)
+				{
+					MCostDetail.createShipment(as, line.getAD_Org_ID(), 
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						costs, line.getQty(),
+						line.getDescription(), true, getTrxName());
+				}
+			}	//	for all lines
+			updateProductInfo(as.getC_AcctSchema_ID());     //  only for SO!
+
+			/** Commitment release										****/
+			if (as.isAccrual() && as.isCreateSOCommitment())
+			{
+				for (int i = 0; i < p_lines.length; i++)
+				{
+					DocLine line = p_lines[i];
+					Fact factcomm = Doc_Order.getCommitmentSalesRelease(as, this, 
+						line.getQty(), line.get_ID(), Env.ONE);
+					if (factcomm != null)
+						facts.add(factcomm);
+				}
+			}	//	Commitment
+		
+		}	//	Shipment
+]]></source>
+<source file="/home/saeed/code/org/compiere/acct/Doc_InOut.java" startline="263" endline="347" pcid="46865"><![CDATA[
+		{
+			for (int i = 0; i < p_lines.length; i++)
+			{
+				DocLine line = p_lines[i];
+				// MZ Goodwill
+				// if Shipment CostDetail exist then get Cost from Cost Detail 
+				BigDecimal costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
+				// end MZ
+				
+				if (costs == null || costs.signum() == 0)	//	zero costs OK
+				{
+					MProduct product = line.getProduct();
+					if (product.isStocked())
+					{
+						p_Error = "No Costs for " + line.getProduct().getName();
+						log.log(Level.WARNING, p_Error);
+						return null;
+					}
+					else	//	ignore service
+						continue;
+				}
+				//  Inventory               DR
+				dr = fact.createLine(line,
+					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
+					as.getC_Currency_ID(), costs, null);
+				if (dr == null)
+				{
+					p_Error = "FactLine DR not created: " + line;
+					log.log(Level.WARNING, p_Error);
+					return null;
+				}
+				dr.setM_Locator_ID(line.getM_Locator_ID());
+				dr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
+				dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
+				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
+						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
+				{
+					//	Set AmtAcctDr from Original Shipment/Receipt
+					if (!dr.updateReverseLine (MInOut.Table_ID, 
+							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+					{
+						p_Error = "Original Shipment/Receipt not posted yet";
+						return null;
+					}
+					costs = dr.getAcctBalance(); //get original cost
+				}
+				//
+				if (line.getM_Product_ID() != 0)
+				{
+					MCostDetail.createShipment(as, line.getAD_Org_ID(), 
+						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						line.get_ID(), 0,
+						costs, line.getQty(),
+						line.getDescription(), true, getTrxName());
+				}
+				
+				//  CoGS            CR
+				cr = fact.createLine(line,
+					line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
+					as.getC_Currency_ID(), null, costs);
+				if (cr == null)
+				{
+					p_Error = "FactLine CR not created: " + line;
+					log.log(Level.WARNING, p_Error);
+					return null;
+				}
+				cr.setM_Locator_ID(line.getM_Locator_ID());
+				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
+				cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+				cr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
+				cr.setQty(line.getQty().negate());
+				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
+						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
+				{
+					//	Set AmtAcctCr from Original Shipment/Receipt
+					if (!cr.updateReverseLine (MInOut.Table_ID, 
+							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
+					{
+						p_Error = "Original Shipment/Receipt not posted yet";
+						return null;
+					}					
+				}
+			}	//	for all lines
+			updateProductInfo(as.getC_AcctSchema_ID());     //  only for SO!
+		}	//	Sales Return
+]]></source>
+</class>
+
+<class id="13" nlines="60" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MOrderLine.java" startline="795" endline="917" pcid="26630"><![CDATA[
+	{
+		if (newRecord && getParent().isComplete()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_OrderLine"));
+			return false;
+		}
+		//	Get Defaults from Parent
+		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0
+			|| getM_Warehouse_ID() == 0 
+			|| getC_Currency_ID() == 0)
+			setOrder (getParent());
+		if (m_M_PriceList_ID == 0)
+			setHeaderInfo(getParent());
+
+		
+		//	R/O Check - Product/Warehouse Change
+		if (!newRecord 
+			&& (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Warehouse_ID"))) 
+		{
+			if (!canChangeWarehouse())
+				return false;
+		}	//	Product Changed
+		
+		//	Charge
+		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
+				setM_Product_ID(0);
+		//	No Product
+		if (getM_Product_ID() == 0)
+			setM_AttributeSetInstance_ID(0);
+		//	Product
+		else	//	Set/check Product Price
+		{
+			//	Set Price if Actual = 0
+			if (m_productPrice == null 
+				&&  Env.ZERO.compareTo(getPriceActual()) == 0
+				&&  Env.ZERO.compareTo(getPriceList()) == 0)
+				setPrice();
+			//	Check if on Price list
+			if (m_productPrice == null)
+				getProductPricing(m_M_PriceList_ID);
+			if (!m_productPrice.isCalculated())
+			{
+				throw new ProductNotOnPriceListException(m_productPrice, getLine());
+			}
+		}
+
+		//	UOM
+		if (getC_UOM_ID() == 0 
+			&& (getM_Product_ID() != 0 
+				|| getPriceEntered().compareTo(Env.ZERO) != 0
+				|| getC_Charge_ID() != 0))
+		{
+			int C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
+			if (C_UOM_ID > 0)
+				setC_UOM_ID (C_UOM_ID);
+		}
+		//	Qty Precision
+		if (newRecord || is_ValueChanged("QtyEntered"))
+			setQtyEntered(getQtyEntered());
+		if (newRecord || is_ValueChanged("QtyOrdered"))
+			setQtyOrdered(getQtyOrdered());
+		
+		//	Qty on instance ASI for SO
+		if (m_IsSOTrx 
+			&& getM_AttributeSetInstance_ID() != 0
+			&& (newRecord || is_ValueChanged("M_Product_ID")
+				|| is_ValueChanged("M_AttributeSetInstance_ID")
+				|| is_ValueChanged("M_Warehouse_ID")))
+		{
+			MProduct product = getProduct();
+			if (product.isStocked())
+			{
+				int M_AttributeSet_ID = product.getM_AttributeSet_ID();
+				boolean isInstance = M_AttributeSet_ID != 0;
+				if (isInstance)
+				{
+					MAttributeSet mas = MAttributeSet.get(getCtx(), M_AttributeSet_ID);
+					isInstance = mas.isInstanceAttribute();
+				}
+				//	Max
+				if (isInstance)
+				{
+					MStorage[] storages = MStorage.getWarehouse(getCtx(), 
+						getM_Warehouse_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), 
+						M_AttributeSet_ID, false, null, true, get_TrxName());
+					BigDecimal qty = Env.ZERO;
+					for (int i = 0; i < storages.length; i++)
+					{
+						if (storages[i].getM_AttributeSetInstance_ID() == getM_AttributeSetInstance_ID())
+							qty = qty.add(storages[i].getQtyOnHand());
+					}
+					
+					if (getQtyOrdered().compareTo(qty) > 0)
+					{
+						log.warning("Qty - Stock=" + qty + ", Ordered=" + getQtyOrdered());
+						log.saveError("QtyInsufficient", "=" + qty); 
+						return false;
+					}
+				}
+			}	//	stocked
+		}	//	SO instance
+		
+		//	FreightAmt Not used
+		if (Env.ZERO.compareTo(getFreightAmt()) != 0)
+			setFreightAmt(Env.ZERO);
+
+		//	Set Tax
+		if (getC_Tax_ID() == 0)
+			setTax();
+
+		//	Get Line No
+		if (getLine() == 0)
+		{
+			String sql = "SELECT COALESCE(MAX(Line),0)+10 FROM C_OrderLine WHERE C_Order_ID=?";
+			int ii = DB.getSQLValue (get_TrxName(), sql, getC_Order_ID());
+			setLine (ii);
+		}
+		
+		//	Calculations & Rounding
+		setLineNetAmt();	//	extended Amount with or without tax
+		setDiscount();
+
+		return true;
+	}	//	beforeSave
+]]></source>
+<source file="/home/saeed/code/org/eevolution/model/MDDOrderLine.java" startline="515" endline="615" pcid="1432"><![CDATA[
+	{
+		if (newRecord && getParent().isComplete()) {
+			log.saveError("ParentComplete", Msg.translate(getCtx(), "DD_OrderLine"));
+			return false;
+		}
+		//	Get Defaults from Parent
+		/*if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0
+			|| getM_Warehouse_ID() == 0)
+			setOrder (getParent());*/
+		if (m_M_PriceList_ID == 0)
+			setHeaderInfo(getParent());
+		
+		//	R/O Check - Product/Warehouse Change
+		if (!newRecord 
+			&& (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Locator_ID") || is_ValueChanged("M_LocatorTo_ID"))) 
+		{
+			if (!canChangeWarehouse())
+				return false;
+		}	//	Product Changed
+		
+		//	Charge
+		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
+				setM_Product_ID(0);
+		//	No Product
+		if (getM_Product_ID() == 0)
+			setM_AttributeSetInstance_ID(0);
+		//	Product
+		
+
+		//	UOM
+		if (getC_UOM_ID() == 0 
+			&& (getM_Product_ID() != 0 
+				|| getC_Charge_ID() != 0))
+		{
+			int C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
+			if (C_UOM_ID > 0)
+				setC_UOM_ID (C_UOM_ID);
+		}
+		//	Qty Precision
+		if (newRecord || is_ValueChanged("QtyEntered"))
+			setQtyEntered(getQtyEntered());
+		if (newRecord || is_ValueChanged("QtyOrdered"))
+			setQtyOrdered(getQtyOrdered());
+		
+		//	Qty on instance ASI for SO
+		if (m_IsSOTrx 
+			&& getM_AttributeSetInstance_ID() != 0
+			&& (newRecord || is_ValueChanged("M_Product_ID")
+				|| is_ValueChanged("M_AttributeSetInstance_ID")
+				|| is_ValueChanged("M_Warehouse_ID")))
+		{
+			MProduct product = getProduct();
+			if (product.isStocked())
+			{
+				int M_AttributeSet_ID = product.getM_AttributeSet_ID();
+				boolean isInstance = M_AttributeSet_ID != 0;
+				if (isInstance)
+				{
+					MAttributeSet mas = MAttributeSet.get(getCtx(), M_AttributeSet_ID);
+					isInstance = mas.isInstanceAttribute();
+				}
+				//	Max
+				if (isInstance)
+				{
+					MLocator locator_from = MLocator.get(getCtx(), getM_Locator_ID());
+					MStorage[] storages = MStorage.getWarehouse(getCtx(), 
+							locator_from.getM_Warehouse_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), 
+						M_AttributeSet_ID, false, null, true, get_TrxName());
+					BigDecimal qty = Env.ZERO;
+					for (int i = 0; i < storages.length; i++)
+					{
+						if (storages[i].getM_AttributeSetInstance_ID() == getM_AttributeSetInstance_ID())
+							qty = qty.add(storages[i].getQtyOnHand());
+					}
+					if (getQtyOrdered().compareTo(qty) > 0)
+					{
+						log.warning("Qty - Stock=" + qty + ", Ordered=" + getQtyOrdered());
+						log.saveError("QtyInsufficient", "=" + qty); 
+						return false;
+					}
+				}
+			}	//	stocked
+			
+		}	//	SO instance
+		
+		//	FreightAmt Not used
+		if (Env.ZERO.compareTo(getFreightAmt()) != 0)
+			setFreightAmt(Env.ZERO);
+
+
+		//	Get Line No
+		if (getLine() == 0)
+		{
+			String sql = "SELECT COALESCE(MAX(Line),0)+10 FROM C_OrderLine WHERE C_Order_ID=?";
+			int ii = DB.getSQLValue (get_TrxName(), sql, getDD_Order_ID());
+			setLine (ii);
+		}
+
+
+		return true;
+	}	//	beforeSave
+]]></source>
+</class>
+
+<class id="14" nlines="59" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="904" endline="988" pcid="23803"><![CDATA[
+	{
+		String sql = "SELECT t.MovementQty, mp.Qty, ol.QtyOrdered, ol.PriceCost, ol.PriceActual,"	//	1..5
+			+ " o.C_Currency_ID, o.DateAcct, o.C_ConversionType_ID,"	//	6..8
+			+ " o.AD_Client_ID, o.AD_Org_ID, t.M_Transaction_ID "		//	9..11
+			+ "FROM M_Transaction t"
+			+ " INNER JOIN M_MatchPO mp ON (t.M_InOutLine_ID=mp.M_InOutLine_ID)"
+			+ " INNER JOIN C_OrderLine ol ON (mp.C_OrderLine_ID=ol.C_OrderLine_ID)"
+			+ " INNER JOIN C_Order o ON (ol.C_Order_ID=o.C_Order_ID) "
+			+ "WHERE t.M_Product_ID=?";
+		if (AD_Org_ID != 0)
+			sql += " AND t.AD_Org_ID=?";
+		else if (M_AttributeSetInstance_ID != 0)
+			sql += " AND t.M_AttributeSetInstance_ID=?";
+		sql += " ORDER BY t.M_Transaction_ID";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		BigDecimal newStockQty = Env.ZERO;
+		//
+		BigDecimal newAverageAmt = Env.ZERO;
+		int oldTransaction_ID = 0;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, product.getM_Product_ID());
+			if (AD_Org_ID != 0)
+				pstmt.setInt (2, AD_Org_ID);
+			else if (M_AttributeSetInstance_ID != 0)
+				pstmt.setInt (2, M_AttributeSetInstance_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				BigDecimal oldStockQty = newStockQty;
+				BigDecimal movementQty = rs.getBigDecimal(1);
+				int M_Transaction_ID = rs.getInt(11);
+				if (M_Transaction_ID != oldTransaction_ID)
+					newStockQty = oldStockQty.add(movementQty);
+				M_Transaction_ID = oldTransaction_ID;
+				//
+				BigDecimal matchQty = rs.getBigDecimal(2);
+				if (matchQty == null)
+				{
+					s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty);
+					continue;
+				}
+				//	Assumption: everything is matched
+				BigDecimal price = rs.getBigDecimal(4);
+				if (price == null || price.signum() == 0)	//	PO Cost
+					price = rs.getBigDecimal(5);			//	Actual
+				int C_Currency_ID = rs.getInt(6);
+				Timestamp DateAcct = rs.getTimestamp(7);
+				int C_ConversionType_ID = rs.getInt(8);
+				int Client_ID = rs.getInt(9);
+				int Org_ID = rs.getInt(10);
+				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
+					C_Currency_ID, as.getC_Currency_ID(),
+					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
+				//
+				BigDecimal oldAverageAmt = newAverageAmt;
+				BigDecimal averageCurrent = oldStockQty.multiply(oldAverageAmt);
+				BigDecimal averageIncrease = matchQty.multiply(cost);
+				BigDecimal newAmt = averageCurrent.add(averageIncrease);
+				newAmt = newAmt.setScale(as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
+				newAverageAmt = newAmt.divide(newStockQty, as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
+				s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty
+					+ ", Match=" + matchQty + ", Cost=" + cost + ", NewAvg=" + newAverageAmt);
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		//
+		if (newAverageAmt != null && newAverageAmt.signum() != 0)
+		{
+			s_log.finer(product.getName() + " = " + newAverageAmt);
+			return newAverageAmt;
+		}
+		return null;
+	}	//	calculateAveragePO
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="811" endline="892" pcid="23796"><![CDATA[
+	{
+		String sql = "SELECT t.MovementQty, mi.Qty, il.QtyInvoiced, il.PriceActual,"
+			+ " i.C_Currency_ID, i.DateAcct, i.C_ConversionType_ID, i.AD_Client_ID, i.AD_Org_ID, t.M_Transaction_ID "
+			+ "FROM M_Transaction t"
+			+ " INNER JOIN M_MatchInv mi ON (t.M_InOutLine_ID=mi.M_InOutLine_ID)"
+			+ " INNER JOIN C_InvoiceLine il ON (mi.C_InvoiceLine_ID=il.C_InvoiceLine_ID)"
+			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
+			+ "WHERE t.M_Product_ID=?";
+		if (AD_Org_ID != 0)
+			sql += " AND t.AD_Org_ID=?";
+		else if (M_AttributeSetInstance_ID != 0)
+			sql += " AND t.M_AttributeSetInstance_ID=?";
+		sql += " ORDER BY t.M_Transaction_ID";
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		BigDecimal newStockQty = Env.ZERO;
+		//
+		BigDecimal newAverageAmt = Env.ZERO;
+		int oldTransaction_ID = 0;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, product.getM_Product_ID());
+			if (AD_Org_ID != 0)
+				pstmt.setInt (2, AD_Org_ID);
+			else if (M_AttributeSetInstance_ID != 0)
+				pstmt.setInt (2, M_AttributeSetInstance_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				BigDecimal oldStockQty = newStockQty;
+				BigDecimal movementQty = rs.getBigDecimal(1);
+				int M_Transaction_ID = rs.getInt(10);
+				if (M_Transaction_ID != oldTransaction_ID)
+					newStockQty = oldStockQty.add(movementQty);
+				M_Transaction_ID = oldTransaction_ID;
+				//
+				BigDecimal matchQty = rs.getBigDecimal(2);
+				if (matchQty == null)
+				{
+					s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty);
+					continue;
+				}
+				//	Assumption: everything is matched
+				BigDecimal price = rs.getBigDecimal(4);
+				int C_Currency_ID = rs.getInt(5);
+				Timestamp DateAcct = rs.getTimestamp(6);
+				int C_ConversionType_ID = rs.getInt(7);
+				int Client_ID = rs.getInt(8);
+				int Org_ID = rs.getInt(9);
+				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
+					C_Currency_ID, as.getC_Currency_ID(),
+					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
+				//
+				BigDecimal oldAverageAmt = newAverageAmt;
+				BigDecimal averageCurrent = oldStockQty.multiply(oldAverageAmt);
+				BigDecimal averageIncrease = matchQty.multiply(cost);
+				BigDecimal newAmt = averageCurrent.add(averageIncrease);
+				newAmt = newAmt.setScale(as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
+				newAverageAmt = newAmt.divide(newStockQty, as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
+				s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty
+					+ ", Match=" + matchQty + ", Cost=" + cost + ", NewAvg=" + newAverageAmt);
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		//
+		if (newAverageAmt != null && newAverageAmt.signum() != 0)
+		{
+			s_log.finer(product.getName() + " = " + newAverageAmt);
+			return newAverageAmt;
+		}
+		return null;
+	}	//	calculateAverageInv
+]]></source>
+</class>
+
+<class id="15" nlines="58" nfragments="2">
+<source file="/home/saeed/code/org/compiere/acct/Doc_Order.java" startline="501" endline="584" pcid="47353"><![CDATA[
+	{
+		int precision = -1;
+		//
+		ArrayList<DocLine> list = new ArrayList<DocLine>();
+		String sql = "SELECT * FROM C_OrderLine ol "
+			+ "WHERE EXISTS "
+				+ "(SELECT * FROM C_InvoiceLine il "
+				+ "WHERE il.C_OrderLine_ID=ol.C_OrderLine_ID"
+				+ " AND il.C_InvoiceLine_ID=?)"
+			+ " OR EXISTS "
+				+ "(SELECT * FROM M_MatchPO po "
+				+ "WHERE po.C_OrderLine_ID=ol.C_OrderLine_ID"
+				+ " AND po.C_InvoiceLine_ID=?)";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, C_InvoiceLine_ID);
+			pstmt.setInt (2, C_InvoiceLine_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				if (maxQty.signum() == 0)
+					continue;
+				MOrderLine line = new MOrderLine (doc.getCtx(), rs, null);
+				DocLine docLine = new DocLine (line, doc);
+				//	Currency
+				if (precision == -1)
+				{
+					doc.setC_Currency_ID(docLine.getC_Currency_ID());
+					precision = MCurrency.getStdPrecision(doc.getCtx(), docLine.getC_Currency_ID());
+				}
+				//	Qty
+				BigDecimal Qty = line.getQtyOrdered().max(maxQty);
+				docLine.setQty(Qty, false);
+				//
+				BigDecimal PriceActual = line.getPriceActual();
+				BigDecimal PriceCost = line.getPriceCost();
+				BigDecimal LineNetAmt = null;
+				if (PriceCost != null && PriceCost.signum() != 0)
+					LineNetAmt = Qty.multiply(PriceCost);
+				else if (Qty.equals(maxQty))
+					LineNetAmt = line.getLineNetAmt();
+				else
+					LineNetAmt = Qty.multiply(PriceActual);
+				maxQty = maxQty.subtract(Qty);
+				
+				docLine.setAmount (LineNetAmt);	//	DR
+				BigDecimal PriceList = line.getPriceList();
+				int C_Tax_ID = docLine.getC_Tax_ID();
+				//	Correct included Tax
+				if (C_Tax_ID != 0 && line.getParent().isTaxIncluded())
+				{
+					MTax tax = MTax.get(doc.getCtx(), C_Tax_ID);
+					if (!tax.isZeroTax())
+					{
+						BigDecimal LineNetAmtTax = tax.calculateTax(LineNetAmt, true, precision);
+						s_log.fine("LineNetAmt=" + LineNetAmt + " - Tax=" + LineNetAmtTax);
+						LineNetAmt = LineNetAmt.subtract(LineNetAmtTax);
+						BigDecimal PriceListTax = tax.calculateTax(PriceList, true, precision);
+						PriceList = PriceList.subtract(PriceListTax);
+					}
+				}	//	correct included Tax
+				
+				docLine.setAmount (LineNetAmt, PriceList, Qty);
+				list.add(docLine);
+			}
+		}
+		catch (Exception e)
+		{
+			s_log.log (Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		//	Return Array
+		DocLine[] dl = new DocLine[list.size()];
+		list.toArray(dl);
+		return dl;
+	}	//	getCommitments
+]]></source>
+<source file="/home/saeed/code/org/compiere/acct/Doc_Order.java" startline="646" endline="724" pcid="47365"><![CDATA[
+	{
+		int precision = -1;
+		//
+		ArrayList<DocLine> list = new ArrayList<DocLine>();
+		String sql = "SELECT * FROM C_OrderLine ol "
+			+ "WHERE EXISTS "
+				+ "(SELECT * FROM M_InOutLine il "
+				+ "WHERE il.C_OrderLine_ID=ol.C_OrderLine_ID"
+				+ " AND il.M_InOutLine_ID=?)";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, M_InOutLine_ID);
+			rs = pstmt.executeQuery ();
+			while (rs.next ())
+			{
+				if (maxQty.signum() == 0)
+					continue;
+				MOrderLine line = new MOrderLine (doc.getCtx(), rs, null);
+				DocLine docLine = new DocLine (line, doc);
+				//	Currency
+				if (precision == -1)
+				{
+					doc.setC_Currency_ID(docLine.getC_Currency_ID());
+					precision = MCurrency.getStdPrecision(doc.getCtx(), docLine.getC_Currency_ID());
+				}
+				//	Qty
+				BigDecimal Qty = line.getQtyOrdered().max(maxQty);
+				docLine.setQty(Qty, false);
+				//
+				BigDecimal PriceActual = line.getPriceActual();
+				BigDecimal PriceCost = line.getPriceCost();
+				BigDecimal LineNetAmt = null;
+				if (PriceCost != null && PriceCost.signum() != 0)
+					LineNetAmt = Qty.multiply(PriceCost);
+				else if (Qty.equals(maxQty))
+					LineNetAmt = line.getLineNetAmt();
+				else
+					LineNetAmt = Qty.multiply(PriceActual);
+				maxQty = maxQty.subtract(Qty);
+				
+				docLine.setAmount (LineNetAmt);	//	DR
+				BigDecimal PriceList = line.getPriceList();
+				int C_Tax_ID = docLine.getC_Tax_ID();
+				//	Correct included Tax
+				if (C_Tax_ID != 0 && line.getParent().isTaxIncluded())
+				{
+					MTax tax = MTax.get(doc.getCtx(), C_Tax_ID);
+					if (!tax.isZeroTax())
+					{
+						BigDecimal LineNetAmtTax = tax.calculateTax(LineNetAmt, true, precision);
+						s_log.fine("LineNetAmt=" + LineNetAmt + " - Tax=" + LineNetAmtTax);
+						LineNetAmt = LineNetAmt.subtract(LineNetAmtTax);
+						BigDecimal PriceListTax = tax.calculateTax(PriceList, true, precision);
+						PriceList = PriceList.subtract(PriceListTax);
+					}
+				}	//	correct included Tax
+				
+				docLine.setAmount (LineNetAmt, PriceList, Qty);
+				list.add(docLine);
+			}
+		}
+		catch (Exception e)
+		{
+			s_log.log (Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		//	Return Array
+		DocLine[] dl = new DocLine[list.size()];
+		list.toArray(dl);
+		return dl;
+	}	//	getCommitmentsSales
+]]></source>
+</class>
+
+<class id="16" nlines="57" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MInOut.java" startline="1811" endline="1900" pcid="38788"><![CDATA[
+	{
+		//	Is this a counter doc ?
+		if (getRef_InOut_ID() != 0)
+			return null;
+
+		//	Org Must be linked to BPartner
+		MOrg org = MOrg.get(getCtx(), getAD_Org_ID());
+		int counterC_BPartner_ID = org.getLinkedC_BPartner_ID(get_TrxName());
+		if (counterC_BPartner_ID == 0)
+			return null;
+		//	Business Partner needs to be linked to Org
+		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
+		if (counterAD_Org_ID == 0)
+			return null;
+
+		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, null);
+		MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID, get_TrxName());
+		log.info("Counter BP=" + counterBP.getName());
+
+		//	Document Type
+		int C_DocTypeTarget_ID = 0;
+		MDocTypeCounter counterDT = MDocTypeCounter.getCounterDocType(getCtx(), getC_DocType_ID());
+		if (counterDT != null)
+		{
+			log.fine(counterDT.toString());
+			if (!counterDT.isCreateCounter() || !counterDT.isValid())
+				return null;
+			C_DocTypeTarget_ID = counterDT.getCounter_C_DocType_ID();
+		}
+		else	//	indirect
+		{
+			C_DocTypeTarget_ID = MDocTypeCounter.getCounterDocType_ID(getCtx(), getC_DocType_ID());
+			log.fine("Indirect C_DocTypeTarget_ID=" + C_DocTypeTarget_ID);
+			if (C_DocTypeTarget_ID <= 0)
+				return null;
+		}
+
+		//	Deep Copy
+		MInOut counter = copyFrom(this, getMovementDate(), getDateAcct(),
+			C_DocTypeTarget_ID, !isSOTrx(), true, get_TrxName(), true);
+
+		//
+		counter.setAD_Org_ID(counterAD_Org_ID);
+		counter.setM_Warehouse_ID(counterOrgInfo.getM_Warehouse_ID());
+		//
+		counter.setBPartner(counterBP);
+
+		if ( isDropShip() )
+		{
+			counter.setIsDropShip(true );
+			counter.setDropShip_BPartner_ID(getDropShip_BPartner_ID());
+			counter.setDropShip_Location_ID(getDropShip_Location_ID());
+			counter.setDropShip_User_ID(getDropShip_User_ID());
+		}
+
+		//	Refernces (Should not be required
+		counter.setSalesRep_ID(getSalesRep_ID());
+		counter.save(get_TrxName());
+
+		String MovementType = counter.getMovementType();
+		boolean inTrx = MovementType.charAt(1) == ''+'';	//	V+ Vendor Receipt
+
+		//	Update copied lines
+		MInOutLine[] counterLines = counter.getLines(true);
+		for (int i = 0; i < counterLines.length; i++)
+		{
+			MInOutLine counterLine = counterLines[i];
+			counterLine.setClientOrg(counter);
+			counterLine.setM_Warehouse_ID(counter.getM_Warehouse_ID());
+			counterLine.setM_Locator_ID(0);
+			counterLine.setM_Locator_ID(inTrx ? Env.ZERO : counterLine.getMovementQty());
+			//
+			counterLine.save(get_TrxName());
+		}
+
+		log.fine(counter.toString());
+
+		//	Document Action
+		if (counterDT != null)
+		{
+			if (counterDT.getDocAction() != null)
+			{
+				counter.setDocAction(counterDT.getDocAction());
+				counter.processIt(counterDT.getDocAction());
+				counter.save(get_TrxName());
+			}
+		}
+		return counter;
+	}	//	createCounterDoc
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MOrder.java" startline="1895" endline="1968" pcid="20530"><![CDATA[
+	{
+		//	Is this itself a counter doc ?
+		if (getRef_Order_ID() != 0)
+			return null;
+		
+		//	Org Must be linked to BPartner
+		MOrg org = MOrg.get(getCtx(), getAD_Org_ID());
+		int counterC_BPartner_ID = org.getLinkedC_BPartner_ID(get_TrxName()); 
+		if (counterC_BPartner_ID == 0)
+			return null;
+		//	Business Partner needs to be linked to Org
+		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
+		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int(); 
+		if (counterAD_Org_ID == 0)
+			return null;
+		
+		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, null);
+		MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID, get_TrxName());
+		log.info("Counter BP=" + counterBP.getName());
+
+		//	Document Type
+		int C_DocTypeTarget_ID = 0;
+		MDocTypeCounter counterDT = MDocTypeCounter.getCounterDocType(getCtx(), getC_DocType_ID());
+		if (counterDT != null)
+		{
+			log.fine(counterDT.toString());
+			if (!counterDT.isCreateCounter() || !counterDT.isValid())
+				return null;
+			C_DocTypeTarget_ID = counterDT.getCounter_C_DocType_ID();
+		}
+		else	//	indirect
+		{
+			C_DocTypeTarget_ID = MDocTypeCounter.getCounterDocType_ID(getCtx(), getC_DocType_ID());
+			log.fine("Indirect C_DocTypeTarget_ID=" + C_DocTypeTarget_ID);
+			if (C_DocTypeTarget_ID <= 0)
+				return null;
+		}
+		//	Deep Copy
+		MOrder counter = copyFrom (this, getDateOrdered(), 
+			C_DocTypeTarget_ID, !isSOTrx(), true, false, get_TrxName());
+		//
+		counter.setAD_Org_ID(counterAD_Org_ID);
+		counter.setM_Warehouse_ID(counterOrgInfo.getM_Warehouse_ID());
+		//
+		counter.setBPartner(counterBP);
+		counter.setDatePromised(getDatePromised());		// default is date ordered 
+		//	Refernces (Should not be required
+		counter.setSalesRep_ID(getSalesRep_ID());
+		counter.save(get_TrxName());
+		
+		//	Update copied lines
+		MOrderLine[] counterLines = counter.getLines(true, null);
+		for (int i = 0; i < counterLines.length; i++)
+		{
+			MOrderLine counterLine = counterLines[i];
+			counterLine.setOrder(counter);	//	copies header values (BP, etc.)
+			counterLine.setPrice();
+			counterLine.setTax();
+			counterLine.save(get_TrxName());
+		}
+		log.fine(counter.toString());
+		
+		//	Document Action
+		if (counterDT != null)
+		{
+			if (counterDT.getDocAction() != null)
+			{
+				counter.setDocAction(counterDT.getDocAction());
+				counter.processIt(counterDT.getDocAction());
+				counter.save(get_TrxName());
+			}
+		}
+		return counter;
+	}	//	createCounterDoc
+]]></source>
+</class>
+
+<class id="17" nlines="57" nfragments="4">
+<source file="/home/saeed/code/org/adempiere/util/GenerateModel.java" startline="69" endline="153" pcid="48570"><![CDATA[
+	{
+		Adempiere.startupEnvironment((args.length > 4 && args[4].equals("Client")));
+		CLogMgt.setLevel(Level.FINE);
+		log.info("Generate Model   $Revision: 1.42 $");
+		log.info("----------------------------------");
+		//	first parameter
+		String directory = "C:\\Compiere\\compiere-all\\extend\\src\\compiere\\model\\";
+		if (args.length > 0)
+			directory = args[0];
+		if (directory == null || directory.length() == 0)
+		{
+			System.err.println("No Directory");
+			System.exit(1);
+		}
+		log.info("Directory: " + directory);
+		
+		//	second parameter
+		String packageName = "compiere.model";
+		if (args.length > 1)
+			packageName = args[1]; 
+		if (packageName == null || packageName.length() == 0)
+		{
+			System.err.println("No package");
+			System.exit(1);
+		}
+		log.info("Package:   " + packageName);
+		
+		//	third parameter
+		String entityType = "''U'',''A''";	//	User, Application
+		if (args.length > 2)
+			entityType = args[2]; 
+		if (entityType == null || entityType.length() == 0)
+		{
+			System.err.println("No EntityType");
+			System.exit(1);
+		}
+		StringBuffer sql = new StringBuffer("EntityType IN (")
+			.append(entityType).append(")");
+		log.info(sql.toString());
+		log.info("----------------------------------");
+		
+		String tableLike = null;
+		tableLike = "''%''";	//	All tables
+		// tableLike = "''AD_OrgInfo'', ''AD_Role'', ''C_CashLine'', ''C_Currency'', ''C_Invoice'', ''C_Order'', ''C_Payment'', ''M_InventoryLine'', ''M_PriceList'', ''M_Product'', ''U_POSTerminal''";	//	Only specific tables
+		if (args.length > 3)
+			tableLike = args[3];
+		log.info("Table Like: " + tableLike);
+
+		//	complete sql
+		sql.insert(0, "SELECT AD_Table_ID "
+			+ "FROM AD_Table "
+			+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')"	//	special views
+			+ " OR IsView=''N'')"
+			+ " AND IsActive = ''Y'' AND TableName NOT LIKE ''%_Trl'' AND ");
+		sql.append(" AND TableName LIKE ").append(tableLike);
+		//sql.append(" AND TableName IN (").append(tableLike).append(")"); // only specific tables
+
+		sql.append(" ORDER BY TableName");
+		
+		//
+		int count = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				new ModelInterfaceGenerator(rs.getInt(1), directory, packageName);
+				new ModelClassGenerator(rs.getInt(1), directory, packageName);
+				count++;
+			}
+ 		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql.toString(), e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		log.info("Generated = " + count);
+	}
+]]></source>
+<source file="/home/saeed/code/org/adempiere/util/ModelInterfaceGenerator.java" startline="760" endline="837" pcid="48561"><![CDATA[
+	public static void main(String[] args) {
+		Adempiere.startupEnvironment(true);
+		CLogMgt.setLevel(Level.FINE);
+		log.info("Generate Interface   $Revision: 1.0 $");
+		log.info("----------------------------------");
+		// first parameter
+		String directory = "C:\\Adempiere\\adempiere-all\\extend\\src\\compiere\\model\\";
+		if (args.length > 0)
+			directory = args[0];
+		if (directory == null || directory.length() == 0) {
+			System.err.println("No Directory");
+			System.exit(1);
+		}
+		log.info("Directory: " + directory);
+
+		// second parameter
+		String packageName = "compiere.model";
+		if (args.length > 1)
+			packageName = args[1];
+		if (packageName == null || packageName.length() == 0) {
+			System.err.println("No package");
+			System.exit(1);
+		}
+		log.info("Package:   " + packageName);
+
+		// third parameter
+		String entityType = "''U'',''A''"; // User, Application
+		if (args.length > 2)
+			entityType = args[2];
+		if (entityType == null || entityType.length() == 0) {
+			System.err.println("No EntityType");
+			System.exit(1);
+		}
+		StringBuffer sql = new StringBuffer("EntityType IN (").append(
+				entityType).append(")");
+		log.info(sql.toString());
+		log.info("----------------------------------");
+		
+		// Table name like
+		String tableLike = "''%''";	//	All tables
+		//tableLike = "''AD_OrgInfo'', ''AD_Role'', ''C_CashLine'', ''C_Currency'', ''C_Invoice'', ''C_Order'', ''C_Payment'', ''M_InventoryLine'', ''M_PriceList'', ''M_Product'', ''U_POSTerminal''"; // only specific tables
+		if (args.length > 3)
+			tableLike = args[3];
+		log.info("Table Like: " + tableLike);
+		
+		// complete sql
+		sql.insert(0, "SELECT AD_Table_ID " + "FROM AD_Table "
+				+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')" // special views
+				+ " OR IsView=''N'') AND IsActive = ''Y'' AND TableName NOT LIKE ''%_Trl'' AND ");
+		sql.append(" AND TableName LIKE ").append(tableLike);
+		//sql.append(" AND TableName IN (").append( tableLike ).append(")");
+		sql.append(" ORDER BY TableName");
+
+		//
+		int count = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				new ModelInterfaceGenerator(rs.getInt(1), directory, packageName);
+				count++;
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql.toString());
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		log.info("Generated = " + count);
+
+	}
+]]></source>
+<source file="/home/saeed/code/org/adempiere/util/ModelClassGenerator.java" startline="833" endline="914" pcid="48693"><![CDATA[
+	{
+		Adempiere.startupEnvironment(true);
+		CLogMgt.setLevel(Level.FINE);
+		log.info("Generate Model   $Revision: 1.42 $");
+		log.info("----------------------------------");
+		//	first parameter
+		String directory = "C:\\Adempiere\\adempiere-all\\extend\\src\\compiere\\model\\";
+		if (args.length > 0)
+			directory = args[0];
+		if (directory == null || directory.length() == 0)
+		{
+			System.err.println("No Directory");
+			System.exit(1);
+		}
+		log.info("Directory: " + directory);
+
+		//	second parameter
+		String packageName = "compiere.model";
+		if (args.length > 1)
+			packageName = args[1];
+		if (packageName == null || packageName.length() == 0)
+		{
+			System.err.println("No package");
+			System.exit(1);
+		}
+		log.info("Package:   " + packageName);
+
+		//	third parameter
+		String entityType = "''U'',''A''";	//	User, Application
+		if (args.length > 2)
+			entityType = args[2];
+		if (entityType == null || entityType.length() == 0)
+		{
+			System.err.println("No EntityType");
+			System.exit(1);
+		}
+		StringBuffer sql = new StringBuffer("EntityType IN (")
+			.append(entityType).append(")");
+		log.info(sql.toString());
+		log.info("----------------------------------");
+
+		String tableLike = "''%''";	//	All tables
+		//tableLike = "''AD_OrgInfo'', ''AD_Role'', ''C_CashLine'', ''C_Currency'', ''C_Invoice'', ''C_Order'', ''C_Payment'', ''M_InventoryLine'', ''M_PriceList'', ''M_Product'', ''U_POSTerminal''";
+		if (args.length > 3)
+			tableLike = args[3];
+		log.info("Table Like: " + tableLike);
+
+		//	complete sql
+		sql.insert(0, "SELECT AD_Table_ID "
+			+ "FROM AD_Table "
+			+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')"	//	special views
+			+ " OR IsView=''N'')"
+			+ " AND IsActive = ''Y'' AND TableName NOT LIKE ''%_Trl'' AND ");
+		sql.append(" AND TableName LIKE ").append(tableLike);
+
+		sql.append(" ORDER BY TableName");
+
+		//
+		int count = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				new ModelClassGenerator(rs.getInt(1), directory, packageName);
+				count++;
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql.toString());
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		log.info("Generated = " + count);
+	}
+]]></source>
+<source file="/home/saeed/code/org/adempiere/util/GenerateModelJPA.java" startline="732" endline="808" pcid="48751"><![CDATA[
+	{
+		org.compiere.Adempiere.startupEnvironment(true);
+		CLogMgt.setLevel(Level.FINE);
+	//	CLogMgt.setLevel(Level.ALL);
+		log.info("Generate Model   $Revision: 1.5 $");
+		log.info("----------------------------------");
+		//	first parameter
+		String directory = "/app/adempiere/adempiere_branch_3.1.1/dbPort/src/org/adempiere/model/";
+		if (args.length > 0)
+			directory = args[0];
+		if (directory == null || directory.length() == 0)
+		{
+			System.err.println("No Directory");
+			System.exit(1);
+		}
+		log.info("Directory: " + directory);
+		
+		//	second parameter
+		String packageName = "adempiere.model";
+		if (args.length > 1)
+			packageName = args[1]; 
+		if (packageName == null || packageName.length() == 0)
+		{
+			System.err.println("No package");
+			System.exit(1);
+		}
+		log.info("Package:   " + packageName);
+		
+		//	third parameter
+		String entityType = "''U'',''A'',''D''";	//	User, Application
+		if (args.length > 2)
+			entityType = args[2]; 
+		if (entityType == null || entityType.length() == 0)
+		{
+			System.err.println("No EntityType");
+			System.exit(1);
+		}
+		StringBuffer sql = new StringBuffer("EntityType IN (")
+			.append(entityType).append(")");
+		log.info(sql.toString());
+		log.info("----------------------------------");
+		
+		//	complete sql
+		sql.insert(0, "SELECT AD_Table_ID "
+			+ "FROM AD_Table "
+			+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')"	//	special views
+			+ " OR IsView=''N'')"
+			+ " AND TableName NOT LIKE ''%_Trl'' AND ");
+		sql.append(" ORDER BY TableName");
+		
+		//
+		int count = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql.toString(), null);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				new GenerateModelJPA(rs.getInt(1), directory, packageName);
+				count++;
+			}
+ 		}
+		catch (Exception e)
+		{
+			log.severe("main - " + e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		
+		log.info("Generated = " + count);
+
+	}	//	main
+]]></source>
+</class>
+
+<class id="18" nlines="54" nfragments="2">
+<source file="/home/saeed/code/org/adempiere/util/ModelClassGenerator.java" startline="266" endline="338" pcid="48634"><![CDATA[
+	{
+		StringBuffer sb = new StringBuffer();
+		String sql = "SELECT c.ColumnName, c.IsUpdateable, c.IsMandatory,"		//	1..3
+			+ " c.AD_Reference_ID, c.AD_Reference_Value_ID, DefaultValue, SeqNo, "	//	4..7
+			+ " c.FieldLength, c.ValueMin, c.ValueMax, c.VFormat, c.Callout, "	//	8..12
+			+ " c.Name, c.Description, c.ColumnSQL, c.IsEncrypted, c.IsKey, c.IsIdentifier "  // 13..18
+			+ "FROM AD_Column c "
+			+ "WHERE c.AD_Table_ID=?"
+			+ " AND c.ColumnName NOT IN (''AD_Client_ID'', ''AD_Org_ID'', ''IsActive'', ''Created'', ''CreatedBy'', ''Updated'', ''UpdatedBy'')"
+			+ " AND c.IsActive=''Y''"
+			+ " ORDER BY c.ColumnName";
+		boolean isKeyNamePairCreated = false; // true if the method "getKeyNamePair" is already generated
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, AD_Table_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next())
+			{
+				String columnName = rs.getString(1);
+				boolean isUpdateable = "Y".equals(rs.getString(2));
+				boolean isMandatory = "Y".equals(rs.getString(3));
+				int displayType = rs.getInt(4);
+				int AD_Reference_Value_ID = rs.getInt(5);
+				String defaultValue = rs.getString(6);
+				int seqNo = rs.getInt(7);
+				int fieldLength = rs.getInt(8);
+				String ValueMin = rs.getString(9);
+				String ValueMax = rs.getString(10);
+				String VFormat = rs.getString(11);
+				String Callout = rs.getString(12);
+				String Name = rs.getString(13);
+				String Description = rs.getString(14);
+				String ColumnSQL = rs.getString(15);
+				boolean virtualColumn = ColumnSQL != null && ColumnSQL.length() > 0;
+				boolean IsEncrypted = "Y".equals(rs.getString(16));
+				boolean IsKey = "Y".equals(rs.getString(17));
+				boolean IsIdentifier = "Y".equals(rs.getString(18));
+				//
+				sb.append(
+					createColumnMethods (mandatory,
+							columnName, isUpdateable, isMandatory,
+							displayType, AD_Reference_Value_ID, fieldLength,
+							defaultValue, ValueMin, ValueMax, VFormat,
+							Callout, Name, Description, virtualColumn, IsEncrypted, IsKey,
+							AD_Table_ID)
+				);
+				//
+				if (seqNo == 1 && IsIdentifier) {
+					if (!isKeyNamePairCreated) {
+						sb.append(createKeyNamePair(columnName, displayType));
+						isKeyNamePairCreated = true;
+					}
+					else {
+						throw new RuntimeException("More than one primary identifier found "
+								+ " (AD_Table_ID=" + AD_Table_ID + ", ColumnName=" + columnName + ")");
+					}
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		return sb;
+	}	//	createColumns
+]]></source>
+<source file="/home/saeed/code/org/adempiere/util/ModelInterfaceGenerator.java" startline="226" endline="292" pcid="48496"><![CDATA[
+	private StringBuffer createColumns(int AD_Table_ID, StringBuffer mandatory) {
+		StringBuffer sb = new StringBuffer();
+		String sql = "SELECT c.ColumnName, c.IsUpdateable, c.IsMandatory," // 1..3
+				+ " c.AD_Reference_ID, c.AD_Reference_Value_ID, DefaultValue, SeqNo, " // 4..7
+				+ " c.FieldLength, c.ValueMin, c.ValueMax, c.VFormat, c.Callout, " // 8..12
+				+ " c.Name, c.Description, c.ColumnSQL, c.IsEncrypted, c.IsKey "   // 13..17
+				+ "FROM AD_Column c "
+				+ "WHERE c.AD_Table_ID=?"
+//				+ " AND c.ColumnName <> ''AD_Client_ID''"
+//				+ " AND c.ColumnName <> ''AD_Org_ID''"
+//				+ " AND c.ColumnName <> ''IsActive''"
+//				+ " AND c.ColumnName NOT LIKE ''Created%''"
+//				+ " AND c.ColumnName NOT LIKE ''Updated%'' "
+				+ " AND c.IsActive=''Y''"
+				+ " ORDER BY c.ColumnName";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, AD_Table_ID);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				String columnName = rs.getString(1);
+				boolean isUpdateable = "Y".equals(rs.getString(2));
+				boolean isMandatory = "Y".equals(rs.getString(3));
+				int displayType = rs.getInt(4);
+				int AD_Reference_Value_ID = rs.getInt(5);
+				String defaultValue = rs.getString(6);
+				//int seqNo = rs.getInt(7);
+				int fieldLength = rs.getInt(8);
+				String ValueMin = rs.getString(9);
+				String ValueMax = rs.getString(10);
+				String VFormat = rs.getString(11);
+				String Callout = rs.getString(12);
+				String Name = rs.getString(13);
+				String Description = rs.getString(14);
+				String ColumnSQL = rs.getString(15);
+				boolean virtualColumn = ColumnSQL != null
+						&& ColumnSQL.length() > 0;
+				boolean IsEncrypted = "Y".equals(rs.getString(16));
+				boolean IsKey = "Y".equals(rs.getString(17));
+				
+				// Create COLUMNNAME_ property (teo_sarca, [ 1662447 ])
+				sb.append("\n")
+				  .append("    /** Column name ").append(columnName).append(" */\n")
+				  .append("    public static final String COLUMNNAME_").append(columnName)
+				  .append(" = \"").append(columnName).append("\";");
+
+				//
+				sb.append(createColumnMethods(mandatory, columnName,
+						isUpdateable, isMandatory, displayType,
+						AD_Reference_Value_ID, fieldLength, defaultValue,
+						ValueMin, ValueMax, VFormat, Callout, Name,
+						Description, virtualColumn, IsEncrypted, IsKey, AD_Table_ID));
+			}
+		}
+		catch (SQLException e)
+		{
+			throw new DBException(e, sql);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		return sb;
+	}
+]]></source>
+</class>
+
+<class id="19" nlines="52" nfragments="4">
+<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="499" endline="624" pcid="11998"><![CDATA[
+	{
+		if (m_M_Product_ID == 0)
+			return false;
+
+		//	Get Price List
+		/**
+		if (m_M_PriceList_ID == 0)
+		{
+			String sql = "SELECT M_PriceList_ID, IsTaxIncluded "
+				+ "FROM M_PriceList pl"
+				+ " INNER JOIN M_Product p ON (pl.AD_Client_ID=p.AD_Client_ID) "
+				+ "WHERE M_Product_ID=? "
+				+ "ORDER BY IsDefault DESC";
+			PreparedStatement pstmt = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql);
+				pstmt.setInt(1, m_M_Product_ID);
+				ResultSet rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					m_M_PriceList_ID = rs.getInt(1);
+					m_isTaxIncluded = "Y".equals(rs.getString(2));
+				}
+				rs.close();
+				pstmt.close();
+				pstmt = null;
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, "calculatePL (PL)", e);
+			}
+			finally
+			{
+				try
+				{
+					if (pstmt != null)
+						pstmt.close ();
+				}
+				catch (Exception e)
+				{}
+				pstmt = null;
+			}
+		}
+		/** **/
+		if (m_M_PriceList_ID == 0)
+		{
+			log.log(Level.SEVERE, "No PriceList");
+			Trace.printStack();
+			return false;
+		}
+
+		//	Get Prices for Price List
+		String sql = "SELECT pp.PriceStd,"	//	1
+			+ " pp.PriceList,"		//	2
+			+ " pp.PriceLimit,"	//	3
+			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,pl.EnforcePriceLimit "	// 4..8
+			+ "FROM M_Product p"
+			+ " INNER JOIN M_ProductPriceVendorBreak pp ON (p.M_Product_ID=pp.M_Product_ID)"
+			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
+			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
+			+ "WHERE pv.IsActive=''Y''"
+			+ " AND pp.IsActive=''Y''"
+			+ " AND p.M_Product_ID=?"				//	#1
+			+ " AND pv.M_PriceList_ID=?"			//	#2
+			+ " AND pp.C_BPartner_ID=?"				//	#3
+			+ " AND ?>=pp.BreakValue"				//  #4
+			+ " ORDER BY pv.ValidFrom DESC, BreakValue DESC";
+		m_calculated = false;
+		if (m_PriceDate == null)
+			m_PriceDate = new Timestamp (System.currentTimeMillis());
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_M_Product_ID);
+			pstmt.setInt(2, m_M_PriceList_ID);
+			pstmt.setInt(3, m_C_BPartner_ID);
+			pstmt.setBigDecimal(4, m_Qty);
+			rs = pstmt.executeQuery();
+			while (!m_calculated && rs.next())
+			{
+				Timestamp plDate = rs.getTimestamp(5);
+				//	we have the price list
+				//	if order date is after or equal PriceList validFrom
+				if (plDate == null || !m_PriceDate.before(plDate))
+				{
+					//	Prices
+					m_PriceStd = rs.getBigDecimal (1);
+					if (rs.wasNull ())
+						m_PriceStd = Env.ZERO;
+					m_PriceList = rs.getBigDecimal (2);
+					if (rs.wasNull ())
+						m_PriceList = Env.ZERO;
+					m_PriceLimit = rs.getBigDecimal (3);
+					if (rs.wasNull ())
+						m_PriceLimit = Env.ZERO;
+						//
+					m_C_UOM_ID = rs.getInt (4);
+					m_C_Currency_ID = rs.getInt (6);
+					m_M_Product_Category_ID = rs.getInt(7);
+					m_enforcePriceLimit = "Y".equals(rs.getString(8));
+					//
+					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
+						+ "(" + plDate + ")" + " - " + m_PriceStd);
+					m_calculated = true;
+					break;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			m_calculated = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		if (!m_calculated)
+			log.finer("Not found (PL)");
+		return m_calculated;
+	}	//	calculatePL_VB
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="216" endline="337" pcid="11980"><![CDATA[
+	{
+		if (m_M_Product_ID == 0)
+			return false;
+
+		//	Get Price List
+		/**
+		if (m_M_PriceList_ID == 0)
+		{
+			String sql = "SELECT M_PriceList_ID, IsTaxIncluded "
+				+ "FROM M_PriceList pl"
+				+ " INNER JOIN M_Product p ON (pl.AD_Client_ID=p.AD_Client_ID) "
+				+ "WHERE M_Product_ID=? "
+				+ "ORDER BY IsDefault DESC";
+			PreparedStatement pstmt = null;
+			try
+			{
+				pstmt = DB.prepareStatement(sql);
+				pstmt.setInt(1, m_M_Product_ID);
+				ResultSet rs = pstmt.executeQuery();
+				if (rs.next())
+				{
+					m_M_PriceList_ID = rs.getInt(1);
+					m_isTaxIncluded = "Y".equals(rs.getString(2));
+				}
+				rs.close();
+				pstmt.close();
+				pstmt = null;
+			}
+			catch (Exception e)
+			{
+				log.log(Level.SEVERE, "calculatePL (PL)", e);
+			}
+			finally
+			{
+				try
+				{
+					if (pstmt != null)
+						pstmt.close ();
+				}
+				catch (Exception e)
+				{}
+				pstmt = null;
+			}
+		}
+		/** **/
+		if (m_M_PriceList_ID == 0)
+		{
+			log.log(Level.SEVERE, "No PriceList");
+			Trace.printStack();
+			return false;
+		}
+
+		//	Get Prices for Price List
+		String sql = "SELECT bomPriceStd(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceStd,"	//	1
+			+ " bomPriceList(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceList,"		//	2
+			+ " bomPriceLimit(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceLimit,"	//	3
+			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,pl.EnforcePriceLimit "	// 4..8
+			+ "FROM M_Product p"
+			+ " INNER JOIN M_ProductPrice pp ON (p.M_Product_ID=pp.M_Product_ID)"
+			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
+			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
+			+ "WHERE pv.IsActive=''Y''"
+			+ " AND pp.IsActive=''Y''"
+			+ " AND p.M_Product_ID=?"				//	#1
+			+ " AND pv.M_PriceList_ID=?"			//	#2
+			+ " ORDER BY pv.ValidFrom DESC";
+		m_calculated = false;
+		if (m_PriceDate == null)
+			m_PriceDate = new Timestamp (System.currentTimeMillis());
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_M_Product_ID);
+			pstmt.setInt(2, m_M_PriceList_ID);
+			rs = pstmt.executeQuery();
+			while (!m_calculated && rs.next())
+			{
+				Timestamp plDate = rs.getTimestamp(5);
+				//	we have the price list
+				//	if order date is after or equal PriceList validFrom
+				if (plDate == null || !m_PriceDate.before(plDate))
+				{
+					//	Prices
+					m_PriceStd = rs.getBigDecimal (1);
+					if (rs.wasNull ())
+						m_PriceStd = Env.ZERO;
+					m_PriceList = rs.getBigDecimal (2);
+					if (rs.wasNull ())
+						m_PriceList = Env.ZERO;
+					m_PriceLimit = rs.getBigDecimal (3);
+					if (rs.wasNull ())
+						m_PriceLimit = Env.ZERO;
+						//
+					m_C_UOM_ID = rs.getInt (4);
+					m_C_Currency_ID = rs.getInt (6);
+					m_M_Product_Category_ID = rs.getInt(7);
+					m_enforcePriceLimit = "Y".equals(rs.getString(8));
+					//
+					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
+						+ "(" + plDate + ")" + " - " + m_PriceStd);
+					m_calculated = true;
+					break;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			m_calculated = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		if (!m_calculated)
+			log.finer("Not found (PL)");
+		return m_calculated;
+	}	//	calculatePL
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="631" endline="710" pcid="12005"><![CDATA[
+	{
+		if (m_M_Product_ID == 0 || m_M_PriceList_ID == 0)
+			return false;
+		//
+		String sql = "SELECT pp.PriceStd,"	//	1
+			+ " pp.PriceList,"		//	2
+			+ " pp.PriceLimit,"	//	3
+			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
+			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
+			+ "FROM M_Product p"
+			+ " INNER JOIN M_ProductPriceVendorBreak pp ON (p.M_Product_ID=pp.M_Product_ID)"
+			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
+			+ " INNER JOIN M_Pricelist bpl ON (pv.M_PriceList_ID=bpl.M_PriceList_ID)"
+			+ " INNER JOIN M_Pricelist pl ON (bpl.M_PriceList_ID=pl.BasePriceList_ID) "
+			+ "WHERE pv.IsActive=''Y''"
+			+ " AND pp.IsActive=''Y''"
+			+ " AND p.M_Product_ID=?"				//	#1
+			+ " AND pl.M_PriceList_ID=?"			//	#2
+			+ " AND pp.C_BPartner_ID=?"				//	#3
+			+ " AND ?>=pp.BreakValue"				//  #4
+			+ " ORDER BY pv.ValidFrom DESC, BreakValue DESC";
+		m_calculated = false;
+		if (m_PriceDate == null)
+			m_PriceDate = new Timestamp (System.currentTimeMillis());
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_M_Product_ID);
+			pstmt.setInt(2, m_M_PriceList_ID);
+			pstmt.setInt(3, m_C_BPartner_ID);
+			pstmt.setBigDecimal(4, m_Qty);
+			rs = pstmt.executeQuery();
+			while (!m_calculated && rs.next())
+			{
+				Timestamp plDate = rs.getTimestamp(5);
+				//	we have the price list
+				//	if order date is after or equal PriceList validFrom
+				if (plDate == null || !m_PriceDate.before(plDate))
+				{
+					//	Prices
+					m_PriceStd = rs.getBigDecimal (1);
+					if (rs.wasNull ())
+						m_PriceStd = Env.ZERO;
+					m_PriceList = rs.getBigDecimal (2);
+					if (rs.wasNull ())
+						m_PriceList = Env.ZERO;
+					m_PriceLimit = rs.getBigDecimal (3);
+					if (rs.wasNull ())
+						m_PriceLimit = Env.ZERO;
+						//
+					m_C_UOM_ID = rs.getInt (4);
+					m_C_Currency_ID = rs.getInt (6);
+					m_M_Product_Category_ID = rs.getInt(7);
+					m_enforcePriceLimit = "Y".equals(rs.getString(8));
+					m_isTaxIncluded = "Y".equals(rs.getString(9));
+					//
+					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
+						+ "(" + plDate + ")" + " - " + m_PriceStd);
+					m_calculated = true;
+					break;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			m_calculated = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		if (!m_calculated)
+			log.finer("Not found (BPL)");
+		return m_calculated;
+	}	//	calculateBPL_VB
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="344" endline="419" pcid="11987"><![CDATA[
+	{
+		if (m_M_Product_ID == 0 || m_M_PriceList_ID == 0)
+			return false;
+		//
+		String sql = "SELECT bomPriceStd(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceStd,"	//	1
+			+ " bomPriceList(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceList,"		//	2
+			+ " bomPriceLimit(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceLimit,"	//	3
+			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
+			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
+			+ "FROM M_Product p"
+			+ " INNER JOIN M_ProductPrice pp ON (p.M_Product_ID=pp.M_Product_ID)"
+			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
+			+ " INNER JOIN M_Pricelist bpl ON (pv.M_PriceList_ID=bpl.M_PriceList_ID)"
+			+ " INNER JOIN M_Pricelist pl ON (bpl.M_PriceList_ID=pl.BasePriceList_ID) "
+			+ "WHERE pv.IsActive=''Y''"
+			+ " AND pp.IsActive=''Y''"
+			+ " AND p.M_Product_ID=?"				//	#1
+			+ " AND pl.M_PriceList_ID=?"			//	#2
+			+ " ORDER BY pv.ValidFrom DESC";
+		m_calculated = false;
+		if (m_PriceDate == null)
+			m_PriceDate = new Timestamp (System.currentTimeMillis());
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_M_Product_ID);
+			pstmt.setInt(2, m_M_PriceList_ID);
+			rs = pstmt.executeQuery();
+			while (!m_calculated && rs.next())
+			{
+				Timestamp plDate = rs.getTimestamp(5);
+				//	we have the price list
+				//	if order date is after or equal PriceList validFrom
+				if (plDate == null || !m_PriceDate.before(plDate))
+				{
+					//	Prices
+					m_PriceStd = rs.getBigDecimal (1);
+					if (rs.wasNull ())
+						m_PriceStd = Env.ZERO;
+					m_PriceList = rs.getBigDecimal (2);
+					if (rs.wasNull ())
+						m_PriceList = Env.ZERO;
+					m_PriceLimit = rs.getBigDecimal (3);
+					if (rs.wasNull ())
+						m_PriceLimit = Env.ZERO;
+						//
+					m_C_UOM_ID = rs.getInt (4);
+					m_C_Currency_ID = rs.getInt (6);
+					m_M_Product_Category_ID = rs.getInt(7);
+					m_enforcePriceLimit = "Y".equals(rs.getString(8));
+					m_isTaxIncluded = "Y".equals(rs.getString(9));
+					//
+					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
+						+ "(" + plDate + ")" + " - " + m_PriceStd);
+					m_calculated = true;
+					break;
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			m_calculated = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		if (!m_calculated)
+			log.finer("Not found (BPL)");
+		return m_calculated;
+	}	//	calculateBPL
+]]></source>
+</class>
+
+<class id="20" nlines="52" nfragments="2">
+<source file="/home/saeed/code/org/adempiere/pipo/handler/MenuElementHandler.java" startline="361" endline="429" pcid="49318"><![CDATA[
+			int AD_Menu_ID) throws SAXException {
+		PackOut packOut = (PackOut)ctx.get("PackOutProcess");
+		String sql = null;
+		// int x = 0;
+		sql = "SELECT A.Node_ID, B.AD_Menu_ID, B.Name, B.AD_WINDOW_ID, B.AD_WORKFLOW_ID, B.AD_TASK_ID, "
+				+ "B.AD_PROCESS_ID, B.AD_FORM_ID, B.AD_WORKBENCH_ID "
+				+ "FROM AD_TreeNoDemm A, AD_Menu B "
+				+ "WHERE A.Node_ID = "
+				+ AD_Menu_ID + " AND A.Node_ID = B.AD_Menu_ID";
+
+		AttributesImpl atts = new AttributesImpl();
+		PreparedStatement pstmt = null;
+		pstmt = DB.prepareStatement(sql, getTrxName(ctx));
+
+		try {
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+
+				X_AD_Menu m_Menu = new X_AD_Menu(ctx, rs.getInt("AD_Menu_ID"),
+						null);
+				atts = createMenuBinding(atts, m_Menu);
+				document.startElement("", "", "menu", atts);
+				if (rs.getInt("AD_WINDOW_ID") > 0
+						|| rs.getInt("AD_WORKFLOW_ID") > 0
+						|| rs.getInt("AD_TASK_ID") > 0
+						|| rs.getInt("AD_PROCESS_ID") > 0
+						|| rs.getInt("AD_FORM_ID") > 0
+						|| rs.getInt("AD_WORKBENCH_ID") > 0) {
+					// Call CreateWindow.
+					if (rs.getInt("AD_WINDOW_ID") > 0) {
+						packOut.createWindow(rs.getInt("AD_WINDOW_ID"), document);
+					}
+					// Call CreateProcess.
+					else if (rs.getInt("AD_PROCESS_ID") > 0) {
+						packOut.createProcess(rs.getInt("AD_PROCESS_ID"), document);
+					}
+					// Call CreateTask.
+					else if (rs.getInt("AD_TASK_ID") > 0) {
+						packOut.createTask(rs.getInt("AD_TASK_ID"), document);
+					}
+					// Call CreateForm.
+					else if (rs.getInt("AD_FORM_ID") > 0) {
+						packOut.createForm(rs.getInt("AD_FORM_ID"), document);
+					}
+					// Call CreateWorkflow
+					else if (rs.getInt("AD_Workflow_ID") > 0) {
+						packOut.createWorkflow(rs.getInt("AD_Workflow_ID"), 
+								document);
+					}
+					// Call CreateModule because entry is a summary menu
+				} else {
+					createModule(ctx, document, rs.getInt("Node_ID"));
+				}
+				document.endElement("", "", "menu");
+			}
+			rs.close();
+			pstmt.close();
+			pstmt = null;
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "getWindows", e);
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+			} catch (Exception e) {
+			}
+			pstmt = null;
+		}
+	}
+]]></source>
+<source file="/home/saeed/code/org/adempiere/pipo/handler/MenuElementHandler.java" startline="432" endline="499" pcid="49332"><![CDATA[
+			int menu_id) throws SAXException {
+		PackOut packOut = (PackOut)ctx.get("PackOutProcess");
+		String sql = null;
+		sql = "SELECT A.Node_ID, B.AD_Menu_ID, B.Name, B.AD_WINDOW_ID, B.AD_WORKFLOW_ID, B.AD_TASK_ID, "
+				+ "B.AD_PROCESS_ID, B.AD_FORM_ID, B.AD_WORKBENCH_ID "
+				+ "FROM AD_TreeNoDemm A, AD_Menu B "
+				+ "WHERE A.Parent_ID = "
+				+ menu_id + " AND A.Node_ID = B.AD_Menu_ID";
+
+		AttributesImpl atts = new AttributesImpl();
+		PreparedStatement pstmt = null;
+		pstmt = DB.prepareStatement(sql, getTrxName(ctx));
+		try {
+			ResultSet rs = pstmt.executeQuery();
+			while (rs.next()) {
+				// Menu tag Start.
+				X_AD_Menu m_Menu = new X_AD_Menu(ctx, rs.getInt("AD_Menu_ID"),
+						null);
+				atts = createMenuBinding(atts, m_Menu);
+				document.startElement("", "", "menu", atts);
+				if (rs.getInt("AD_WINDOW_ID") > 0
+						|| rs.getInt("AD_WORKFLOW_ID") > 0
+						|| rs.getInt("AD_TASK_ID") > 0
+						|| rs.getInt("AD_PROCESS_ID") > 0
+						|| rs.getInt("AD_FORM_ID") > 0
+						|| rs.getInt("AD_WORKBENCH_ID") > 0) {
+					// Call CreateWindow.
+					if (rs.getInt("AD_WINDOW_ID") > 0) {
+						packOut.createWindow(rs.getInt("AD_WINDOW_ID"), document);
+					}
+					// Call CreateProcess.
+					else if (rs.getInt("AD_PROCESS_ID") > 0) {
+						packOut.createProcess(rs.getInt("AD_PROCESS_ID"), 
+								document);
+					}
+					// Call CreateTask.
+					else if (rs.getInt("AD_TASK_ID") > 0) {
+						packOut.createTask(rs.getInt("AD_TASK_ID"), document);
+					}
+					// Call CreateForm.
+					else if (rs.getInt("AD_FORM_ID") > 0) {
+						packOut.createForm(rs.getInt("AD_FORM_ID"), document);
+					}
+					// Call CreateWorkflow
+					else if (rs.getInt("AD_Workflow_ID") > 0) {
+						packOut.createWorkflow(rs.getInt("AD_Workflow_ID"), 
+								document);
+					}
+					// Call CreateModule because entry is a summary menu
+				} else {
+					createModule(ctx, document, rs.getInt("Node_ID"));
+				}
+				document.endElement("", "", "menu");
+			}
+			rs.close();
+			pstmt.close();
+			pstmt = null;
+		} catch (Exception e) {
+			log.log(Level.SEVERE, "getWindows", e);
+		} finally {
+			try {
+				if (pstmt != null)
+					pstmt.close();
+			} catch (Exception e) {
+			}
+			pstmt = null;
+		}
+	}
+]]></source>
+</class>
+
+<class id="21" nlines="52" nfragments="2">
+<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="318" endline="396" pcid="46927"><![CDATA[
+		{
+			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+			BigDecimal serviceAmt = Env.ZERO;
+			
+			//  Header Charge           CR
+			BigDecimal amt = getAmount(Doc.AMTTYPE_Charge);
+			if (amt != null && amt.signum() != 0)
+				fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
+					getC_Currency_ID(), null, amt);
+			//  TaxDue                  CR
+			for (int i = 0; i < m_taxes.length; i++)
+			{
+				amt = m_taxes[i].getAmount();
+				if (amt != null && amt.signum() != 0)
+				{
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+						getC_Currency_ID(), null, amt);
+					if (tl != null)
+						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+				}
+			}
+			//  Revenue                 CR
+			for (int i = 0; i < p_lines.length; i++)
+			{
+				amt = p_lines[i].getAmtSource();
+				BigDecimal dAmt = null;
+				if (as.isTradeDiscountPosted())
+				{
+					BigDecimal discount = p_lines[i].getDiscount();
+					if (discount != null && discount.signum() != 0)
+					{
+						amt = amt.add(discount);
+						dAmt = discount;
+						fact.createLine (p_lines[i],
+								p_lines[i].getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as),
+								getC_Currency_ID(), dAmt, null);
+					}
+				}
+				fact.createLine (p_lines[i],
+					p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as),
+					getC_Currency_ID(), null, amt);
+				if (!p_lines[i].isItem())
+				{
+					grossAmt = grossAmt.subtract(amt);
+					serviceAmt = serviceAmt.add(amt);
+				}
+			}
+			//  Set Locations
+			FactLine[] fLines = fact.getLines();
+			for (int i = 0; i < fLines.length; i++)
+			{
+				if (fLines[i] != null)
+				{
+					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
+					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+				}
+			}
+			
+			//  Receivables     DR
+			int receivables_ID = getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as);
+			int receivablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable_Services, as);
+			if (m_allLinesItem || !as.isPostServices() 
+				|| receivables_ID == receivablesServices_ID)
+			{
+				grossAmt = getAmount(Doc.AMTTYPE_Gross);
+				serviceAmt = Env.ZERO;
+			}
+			else if (m_allLinesService)
+			{
+				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
+				grossAmt = Env.ZERO;
+			}
+			if (grossAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
+					getC_Currency_ID(), grossAmt, null);
+			if (serviceAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), receivablesServices_ID),
+					getC_Currency_ID(), serviceAmt, null);
+		}
+]]></source>
+<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="399" endline="476" pcid="46938"><![CDATA[
+		{
+			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
+			BigDecimal serviceAmt = Env.ZERO;
+
+			//  Header Charge   DR
+			BigDecimal amt = getAmount(Doc.AMTTYPE_Charge);
+			if (amt != null && amt.signum() != 0)
+				fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
+					getC_Currency_ID(), amt, null);
+			//  TaxDue          DR
+			for (int i = 0; i < m_taxes.length; i++)
+			{
+				amt = m_taxes[i].getAmount();
+				if (amt != null && amt.signum() != 0)
+				{
+					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
+						getC_Currency_ID(), amt, null);
+					if (tl != null)
+						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
+				}
+			}
+			//  Revenue         CR
+			for (int i = 0; i < p_lines.length; i++)
+			{
+				amt = p_lines[i].getAmtSource();
+				BigDecimal dAmt = null;
+				if (as.isTradeDiscountPosted())
+				{
+					BigDecimal discount = p_lines[i].getDiscount();
+					if (discount != null && discount.signum() != 0)
+					{
+						amt = amt.add(discount);
+						dAmt = discount;
+						fact.createLine (p_lines[i],
+								p_lines[i].getAccount (ProductCost.ACCTTYPE_P_TDiscountGrant, as),
+								getC_Currency_ID(), null, dAmt);
+					}
+				}
+				fact.createLine (p_lines[i],
+					p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as),
+					getC_Currency_ID(), amt, null);
+				if (!p_lines[i].isItem())
+				{
+					grossAmt = grossAmt.subtract(amt);
+					serviceAmt = serviceAmt.add(amt);
+				}
+			}
+			//  Set Locations
+			FactLine[] fLines = fact.getLines();
+			for (int i = 0; i < fLines.length; i++)
+			{
+				if (fLines[i] != null)
+				{
+					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
+					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
+				}
+			}
+			//  Receivables             CR
+			int receivables_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable, as);
+			int receivablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable_Services, as);
+			if (m_allLinesItem || !as.isPostServices() 
+				|| receivables_ID == receivablesServices_ID)
+			{
+				grossAmt = getAmount(Doc.AMTTYPE_Gross);
+				serviceAmt = Env.ZERO;
+			}
+			else if (m_allLinesService)
+			{
+				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
+				grossAmt = Env.ZERO;
+			}
+			if (grossAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
+					getC_Currency_ID(), null, grossAmt);
+			if (serviceAmt.signum() != 0)
+				fact.createLine(null, MAccount.get(getCtx(), receivablesServices_ID),
+					getC_Currency_ID(), null, serviceAmt);
+		}
+]]></source>
+</class>
+
+<class id="22" nlines="52" nfragments="2">
+<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="324" endline="403" pcid="47798"><![CDATA[
+	{		
+		int v_adj=0;
+		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
+		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
+			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
+			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
+			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
+			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
+		  
+		  
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  try {				
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()){
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
+					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
+					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);
+					calendar.setTime(rs.getDate("DATEACCT"));
+					int DateAcctYear = calendar.get(Calendar.YEAR);
+					int DateAcctMonth = calendar.get(Calendar.MONTH);
+					if(p_Flag <2){
+						
+						//ADJUST PERIOD FOR MID-QUARTER CONVENTION
+						if(DateAcctYear == AssetServiceDateYear){					 
+					          if(AssetServiceDateMonth < 4 )
+					            return .875;
+					          else if (AssetServiceDateMonth  < 7 )
+					          	return  .625;
+					          else if (AssetServiceDateMonth < 10 )
+					          	return  .375;
+					          else if (AssetServiceDateMonth  > 9 )
+					          	return  .125;
+						}
+					   else if(DateAcctYear*12 + DateAcctMonth >= ((AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS"))*12 + AssetServiceDateMonth)){					   
+					          if(AssetServiceDateMonth < 4 )
+					        	return  .125;
+					          else if (AssetServiceDateMonth  < 7 )
+					      	    return  .375;
+					          else if (AssetServiceDateMonth < 10 )
+					      	    return  .625;
+					          else if (AssetServiceDateMonth  > 9 )
+					      	    return  .875;
+					   }
+					   else
+					     	return 1;						
+					}					
+										
+					if(p_Flag == 2){
+						if(AssetServiceDateMonth< 4 )
+				            return .875;
+				          else if (AssetServiceDateMonth  < 7 )
+				          	return  .625;
+				          else if (AssetServiceDateMonth  < 10 )
+				          	return  .375;
+				          else if (AssetServiceDateMonth > 9 )
+				        	return  .125;
+					}					
+			}				
+		  }
+		  catch (Exception e)
+		  {
+			  System.out.println("MQCON"+e);
+		  }
+		  finally
+		  {
+			  try
+			  {
+				  if (pstmt != null)
+					  pstmt.close ();
+			  }
+			  catch (Exception e)
+				{}
+				pstmt = null;
+		  }		  
+		  return v_adj;		
+	}	  
+]]></source>
+<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="185" endline="261" pcid="47776"><![CDATA[
+	{		
+		int v_adj=0;
+		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
+		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
+			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
+			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
+			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
+			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
+		  
+		  
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  try {				
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()){
+					
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
+					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
+					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);
+					int AssetServiceDateDay = calendar.get(Calendar.DAY_OF_YEAR);
+					calendar.setTime(rs.getDate("DATEACCT"));
+					int DateAcctYear = calendar.get(Calendar.YEAR);
+					int DateAcctMonth = calendar.get(Calendar.MONTH);
+					
+					if(p_Flag ==0){
+						
+						 //ADJUST PERIOD FOR DAY CONVENTION
+							if(DateAcctYear == AssetServiceDateYear){									
+						           return ((365-(double)AssetServiceDateDay)/365);						
+							}
+							else if ((DateAcctYear*12 + DateAcctMonth) == (AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS"))*12 + AssetServiceDateMonth) 
+						    	   return ((double)AssetServiceDateDay/365);
+							else if ((DateAcctYear*12 + DateAcctMonth) > (AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS"))*12 + AssetServiceDateMonth)
+						    	   return ((double)AssetServiceDateDay/365);
+						    else        
+						           return 1;
+					}
+					
+					if(p_Flag ==1){						
+						 //ADJUST PERIOD FOR DAY CONVENTION
+							if(DateAcctYear == AssetServiceDateYear){								
+					           return ((365-(double)AssetServiceDateDay)/365);
+							}
+							if(DateAcctYear == (AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS")+1))
+							   return ((double)AssetServiceDateDay/365);
+							else        
+						       return 1;					
+					}
+					
+					if(p_Flag == 2){
+					 //ADJUST PERIOD FOR DAY CONVENTION
+						return ((365-(double)AssetServiceDateDay)/365);
+					}					
+			}				
+		  }
+		  catch (Exception e)
+		  {
+			  System.out.println("DYCON"+e);
+		  }
+		  finally
+		  {
+			  try
+			  {
+				  if (pstmt != null)
+					  pstmt.close ();
+			  }
+			  catch (Exception e)
+				{}
+				pstmt = null;
+		  }
+		  
+		  return v_adj;
+		
+	}	   
+]]></source>
+</class>
+
+<class id="23" nlines="49" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/CalloutPayment.java" startline="55" endline="125" pcid="30578"><![CDATA[
+	{
+		Integer C_Invoice_ID = (Integer)value;
+		if (isCalloutActive () // assuming it is resetting value
+			|| C_Invoice_ID == null || C_Invoice_ID.intValue () == 0)
+			return "";
+		mTab.setValue ("C_Order_ID", null);
+		mTab.setValue ("C_Charge_ID", null);
+		mTab.setValue ("IsPrepayment", Boolean.FALSE);
+		//
+		mTab.setValue ("DiscountAmt", Env.ZERO);
+		mTab.setValue ("WriteOffAmt", Env.ZERO);
+		mTab.setValue ("IsOverUnderPayment", Boolean.FALSE);
+		mTab.setValue ("OverUnderAmt", Env.ZERO);
+		int C_InvoicePaySchedule_ID = 0;
+		if (Env.getContextAsInt (ctx, WindowNo, Env.TAB_INFO, "C_Invoice_ID") == C_Invoice_ID.intValue ()
+			&& Env.getContextAsInt (ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID") != 0)
+		{
+			C_InvoicePaySchedule_ID = Env.getContextAsInt (ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID");
+		}
+		// Payment Date
+		Timestamp ts = (Timestamp)mTab.getValue ("DateTrx");
+		if (ts == null)
+			ts = new Timestamp (System.currentTimeMillis ());
+		//
+		String sql = "SELECT C_BPartner_ID,C_Currency_ID," // 1..2
+			+ " invoiceOpen(C_Invoice_ID, ?)," // 3 #1
+			+ " invoiceDiscount(C_Invoice_ID,?,?), IsSOTrx " // 4..5 #2/3
+			+ "FROM C_Invoice WHERE C_Invoice_ID=?"; // #4
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement (sql, null);
+			pstmt.setInt (1, C_InvoicePaySchedule_ID);
+			pstmt.setTimestamp (2, ts);
+			pstmt.setInt (3, C_InvoicePaySchedule_ID);
+			pstmt.setInt (4, C_Invoice_ID.intValue ());
+			rs = pstmt.executeQuery ();
+			if (rs.next ())
+			{
+				mTab.setValue ("C_BPartner_ID", new Integer (rs.getInt (1)));
+				int C_Currency_ID = rs.getInt (2); // Set Invoice Currency
+				mTab.setValue ("C_Currency_ID", new Integer (C_Currency_ID));
+				//
+				BigDecimal InvoiceOpen = rs.getBigDecimal (3); // Set Invoice
+				// OPen Amount
+				if (InvoiceOpen == null)
+					InvoiceOpen = Env.ZERO;
+				BigDecimal DiscountAmt = rs.getBigDecimal (4); // Set Discount
+				// Amt
+				if (DiscountAmt == null)
+					DiscountAmt = Env.ZERO;
+				mTab.setValue ("PayAmt", InvoiceOpen.subtract (DiscountAmt));
+				mTab.setValue ("DiscountAmt", DiscountAmt);
+				// reset as dependent fields get reset
+				Env.setContext (ctx, WindowNo, "C_Invoice_ID", C_Invoice_ID
+					.toString ());
+				mTab.setValue ("C_Invoice_ID", C_Invoice_ID);
+			}
+		}
+		catch (SQLException e)
+		{
+			log.log (Level.SEVERE, sql, e);
+			return e.getLocalizedMessage ();
+		}
+		finally
+		{
+			DB.close (rs, pstmt);
+		}
+		return docType (ctx, WindowNo, mTab, mField, value);
+	} // invoice
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/CalloutPaymentAllocate.java" startline="54" endline="127" pcid="34716"><![CDATA[
+	{
+		Integer C_Invoice_ID = (Integer)value;
+		if (isCalloutActive()		//	assuming it is resetting value
+			|| C_Invoice_ID == null || C_Invoice_ID.intValue() == 0)
+			return "";
+
+		//	Check Payment
+		int C_Payment_ID = Env.getContextAsInt(ctx, WindowNo, "C_Payment_ID");
+		MPayment payment = new MPayment (ctx, C_Payment_ID, null);
+		if (payment.getC_Charge_ID() != 0 || payment.getC_Invoice_ID() != 0 
+			|| payment.getC_Order_ID() != 0)
+			return Msg.getMsg(ctx, "PaymentIsAllocated");
+		
+		//
+		mTab.setValue("DiscountAmt", Env.ZERO);
+		mTab.setValue("WriteOffAmt", Env.ZERO);
+		mTab.setValue("OverUnderAmt", Env.ZERO);
+
+		int C_InvoicePaySchedule_ID = 0;
+		if (Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "C_Invoice_ID") == C_Invoice_ID.intValue()
+			&& Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID") != 0)
+		{
+			C_InvoicePaySchedule_ID = Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID");
+		}
+
+		//  Payment Date
+		Timestamp ts = Env.getContextAsDate(ctx, WindowNo, "DateTrx");
+		//
+		String sql = "SELECT C_BPartner_ID,C_Currency_ID,"		//	1..2
+			+ " invoiceOpen(C_Invoice_ID, ?),"					//	3		#1
+			+ " invoiceDiscount(C_Invoice_ID,?,?), IsSOTrx "	//	4..5	#2/3
+			+ "FROM C_Invoice WHERE C_Invoice_ID=?";			//			#4
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, C_InvoicePaySchedule_ID);
+			pstmt.setTimestamp(2, ts);
+			pstmt.setInt(3, C_InvoicePaySchedule_ID);
+			pstmt.setInt(4, C_Invoice_ID.intValue());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+			//	mTab.setValue("C_BPartner_ID", new Integer(rs.getInt(1)));
+			//	int C_Currency_ID = rs.getInt(2);					//	Set Invoice Currency
+			//	mTab.setValue("C_Currency_ID", new Integer(C_Currency_ID));
+				//
+				BigDecimal InvoiceOpen = rs.getBigDecimal(3);		//	Set Invoice OPen Amount
+				if (InvoiceOpen == null)
+					InvoiceOpen = Env.ZERO;
+				BigDecimal DiscountAmt = rs.getBigDecimal(4);		//	Set Discount Amt
+				if (DiscountAmt == null)
+					DiscountAmt = Env.ZERO;
+				mTab.setValue("InvoiceAmt", InvoiceOpen);
+				mTab.setValue("Amount", InvoiceOpen.subtract(DiscountAmt));
+				mTab.setValue("DiscountAmt", DiscountAmt);
+				//  reset as dependent fields get reset
+				Env.setContext(ctx, WindowNo, "C_Invoice_ID", C_Invoice_ID.toString());
+				mTab.setValue("C_Invoice_ID", C_Invoice_ID);
+			}
+		}
+		catch (SQLException e)
+		{
+			log.log(Level.SEVERE, sql, e);
+			return e.getLocalizedMessage();
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+		return "";
+	}	//	invoice
+]]></source>
+</class>
+
+<class id="24" nlines="48" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MInventory.java" startline="586" endline="658" pcid="11604"><![CDATA[
+		{
+			MProduct product = MProduct.get(getCtx(), line.getM_Product_ID());
+			if (qtyDiff.signum() > 0)	//	Incoming Trx
+			{
+				MAttributeSetInstance asi = null;
+				//auto balance negative on hand
+				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
+						null, MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false, line.getM_Locator_ID(), get_TrxName());
+				for (MStorage storage : storages)
+				{
+					if (storage.getQtyOnHand().signum() < 0)
+					{
+						asi = new MAttributeSetInstance(getCtx(), storage.getM_AttributeSetInstance_ID(), get_TrxName());
+						break;
+					}
+				}
+				if (asi == null)
+				{
+					asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
+				}
+				line.setM_AttributeSetInstance_ID(asi.getM_AttributeSetInstance_ID());
+				needSave = true;
+			}
+			else	//	Outgoing Trx
+			{
+				String MMPolicy = product.getMMPolicy();
+				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
+						null, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, line.getM_Locator_ID(), get_TrxName());
+
+				BigDecimal qtyToDeliver = qtyDiff.negate();
+
+				for (MStorage storage: storages)
+				{					
+					if (storage.getQtyOnHand().compareTo(qtyToDeliver) >= 0)
+					{
+						MInventoryLineMA ma = new MInventoryLineMA (line, 
+								storage.getM_AttributeSetInstance_ID(),
+								qtyToDeliver);
+						ma.saveEx();		
+						qtyToDeliver = Env.ZERO;
+						log.fine( ma + ", QtyToDeliver=" + qtyToDeliver);		
+					}
+					else
+					{	
+						MInventoryLineMA ma = new MInventoryLineMA (line, 
+								storage.getM_AttributeSetInstance_ID(),
+								storage.getQtyOnHand());
+						ma.saveEx();	
+						qtyToDeliver = qtyToDeliver.subtract(storage.getQtyOnHand());
+						log.fine( ma + ", QtyToDeliver=" + qtyToDeliver);		
+					}
+					if (qtyToDeliver.signum() == 0)
+						break;
+				}
+
+				//	No AttributeSetInstance found for remainder
+				if (qtyToDeliver.signum() != 0)
+				{
+					//deliver using new asi
+					MAttributeSetInstance asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
+					int M_AttributeSetInstance_ID = asi.getM_AttributeSetInstance_ID();
+					MInventoryLineMA ma = new MInventoryLineMA (line, M_AttributeSetInstance_ID , qtyToDeliver);
+
+					ma.saveEx();
+					log.fine("##: " + ma);
+				}
+			}	//	outgoing Trx
+
+			if (needSave)
+			{
+				line.saveEx();
+			}
+		}	//	for all lines
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MInOut.java" startline="1729" endline="1797" pcid="38777"><![CDATA[
+		{
+			//Validate Transaction
+			if (getMovementType().compareTo(MInOut.MOVEMENTTYPE_CustomerReturns) == 0 
+					|| getMovementType().compareTo(MInOut.MOVEMENTTYPE_VendorReceipts) == 0 )
+			{
+				MAttributeSetInstance asi = null;
+				//auto balance negative on hand
+				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
+						null, MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false, line.getM_Locator_ID(), get_TrxName());
+				for (MStorage storage : storages)
+				{
+					if (storage.getQtyOnHand().signum() < 0)
+					{
+						asi = new MAttributeSetInstance(getCtx(), storage.getM_AttributeSetInstance_ID(), get_TrxName());
+						break;
+					}
+				}
+				//always create asi so fifo/lifo work.
+				if (asi == null)
+				{
+					asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
+				}
+				line.setM_AttributeSetInstance_ID(asi.getM_AttributeSetInstance_ID());
+				log.config("New ASI=" + line);
+				needSave = true;
+			}
+			// Create consume the Attribute Set Instance using policy FIFO/LIFO
+			else if(getMovementType().compareTo(MInOut.MOVEMENTTYPE_VendorReturns) == 0 || getMovementType().compareTo(MInOut.MOVEMENTTYPE_CustomerShipment) == 0)
+			{
+				String MMPolicy = product.getMMPolicy();
+				Timestamp minGuaranteeDate = getMovementDate();
+				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
+						minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, line.getM_Locator_ID(), get_TrxName());
+				BigDecimal qtyToDeliver = line.getMovementQty();
+				for (MStorage storage: storages)
+				{
+					if (storage.getQtyOnHand().compareTo(qtyToDeliver) >= 0)
+					{
+						MInOutLineMA ma = new MInOutLineMA (line,
+								storage.getM_AttributeSetInstance_ID(),
+								qtyToDeliver);
+						ma.saveEx();
+						qtyToDeliver = Env.ZERO;
+					}
+					else
+					{
+						MInOutLineMA ma = new MInOutLineMA (line,
+								storage.getM_AttributeSetInstance_ID(),
+								storage.getQtyOnHand());
+						ma.saveEx();
+						qtyToDeliver = qtyToDeliver.subtract(storage.getQtyOnHand());
+						log.fine( ma + ", QtyToDeliver=" + qtyToDeliver);
+					}
+
+					if (qtyToDeliver.signum() == 0)
+						break;
+				}
+
+				if (qtyToDeliver.signum() != 0)
+				{
+					//deliver using new asi
+					MAttributeSetInstance asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
+					int M_AttributeSetInstance_ID = asi.getM_AttributeSetInstance_ID();
+					MInOutLineMA ma = new MInOutLineMA (line, M_AttributeSetInstance_ID, qtyToDeliver);
+					ma.saveEx();
+					log.fine("##: " + ma);
+				}
+			}	//	outgoing Trx
+		}	//	attributeSetInstance
+]]></source>
+</class>
+
+<class id="25" nlines="45" nfragments="2">
+<source file="/home/saeed/code/org/compiere/report/TrialBalance.java" startline="221" endline="277" pcid="9762"><![CDATA[
+	{
+		//	Date defined
+		if (p_DateAcct_From != null)
+		{
+			if (p_DateAcct_To == null)
+				p_DateAcct_To = new Timestamp (System.currentTimeMillis());
+			return;
+		}
+		//	Get Date from Period
+		if (p_C_Period_ID == 0)
+		{
+		   GregorianCalendar cal = new GregorianCalendar(Language.getLoginLanguage().getLocale());
+		   cal.setTimeInMillis(System.currentTimeMillis());
+		   cal.set(Calendar.HOUR_OF_DAY, 0);
+		   cal.set(Calendar.MINUTE, 0);
+		   cal.set(Calendar.SECOND, 0);
+		   cal.set(Calendar.MILLISECOND, 0);
+		   cal.set(Calendar.DAY_OF_MONTH, 1);		//	set to first of month
+		   p_DateAcct_From = new Timestamp (cal.getTimeInMillis());
+		   cal.add(Calendar.MONTH, 1);
+		   cal.add(Calendar.DAY_OF_YEAR, -1);		//	last of month
+		   p_DateAcct_To = new Timestamp (cal.getTimeInMillis());
+		   return;
+		}
+
+		String sql = "SELECT StartDate, EndDate FROM C_Period WHERE C_Period_ID=?";
+		PreparedStatement pstmt = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, p_C_Period_ID);
+			ResultSet rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				p_DateAcct_From = rs.getTimestamp(1);
+				p_DateAcct_To = rs.getTimestamp(2);
+			}
+			rs.close();
+			pstmt.close();
+			pstmt = null;
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			try
+			{
+				if (pstmt != null)
+					pstmt.close ();
+			}
+			catch (Exception e)
+			{}
+			pstmt = null;
+		}
+	}	//	setDateAcct
+]]></source>
+<source file="/home/saeed/code/org/compiere/report/FinStatement.java" startline="215" endline="263" pcid="9523"><![CDATA[
+	{
+		//	Date defined
+		if (p_DateAcct_From != null)
+		{
+			if (p_DateAcct_To == null)
+				p_DateAcct_To = new Timestamp (System.currentTimeMillis());
+			return;
+		}
+		//	Get Date from Period
+		if (p_C_Period_ID == 0)
+		{
+		   GregorianCalendar cal = new GregorianCalendar(Language.getLoginLanguage().getLocale());
+		   cal.setTimeInMillis(System.currentTimeMillis());
+		   cal.set(Calendar.HOUR_OF_DAY, 0);
+		   cal.set(Calendar.MINUTE, 0);
+		   cal.set(Calendar.SECOND, 0);
+		   cal.set(Calendar.MILLISECOND, 0);
+		   cal.set(Calendar.DAY_OF_MONTH, 1);		//	set to first of month
+		   p_DateAcct_From = new Timestamp (cal.getTimeInMillis());
+		   cal.add(Calendar.MONTH, 1);
+		   cal.add(Calendar.DAY_OF_YEAR, -1);		//	last of month
+		   p_DateAcct_To = new Timestamp (cal.getTimeInMillis());
+		   return;
+		}
+
+		String sql = "SELECT StartDate, EndDate FROM C_Period WHERE C_Period_ID=?";
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, p_C_Period_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				p_DateAcct_From = rs.getTimestamp(1);
+				p_DateAcct_To = rs.getTimestamp(2);
+			}
+ 		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e);
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null; pstmt = null;
+		}
+	}	//	setDateAcct
+]]></source>
+</class>
+
+<class id="26" nlines="45" nfragments="2">
+<source file="/home/saeed/code/org/adempiere/model/POWrapper.java" startline="80" endline="138" pcid="51159"><![CDATA[
+	{
+		String methodName = method.getName();
+		if (methodName.startsWith("set") && args.length == 1)
+		{
+			String propertyName = methodName.substring(3);
+			po.set_ValueOfColumn(propertyName, args[0]);
+			return null;
+		}
+		else if (methodName.startsWith("get") && (args == null || args.length == 0))
+		{
+			String propertyName = methodName.substring(3);
+			Object value = null;
+			final int idx = po.get_ColumnIndex(propertyName);
+			if (idx >= 0)
+				value = po.get_Value(propertyName);
+			if (value != null)
+			{
+				return value;
+			}
+			//
+			if (method.getReturnType() == int.class)
+			{
+				value = Integer.valueOf(0);
+			}
+			else if (method.getReturnType() == BigDecimal.class)
+			{
+				value = BigDecimal.ZERO;
+			}
+			else if (isModelInterface(method.getReturnType()))
+			{
+				value = getReferencedObject(propertyName, method);
+			}
+			else if (PO.class.isAssignableFrom(method.getReturnType()))
+			{
+				throw new IllegalArgumentException("Method not supported - "+methodName);
+			}
+			return value;
+		}
+		else if (methodName.startsWith("is") && (args == null || args.length == 0))
+		{
+			String propertyName = methodName.substring(2);
+			int ii = po.get_ColumnIndex(propertyName);
+			if (ii >= 0)
+			{
+				return po.get_Value(ii);
+			}
+			ii = po.get_ColumnIndex("Is"+propertyName);
+			if (ii >= 0)
+			{
+				return po.get_Value(ii);
+			}
+			//
+			throw new IllegalArgumentException("Method not supported - "+methodName);
+		}
+		else
+		{
+			return method.invoke(po, args);
+		}
+	}
+]]></source>
+<source file="/home/saeed/code/org/adempiere/model/GridTabWrapper.java" startline="63" endline="122" pcid="51233"><![CDATA[
+	{
+		String methodName = method.getName();
+		if (methodName.startsWith("set") && args.length == 1)
+		{
+			String propertyName = methodName.substring(3);
+			m_gridTab.setValue(propertyName, args[0]);
+			// TODO: handle GridTab.setValue returning error  
+			return null;
+		}
+		else if (methodName.startsWith("get") && (args == null || args.length == 0))
+		{
+			String propertyName = methodName.substring(3);
+			Object value = m_gridTab.getValue(propertyName);
+			if (value != null)
+			{
+				return value;
+			}
+			//
+			if (method.getReturnType() == int.class)
+			{
+				value = Integer.valueOf(0);
+			}
+			else if (method.getReturnType() == BigDecimal.class)
+			{
+				value = BigDecimal.ZERO;
+			}
+			else if (isModelInterface(method.getReturnType()))
+			{
+				value = getReferencedObject(propertyName, method);
+			}
+			else if (PO.class.isAssignableFrom(method.getReturnType()))
+			{
+				throw new IllegalArgumentException("Method not supported - "+methodName);
+			}
+			return value;
+		}
+		else if (methodName.startsWith("is") && (args == null || args.length == 0))
+		{
+			String propertyName = methodName.substring(2);
+			GridField field = m_gridTab.getField(propertyName);
+			if (field != null)
+			{
+				final Object value = field.getValue();
+				return value instanceof Boolean ? value : "Y".equals(value);
+			}
+			//
+			field = m_gridTab.getField("Is"+propertyName);
+			if (field != null)
+			{
+				final Object value = field.getValue();
+				return value instanceof Boolean ? value : "Y".equals(value);
+			}
+			//
+			throw new IllegalArgumentException("Method not supported - "+methodName);
+		}
+		else
+		{
+			return method.invoke(m_gridTab, args);
+		}
+	}
+]]></source>
+</class>
+
+<class id="27" nlines="43" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MOrder.java" startline="1303" endline="1382" pcid="20479"><![CDATA[
+		{
+			retValue = true;
+			renumberLines (1000);		//	max 999 bom items	
+
+			//	Order Lines with non-stocked BOMs
+			MOrderLine[] lines = getLines (where, MOrderLine.COLUMNNAME_Line);
+			for (int i = 0; i < lines.length; i++)
+			{
+				MOrderLine line = lines[i];
+				MProduct product = MProduct.get (getCtx(), line.getM_Product_ID());
+				log.fine(product.getName());
+				//	New Lines
+				int lineNo = line.getLine ();
+				//find default BOM with valid dates and to this product
+				MPPProductBOM bom = MPPProductBOM.get(product, getAD_Org_ID(),getDatePromised(), get_TrxName());
+				if(bom != null)
+				{	
+					MPPProductBOMLine[] bomlines = bom.getLines(getDatePromised());
+					for (int j = 0; j < bomlines.length; j++)
+					{
+						MPPProductBOMLine bomline = bomlines[j];
+						MOrderLine newLine = new MOrderLine (this);
+						newLine.setLine (++lineNo);
+						newLine.setM_Product_ID (bomline.getM_Product_ID ());
+						newLine.setC_UOM_ID (bomline.getC_UOM_ID ());
+						newLine.setQty (line.getQtyOrdered ().multiply (
+							bomline.getQtyBOM()));
+						if (bomline.getDescription () != null)
+							newLine.setDescription (bomline.getDescription ());
+						//
+						newLine.setPrice ();
+						newLine.save (get_TrxName());
+					}
+				}	
+				
+				/*MProductBOM[] boms = MProductBOM.getBOMLines (product);
+				for (int j = 0; j < boms.length; j++)
+				{
+					//MProductBOM bom = boms[j];
+					MPPProductBOMLine bom = boms[j];
+					MOrderLine newLine = new MOrderLine (this);
+					newLine.setLine (++lineNo);
+					//newLine.setM_Product_ID (bom.getProduct ()
+					//	.getM_Product_ID ());
+					newLine.setM_Product_ID (bom.getM_Product_ID ());
+					//newLine.setC_UOM_ID (bom.getProduct ().getC_UOM_ID ());
+					newLine.setC_UOM_ID (bom.getC_UOM_ID ());
+					//newLine.setQty (line.getQtyOrdered ().multiply (
+					//		bom.getBOMQty ()));
+					newLine.setQty (line.getQtyOrdered ().multiply (
+						bom.getQtyBOM()));
+					if (bom.getDescription () != null)
+						newLine.setDescription (bom.getDescription ());
+					//
+					newLine.setPrice ();
+					newLine.save (get_TrxName());
+				}*/
+				
+				//	Convert into Comment Line
+				line.setM_Product_ID (0);
+				line.setM_AttributeSetInstance_ID (0);
+				line.setPrice (Env.ZERO);
+				line.setPriceLimit (Env.ZERO);
+				line.setPriceList (Env.ZERO);
+				line.setLineNetAmt (Env.ZERO);
+				line.setFreightAmt (Env.ZERO);
+				//
+				String description = product.getName ();
+				if (product.getDescription () != null)
+					description += " " + product.getDescription ();
+				if (line.getDescription () != null)
+					description += " " + line.getDescription ();
+				line.setDescription (description);
+				line.save (get_TrxName());
+			}	//	for all lines with BOM
+
+			m_lines = null;		//	force requery
+			count = DB.getSQLValue (get_TrxName(), sql, getC_Invoice_ID ());
+			renumberLines (10);
+		}	//	while count != 0
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MInvoice.java" startline="1391" endline="1464" pcid="43038"><![CDATA[
+		{
+			renumberLines (100);
+
+			//	Order Lines with non-stocked BOMs
+			MInvoiceLine[] lines = getLines (where);
+			for (int i = 0; i < lines.length; i++)
+			{
+				MInvoiceLine line = lines[i];
+				MProduct product = MProduct.get (getCtx(), line.getM_Product_ID());
+				log.fine(product.getName());
+				//	New Lines
+				int lineNo = line.getLine ();
+
+				//find default BOM with valid dates and to this product
+				MPPProductBOM bom = MPPProductBOM.get(product, getAD_Org_ID(),getDateInvoiced(), get_TrxName());
+				if(bom != null)
+				{
+					MPPProductBOMLine[] bomlines = bom.getLines(getDateInvoiced());
+					for (int j = 0; j < bomlines.length; j++)
+					{
+						MPPProductBOMLine bomline = bomlines[j];
+						MInvoiceLine newLine = new MInvoiceLine (this);
+						newLine.setLine (++lineNo);
+						newLine.setM_Product_ID (bomline.getM_Product_ID ());
+						newLine.setC_UOM_ID (bomline.getC_UOM_ID ());
+						newLine.setQty (line.getQtyInvoiced().multiply(
+								bomline.getQtyBOM ()));		//	Invoiced/Entered
+						if (bomline.getDescription () != null)
+							newLine.setDescription (bomline.getDescription ());
+						//
+						newLine.setPrice ();
+						newLine.saveEx (get_TrxName());
+					}
+				}
+
+				/*MProductBOM[] boms = MProductBOM.getBOMLines (product);
+				for (int j = 0; j < boms.length; j++)
+				{
+					MProductBOM bom = boms[j];
+					MInvoiceLine newLine = new MInvoiceLine (this);
+					newLine.setLine (++lineNo);
+					newLine.setM_Product_ID (bom.getProduct().getM_Product_ID(),
+						bom.getProduct().getC_UOM_ID());
+					newLine.setQty (line.getQtyInvoiced().multiply(
+						bom.getBOMQty ()));		//	Invoiced/Entered
+					if (bom.getDescription () != null)
+						newLine.setDescription (bom.getDescription ());
+					//
+					newLine.setPrice ();
+					newLine.save (get_TrxName());
+				}*/
+
+				//	Convert into Comment Line
+				line.setM_Product_ID (0);
+				line.setM_AttributeSetInstance_ID (0);
+				line.setPriceEntered (Env.ZERO);
+				line.setPriceActual (Env.ZERO);
+				line.setPriceLimit (Env.ZERO);
+				line.setPriceList (Env.ZERO);
+				line.setLineNetAmt (Env.ZERO);
+				//
+				String description = product.getName ();
+				if (product.getDescription () != null)
+					description += " " + product.getDescription ();
+				if (line.getDescription () != null)
+					description += " " + line.getDescription ();
+				line.setDescription (description);
+				line.saveEx (get_TrxName());
+			} //	for all lines with BOM
+
+			m_lines = null;
+			count = DB.getSQLValue (get_TrxName(), sql, getC_Invoice_ID ());
+			renumberLines (10);
+		}	//	while count != 0
+]]></source>
+</class>
+
+<class id="28" nlines="42" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="426" endline="492" pcid="11993"><![CDATA[
+	{
+		if (m_M_Product_ID == 0 || m_M_PriceList_Version_ID == 0)
+			return false;
+		//
+		String sql = "SELECT pp.PriceStd,"	//	1
+			+ " pp.PriceList,"		//	2
+			+ " pp.PriceLimit,"	//	3
+			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
+			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
+			+ "FROM M_Product p"
+			+ " INNER JOIN M_ProductPriceVendorBreak pp ON (p.M_Product_ID=pp.M_Product_ID)"
+			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
+			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
+			+ "WHERE pv.IsActive=''Y''"
+			+ " AND pp.IsActive=''Y''"
+			+ " AND p.M_Product_ID=?"				//	#1
+			+ " AND pv.M_PriceList_Version_ID=?"	//	#2
+			+ " AND pp.C_BPartner_ID=?"				//	#3
+			+ " AND ?>=pp.BreakValue"				//  #4
+			+ " ORDER BY BreakValue DESC";
+		m_calculated = false;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_M_Product_ID);
+			pstmt.setInt(2, m_M_PriceList_Version_ID);
+			pstmt.setInt(3, m_C_BPartner_ID);
+			pstmt.setBigDecimal(4, m_Qty);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				//	Prices
+				m_PriceStd = rs.getBigDecimal(1);
+				if (rs.wasNull())
+					m_PriceStd = Env.ZERO;
+				m_PriceList = rs.getBigDecimal(2);
+				if (rs.wasNull())
+					m_PriceList = Env.ZERO;
+				m_PriceLimit = rs.getBigDecimal(3);
+				if (rs.wasNull())
+					m_PriceLimit = Env.ZERO;
+				//
+				m_C_UOM_ID = rs.getInt(4);
+				m_C_Currency_ID = rs.getInt(6);
+				m_M_Product_Category_ID = rs.getInt(7);
+				m_enforcePriceLimit = "Y".equals(rs.getString(8));
+				m_isTaxIncluded = "Y".equals(rs.getString(9));
+				//
+				log.fine("M_PriceList_Version_ID=" + m_M_PriceList_Version_ID + " - " + m_PriceStd);
+				m_calculated = true;
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e); 
+			m_calculated = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return m_calculated;
+	}	//	calculatePLV_VB
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="148" endline="209" pcid="11975"><![CDATA[
+	{
+		if (m_M_Product_ID == 0 || m_M_PriceList_Version_ID == 0)
+			return false;
+		//
+		String sql = "SELECT bomPriceStd(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceStd,"	//	1
+			+ " bomPriceList(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceList,"		//	2
+			+ " bomPriceLimit(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceLimit,"	//	3
+			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
+			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
+			+ "FROM M_Product p"
+			+ " INNER JOIN M_ProductPrice pp ON (p.M_Product_ID=pp.M_Product_ID)"
+			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
+			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
+			+ "WHERE pv.IsActive=''Y''"
+			+ " AND pp.IsActive=''Y''"
+			+ " AND p.M_Product_ID=?"				//	#1
+			+ " AND pv.M_PriceList_Version_ID=?";	//	#2
+		m_calculated = false;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try
+		{
+			pstmt = DB.prepareStatement(sql, null);
+			pstmt.setInt(1, m_M_Product_ID);
+			pstmt.setInt(2, m_M_PriceList_Version_ID);
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				//	Prices
+				m_PriceStd = rs.getBigDecimal(1);
+				if (rs.wasNull())
+					m_PriceStd = Env.ZERO;
+				m_PriceList = rs.getBigDecimal(2);
+				if (rs.wasNull())
+					m_PriceList = Env.ZERO;
+				m_PriceLimit = rs.getBigDecimal(3);
+				if (rs.wasNull())
+					m_PriceLimit = Env.ZERO;
+				//
+				m_C_UOM_ID = rs.getInt(4);
+				m_C_Currency_ID = rs.getInt(6);
+				m_M_Product_Category_ID = rs.getInt(7);
+				m_enforcePriceLimit = "Y".equals(rs.getString(8));
+				m_isTaxIncluded = "Y".equals(rs.getString(9));
+				//
+				log.fine("M_PriceList_Version_ID=" + m_M_PriceList_Version_ID + " - " + m_PriceStd);
+				m_calculated = true;
+			}
+		}
+		catch (Exception e)
+		{
+			log.log(Level.SEVERE, sql, e); 
+			m_calculated = false;
+		}
+		finally
+		{
+			DB.close(rs, pstmt);
+			rs = null;
+			pstmt = null;
+		}
+		return m_calculated;
+	}	//	calculatePLV
+]]></source>
+</class>
+
+<class id="29" nlines="41" nfragments="2">
+<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="263" endline="321" pcid="47788"><![CDATA[
+	{		
+		int v_adj=0;
+		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
+		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
+			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
+			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
+			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
+			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
+		  
+		  
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  try {				
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()){
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));					
+					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);
+					calendar.setTime(rs.getDate("DATEACCT"));					
+					int DateAcctMonth = calendar.get(Calendar.MONTH);
+					if(p_Flag ==0){
+						if(DateAcctMonth - AssetServiceDateMonth >1)						
+						  return 1;
+						else
+						  return .5;
+					}					
+					if(p_Flag ==1){
+						if(p_Period == 0)
+							return .5;
+						else
+							return 1;						
+					}					
+					if(p_Flag == 2){
+						if (p_Period - AssetServiceDateMonth >1)
+						  return 1;
+						else
+						  return .5;
+					}					
+			}				
+		  }
+		  catch (Exception e)
+		  {
+			  System.out.println("MMCON"+e);
+		  }
+		  finally
+		  {
+			  try
+			  {
+				  if (pstmt != null)
+					  pstmt.close ();
+			  }
+			  catch (Exception e)
+				{}
+				pstmt = null;
+		  }		  
+		  return v_adj;		
+	}	  
+]]></source>
+<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="123" endline="182" pcid="47767"><![CDATA[
+	{		
+		int v_adj=0;
+		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
+		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
+			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
+			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
+			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
+			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
+		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
+		  
+		  
+		  PreparedStatement pstmt = null;
+		  pstmt = DB.prepareStatement (sqlB.toString(),null);
+		  try {				
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()){
+					Calendar calendar = new GregorianCalendar();
+					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
+					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
+					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
+					calendar.setTime(rs.getDate("DATEACCT"));
+					int DateAcctYear = calendar.get(Calendar.YEAR);				
+					
+					int v_Months_of_Full_Year = 12 - AssetServiceDateMonth;					
+					if(p_Flag < 2){
+						//ADJUST PERIOD FOR FULL-YEAR CONVENTION
+						if(DateAcctYear == AssetServiceDateYear)				        
+				         v_adj =  12/v_Months_of_Full_Year;
+				        else
+				         v_adj = 1;
+					}
+					if(p_Flag == 2){
+					 //ADJUST COST CORRECTIONS FOR FULL-YEAR CONVENTION
+					       v_adj = 12/v_Months_of_Full_Year;
+					}
+					
+					
+			}				
+				
+		  }
+		  catch (Exception e)
+		  {
+			  System.out.println("FYCON"+e);
+		  }
+		  finally
+		  {
+			  try
+			  {
+				  if (pstmt != null)
+					  pstmt.close ();
+			  }
+			  catch (Exception e)
+				{}
+				pstmt = null;
+		  }
+		  
+		  return v_adj;
+		
+	}				
+]]></source>
+</class>
+
+<class id="30" nlines="41" nfragments="2">
+<source file="/home/saeed/code/org/compiere/tools/FileUtil.java" startline="292" endline="351" pcid="8910"><![CDATA[
+	{
+		String fileName = file.getAbsolutePath();
+		boolean isJava = fileName.endsWith(".java");
+		boolean isJSP = fileName.endsWith(".jsp");
+		boolean other = !(isJava || isJSP); 
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		//
+		File tmpFile = new File(fileName + ".tmp");
+		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));
+
+		out.write(COPYRIGHT);
+		boolean found = false;
+
+		String line = null;
+		int lineNo = 0;
+		while ((line = in.readLine()) != null)
+		{
+			lineNo++;
+			if (!found)
+			{
+				if (line.startsWith("package ") && isJava)
+					found = true;
+			}
+			if (found)
+			{
+				out.write(line);
+				out.newLine();
+			}
+		}	//	while reading file
+		//
+		in.close();
+		out.close();
+		//
+		if (found)
+		{
+			File oldFile = new File (fileName + ".old");
+			if (file.renameTo(oldFile))
+			{
+				if (tmpFile.renameTo (new File (fileName)))
+				{
+					if (oldFile.delete ())
+					{
+		//				System.out.println (" - File updated: " + fileName);
+					}
+					else
+						System.err.println (" - Old File not deleted - " + fileName);
+				}
+				else
+					System.err.println (" - New File not renamed - " + fileName);
+			}
+			else
+				System.err.println(" - Old File not renamed - " + fileName);
+		}
+		else
+		{
+			System.err.println(" - No Copyright - " + fileName);
+			if (!tmpFile.delete())
+				System.err.println(" - Temp file not deleted - " + tmpFile.getAbsolutePath());
+		}
+	}	//	license
+]]></source>
+<source file="/home/saeed/code/org/compiere/tools/FileUtil.java" startline="182" endline="232" pcid="8900"><![CDATA[
+	{
+		String fileName = file.getAbsolutePath();
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		//
+		File tmpFile = new File(fileName + ".tmp");
+		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));
+		boolean found = false;
+
+		String line = null;
+		int lineNo = 0;
+		while ((line = in.readLine()) != null)
+		{
+			lineNo++;
+			if (line.indexOf(from) != -1)
+			{
+				found = true;
+				System.out.println("  " + lineNo + ": " + line);
+				line = Util.replace(line, from, to);
+				m_actions++;
+			}
+			out.write(line);
+			out.newLine();
+		}	//	while reading file
+		//
+		in.close();
+		out.close();
+		//
+		if (found)
+		{
+			File oldFile = new File (fileName + ".old");
+			if (file.renameTo(oldFile))
+			{
+				if (tmpFile.renameTo (new File (fileName)))
+				{
+					if (oldFile.delete ())
+						System.out.println (" - File updated: " + fileName);
+					else
+						System.err.println (" - Old File not deleted - " + fileName);
+				}
+				else
+					System.err.println (" - New File not renamed - " + fileName);
+			}
+			else
+				System.err.println(" - Old File not renamed - " + fileName);
+		}
+		else
+		{
+			if (!tmpFile.delete())
+				System.err.println(" - Temp file not deleted - " + tmpFile.getAbsolutePath());
+		}
+	}	//	replaceString
+]]></source>
+</class>
+
+<class id="31" nlines="41" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/MJournalBatch.java" startline="603" endline="667" pcid="31606"><![CDATA[
+	{
+		log.info("reverseCorrectIt - " + toString());
+		// Before reverseCorrect
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+				
+		MJournal[] journals = getJournals(true);
+		//	check prerequisites
+		for (int i = 0; i < journals.length; i++)
+		{
+			MJournal journal = journals[i];
+			if (!journal.isActive())
+				continue;
+			//	All need to be closed/Completed
+			if (DOCSTATUS_Completed.equals(journal.getDocStatus()))
+				;
+			else
+			{
+				m_processMsg = "All Journals need to be Completed: " + journal.getSummary();
+				return false;
+			}
+		}
+		
+		//	Reverse it
+		MJournalBatch reverse = new MJournalBatch (this);
+		reverse.setDateDoc(getDateDoc());
+		reverse.setC_Period_ID(getC_Period_ID());
+		reverse.setDateAcct(getDateAcct());
+		//	Reverse indicator
+		String description = reverse.getDescription();
+		if (description == null)
+			description = "** " + getDocumentNo() + " **";
+		else
+			description += " ** " + getDocumentNo() + " **";
+		reverse.setDescription(description);
+		//[ 1948157  ]
+		reverse.setReversal_ID(getGL_JournalBatch_ID());
+		reverse.saveEx();
+		//
+		
+		//	Reverse Journals
+		for (int i = 0; i < journals.length; i++)
+		{
+			MJournal journal = journals[i];
+			if (!journal.isActive())
+				continue;
+			if (journal.reverseCorrectIt(reverse.getGL_JournalBatch_ID()) == null)
+			{
+				m_processMsg = "Could not reverse " + journal;
+				return false;
+			}
+			journal.save();
+		}
+		
+		//[ 1948157  ]
+		setReversal_ID(reverse.getGL_JournalBatch_ID());
+		save();
+		// After reverseCorrect
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
+		if (m_processMsg != null)
+			return false;
+		
+		return true;
+	}	//	reverseCorrectionIt
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/MJournalBatch.java" startline="675" endline="731" pcid="31611"><![CDATA[
+	{
+		log.info("reverseAccrualIt - " + toString());
+		// Before reverseAccrual
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+		
+		MJournal[] journals = getJournals(true);
+		//	check prerequisites
+		for (int i = 0; i < journals.length; i++)
+		{
+			MJournal journal = journals[i];
+			if (!journal.isActive())
+				continue;
+			//	All need to be closed/Completed
+			if (DOCSTATUS_Completed.equals(journal.getDocStatus()))
+				;
+			else
+			{
+				m_processMsg = "All Journals need to be Completed: " + journal.getSummary();
+				return false;
+			}
+		}
+		//	Reverse it
+		MJournalBatch reverse = new MJournalBatch (this);
+		reverse.setC_Period_ID(0);
+		reverse.setDateDoc(new Timestamp(System.currentTimeMillis()));
+		reverse.setDateAcct(reverse.getDateDoc());
+		//	Reverse indicator
+		String description = reverse.getDescription();
+		if (description == null)
+			description = "** " + getDocumentNo() + " **";
+		else
+			description += " ** " + getDocumentNo() + " **";
+		reverse.setDescription(description);
+		reverse.save();
+		
+		//	Reverse Journals
+		for (int i = 0; i < journals.length; i++)
+		{
+			MJournal journal = journals[i];
+			if (!journal.isActive())
+				continue;
+			if (journal.reverseAccrualIt(reverse.getGL_JournalBatch_ID()) == null)
+			{
+				m_processMsg = "Could not reverse " + journal;
+				return false;
+			}
+			journal.save();
+		}
+		// After reverseAccrual
+		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
+		if (m_processMsg != null)
+			return false;
+				
+		return true;
+	}	//	reverseAccrualIt
+]]></source>
+</class>
+
+<class id="32" nlines="40" nfragments="2">
+<source file="/home/saeed/code/org/compiere/dbPort/JdbcTest.java" startline="394" endline="464" pcid="7981"><![CDATA[
+	{
+		ResultSet  rs   = null;
+		Statement  stmt = null;
+
+		try
+		{
+			while (!getGreenLight())
+				yield();
+			if (WITH_OUTPUT)
+				System.out.println("Thread " + m_myId + " started");
+
+			// Get the connection & statement
+			if (s_cType == C_SHARED)
+				stmt = s_sconn.createStatement ();
+			else if (s_cType == C_MULTIPLE)
+			{
+				s_conn[m_myId] = DriverManager.getConnection (CONNECTION, UID, PWD);
+				stmt = s_conn[m_myId].createStatement ();
+			}
+			else if (s_cType == C_PRECREATED)
+			{
+				stmt = s_conn[m_myId].createStatement ();
+			}
+			else if (s_cType == C_DATASOURCE)
+			{
+				s_conn[m_myId] = s_ds.getConnection();
+				stmt = s_conn[m_myId].createStatement ();
+			}
+		//	else if (s_cType == C_CACHE)
+		//	{
+		//		s_conn[m_myId] = s_cc.getConnection();
+		//		stmt = s_conn[m_myId].createStatement ();
+		//	}
+			stmt.setFetchSize(s_fetchSize);
+
+			// Execute the Query
+			rs = stmt.executeQuery (STATEMENT);
+
+			// Loop through the results
+			while (rs.next())
+			{
+				if (s_do_yield)
+					yield();  // Yield To other threads
+			}
+
+			// Close all the resources
+			rs.close();
+			rs = null;
+
+			// Close the statement
+			stmt.close();
+			stmt = null;
+
+			// Close the local connection
+			if (s_cType == C_SHARED || s_cType == C_PRECREATED)
+				;
+			else
+			{
+				s_conn[m_myId].close();
+				s_conn[m_myId] = null;
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Thread " + m_myId + " got Exception: " + e);
+			e.printStackTrace();
+			return;
+		}
+		if (WITH_OUTPUT)
+			System.out.println("Thread " + m_myId + " finished");
+	}
+]]></source>
+<source file="/home/saeed/code/org/compiere/dbPort/JdbcTestPG.java" startline="282" endline="344" pcid="7913"><![CDATA[
+	{
+		ResultSet  rs   = null;
+		Statement  stmt = null;
+
+		try
+		{
+			if (WITH_OUTPUT)
+				System.out.println("Thread " + m_myId + " waiting");
+			while (!getGreenLight())
+				yield();
+			if (WITH_OUTPUT)
+				System.out.println("Thread " + m_myId + " started");
+
+			// Get the connection & statement
+			if (s_cType == C_SHARED)
+				stmt = s_sconn.createStatement ();
+			else if (s_cType == C_MULTIPLE)
+			{
+				s_conn[m_myId] = DriverManager.getConnection (CONNECTION, UID, PWD);
+				stmt = s_conn[m_myId].createStatement ();
+			}
+			else if (s_cType == C_PRECREATED)
+			{
+				stmt = s_conn[m_myId].createStatement ();
+			}
+		//	stmt.setFetchSize(s_fetchSize);
+
+			// Execute the Query
+			rs = stmt.executeQuery (STATEMENT);
+
+			// Loop through the results
+			while (rs.next())
+			{
+				if (s_do_yield)
+					yield();  // Yield To other threads
+			}
+
+			// Close all the resources
+			rs.close();
+			rs = null;
+
+			// Close the statement
+			stmt.close();
+			stmt = null;
+
+			// Close the local connection
+			if (s_cType == C_SHARED || s_cType == C_PRECREATED)
+				;
+			else
+			{
+				s_conn[m_myId].close();
+				s_conn[m_myId] = null;
+			}
+		}
+		catch (Exception e)
+		{
+			System.out.println("Thread " + m_myId + " got Exception: " + e);
+			e.printStackTrace();
+			return;
+		}
+		if (WITH_OUTPUT)
+			System.out.println("Thread " + m_myId + " finished");
+	}
+]]></source>
+</class>
+
+<class id="33" nlines="40" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/ModelValidationEngine.java" startline="471" endline="534" pcid="18710"><![CDATA[
+	{
+		if (po == null || m_docValidateListeners.size() == 0)
+			return null;
+		
+		String propertyName = po.get_TableName() + "*";
+		ArrayList<ModelValidator> list = m_docValidateListeners.get(propertyName);
+		if (list != null)
+		{
+			//ad_entitytype.modelvalidationclasses
+			String error = fireDocValidate(po, docTiming, list);
+			if (error != null && error.length() > 0)
+				return error;
+		}
+		
+		propertyName = po.get_TableName() + po.getAD_Client_ID();
+		list = m_docValidateListeners.get(propertyName);
+		if (list != null)
+		{
+			//ad_client.modelvalidationclasses
+			String error = fireDocValidate(po, docTiming, list);
+			if (error != null && error.length() > 0)
+				return error;
+		}
+		
+		// now process the script model validator for this event
+		List<MTableScriptValidator> scriptValidators = 
+			MTableScriptValidator.getModelValidatorRules(
+					po.getCtx(), 
+					po.get_Table_ID(),
+					ModelValidator.documentEventValidators[docTiming]);
+		if (scriptValidators != null) {
+			for (MTableScriptValidator scriptValidator : scriptValidators) {
+				MRule rule = MRule.get(po.getCtx(), scriptValidator.getAD_Rule_ID());
+				// currently just JSR 223 supported
+				if (   rule != null 
+					&& rule.isActive()
+					&& rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs)
+					&& rule.getEventType().equals(MRule.EVENTTYPE_ModelValidatorDocumentEvent)) {
+					String error;
+					try {
+						ScriptEngine engine = rule.getScriptEngine();
+
+						MRule.setContext(engine, po.getCtx(), 0);  // no window
+						// now add the method arguments to the engine 
+						engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
+						engine.put(MRule.ARGUMENTS_PREFIX + "PO", po);
+						engine.put(MRule.ARGUMENTS_PREFIX + "Type", docTiming);
+						engine.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.documentEventValidators[docTiming]);
+					
+						Object retval = engine.eval(rule.getScript());
+						error = (retval == null ? "" : retval.toString());
+					} catch (Exception e) {
+						e.printStackTrace();
+						error = e.toString();
+					}
+					if (error != null && error.length() > 0)
+						return error;
+				}
+			}
+		}
+		//
+
+		return null;
+	}	//	fireDocValidate
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/ModelValidationEngine.java" startline="315" endline="378" pcid="18691"><![CDATA[
+	{
+		if (po == null || m_modelChangeListeners.size() == 0)
+			return null;
+		
+		String propertyName = po.get_TableName() + "*";
+		ArrayList<ModelValidator> list = m_modelChangeListeners.get(propertyName);
+		if (list != null)
+		{
+			//ad_entitytype.modelvalidationclasses
+			String error = fireModelChange(po, changeType, list);
+			if (error != null && error.length() > 0)
+				return error;
+		}
+		
+		propertyName = po.get_TableName() + po.getAD_Client_ID();
+		list = m_modelChangeListeners.get(propertyName);
+		if (list != null)
+		{
+			//ad_client.modelvalidationclasses
+			String error = fireModelChange(po, changeType, list);
+			if (error != null && error.length() > 0)
+				return error;
+		}
+		
+		// now process the script model validator for this event
+		List<MTableScriptValidator> scriptValidators = 
+			MTableScriptValidator.getModelValidatorRules(
+					po.getCtx(), 
+					po.get_Table_ID(),
+					ModelValidator.tableEventValidators[changeType]);
+		if (scriptValidators != null) {
+			for (MTableScriptValidator scriptValidator : scriptValidators) {
+				MRule rule = MRule.get(po.getCtx(), scriptValidator.getAD_Rule_ID());
+				// currently just JSR 223 supported
+				if (   rule != null 
+					&& rule.isActive()
+					&& rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs)
+					&& rule.getEventType().equals(MRule.EVENTTYPE_ModelValidatorTableEvent)) {
+					String error;
+					try {
+						ScriptEngine engine = rule.getScriptEngine();
+
+						MRule.setContext(engine, po.getCtx(), 0);  // no window
+						// now add the method arguments to the engine 
+						engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
+						engine.put(MRule.ARGUMENTS_PREFIX + "PO", po);
+						engine.put(MRule.ARGUMENTS_PREFIX + "Type", changeType);
+						engine.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.tableEventValidators[changeType]);
+					
+						Object retval = engine.eval(rule.getScript());
+						error = (retval == null ? "" : retval.toString());
+					} catch (Exception e) {
+						e.printStackTrace();
+						error = e.toString();
+					}
+					if (error != null && error.length() > 0)
+						return error;
+				}
+			}
+		}
+		//
+		
+		return null;
+	}	//	fireModelChange
+]]></source>
+</class>
+
+<class id="34" nlines="40" nfragments="2">
+<source file="/home/saeed/code/org/compiere/model/PP_PayFlowPro4.java" startline="81" endline="158" pcid="14700"><![CDATA[
+	{
+		log.fine(p_mpp.getHostAddress() + " " + p_mpp.getHostPort() + ", Timeout=" + getTimeout()
+			+ "; Proxy=" + p_mpp.getProxyAddress() + " " + p_mpp.getProxyPort() + " " + p_mpp.getProxyLogon() + " " + p_mpp.getProxyPassword());
+
+		if ( p_mpp.getC_Currency_ID() != 0 && p_mpp.getC_Currency_ID() != p_mp.getC_Currency_ID() )
+			throw new IllegalArgumentException("Payment currency not supported by processor.");
+		if ( p_mpp.getMinimumAmt().compareTo(p_mp.getPayAmt()) > 0)
+			throw new IllegalArgumentException("Payment amount is less than minimum accepted.");
+		if ( p_mpp.isRequireVV() && Util.isEmpty(p_mp.getCreditCardVV(), true) )
+			throw new IllegalArgumentException("Credit card verification code required.");
+		
+		
+		//
+		StringBuffer param = new StringBuffer();
+		//  Transaction Type
+		if (p_mp.getTrxType().equals(MPayment.TRXTYPE_Sales))
+			param.append("TRXTYPE=").append(p_mp.getTrxType());
+		else
+			throw new IllegalArgumentException("PP_PayFlowPro TrxType not supported - " + p_mp.getTrxType());
+
+		//  Mandatory Fields
+		param.append("&TENDER=C")										//	CreditCard
+			.append("&ACCT=").append(MPaymentValidate.checkNumeric(p_mp.getCreditCardNumber()));	//	CreditCard No
+		param.append("&EXPDATE=");										//	ExpNo
+		String month = String.valueOf(p_mp.getCreditCardExpMM());
+		if (month.length() == 1)
+			param.append("0");
+		param.append(month);
+		int expYY = p_mp.getCreditCardExpYY();
+		if (expYY > 2000)
+			expYY -= 2000;
+		String year = String.valueOf(expYY);
+		if (year.length() == 1)
+			param.append("0");
+		param.append(year);
+		
+		// CURRENCY
+		int precision = 2;  // cents
+		I_C_Currency currency = null;
+		currency = p_mp.getC_Currency();
+		if ( currency != null )
+		{
+			precision = currency.getStdPrecision();
+			param.append(createPair("&CURRENCY", currency.getISO_Code(), 3));
+		}
+		// rounded to cent
+		param.append("&AMT=").append(p_mp.getPayAmt().setScale(precision, RoundingMode.HALF_UP));					//	Amount
+
+		//  Optional Control Fields		- AuthCode & Orig ID
+		param.append(createPair("&AUTHCODE", p_mp.getVoiceAuthCode(), 6));
+		param.append(createPair("&ORIGID", p_mp.getOrig_TrxID(), 12));	//	PNREF - returned
+		//	CVV
+		param.append(createPair("&CVV2", p_mp.getCreditCardVV(), 4));
+	//	param.append(createPair("&SWIPE", p_mp.getXXX(), 80));			//	Track 1+2
+
+		//	Address
+		param.append(createPair("&NAME", p_mp.getA_Name(), 30));
+		param.append(createPair("&STREET", p_mp.getA_Street(), 30));	//	Street
+		param.append(createPair("&ZIP", p_mp.getA_Zip(), 9));			//	Zip 5-9
+		//	CITY 20, STATE 2,
+		param.append(createPair("&EMAIL", p_mp.getA_EMail(), 64));		//	EMail
+
+		//	Amex Fields
+		//	DESC, SHIPTOZIP, TAXAMT
+	//	param.append(createPair("&DESC", p_mp.getXXX(), 23));			//	Description
+		param.append(createPair("&SHIPTOZIP", p_mp.getA_Zip(), 6));		//	Zip 6
+		param.append(createPair("&TAXAMT", p_mp.getTaxAmt(), 10));		//	Tax
+
+		//	Invoice No
+		param.append(createPair("&INVNUM", p_mp.getC_Invoice_ID(), 9));
+
+		//	COMMENT1/2
+		param.append(createPair("&COMMENT1", p_mp.getC_Payment_ID(), 128));		//	Comment
+		param.append(createPair("&COMMENT2", p_mp.getC_BPartner_ID(), 128)); 	//	Comment2
+
+		return process(param.toString());
+
+	}
+]]></source>
+<source file="/home/saeed/code/org/compiere/model/PP_PayFlowPro.java" startline="85" endline="141" pcid="17493"><![CDATA[
+	{
+		log.fine(p_mpp.getHostAddress() + " " + p_mpp.getHostPort() + ", Timeout=" + getTimeout()
+			+ "; Proxy=" + p_mpp.getProxyAddress() + " " + p_mpp.getProxyPort() + " " + p_mpp.getProxyLogon() + " " + p_mpp.getProxyPassword());
+		//
+		StringBuffer param = new StringBuffer();
+		//  Transaction Type
+		if (p_mp.getTrxType().equals(MPayment.TRXTYPE_Sales))
+			param.append("TRXTYPE=").append(p_mp.getTrxType());
+		else
+			throw new IllegalArgumentException("PP_PayFlowPro TrxType not supported - " + p_mp.getTrxType());
+
+		//  Mandatory Fields
+		param.append("&TENDER=C")										//	CreditCard
+			.append("&ACCT=").append(MPaymentValidate.checkNumeric(p_mp.getCreditCardNumber()));	//	CreditCard No
+		param.append("&EXPDATE=");										//	ExpNo
+		String month = String.valueOf(p_mp.getCreditCardExpMM());
+		if (month.length() == 1)
+			param.append("0");
+		param.append(month);
+		int expYY = p_mp.getCreditCardExpYY();
+		if (expYY > 2000)
+			expYY -= 2000;
+		String year = String.valueOf(expYY);
+		if (year.length() == 1)
+			param.append("0");
+		param.append(year);
+		param.append("&AMT=").append(p_mp.getPayAmt());					//	Amount
+
+		//  Optional Control Fields		- AuthCode & Orig ID
+		param.append(createPair("&AUTHCODE", p_mp.getVoiceAuthCode(), 6));
+		param.append(createPair("&ORIGID", p_mp.getOrig_TrxID(), 12));	//	PNREF - returned
+		//	CVV
+		param.append(createPair("&CVV2", p_mp.getCreditCardVV(), 4));
+	//	param.append(createPair("&SWIPE", p_mp.getXXX(), 80));			//	Track 1+2
+
+		//	Address
+		param.append(createPair("&NAME", p_mp.getA_Name(), 30));
+		param.append(createPair("&STREET", p_mp.getA_Street(), 30));	//	Street
+		param.append(createPair("&ZIP", p_mp.getA_Zip(), 9));			//	Zip 5-9
+		//	CITY 20, STATE 2,
+		param.append(createPair("&EMAIL", p_mp.getA_EMail(), 64));		//	EMail
+
+		//	Amex Fields
+		//	DESC, SHIPTOZIP, TAXAMT
+	//	param.append(createPair("&DESC", p_mp.getXXX(), 23));			//	Description
+		param.append(createPair("&SHIPTOZIP", p_mp.getA_Zip(), 6));		//	Zip 6
+		param.append(createPair("&TAXAMT", p_mp.getTaxAmt(), 10));		//	Tax
+
+		//	Invoice No
+		param.append(createPair("&INVNUM", p_mp.getC_Invoice_ID(), 9));
+
+		//	COMMENT1/2
+		param.append(createPair("&COMMENT1", p_mp.getC_Payment_ID(), 128));		//	Comment
+		param.append(createPair("&COMMENT2", p_mp.getC_BPartner_ID(), 128)); 	//	Comment2
+
+		return process(param.toString());
+	}   //  processCC
+]]></source>
+</class>
+</clones>
+</source_elements>
+</project>'
+]
+
+{ #category : #tests }
+MJCCPSampleReports class >> fullReportWithoutCode [
+	^'<project>
+<name></name>
+<description></description>
+<prog_language></prog_language>
+<source_elements>
+<clones>
+<systeminfo  system="org" granularity="blocks" threshold="30%" minlines="5" maxlines="500"/>
+<classinfo npcs="51492" nclones="7913" nfragments="8817" npairs="7764021" nclasses="904"/>
+<runinfo ncompares="33081912" cputime="18970000"/>
 <class id="1" nlines="166" nfragments="2">
 <source file="/home/saeed/code/org/compiere/model/MSequence.java" startline="643" endline="892" pcid="26812"/>
 <source file="/home/saeed/code/org/compiere/model/MSequence.java" startline="372" endline="608" pcid="26780"/>
@@ -10639,6963 +17596,6 @@ MJCCPSampleReports class >> fullReportWithCode [
 <class id="904" nlines="5" nfragments="2">
 <source file="/home/saeed/code/org/compiere/util/Ini.java" startline="309" endline="313" pcid="5756"/>
 <source file="/home/saeed/code/org/compiere/util/Ini.java" startline="370" endline="374" pcid="5768"/>
-</class>
-</clones>
-</source_elements>
-</project>'
-]
-
-{ #category : #tests }
-MJCCPSampleReports class >> fullReportWithoutCode [
-	^'<project>
-<name></name>
-<description></description>
-<prog_language></prog_language>
-<source_elements>
-<clones>
-<systeminfo  system="org" granularity="blocks" threshold="30%" minlines="5" maxlines="500"/>
-<classinfo npcs="51492" nclones="7913" nfragments="8817" npairs="7764021" nclasses="904"/>
-<runinfo ncompares="33081912" cputime="18970000"/>
-
-<class id="1" nlines="166" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MSequence.java" startline="643" endline="892" pcid="26812"><![CDATA[
-	{
-		if (C_DocType_ID == 0)
-		{
-			s_log.severe ("C_DocType_ID=0");
-			return null;
-		}
-
-		MDocType dt = MDocType.get (Env.getCtx(), C_DocType_ID);	//	wrong for SERVER, but r/o
-		if (dt != null && !dt.isDocNoControlled())
-		{
-			s_log.finer("DocType_ID=" + C_DocType_ID + " Not DocNo controlled");
-			return null;
-		}
-		if (definite && ! dt.isOverwriteSeqOnComplete()) {
-			s_log.finer("DocType_ID=" + C_DocType_ID + " Not Sequence Overwrite on Complete");
-			return null;
-		}
-		if (dt == null || dt.getDocNoSequence_ID() == 0)
-		{
-			s_log.warning ("No Sequence for DocType - " + dt);
-			return null;
-		}
-		if (definite && dt.getDefiniteSequence_ID() == 0)
-		{
-			s_log.warning ("No Definite Sequence for DocType - " + dt);
-			return null;
-		}
-
-		//	Check AdempiereSys
-		boolean adempiereSys = Ini.isPropertyBool(Ini.P_ADEMPIERESYS);
-		if (CLogMgt.isLevel(LOGLEVEL))
-			s_log.log(LOGLEVEL, "DocType_ID=" + C_DocType_ID + " [" + trxName + "]");
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		boolean isStartNewYear = false;
-		String dateColumn = null;
-
-		if (!adempiereSys)
-		{
-			// Get the Start New Year & Sequence Type
-			String startNewYearSQL = "SELECT StartNewYear, DateColumn FROM AD_Sequence "
-					+ "WHERE AD_Sequence_ID = ? AND IsActive = ''Y'' AND IsTableID = ''N'' AND IsAutoSequence=''Y''";
-			try {
-				pstmt = DB.prepareStatement(startNewYearSQL, trxName);
-				pstmt.setInt(1, definite ? dt.getDefiniteSequence_ID() : dt
-						.getDocNoSequence_ID());
-				rs = pstmt.executeQuery();
-				if (rs.next()) {
-					isStartNewYear = "Y".equals(rs.getString(1));
-					dateColumn = rs.getString(2);
-				}
-			} catch (Exception e) {
-				s_log.log(Level.SEVERE, "(Table) [" + trxName + "]", e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-			}
-		}
-
-		String selectSQL = null;
-		if (DB.isOracle() == false)
-		{
-			if (isStartNewYear)
-			{
-				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, s.Prefix, s.Suffix, s.DecimalPattern, s.AD_Client_ID, s.AD_Sequence_ID "
-						+ "FROM AD_Sequence_No y, AD_Sequence s "
-						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
-						+ "AND s.AD_Sequence_ID = ? "
-						+ "AND y.CalendarYear = ? "
-						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' "
-						+ "FOR UPDATE OF y";
-			}
-			else
-			{
-				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Client_ID, AD_Sequence_ID "
-						+ "FROM AD_Sequence "
-						+ "WHERE AD_Sequence_ID = ? "
-						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' "
-						+ "FOR UPDATE OF AD_Sequence";
-			}
-			USE_PROCEDURE=false;
-		}
-		else
-		{
-			if (isStartNewYear) {
-				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, s.Prefix, s.Suffix, s.DecimalPattern, s.AD_Client_ID, s.AD_Sequence_ID "
-						+ "FROM AD_Sequence_No y, AD_Sequence s "
-						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
-						+ "AND s.AD_Sequence_ID = ? "
-						+ "AND y.CalendarYear = ? "
-						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' ";
-			} else {
-				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Client_ID, AD_Sequence_ID "
-						+ "FROM AD_Sequence "
-						+ "WHERE AD_Sequence_ID = ? "
-						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' ";
-			}
-			USE_PROCEDURE = true;
-		}
-		Connection conn = null;
-		Trx trx = trxName == null ? null : Trx.get(trxName, true);
-		//
-		int AD_Sequence_ID = 0;
-		int incrementNo = 0;
-		int next = -1;
-		String prefix = "";
-		String suffix = "";
-		String decimalPattern = "";
-		String calendarYear = "";
-		try
-		{
-			if (trx != null)
-				conn = trx.getConnection();
-			else
-				conn = DB.getConnectionID();
-			//	Error
-			if (conn == null)
-				return null;
-
-			if (isStartNewYear)
-			{
-				if (po != null && dateColumn != null && dateColumn.length() > 0)
-				{
-					Date docDate = (Date)po.get_Value(dateColumn);
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-					calendarYear = sdf.format(docDate);
-				}
-				else
-				{
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-					calendarYear = sdf.format(new Date());
-				}
-			}
-
-			pstmt = conn.prepareStatement(selectSQL,
-				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			if (definite)
-				pstmt.setInt(1, dt.getDefiniteSequence_ID());
-			else
-				pstmt.setInt(1, dt.getDocNoSequence_ID());
-			if (isStartNewYear)
-				pstmt.setString(2, calendarYear);
-
-			//
-			if (!USE_PROCEDURE && DB.getDatabase().isQueryTimeoutSupported())
-				pstmt.setQueryTimeout(QUERY_TIME_OUT);
-			rs = pstmt.executeQuery();
-		//	s_log.fine("AC=" + conn.getAutoCommit() + " -Iso=" + conn.getTransactionIsolation()
-		//		+ " - Type=" + pstmt.getResultSetType() + " - Concur=" + pstmt.getResultSetConcurrency());
-			if (rs.next())
-			{
-				incrementNo = rs.getInt(3);
-				prefix = rs.getString(4);
-				suffix = rs.getString(5);
-				decimalPattern = rs.getString(6);
-				int AD_Client_ID = rs.getInt(7);
-				if (adempiereSys && AD_Client_ID > 11)
-					adempiereSys = false;
-				AD_Sequence_ID = rs.getInt(8);
-
-				if (USE_PROCEDURE)
-				{
-					next = isStartNewYear
-						? nextIDByYear(conn, AD_Sequence_ID, incrementNo, calendarYear)
-						: nextID(conn, AD_Sequence_ID, adempiereSys);
-				}
-				else
-				{
-					PreparedStatement updateSQL = null;
-					try
-					{
-						if (adempiereSys) {
-							updateSQL = conn
-									.prepareStatement("UPDATE AD_Sequence SET CurrentNextSys = CurrentNextSys + ? WHERE AD_Sequence_ID = ?");
-							next = rs.getInt(2);
-						} else {
-							String sql = isStartNewYear
-								? "UPDATE AD_Sequence_No SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ? AND CalendarYear = ?"
-								: "UPDATE AD_Sequence SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ?";
-							updateSQL = conn.prepareStatement(sql);
-							next = rs.getInt(1);
-						}
-						updateSQL.setInt(1, incrementNo);
-						updateSQL.setInt(2, AD_Sequence_ID);
-						if (isStartNewYear)
-							updateSQL.setString(3, calendarYear);
-						updateSQL.executeUpdate();
-					}
-					finally
-					{
-						DB.close(updateSQL);
-					}
-				}
-			}
-			else
-			{
-				s_log.warning ("(DocType)- no record found - " + dt);
-				next = -2;
-			}
-			//	Commit
-			if (trx == null)
-			{
-				conn.commit();
-			}
-		}
-		catch (Exception e)
-		{
-			s_log.log(Level.SEVERE, "(DocType) [" + trxName + "]", e);
-			if (DBException.isTimeout(e))
-				throw new AdempiereException("GenerateDocumentNoTimeOut", e);
-			else
-				throw new AdempiereException("GenerateDocumentNoError", e);
-		}
-		finally
-		{
-			//	Finish
-			try
-			{
-				DB.close(rs, pstmt);
-				if (trx == null && conn != null) {
-					conn.close();
-					conn = null;
-				}
-			}
-			catch (Exception e)
-			{
-				s_log.log(Level.SEVERE, "(DocType) - finish", e);
-			}
-		}
-		//	Error
-		if (next < 0)
-			return null;
-
-		//	create DocumentNo
-		StringBuffer doc = new StringBuffer();
-		if (prefix != null && prefix.length() > 0)
-			doc.append(Env.parseVariable(prefix, po, trxName, false));
-		if (decimalPattern != null && decimalPattern.length() > 0)
-			doc.append(new DecimalFormat(decimalPattern).format(next));
-		else
-			doc.append(next);
-		if (suffix != null && suffix.length() > 0)
-			doc.append(Env.parseVariable(suffix, po, trxName, false));
-		String documentNo = doc.toString();
-		s_log.finer (documentNo + " (" + incrementNo + ")"
-				+ " - C_DocType_ID=" + C_DocType_ID + " [" + trx + "]");
-		return documentNo;
-	}	//	getDocumentNo
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MSequence.java" startline="372" endline="608" pcid="26780"><![CDATA[
-	{
-		if (TableName == null || TableName.length() == 0)
-			throw new IllegalArgumentException("TableName missing");
-
-		//	Check AdempiereSys
-		boolean adempiereSys = Ini.isPropertyBool(Ini.P_ADEMPIERESYS);
-		if (adempiereSys && AD_Client_ID > 11)
-			adempiereSys = false;
-		//
-		if (CLogMgt.isLevel(LOGLEVEL))
-			s_log.log(LOGLEVEL, TableName + " - AdempiereSys=" + adempiereSys  + " [" + trxName + "]");
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		boolean isStartNewYear = false;
-		String dateColumn = null;
-
-		if (!adempiereSys)
-		{
-			// Get the Start New Year flag
-			String startNewYearSQL = "SELECT StartNewYear, DateColumn FROM AD_Sequence "
-					+ "WHERE Name = ? AND IsActive = ''Y'' AND IsTableID = ''N'' AND IsAutoSequence=''Y'' AND AD_Client_ID = ?";
-			try
-			{
-				pstmt = DB.prepareStatement(startNewYearSQL, trxName);
-				pstmt.setString(1, PREFIX_DOCSEQ + TableName);
-				pstmt.setInt(2, AD_Client_ID);
-				rs = pstmt.executeQuery();
-				if (rs.next()) {
-					isStartNewYear = "Y".equals(rs.getString(1));
-					dateColumn = rs.getString(2);
-				}
-			}
-			catch (Exception e)
-			{
-				s_log.log(Level.SEVERE, "(Table) [" + trxName + "]", e);
-			}
-			finally
-			{
-				DB.close(rs, pstmt);
-			}
-		}
-
-
-		String selectSQL = null;
-		if (DB.isOracle() == false)
-		{
-			if (isStartNewYear) {
-				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, s.Prefix, s.Suffix, s.DecimalPattern, s.AD_Sequence_ID "
-						+ "FROM AD_Sequence_No y, AD_Sequence s "
-						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
-						+ "AND s.Name = ? "
-						+ "AND s.AD_Client_ID = ? "
-						+ "AND y.CalendarYear = ? "
-						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' "
-						+ "ORDER BY s.AD_Client_ID DESC "
-						+ "FOR UPDATE OF y";
-			} else {
-				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Sequence_ID "
-						+ "FROM AD_Sequence "
-						+ "WHERE Name = ? "
-						+ "AND AD_Client_ID = ? "
-						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' "
-						+ "ORDER BY AD_Client_ID DESC "
-						+ "FOR UPDATE OF AD_Sequence";
-			}
-			USE_PROCEDURE=false;
-		}
-		else
-		{
-			if (isStartNewYear) {
-				selectSQL = "SELECT y.CurrentNext, s.CurrentNextSys, s.IncrementNo, Prefix, Suffix, DecimalPattern, s.AD_Sequence_ID "
-						+ "FROM AD_Sequence_No y, AD_Sequence s "
-						+ "WHERE y.AD_Sequence_ID = s.AD_Sequence_ID "
-						+ "AND s.Name = ? "
-						+ "AND s.AD_Client_ID = ? "
-						+ "AND y.CalendarYear = ? "
-						+ "AND s.IsActive=''Y'' AND s.IsTableID=''N'' AND s.IsAutoSequence=''Y'' "
-						+ "ORDER BY s.AD_Client_ID DESC";
-			} else {
-				selectSQL = "SELECT CurrentNext, CurrentNextSys, IncrementNo, Prefix, Suffix, DecimalPattern, AD_Sequence_ID "
-						+ "FROM AD_Sequence "
-						+ "WHERE Name = ? "
-						+ "AND AD_Client_ID = ? "
-						+ "AND IsActive=''Y'' AND IsTableID=''N'' AND IsAutoSequence=''Y'' "
-						+ "ORDER BY AD_Client_ID DESC";
-			}
-			USE_PROCEDURE = true;
-		}
-		Connection conn = null;
-		Trx trx = trxName == null ? null : Trx.get(trxName, true);
-		//
-		int AD_Sequence_ID = 0;
-		int incrementNo = 0;
-		int next = -1;
-		String prefix = "";
-		String suffix = "";
-		String decimalPattern = "";
-		String calendarYear = "";
-		try
-		{
-			if (trx != null)
-				conn = trx.getConnection();
-			else
-				conn = DB.getConnectionID();
-			//	Error
-			if (conn == null)
-				return null;
-
-			if (isStartNewYear)
-			{
-				if (po != null && dateColumn != null && dateColumn.length() > 0)
-				{
-					Date docDate = (Date)po.get_Value(dateColumn);
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-					calendarYear = sdf.format(docDate);
-				}
-				else
-				{
-					SimpleDateFormat sdf = new SimpleDateFormat("yyyy");
-					calendarYear = sdf.format(new Date());
-				}
-			}
-
-			//
-			pstmt = conn.prepareStatement(selectSQL,
-				ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
-			pstmt.setString(1, PREFIX_DOCSEQ + TableName);
-			pstmt.setInt(2, AD_Client_ID);
-			if (isStartNewYear)
-				pstmt.setString(3, calendarYear);
-
-			//
-			if (!USE_PROCEDURE && DB.getDatabase().isQueryTimeoutSupported())
-				pstmt.setQueryTimeout(QUERY_TIME_OUT);
-			rs = pstmt.executeQuery();
-		//	s_log.fine("AC=" + conn.getAutoCommit() + " -Iso=" + conn.getTransactionIsolation()
-		//		+ " - Type=" + pstmt.getResultSetType() + " - Concur=" + pstmt.getResultSetConcurrency());
-			if (rs.next())
-			{
-				AD_Sequence_ID = rs.getInt(7);
-				prefix = rs.getString(4);
-				suffix = rs.getString(5);
-				decimalPattern = rs.getString(6);
-				incrementNo = rs.getInt(3);
-				if (USE_PROCEDURE)
-				{
-					next = isStartNewYear
-						? nextIDByYear(conn, AD_Sequence_ID, incrementNo, calendarYear)
-						: nextID(conn, AD_Sequence_ID, adempiereSys);
-				}
-				else
-				{
-					PreparedStatement updateSQL = null;
-					try
-					{
-						if (adempiereSys) {
-							updateSQL = conn
-									.prepareStatement("UPDATE AD_Sequence SET CurrentNextSys = CurrentNextSys + ? WHERE AD_Sequence_ID = ?");
-							next = rs.getInt(2);
-						} else {
-							String sql = isStartNewYear
-								? "UPDATE AD_Sequence_No SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ? AND CalendarYear = ?"
-								: "UPDATE AD_Sequence SET CurrentNext = CurrentNext + ? WHERE AD_Sequence_ID = ?";
-							updateSQL = conn
-									.prepareStatement(sql);
-							next = rs.getInt(1);
-						}
-						updateSQL.setInt(1, incrementNo);
-						updateSQL.setInt(2, AD_Sequence_ID);
-						if (isStartNewYear)
-							updateSQL.setString(3, calendarYear);
-						updateSQL.executeUpdate();
-					}
-					finally
-					{
-						DB.close(updateSQL);
-					}
-				}
-			}
-			else
-			{
-				s_log.warning ("(Table) - no record found - " + TableName);
-				MSequence seq = new MSequence (Env.getCtx(), AD_Client_ID, TableName, null);
-				next = seq.getNextID();
-				seq.save();
-			}
-			//	Commit
-			if (trx == null)
-			{
-				conn.commit();
-			}
-		}
-		catch (Exception e)
-		{
-			s_log.log(Level.SEVERE, "(Table) [" + trxName + "]", e);
-			if (DBException.isTimeout(e))
-				throw new AdempiereException("GenerateDocumentNoTimeOut", e);
-			else
-				throw new AdempiereException("GenerateDocumentNoError", e);
-		}
-		finally
-		{
-			//Finish
-			DB.close(rs, pstmt);
-			try
-			{
-				if (trx == null && conn != null) {
-					conn.close();
-					conn = null;
-				}
-			}
-			catch (Exception e)
-			{
-				s_log.log(Level.SEVERE, "(Table) - finish", e);
-			}
-		}
-
-		//	Error
-		if (next < 0)
-			return null;
-
-		//	create DocumentNo
-		StringBuffer doc = new StringBuffer();
-		if (prefix != null && prefix.length() > 0)
-			doc.append(Env.parseVariable(prefix, po, trxName, false));
-		if (decimalPattern != null && decimalPattern.length() > 0)
-			doc.append(new DecimalFormat(decimalPattern).format(next));
-		else
-			doc.append(next);
-		if (suffix != null && suffix.length() > 0)
-			doc.append(Env.parseVariable(suffix, po, trxName, false));
-		String documentNo = doc.toString();
-		s_log.finer (documentNo + " (" + incrementNo + ")"
-				+ " - Table=" + TableName + " [" + trx + "]");
-		return documentNo;
-	}	//	getDocumentNo
-]]></source>
-</class>
-
-<class id="2" nlines="113" nfragments="3">
-<source file="/home/saeed/code/org/compiere/FA/Depreciation.java" startline="364" endline="493" pcid="47559"><![CDATA[
-	{		
-		  BigDecimal v_DB = new BigDecimal(0.0);		 
-		  BigDecimal v_Accum_Dep = new BigDecimal(0.0);
-		  BigDecimal v_SL = new BigDecimal(0.0);
-		  BigDecimal A_Period_Exp = new BigDecimal(0.0);
-		  double v_Var = 0.0;
-		  int v_counter = 0;
-		  double v_months = 0;
-		  int v_firstyr = 0;
-		  double v_monthadj = 0;
-		  BigDecimal v_adj = new BigDecimal(0.0);		  
-		  BigDecimal v_Base_Amount = new BigDecimal(0.0);
-		  BigDecimal v_Salvage_Amount = new BigDecimal(0.0);
-		  double v_Life_Periods = 0;
-		  double v_Life_Years = 0;
-		  String v_con_type = null;
-		 
-		  StringBuffer sqlB = new StringBuffer ("SELECT A.A_ASSET_COST, A.A_SALVAGE_VALUE, A.A_LIFE_PERIOD, A.A_ASSET_LIFE_YEARS, A.DATEACCT,"
-			+ " D.ASSETSERVICEDATE, C.CONVENTIONTYPE, A_DEPRECIATION_VARIABLE_PERC  "
-			+ " FROM A_DEPRECIATION_WORKFILE A, A_ASSET_ACCT B,A_ASSET D,A_DEPRECIATION_CONVENTION C "
-			+ " WHERE A.A_ASSET_ID = " + p_A_ASSET_ID  
-			+ " AND B.A_ASSET_ID = " + p_A_ASSET_ID
-			+ " AND A_PERIOD_POSTED+1 >= A_PERIOD_START AND A_PERIOD_POSTED+1 <= A_PERIOD_END "
-			+ " AND A.POSTINGTYPE = ''" +  p_POSTINGTYPE
-			+ "'' AND B.POSTINGTYPE = ''" +  p_POSTINGTYPE
-			+ "'' AND B.A_ASSET_ACCT_ID = " +  p_A_ASSET_ACCT_ID
-			+ " AND D.A_ASSET_ID = " + p_A_ASSET_ID
-			+ " AND B.A_DEPRECIATION_CONV_ID = C.A_DEPRECIATION_CONVENTION_ID");		
-		  //System.out.println("DBVAR: "+sqlB.toString());
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  ResultSet rs = null;
-		  try {				
-				rs = pstmt.executeQuery();
-				while (rs.next()){				  				 
-				  v_counter = 0;
-				  v_months = 0;
-				  v_firstyr = 0;
-				  v_monthadj = 0;
-				  v_Var=rs.getDouble("A_DEPRECIATION_VARIABLE_PERC");
-				  v_adj = new BigDecimal(0.0);				  
-				  v_Base_Amount = rs.getBigDecimal("A_ASSET_COST");
-				  v_Salvage_Amount = rs.getBigDecimal("A_SALVAGE_VALUE");
-				  v_Life_Periods = rs.getDouble("A_LIFE_PERIOD");
-				  v_Life_Years = rs.getDouble("A_ASSET_LIFE_YEARS");
-				  v_con_type = rs.getString("CONVENTIONTYPE");
-				  Calendar calendar = new GregorianCalendar();
-				  calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
-				  int AssetServiceDateYear = calendar.get(Calendar.YEAR);
-				  int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
-				  calendar.setTime(rs.getDate("DATEACCT"));
-				  int DateAcctYear = calendar.get(Calendar.YEAR);
-				  
-				  double v_period = DateAcctYear - AssetServiceDateYear;				  
-				    while (v_counter <= v_period){				      
-				        if(v_firstyr == 0){
-				        v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(v_Var/v_Life_Years));
-				        v_months = 12 - AssetServiceDateMonth +1;				        
-				        if (v_con_type.compareTo("HYCON") ==0){
-				          v_adj = new BigDecimal(Conventions.HYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));
-				          v_monthadj = 6-v_months;
-				        }
-				        else if (v_con_type.compareTo("FYCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.FYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,0,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));				          
-				          v_monthadj = 12-v_months;
-				        }
-				        else if (v_con_type.compareTo("DYCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.DYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));				          
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("MQCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.MQCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
-				          v_DB =(v_DB.divide(new BigDecimal(v_months),2, BigDecimal.ROUND_HALF_UP));				          				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("FMCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.FMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(new BigDecimal(v_months)));				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("MMCON") ==0){
-				        	
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(.5)).add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(v_months-1));
-				          v_adj = new BigDecimal(Conventions.MMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateMonth+1));
-				          v_DB = (v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP).multiply(v_adj));
-				          v_monthadj = 0;
-				        }
-				        v_firstyr = 1;
-				        }
-				     else{				    	
-				    	v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(v_Var/v_Life_Years));				        
-				        v_Accum_Dep = v_Accum_Dep.add(v_DB);
-				        v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				     }
-			        v_counter = v_counter+1;				     
-				    }
-				    A_Period_Exp = v_DB;					 
-					 if (p_SL ==1 ){   
-						 if (v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)>0 )					 
-							 v_SL = ((v_Base_Amount.subtract(v_Salvage_Amount).subtract(p_Accum_Dep)).divide(new BigDecimal(v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)),2, BigDecimal.ROUND_HALF_UP));				 
-		
-						 if (A_Period_Exp.compareTo(v_SL)==-1)				   
-						   A_Period_Exp = v_SL;				 
-						  
-						 if (v_Base_Amount.subtract(p_Accum_Dep).subtract(A_Period_Exp).compareTo(v_Salvage_Amount)==-1 )
-							  A_Period_Exp =v_Base_Amount.subtract(p_Accum_Dep).subtract(v_Salvage_Amount);
-					 }		
-				}
-				//System.out.println("DBVAR: "+A_Period_Exp);
-				return A_Period_Exp;
-			}
-		  catch (Exception e)
-		  {
-			  System.out.println("DBVAR: "+e);
-		  }
-		  finally
-		  {
-			  DB.close(rs, pstmt);
-			  rs = null; pstmt = null;
-		  }
-		  return A_Period_Exp;		
-	}
-]]></source>
-<source file="/home/saeed/code/org/compiere/FA/Depreciation.java" startline="232" endline="360" pcid="47544"><![CDATA[
-	{		
-		  BigDecimal v_DB = new BigDecimal(0.0);		 
-		  BigDecimal v_Accum_Dep = new BigDecimal(0.0);
-		  BigDecimal v_SL = new BigDecimal(0.0);
-		  BigDecimal A_Period_Exp = new BigDecimal(0.0);
-		  int v_counter = 0;
-		  double v_months = 0;
-		  int v_firstyr = 0;
-		  double v_monthadj = 0;
-		  BigDecimal v_adj = new BigDecimal(0.0);		  
-		  BigDecimal v_Base_Amount = new BigDecimal(0.0);
-		  BigDecimal v_Salvage_Amount = new BigDecimal(0.0);
-		  double v_Life_Periods = 0;
-		  double v_Life_Years = 0;
-		  String v_con_type = null;
-		 
-		  StringBuffer sqlB = new StringBuffer ("SELECT A.A_ASSET_COST, A.A_SALVAGE_VALUE, A.A_LIFE_PERIOD, A.A_ASSET_LIFE_YEARS, A.DATEACCT,"
-			+ " D.ASSETSERVICEDATE, C.CONVENTIONTYPE "
-			+ " FROM A_DEPRECIATION_WORKFILE A, A_ASSET_ACCT B,A_ASSET D,A_DEPRECIATION_CONVENTION C "
-			+ " WHERE A.A_ASSET_ID = " + p_A_ASSET_ID 
-			+ " AND B.A_ASSET_ID = " + p_A_ASSET_ID 
-			+ " AND A_PERIOD_POSTED+1 >= A_PERIOD_START AND A_PERIOD_POSTED+1 <= A_PERIOD_END "
-			+ " AND A.POSTINGTYPE = ''" +  p_POSTINGTYPE
-			+ "'' AND B.POSTINGTYPE = ''" +  p_POSTINGTYPE
-			+ "'' AND B.A_ASSET_ACCT_ID = " +  p_A_ASSET_ACCT_ID
-			+ " AND D.A_ASSET_ID = " + p_A_ASSET_ID
-			+ " AND B.A_DEPRECIATION_CONV_ID = C.A_DEPRECIATION_CONVENTION_ID");		
-		  //System.out.println("DB200: "+sqlB.toString());
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  ResultSet rs = null;
-		  try {				
-				rs = pstmt.executeQuery();
-				while (rs.next()){
-				  Calendar calendar = new GregorianCalendar();
-				  calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
-				  int AssetServiceDateYear = calendar.get(Calendar.YEAR);
-				  int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
-				  calendar.setTime(rs.getDate("DATEACCT"));
-				  int DateAcctYear = calendar.get(Calendar.YEAR);
-				  v_counter = 0;
-				  v_months = 0;
-				  v_firstyr = 0;
-				  v_monthadj = 0;
-				  v_adj = new BigDecimal(0.0);				  
-				  v_Base_Amount = rs.getBigDecimal("A_ASSET_COST");
-				  v_Salvage_Amount = rs.getBigDecimal("A_SALVAGE_VALUE");
-				  v_Life_Periods = rs.getDouble("A_LIFE_PERIOD");
-				  v_Life_Years = rs.getDouble("A_ASSET_LIFE_YEARS");
-				  v_con_type = rs.getString("CONVENTIONTYPE");
-				  
-				  double v_period = DateAcctYear - AssetServiceDateYear;				  
-				    while (v_counter <= v_period){				      
-				        if(v_firstyr == 0){
-				        v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(2/v_Life_Years));				        
-				        v_months = 12 - AssetServiceDateMonth +1;				        
-				        if (v_con_type.compareTo("HYCON") ==0){
-				          v_adj = new BigDecimal(Conventions.HYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));
-				          v_monthadj = 6-v_months;
-				        }
-				        else if (v_con_type.compareTo("FYCON") ==0){
-				        	
-				          v_adj = new BigDecimal(Conventions.FYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,0,AssetServiceDateYear));				          
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));				          
-				          v_monthadj = 12-v_months;
-				        }
-				        else if (v_con_type.compareTo("DYCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.DYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));				          
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("MQCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.MQCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
-				          v_DB =(v_DB.divide(new BigDecimal(v_months),2, BigDecimal.ROUND_HALF_UP));				          				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("FMCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.FMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(new BigDecimal(v_months)));				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("MMCON") ==0){
-				        	
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(.5)).add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(v_months-1));
-				          v_adj = new BigDecimal(Conventions.MMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateMonth+1));
-				          v_DB = (v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(v_adj);
-				          v_monthadj = 0;
-				        }
-				        v_firstyr = 1;
-				        }
-				     else{				    	
-				    	v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(2/v_Life_Years));				        
-				        v_Accum_Dep = v_Accum_Dep.add(v_DB);
-				        v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				     }
-			        v_counter = v_counter+1;				     
-				    }
-				    A_Period_Exp = v_DB;					 
-					 if (p_SL ==1 ){   
-						 if (v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)>0 )
-							 v_SL = ((v_Base_Amount.subtract(v_Salvage_Amount).subtract(p_Accum_Dep)).divide(new BigDecimal(v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)),2, BigDecimal.ROUND_HALF_UP));						     				 
-		
-						 if (A_Period_Exp.compareTo(v_SL)==-1)				   
-						   A_Period_Exp = v_SL;				 
-						  
-						 if (v_Base_Amount.subtract(p_Accum_Dep).subtract(A_Period_Exp).compareTo(v_Salvage_Amount)==-1 )
-							  A_Period_Exp =v_Base_Amount.subtract(p_Accum_Dep).subtract(v_Salvage_Amount);
-					 }		
-				}
-				//System.out.println("DB200: "+A_Period_Exp);
-				return A_Period_Exp;
-			}
-		  catch (Exception e)
-		  {
-			  System.out.println("DB200: "+e);
-		  }
-		  finally
-		  {
-			  DB.close(rs, pstmt);
-			  rs = null; pstmt = null;
-		  }
-		  return A_Period_Exp;		
-	}
-]]></source>
-<source file="/home/saeed/code/org/compiere/FA/Depreciation.java" startline="98" endline="228" pcid="47527"><![CDATA[
-	{		
-		  BigDecimal v_DB = new BigDecimal(0.0);
-		  BigDecimal v_Accum_Dep = new BigDecimal(0.0);
-		  BigDecimal v_SL = new BigDecimal(0.0);
-		  BigDecimal A_Period_Exp = new BigDecimal(0.0);
-		  int v_counter = 0;
-		  double v_months = 0;
-		  int v_firstyr = 0;
-		  double v_monthadj = 0;
-		  BigDecimal v_adj = new BigDecimal(0.0);		  
-		  BigDecimal v_Base_Amount = new BigDecimal(0.0);
-		  BigDecimal v_Salvage_Amount = new BigDecimal(0.0);
-		  double v_Life_Periods = 0;
-		  double v_Life_Years = 0;
-		  String v_con_type = null;
-		  
-		  StringBuffer sqlB = new StringBuffer ("SELECT A.A_ASSET_COST, A.A_SALVAGE_VALUE, A.A_LIFE_PERIOD, A.A_ASSET_LIFE_YEARS, A.DATEACCT,"
-			+ " D.ASSETSERVICEDATE, C.CONVENTIONTYPE "
-			+ " FROM A_DEPRECIATION_WORKFILE A, A_ASSET_ACCT B,A_ASSET D,A_DEPRECIATION_CONVENTION C "
-			+ " WHERE A.A_ASSET_ID = " + p_A_ASSET_ID  
-			+ " AND B.A_ASSET_ID = " + p_A_ASSET_ID 
-			+ " AND A_PERIOD_POSTED+1 >= A_PERIOD_START AND A_PERIOD_POSTED+1 <= A_PERIOD_END "
-			+ " AND A.POSTINGTYPE = ''" +  p_POSTINGTYPE
-			+ "'' AND B.POSTINGTYPE = ''" +  p_POSTINGTYPE
-			+ "'' AND B.A_ASSET_ACCT_ID = " +  p_A_ASSET_ACCT_ID
-			+ " AND D.A_ASSET_ID = " + p_A_ASSET_ID
-			+ " AND B.A_DEPRECIATION_CONV_ID = C.A_DEPRECIATION_CONVENTION_ID");		
-		  //System.out.println("DB150: "+sqlB.toString());
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  try {				
-				ResultSet rs = pstmt.executeQuery();
-				while (rs.next()){
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
-					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
-					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
-					calendar.setTime(rs.getDate("DATEACCT"));
-					int DateAcctYear = calendar.get(Calendar.YEAR);
-					
-				  v_Base_Amount = rs.getBigDecimal("A_ASSET_COST");
-				  v_Salvage_Amount = rs.getBigDecimal("A_SALVAGE_VALUE");
-				  v_Life_Periods = rs.getDouble("A_LIFE_PERIOD");
-				  v_Life_Years = rs.getDouble("A_ASSET_LIFE_YEARS");
-				  v_con_type = rs.getString("CONVENTIONTYPE");
-				  
-				  double v_period = DateAcctYear - AssetServiceDateYear;				  
-				    while (v_counter <= v_period){				      
-				        if(v_firstyr == 0){
-				        v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(1.5/v_Life_Years));
-				        v_months = 12 - AssetServiceDateMonth +1;				        
-				        if (v_con_type.compareTo("HYCON") ==0){
-				          v_adj = new BigDecimal(Conventions.HYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));				          
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));
-				          v_monthadj = 6-v_months;
-				        }
-				        else if (v_con_type.compareTo("FYCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.FYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,0,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj).multiply(new BigDecimal(v_months)));				          
-				          v_monthadj = 12-v_months;
-				        }
-				        else if (v_con_type.compareTo("DYCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.DYCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("MQCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.MQCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(v_adj));
-				          v_DB =(v_DB.divide(new BigDecimal(v_months),2, BigDecimal.ROUND_HALF_UP));				          				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("FMCON") ==0){				        
-				          v_adj = new BigDecimal(Conventions.FMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateYear));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				          
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.multiply(new BigDecimal(v_months)));				          
-				          v_monthadj = 0;
-				        }
-				        else if (v_con_type.compareTo("MMCON") ==0){
-				        	
-				          v_Accum_Dep = v_Accum_Dep.add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(.5)).add(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(new BigDecimal(v_months-1));
-				          v_adj = new BigDecimal(Conventions.MMCON(p_A_ASSET_ID,p_POSTINGTYPE,p_A_ASSET_ACCT_ID,2,AssetServiceDateMonth+1));
-				          v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP)).multiply(v_adj);				          
-				          v_monthadj = 0;
-				        }
-				        v_firstyr = 1;
-				        }
-				     else{				    	
-				    	v_DB = (v_Base_Amount.subtract(v_Accum_Dep).subtract(v_Salvage_Amount)).multiply(new BigDecimal(1.5/v_Life_Years));				        
-				        v_Accum_Dep = v_Accum_Dep.add(v_DB);
-				        v_DB =(v_DB.divide(new BigDecimal(12.0),2, BigDecimal.ROUND_HALF_UP));				        
-				     }
-			        v_counter = v_counter+1;				     
-				    }				 
-				 A_Period_Exp = v_DB;
-				 
-				 if (p_SL ==1 ){   
-					 if (v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)>0 )					 
-					     v_SL = ((v_Base_Amount.subtract(v_Salvage_Amount).subtract(p_Accum_Dep)).divide(new BigDecimal(v_Life_Periods-(p_A_CURRENT_PERIOD+v_monthadj)),2, BigDecimal.ROUND_HALF_UP));				 
-	
-					 if (A_Period_Exp.compareTo(v_SL)==-1)				   
-					   A_Period_Exp = v_SL;				 
-					  
-					 if (v_Base_Amount.subtract(p_Accum_Dep).subtract(A_Period_Exp).compareTo(v_Salvage_Amount)==-1 )
-						  A_Period_Exp =v_Base_Amount.subtract(p_Accum_Dep).subtract(v_Salvage_Amount);
-				 }
-				 
-				}
-				//System.out.println("DB150: "+A_Period_Exp);
-				return A_Period_Exp;
-			}
-		  catch (Exception e)
-		  {
-			  System.out.println("DB150: "+e);
-		  }
-		  finally
-		  {
-			  try
-			  {
-				  if (pstmt != null)
-					  pstmt.close ();
-			  }
-			  catch (Exception e)
-				{}
-				pstmt = null;
-		  }
-		  return A_Period_Exp;		
-	}
-]]></source>
-</class>
-
-<class id="3" nlines="108" nfragments="2">
-<source file="/home/saeed/code/org/compiere/FA/CreateInvoicedAsset.java" startline="154" endline="264" pcid="47841"><![CDATA[
-							{
-								assetacct.setPostingType(assetgrpacct.getPostingType());
-								assetacct.setA_Split_Percent(assetgrpacct.getA_Split_Percent());
-								assetacct.setA_Depreciation_Conv_ID(assetgrpacct.getConventionType());
-								assetacct.setA_Asset_ID(asset.getA_Asset_ID());
-								assetacct.setA_Depreciation_ID(assetgrpacct.getDepreciationType());
-								assetacct.setA_Asset_Spread_ID(assetgrpacct.getA_Asset_Spread_Type());
-								assetacct.setA_Period_Start(1);										
-				
-								if (asset.getUseLifeMonths() == 0 & asset.getUseLifeYears() == 0){
-									assetacct.setA_Period_End(assetgrpacct.getUseLifeMonths());
-									asset.setUseLifeYears(assetgrpacct.getUseLifeYears());
-									asset.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
-									asset.setIsDepreciated(true);
-									asset.setIsOwned(true);
-									asset.save();
-									uselifemonths = assetgrpacct.getUseLifeMonths();
-									uselifeyears = assetgrpacct.getUseLifeYears();
-									
-									}
-								else if(asset.getUseLifeMonths() == 0){
-									assetacct.setA_Period_End(asset.getUseLifeYears()*12);
-									asset.setUseLifeMonths(asset.getUseLifeYears()*12);
-									asset.setIsDepreciated(true);
-									asset.setIsOwned(true);
-									asset.save();
-									uselifemonths = asset.getUseLifeYears()*12;
-									uselifeyears = asset.getUseLifeYears();						
-									}
-								else{
-									assetacct.setA_Period_End(asset.getUseLifeMonths());
-									uselifemonths = asset.getUseLifeMonths();
-									uselifeyears = asset.getUseLifeYears();}
-								
-								assetacct.setA_Depreciation_Method_ID(assetgrpacct.getA_Depreciation_Calc_Type());
-								assetacct.setA_Asset_Acct(assetgrpacct.getA_Asset_Acct());
-								assetacct.setC_AcctSchema_ID(assetgrpacct.getC_AcctSchema_ID());
-								assetacct.setA_Accumdepreciation_Acct(assetgrpacct.getA_Accumdepreciation_Acct());
-								assetacct.setA_Depreciation_Acct(assetgrpacct.getA_Depreciation_Acct());
-								assetacct.setA_Disposal_Revenue(assetgrpacct.getA_Disposal_Revenue());
-								assetacct.setA_Disposal_Loss(assetgrpacct.getA_Disposal_Loss());
-								assetacct.setA_Salvage_Value(new BigDecimal(0.0));
-								assetacct.setA_Reval_Accumdep_Offset_Cur(assetgrpacct.getA_Reval_Accumdep_Offset_Cur());
-								assetacct.setA_Reval_Accumdep_Offset_Prior(assetgrpacct.getA_Reval_Accumdep_Offset_Prior());
-								assetacct.setA_Reval_Cal_Method(assetgrpacct.getA_Reval_Cal_Method());
-								assetacct.setA_Reval_Cost_Offset(assetgrpacct.getA_Reval_Cost_Offset());
-								assetacct.setA_Reval_Cost_Offset_Prior(assetgrpacct.getA_Reval_Cost_Offset_Prior());
-								assetacct.setA_Reval_Depexp_Offset(assetgrpacct.getA_Reval_Depexp_Offset());
-								assetacct.setA_Depreciation_Manual_Amount(assetgrpacct.getA_Depreciation_Manual_Amount());
-								assetacct.setA_Depreciation_Manual_Period(assetgrpacct.getA_Depreciation_Manual_Period());
-								assetacct.setA_Depreciation_Table_Header_ID(assetgrpacct.getA_Depreciation_Table_Header_ID());
-								assetacct.setA_Depreciation_Variable_Perc(assetgrpacct.getA_Depreciation_Variable_Perc());
-								assetacct.setProcessing(false);
-								assetacct.getAD_Client_ID();
-								assetacct.save();
-								
-								MAssetChange change = new MAssetChange (getCtx(), 0, get_TrxName());						
-								change.setPostingType(assetacct.getPostingType());
-								change.setA_Split_Percent(assetacct.getA_Split_Percent());
-								change.setConventionType(assetacct.getA_Depreciation_Conv_ID());
-								change.setA_Asset_ID(asset.getA_Asset_ID());								
-								change.setDepreciationType(assetacct.getA_Depreciation_ID());
-								change.setA_Asset_Spread_Type(assetacct.getA_Asset_Spread_ID());
-								change.setA_Period_Start(assetacct.getA_Period_Start());
-								change.setA_Period_End(assetacct.getA_Period_End());
-								change.setIsInPosession(asset.isOwned());
-								change.setIsDisposed(asset.isDisposed());
-								change.setIsDepreciated(asset.isDepreciated());
-								change.setIsFullyDepreciated(asset.isFullyDepreciated());					
-								change.setA_Depreciation_Calc_Type(assetacct.getA_Depreciation_Method_ID());
-								change.setA_Asset_Acct(assetacct.getA_Asset_Acct());
-								change.setC_AcctSchema_ID(assetacct.getC_AcctSchema_ID());
-								change.setA_Accumdepreciation_Acct(assetacct.getA_Accumdepreciation_Acct());
-								change.setA_Depreciation_Acct(assetacct.getA_Depreciation_Acct());
-								change.setA_Disposal_Revenue(assetacct.getA_Disposal_Revenue());
-								change.setA_Disposal_Loss(assetacct.getA_Disposal_Loss());
-								change.setA_Reval_Accumdep_Offset_Cur(assetacct.getA_Reval_Accumdep_Offset_Cur());
-								change.setA_Reval_Accumdep_Offset_Prior(assetacct.getA_Reval_Accumdep_Offset_Prior());
-								change.setA_Reval_Cal_Method(assetacct.getA_Reval_Cal_Method());
-								change.setA_Reval_Cost_Offset(assetacct.getA_Reval_Cost_Offset());
-								change.setA_Reval_Cost_Offset_Prior(assetacct.getA_Reval_Cost_Offset_Prior());
-								change.setA_Reval_Depexp_Offset(assetacct.getA_Reval_Depexp_Offset());
-								change.setA_Depreciation_Manual_Amount(assetacct.getA_Depreciation_Manual_Amount());
-								change.setA_Depreciation_Manual_Period(assetacct.getA_Depreciation_Manual_Period());
-								change.setA_Depreciation_Table_Header_ID(assetacct.getA_Depreciation_Table_Header_ID());
-								change.setA_Depreciation_Variable_Perc(assetacct.getA_Depreciation_Variable_Perc());
-								change.setA_Parent_Asset_ID(asset.getA_Parent_Asset_ID());
-							    change.setChangeType("CRT");	
-								change.setTextDetails(MRefList.getListDescription (getCtx(),"A_Update_Type" , "CRT"));		    
-							    change.setIsInPosession(asset.isOwned());
-								change.setIsDisposed(asset.isDisposed());
-								change.setIsDepreciated(asset.isDepreciated());
-								change.setIsFullyDepreciated(asset.isFullyDepreciated());
-								change.setLot(asset.getLot());
-								change.setSerNo(asset.getSerNo());
-								change.setVersionNo(asset.getVersionNo());
-							    change.setUseLifeMonths(asset.getUseLifeMonths());
-							    change.setUseLifeYears(asset.getUseLifeYears());
-							    change.setLifeUseUnits(asset.getLifeUseUnits());
-							    change.setAssetDisposalDate(asset.getAssetDisposalDate());
-							    change.setAssetServiceDate(asset.getAssetServiceDate());
-							    change.setC_BPartner_Location_ID(asset.getC_BPartner_Location_ID());
-							    change.setC_BPartner_ID(asset.getC_BPartner_ID());
-							    change.setAssetValueAmt(InvoiceLine.getLineTotalAmt());
-							    change.setA_QTY_Current(InvoiceLine.getQtyEntered());
-							    change.setA_QTY_Original(InvoiceLine.getQtyEntered());
-							    change.setA_Asset_CreateDate(asset.getA_Asset_CreateDate());
-							    change.setAD_User_ID(asset.getAD_User_ID());
-							    change.setC_Location_ID(asset.getC_Location_ID());
-							    change.save();
-							}
-]]></source>
-<source file="/home/saeed/code/org/compiere/FA/CreateGLAsset.java" startline="134" endline="242" pcid="47724"><![CDATA[
-									{
-										assetacct.setPostingType(assetgrpacct.getPostingType());										
-										assetacct.setA_Split_Percent(assetgrpacct.getA_Split_Percent());
-										assetacct.setA_Depreciation_Conv_ID(assetgrpacct.getConventionType());
-										assetacct.setA_Asset_ID(asset.getA_Asset_ID());								
-										assetacct.setA_Depreciation_ID(assetgrpacct.getDepreciationType());
-										assetacct.setA_Asset_Spread_ID(assetgrpacct.getA_Asset_Spread_Type());
-										assetacct.setA_Period_Start(1);										
-						
-										if (asset.getUseLifeMonths() == 0 & asset.getUseLifeYears() == 0){
-											assetacct.setA_Period_End(assetgrpacct.getUseLifeMonths());
-											asset.setUseLifeYears(assetgrpacct.getUseLifeYears());
-											asset.setUseLifeMonths(assetgrpacct.getUseLifeMonths());
-											asset.setIsDepreciated(true);
-											asset.setIsOwned(true);
-											asset.save();
-//											uselifemonths = assetgrpacct.getUseLifeMonths();
-//											uselifeyears = assetgrpacct.getUseLifeYears();
-											
-											}
-										else if(asset.getUseLifeMonths() == 0){
-											assetacct.setA_Period_End(asset.getUseLifeYears()*12);
-											asset.setUseLifeMonths(asset.getUseLifeYears()*12);
-											asset.setIsDepreciated(true);
-											asset.setIsOwned(true);
-											asset.save();
-//											uselifemonths = asset.getUseLifeYears()*12;
-//											uselifeyears = asset.getUseLifeYears();						
-											}
-										else{
-											assetacct.setA_Period_End(asset.getUseLifeMonths());
-//											uselifemonths = asset.getUseLifeMonths();
-//											uselifeyears = asset.getUseLifeYears();
-											}
-										
-										assetacct.setA_Depreciation_Method_ID(assetgrpacct.getA_Depreciation_Calc_Type());
-										assetacct.setA_Asset_Acct(assetgrpacct.getA_Asset_Acct());
-										assetacct.setC_AcctSchema_ID(assetgrpacct.getC_AcctSchema_ID());
-										assetacct.setA_Salvage_Value(new BigDecimal (0.0));
-										assetacct.setA_Accumdepreciation_Acct(assetgrpacct.getA_Accumdepreciation_Acct());
-										assetacct.setA_Depreciation_Acct(assetgrpacct.getA_Depreciation_Acct());
-										assetacct.setA_Disposal_Revenue(assetgrpacct.getA_Disposal_Revenue());
-										assetacct.setA_Disposal_Loss(assetgrpacct.getA_Disposal_Loss());										
-										assetacct.setA_Reval_Accumdep_Offset_Cur(assetgrpacct.getA_Reval_Accumdep_Offset_Cur());
-										assetacct.setA_Reval_Accumdep_Offset_Prior(assetgrpacct.getA_Reval_Accumdep_Offset_Prior());
-										assetacct.setA_Reval_Cal_Method(assetgrpacct.getA_Reval_Cal_Method());
-										assetacct.setA_Reval_Cost_Offset(assetgrpacct.getA_Reval_Cost_Offset());
-										assetacct.setA_Reval_Cost_Offset_Prior(assetgrpacct.getA_Reval_Cost_Offset_Prior());
-										assetacct.setA_Reval_Depexp_Offset(assetgrpacct.getA_Reval_Depexp_Offset());
-										assetacct.setA_Depreciation_Manual_Amount(assetgrpacct.getA_Depreciation_Manual_Amount());
-										assetacct.setA_Depreciation_Manual_Period(assetgrpacct.getA_Depreciation_Manual_Period());
-										assetacct.setA_Depreciation_Table_Header_ID(assetgrpacct.getA_Depreciation_Table_Header_ID());
-										assetacct.setA_Depreciation_Variable_Perc(assetgrpacct.getA_Depreciation_Variable_Perc());
-										assetacct.setProcessing(false);
-										assetacct.save();
-										
-										MAssetChange change = new MAssetChange (getCtx(), 0, get_TrxName());						
-										change.setPostingType(assetacct.getPostingType());
-										change.setA_Split_Percent(assetacct.getA_Split_Percent());
-										change.setConventionType(assetacct.getA_Depreciation_Conv_ID());
-										change.setA_Asset_ID(asset.getA_Asset_ID());								
-										change.setDepreciationType(assetacct.getA_Depreciation_ID());
-										change.setA_Asset_Spread_Type(assetacct.getA_Asset_Spread_ID());
-										change.setA_Period_Start(assetacct.getA_Period_Start());
-										change.setA_Period_End(assetacct.getA_Period_End());
-										change.setIsInPosession(asset.isOwned());
-										change.setIsDisposed(asset.isDisposed());
-										change.setIsDepreciated(asset.isDepreciated());
-										change.setIsFullyDepreciated(asset.isFullyDepreciated());					
-										change.setA_Depreciation_Calc_Type(assetacct.getA_Depreciation_Method_ID());
-										change.setA_Asset_Acct(assetacct.getA_Asset_Acct());
-										change.setC_AcctSchema_ID(assetacct.getC_AcctSchema_ID());
-										change.setA_Accumdepreciation_Acct(assetacct.getA_Accumdepreciation_Acct());
-										change.setA_Depreciation_Acct(assetacct.getA_Depreciation_Acct());
-										change.setA_Disposal_Revenue(assetacct.getA_Disposal_Revenue());
-										change.setA_Disposal_Loss(assetacct.getA_Disposal_Loss());
-										change.setA_Reval_Accumdep_Offset_Cur(assetacct.getA_Reval_Accumdep_Offset_Cur());
-										change.setA_Reval_Accumdep_Offset_Prior(assetacct.getA_Reval_Accumdep_Offset_Prior());
-										change.setA_Reval_Cal_Method(assetacct.getA_Reval_Cal_Method());
-										change.setA_Reval_Cost_Offset(assetacct.getA_Reval_Cost_Offset());
-										change.setA_Reval_Cost_Offset_Prior(assetacct.getA_Reval_Cost_Offset_Prior());
-										change.setA_Reval_Depexp_Offset(assetacct.getA_Reval_Depexp_Offset());
-										change.setA_Depreciation_Manual_Amount(assetacct.getA_Depreciation_Manual_Amount());
-										change.setA_Depreciation_Manual_Period(assetacct.getA_Depreciation_Manual_Period());
-										change.setA_Depreciation_Table_Header_ID(assetacct.getA_Depreciation_Table_Header_ID());
-										change.setA_Depreciation_Variable_Perc(assetacct.getA_Depreciation_Variable_Perc());
-										change.setA_Parent_Asset_ID(asset.getA_Parent_Asset_ID());
-									    change.setChangeType("CRT");
-									    change.setTextDetails(MRefList.getListDescription (getCtx(),"A_Update_Type" , "CRT"));		    
-									    change.setIsInPosession(asset.isOwned());
-										change.setIsDisposed(asset.isDisposed());
-										change.setIsDepreciated(asset.isDepreciated());
-										change.setIsFullyDepreciated(asset.isFullyDepreciated());
-										change.setLot(asset.getLot());
-										change.setSerNo(asset.getSerNo());
-										change.setVersionNo(asset.getVersionNo());
-									    change.setUseLifeMonths(asset.getUseLifeMonths());
-									    change.setUseLifeYears(asset.getUseLifeYears());
-									    change.setLifeUseUnits(asset.getLifeUseUnits());
-									    change.setAssetDisposalDate(asset.getAssetDisposalDate());
-									    change.setAssetServiceDate(asset.getAssetServiceDate());
-									    change.setC_BPartner_Location_ID(asset.getC_BPartner_Location_ID());
-									    change.setC_BPartner_ID(asset.getC_BPartner_ID());
-									    change.setAssetValueAmt(JVLine.getAmtAcctDr().subtract(JVLine.getAmtAcctCr()));									    
-									    change.setA_Asset_CreateDate(asset.getA_Asset_CreateDate());
-									    change.setAD_User_ID(asset.getAD_User_ID());
-									    change.setC_Location_ID(asset.getC_Location_ID());
-									    change.save();
-									}
-]]></source>
-</class>
-
-<class id="4" nlines="89" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="1000" endline="1125" pcid="23810"><![CDATA[
-	{
-		String sql = "SELECT t.MovementQty, mi.Qty, il.QtyInvoiced, il.PriceActual,"
-			+ " i.C_Currency_ID, i.DateAcct, i.C_ConversionType_ID, i.AD_Client_ID, i.AD_Org_ID, t.M_Transaction_ID "
-			+ "FROM M_Transaction t"
-			+ " INNER JOIN M_MatchInv mi ON (t.M_InOutLine_ID=mi.M_InOutLine_ID)"
-			+ " INNER JOIN C_InvoiceLine il ON (mi.C_InvoiceLine_ID=il.C_InvoiceLine_ID)"
-			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
-			+ "WHERE t.M_Product_ID=?";
-		if (AD_Org_ID != 0)
-			sql += " AND t.AD_Org_ID=?";
-		else if (M_AttributeSetInstance_ID != 0)
-			sql += " AND t.M_AttributeSetInstance_ID=?";
-		sql += " ORDER BY t.M_Transaction_ID";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		//
-		int oldTransaction_ID = 0;
-		ArrayList<QtyCost> fifo = new ArrayList<QtyCost>();
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, product.getM_Product_ID());
-			if (AD_Org_ID != 0)
-				pstmt.setInt (2, AD_Org_ID);
-			else if (M_AttributeSetInstance_ID != 0)
-				pstmt.setInt (2, M_AttributeSetInstance_ID);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				BigDecimal movementQty = rs.getBigDecimal(1);
-				int M_Transaction_ID = rs.getInt(10);
-				if (M_Transaction_ID == oldTransaction_ID)
-					continue;	//	assuming same price for receipt
-				M_Transaction_ID = oldTransaction_ID;
-				//
-				BigDecimal matchQty = rs.getBigDecimal(2);
-				if (matchQty == null)	//	out (negative)
-				{
-					if (fifo.size() > 0)
-					{
-						QtyCost pp = (QtyCost)fifo.get(0);
-						pp.Qty = pp.Qty.add(movementQty);
-						BigDecimal remainder = pp.Qty;
-						if (remainder.signum() == 0)
-							fifo.remove(0);
-						else
-						{
-							while (remainder.signum() != 0)
-							{
-								if (fifo.size() == 1)	//	Last
-								{
-									pp.Cost = Env.ZERO;
-									remainder = Env.ZERO;
-								}
-								else
-								{
-									fifo.remove(0);
-									pp = (QtyCost)fifo.get(0);
-									pp.Qty = pp.Qty.add(movementQty);
-									remainder = pp.Qty;
-								}
-							}
-						}
-					}
-					else
-					{
-						QtyCost pp = new QtyCost (movementQty, Env.ZERO);
-						fifo.add(pp);
-					}
-					s_log.finer("Movement=" + movementQty + ", Size=" + fifo.size());
-					continue;
-				}
-				//	Assumption: everything is matched
-				BigDecimal price = rs.getBigDecimal(4);
-				int C_Currency_ID = rs.getInt(5);
-				Timestamp DateAcct = rs.getTimestamp(6);
-				int C_ConversionType_ID = rs.getInt(7);
-				int Client_ID = rs.getInt(8);
-				int Org_ID = rs.getInt(9);
-				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
-					C_Currency_ID, as.getC_Currency_ID(),
-					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
-
-				//	Add Stock
-				boolean used = false;
-				if (fifo.size() == 1)
-				{
-					QtyCost pp = (QtyCost)fifo.get(0);
-					if (pp.Qty.signum() < 0)
-					{
-						pp.Qty = pp.Qty.add(movementQty);
-						if (pp.Qty.signum() == 0)
-							fifo.remove(0);
-						else
-							pp.Cost = cost;
-						used = true;
-					}
-
-				}
-				if (!used)
-				{
-					QtyCost pp = new QtyCost (movementQty, cost);
-					fifo.add(pp);
-				}
-				s_log.finer("Movement=" + movementQty + ", Size=" + fifo.size());
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-
-		if (fifo.size() == 0)
-		{
-			return null;
-		}
-		QtyCost pp = (QtyCost)fifo.get(0);
-		s_log.finer(product.getName() + " = " + pp.Cost);
-		return pp.Cost;
-	}	//	calculateFiFo
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="1137" endline="1244" pcid="23826"><![CDATA[
-	{
-		String sql = "SELECT t.MovementQty, mi.Qty, il.QtyInvoiced, il.PriceActual,"
-			+ " i.C_Currency_ID, i.DateAcct, i.C_ConversionType_ID, i.AD_Client_ID, i.AD_Org_ID, t.M_Transaction_ID "
-			+ "FROM M_Transaction t"
-			+ " INNER JOIN M_MatchInv mi ON (t.M_InOutLine_ID=mi.M_InOutLine_ID)"
-			+ " INNER JOIN C_InvoiceLine il ON (mi.C_InvoiceLine_ID=il.C_InvoiceLine_ID)"
-			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
-			+ "WHERE t.M_Product_ID=?";
-		if (AD_Org_ID != 0)
-			sql += " AND t.AD_Org_ID=?";
-		else if (M_AttributeSetInstance_ID != 0)
-			sql += " AND t.M_AttributeSetInstance_ID=?";
-		//	Starting point?
-		sql += " ORDER BY t.M_Transaction_ID DESC";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		//
-		int oldTransaction_ID = 0;
-		ArrayList<QtyCost> lifo = new ArrayList<QtyCost>();
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, product.getM_Product_ID());
-			if (AD_Org_ID != 0)
-				pstmt.setInt (2, AD_Org_ID);
-			else if (M_AttributeSetInstance_ID != 0)
-				pstmt.setInt (2, M_AttributeSetInstance_ID);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				BigDecimal movementQty = rs.getBigDecimal(1);
-				int M_Transaction_ID = rs.getInt(10);
-				if (M_Transaction_ID == oldTransaction_ID)
-					continue;	//	assuming same price for receipt
-				M_Transaction_ID = oldTransaction_ID;
-				//
-				BigDecimal matchQty = rs.getBigDecimal(2);
-				if (matchQty == null)	//	out (negative)
-				{
-					if (lifo.size() > 0)
-					{
-						QtyCost pp = (QtyCost)lifo.get(lifo.size()-1);
-						pp.Qty = pp.Qty.add(movementQty);
-						BigDecimal remainder = pp.Qty;
-						if (remainder.signum() == 0)
-							lifo.remove(lifo.size()-1);
-						else
-						{
-							while (remainder.signum() != 0)
-							{
-								if (lifo.size() == 1)	//	Last
-								{
-									pp.Cost = Env.ZERO;
-									remainder = Env.ZERO;
-								}
-								else
-								{
-									lifo.remove(lifo.size()-1);
-									pp = (QtyCost)lifo.get(lifo.size()-1);
-									pp.Qty = pp.Qty.add(movementQty);
-									remainder = pp.Qty;
-								}
-							}
-						}
-					}
-					else
-					{
-						QtyCost pp = new QtyCost (movementQty, Env.ZERO);
-						lifo.add(pp);
-					}
-					s_log.finer("Movement=" + movementQty + ", Size=" + lifo.size());
-					continue;
-				}
-				//	Assumption: everything is matched
-				BigDecimal price = rs.getBigDecimal(4);
-				int C_Currency_ID = rs.getInt(5);
-				Timestamp DateAcct = rs.getTimestamp(6);
-				int C_ConversionType_ID = rs.getInt(7);
-				int Client_ID = rs.getInt(8);
-				int Org_ID = rs.getInt(9);
-				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
-					C_Currency_ID, as.getC_Currency_ID(),
-					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
-				//
-				QtyCost pp = new QtyCost (movementQty, cost);
-				lifo.add(pp);
-				s_log.finer("Movement=" + movementQty + ", Size=" + lifo.size());
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-
-		if (lifo.size() == 0)
-		{
-			return null;
-		}
-		QtyCost pp = (QtyCost)lifo.get(lifo.size()-1);
-		s_log.finer(product.getName() + " = " + pp.Cost);
-		return pp.Cost;
-	}	//	calculateLiFo
-]]></source>
-</class>
-
-<class id="5" nlines="79" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MAttachment.java" startline="715" endline="804" pcid="31370"><![CDATA[
-	private boolean loadLOBDataFromFileSystem(){
-		if("".equals(m_attachmentPathRoot)){
-			log.severe("no attachmentPath defined");
-			return false;
-		}
-		// Reset
-		m_items = new ArrayList<MAttachmentEntry>();
-		//
-		byte[] data = getBinaryData();
-		if (data == null)
-			return true;
-		log.fine("TextFileSize=" + data.length);
-		if (data.length == 0)
-			return true;
-
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-		try {
-			final DocumentBuilder builder = factory.newDocumentBuilder();
-			final Document document = builder.parse(new ByteArrayInputStream(data));
-			final NodeList entries = document.getElementsByTagName("entry");
-			for (int i = 0; i < entries.getLength(); i++) {
-				final Node entryNode = entries.item(i);
-				final NamedNodeMap attributes = entryNode.getAttributes();
-				final Node fileNode = attributes.getNamedItem("file");
-				final Node nameNode = attributes.getNamedItem("name");
-				if(fileNode==null || nameNode==null){
-					log.severe("no filename for entry " + i);
-					m_items = null;
-					return false;
-				}
-				log.fine("name: " + nameNode.getNodeValue());
-				String filePath = fileNode.getNodeValue();
-				log.fine("filePath: " + filePath);
-				if(filePath!=null){
-					filePath = filePath.replaceFirst(ATTACHMENT_FOLDER_PLACEHOLDER, m_attachmentPathRoot.replaceAll("\\\\","\\\\\\\\"));
-					//just to be shure...
-					String replaceSeparator = File.separator;
-					if(!replaceSeparator.equals("/")){
-						replaceSeparator = "\\\\";
-					}
-					filePath = filePath.replaceAll("/", replaceSeparator);
-					filePath = filePath.replaceAll("\\\\", replaceSeparator);
-				}
-				log.fine("filePath: " + filePath);
-				final File file = new File(filePath);
-				if (file.exists()) {
-					// read files into byte[]
-					final byte[] dataEntry = new byte[(int) file.length()];
-					try {
-						final FileInputStream fileInputStream = new FileInputStream(file);
-						fileInputStream.read(dataEntry);
-						fileInputStream.close();
-					} catch (FileNotFoundException e) {
-						log.severe("File Not Found.");
-						e.printStackTrace();
-					} catch (IOException e1) {
-						log.severe("Error Reading The File.");
-						e1.printStackTrace();
-					}
-					final MAttachmentEntry entry = new MAttachmentEntry(filePath,
-							dataEntry, m_items.size() + 1);
-					m_items.add(entry);
-				} else {
-					log.severe("file not found: " + file.getAbsolutePath());
-				}
-			}
-
-		} catch (SAXException sxe) {
-			// Error generated during parsing)
-			Exception x = sxe;
-			if (sxe.getException() != null)
-				x = sxe.getException();
-			x.printStackTrace();
-			log.severe(x.getMessage());
-
-		} catch (ParserConfigurationException pce) {
-			// Parser with specified options can''t be built
-			pce.printStackTrace();
-			log.severe(pce.getMessage());
-
-		} catch (IOException ioe) {
-			// I/O error
-			ioe.printStackTrace();
-			log.severe(ioe.getMessage());
-		}
-
-		return true;
-
-	}
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MArchive.java" startline="238" endline="318" pcid="29851"><![CDATA[
-	private byte[] getBinaryDataFromFileSystem() {
-		if ("".equals(m_archivePathRoot)) {
-			throw new IllegalArgumentException("no attachmentPath defined");
-		}
-		byte[] data = super.getBinaryData();
-		m_deflated = null;
-		m_inflated = null;
-		if (data == null) {
-			return null;
-		}
-
-		final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-
-		try {
-			final DocumentBuilder builder = factory.newDocumentBuilder();
-			final Document document = builder.parse(new ByteArrayInputStream(data));
-			final NodeList entries = document.getElementsByTagName("entry");
-			if(entries.getLength()!=1){
-				log.severe("no archive entry found");
-			}
-				final Node entryNode = entries.item(0);
-				final NamedNodeMap attributes = entryNode.getAttributes();
-				final Node fileNode = attributes.getNamedItem("file");
-				if(fileNode==null ){
-					log.severe("no filename for entry");
-					return null;
-				}
-				String filePath = fileNode.getNodeValue();
-				log.fine("filePath: " + filePath);
-				if(filePath!=null){
-					filePath = filePath.replaceFirst(ARCHIVE_FOLDER_PLACEHOLDER, m_archivePathRoot.replaceAll("\\\\","\\\\\\\\"));
-					//just to be shure...
-					String replaceSeparator = File.separator;
-					if(!replaceSeparator.equals("/")){
-						replaceSeparator = "\\\\";
-					}
-					filePath = filePath.replaceAll("/", replaceSeparator);
-					filePath = filePath.replaceAll("\\\\", replaceSeparator);
-				}
-				log.fine("filePath: " + filePath);
-				final File file = new File(filePath);
-				if (file.exists()) {
-					// read files into byte[]
-					final byte[] dataEntry = new byte[(int) file.length()];
-					try {
-						final FileInputStream fileInputStream = new FileInputStream(file);
-						fileInputStream.read(dataEntry);
-						fileInputStream.close();
-					} catch (FileNotFoundException e) {
-						log.severe("File Not Found.");
-						e.printStackTrace();
-					} catch (IOException e1) {
-						log.severe("Error Reading The File.");
-						e1.printStackTrace();
-					}
-					return dataEntry;
-				} else {
-					log.severe("file not found: " + file.getAbsolutePath());
-					return null;
-				}
-
-		} catch (SAXException sxe) {
-			// Error generated during parsing)
-			Exception x = sxe;
-			if (sxe.getException() != null)
-				x = sxe.getException();
-			x.printStackTrace();
-			log.severe(x.getMessage());
-
-		} catch (ParserConfigurationException pce) {
-			// Parser with specified options can''t be built
-			pce.printStackTrace();
-			log.severe(pce.getMessage());
-
-		} catch (IOException ioe) {
-			// I/O error
-			ioe.printStackTrace();
-			log.severe(ioe.getMessage());
-		}
-		return null;
-	}
-]]></source>
-</class>
-
-<class id="6" nlines="77" nfragments="2">
-<source file="/home/saeed/code/org/compiere/report/MReportSource.java" startline="119" endline="246" pcid="9956"><![CDATA[
-	private String getWhereCombination(int PA_Hierarchy_ID) {
-		StringBuffer whcomb = new StringBuffer();
-		if (getC_ElementValue_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Account, getC_ElementValue_ID());
-			if (isIncludeNullsElementValue())
-				whcomb.append(" AND (Account_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsElementValue())
-				whcomb.append(" AND Account_ID IS NULL");
-
-		if (getC_Activity_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Activity, getC_Activity_ID());
-			if (isIncludeNullsActivity())
-				whcomb.append(" AND (C_Activity_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsActivity())
-				whcomb.append(" AND C_Activity_ID IS NULL");
-
-		if (getC_BPartner_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_BPartner, getC_BPartner_ID());
-			if (isIncludeNullsBPartner())
-				whcomb.append(" AND (C_BPartner_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsBPartner())
-				whcomb.append(" AND C_BPartner_ID IS NULL");
-
-		if (getC_Campaign_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Campaign, getC_Campaign_ID());
-			if (isIncludeNullsCampaign())
-				whcomb.append(" AND (C_Campaign_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsCampaign())
-				whcomb.append(" AND C_Campaign_ID IS NULL");
-
-		if (getC_Location_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_LocationFrom, getC_Location_ID());
-			if (isIncludeNullsLocation())
-				whcomb.append(" AND (C_LocFrom_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsLocation())
-				whcomb.append(" AND C_LocFrom_ID IS NULL");
-
-		if (getOrg_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Organization, getOrg_ID());
-			if (isIncludeNullsOrg())
-				whcomb.append(" AND (AD_Org_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsOrg())
-				whcomb.append(" AND AD_Org_ID IS NULL");
-		
-		if (getAD_OrgTrx_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_OrgTrx, getAD_OrgTrx_ID());
-			if (isIncludeNullsOrgTrx())
-				whcomb.append(" AND (AD_OrgTrx_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsOrgTrx())
-				whcomb.append(" AND AD_OrgTrx_ID IS NULL");
-
-		if (getM_Product_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Product, getM_Product_ID());
-			if (isIncludeNullsProduct())
-				whcomb.append(" AND (M_Product_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsProduct())
-				whcomb.append(" AND M_Product_ID IS NULL");
-
-		if (getC_Project_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_Project, getC_Project_ID());
-			if (isIncludeNullsProject())
-				whcomb.append(" AND (C_Project_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsProject())
-				whcomb.append(" AND C_Project_ID IS NULL");
-
-		if (getC_SalesRegion_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportSource.ELEMENTTYPE_SalesRegion, getC_SalesRegion_ID());
-			if (isIncludeNullsSalesRegion())
-				whcomb.append(" AND (C_SalesRegion_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsSalesRegion())
-				whcomb.append(" AND C_SalesRegion_ID IS NULL");
-
-		if (getUserElement1_ID() > 0) {
-			String whtree = "UserElement1_ID=" + getUserElement1_ID(); // No Tree
-			if (isIncludeNullsUserElement1())
-				whcomb.append(" AND (UserElement1_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsUserElement1())
-				whcomb.append(" AND UserElement1_ID IS NULL");
-
-		if (getUserElement2_ID() > 0) {
-			String whtree = "UserElement2_ID=" + getUserElement2_ID(); // No Tree
-			if (isIncludeNullsUserElement2())
-				whcomb.append(" AND (UserElement2_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsUserElement2())
-				whcomb.append(" AND UserElement2_ID IS NULL");
-		
-		// drop the first " AND "
-		if (whcomb.length() > 5 && whcomb.toString().startsWith(" AND "))
-			whcomb.delete(0, 5);
-
-		return whcomb.toString();
-	}
-]]></source>
-<source file="/home/saeed/code/org/compiere/report/MReportColumn.java" startline="213" endline="337" pcid="9557"><![CDATA[
-	private String getWhereCombination(int PA_Hierarchy_ID) {
-		StringBuffer whcomb = new StringBuffer();
-		if (getC_ElementValue_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Account, getC_ElementValue_ID());
-			if (isIncludeNullsElementValue())
-				whcomb.append(" AND (Account_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsElementValue())
-				whcomb.append(" AND Account_ID IS NULL");
-
-		if (getC_Activity_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Activity, getC_Activity_ID());
-			if (isIncludeNullsActivity())
-				whcomb.append(" AND (C_Activity_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsActivity())
-				whcomb.append(" AND C_Activity_ID IS NULL");
-
-		if (getC_BPartner_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_BPartner, getC_BPartner_ID());
-			if (isIncludeNullsBPartner())
-				whcomb.append(" AND (C_BPartner_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsBPartner())
-				whcomb.append(" AND C_BPartner_ID IS NULL");
-
-		if (getC_Campaign_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Campaign, getC_Campaign_ID());
-			if (isIncludeNullsCampaign())
-				whcomb.append(" AND (C_Campaign_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsCampaign())
-				whcomb.append(" AND C_Campaign_ID IS NULL");
-
-		if (getC_Location_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_LocationFrom, getC_Location_ID());
-			if (isIncludeNullsLocation())
-				whcomb.append(" AND (C_LocFrom_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsLocation())
-				whcomb.append(" AND C_LocFrom_ID IS NULL");
-
-		if (getOrg_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Organization, getOrg_ID());
-			if (isIncludeNullsOrg())
-				whcomb.append(" AND (AD_Org_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsOrg())
-				whcomb.append(" AND AD_Org_ID IS NULL");
-		
-		if (getAD_OrgTrx_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_OrgTrx, getAD_OrgTrx_ID());
-			if (isIncludeNullsOrgTrx())
-				whcomb.append(" AND (AD_OrgTrx_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsOrgTrx())
-				whcomb.append(" AND AD_OrgTrx_ID IS NULL");
-		
-
-		if (getM_Product_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Product, getM_Product_ID());
-			if (isIncludeNullsProduct())
-				whcomb.append(" AND (M_Product_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsProduct())
-				whcomb.append(" AND M_Product_ID IS NULL");
-
-		if (getC_Project_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_Project, getC_Project_ID());
-			if (isIncludeNullsProject())
-				whcomb.append(" AND (C_Project_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsProject())
-				whcomb.append(" AND C_Project_ID IS NULL");
-
-		if (getC_SalesRegion_ID() > 0) {
-			String whtree = MReportTree.getWhereClause (getCtx(), PA_Hierarchy_ID, MReportColumn.ELEMENTTYPE_SalesRegion, getC_SalesRegion_ID());
-			if (isIncludeNullsSalesRegion())
-				whcomb.append(" AND (C_SalesRegion_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsSalesRegion())
-				whcomb.append(" AND C_SalesRegion_ID IS NULL");
-
-		if (getUserElement1_ID() > 0) {
-			String whtree = "UserElement1_ID=" + getUserElement1_ID(); // No Tree
-			if (isIncludeNullsUserElement1())
-				whcomb.append(" AND (UserElement1_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsUserElement1())
-				whcomb.append(" AND UserElement1_ID IS NULL");
-
-		if (getUserElement2_ID() > 0) {
-			String whtree = "UserElement2_ID=" + getUserElement2_ID(); // No Tree
-			if (isIncludeNullsUserElement2())
-				whcomb.append(" AND (UserElement2_ID IS NULL OR ").append(whtree).append(")");
-			else
-				whcomb.append(" AND ").append(whtree);
-		} else
-			if (isIncludeNullsUserElement2())
-				whcomb.append(" AND UserElement2_ID IS NULL");
-
-		return whcomb.toString();
-	}
-]]></source>
-</class>
-
-<class id="7" nlines="75" nfragments="3">
-<source file="/home/saeed/code/org/compiere/process/ImportOrder.java" startline="503" endline="616" pcid="5020"><![CDATA[
-		{
-			PreparedStatement pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
-			ResultSet rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				X_I_Order imp = new X_I_Order (getCtx (), rs, get_TrxName());
-				if (imp.getBPartnerValue () == null)
-				{
-					if (imp.getEMail () != null)
-						imp.setBPartnerValue (imp.getEMail ());
-					else if (imp.getName () != null)
-						imp.setBPartnerValue (imp.getName ());
-					else
-						continue;
-				}
-				if (imp.getName () == null)
-				{
-					if (imp.getContactName () != null)
-						imp.setName (imp.getContactName ());
-					else
-						imp.setName (imp.getBPartnerValue ());
-				}
-				//	BPartner
-				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
-				if (bp == null)
-				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
-					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
-					bp.setValue (imp.getBPartnerValue ());
-					bp.setName (imp.getName ());
-					if (!bp.save ())
-						continue;
-				}
-				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
-				
-				//	BP Location
-				MBPartnerLocation bpl = null; 
-				MBPartnerLocation[] bpls = bp.getLocations(true);
-				for (int i = 0; bpl == null && i < bpls.length; i++)
-				{
-					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
-						bpl = bpls[i];
-					//	Same Location ID
-					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
-						bpl = bpls[i];
-					//	Same Location Info
-					else if (imp.getC_Location_ID() == 0)
-					{
-						MLocation loc = bpls[i].getLocation(false);
-						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(), 
-								imp.getPostal(), "", imp.getCity(), 
-								imp.getAddress1(), imp.getAddress2()))
-							bpl = bpls[i];
-					}
-				}
-				if (bpl == null)
-				{
-					//	New Location
-					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
-					loc.setAddress1 (imp.getAddress1 ());
-					loc.setAddress2 (imp.getAddress2 ());
-					loc.setCity (imp.getCity ());
-					loc.setPostal (imp.getPostal ());
-					if (imp.getC_Region_ID () != 0)
-						loc.setC_Region_ID (imp.getC_Region_ID ());
-					loc.setC_Country_ID (imp.getC_Country_ID ());
-					if (!loc.save ())
-						continue;
-					//
-					bpl = new MBPartnerLocation (bp);
-					bpl.setC_Location_ID (loc.getC_Location_ID ());
-					if (!bpl.save ())
-						continue;
-				}
-				imp.setC_Location_ID (bpl.getC_Location_ID ());
-				imp.setBillTo_ID (bpl.getC_BPartner_Location_ID ());
-				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
-				
-				//	User/Contact
-				if (imp.getContactName () != null 
-					|| imp.getEMail () != null 
-					|| imp.getPhone () != null)
-				{
-					MUser[] users = bp.getContacts(true);
-					MUser user = null;
-					for (int i = 0; user == null && i < users.length;  i++)
-					{
-						String name = users[i].getName();
-						if (name.equals(imp.getContactName()) 
-							|| name.equals(imp.getName()))
-						{
-							user = users[i];
-							imp.setAD_User_ID (user.getAD_User_ID ());
-						}
-					}
-					if (user == null)
-					{
-						user = new MUser (bp);
-						if (imp.getContactName () == null)
-							user.setName (imp.getName ());
-						else
-							user.setName (imp.getContactName ());
-						user.setEMail (imp.getEMail ());
-						user.setPhone (imp.getPhone ());
-						if (user.save ())
-							imp.setAD_User_ID (user.getAD_User_ID ());
-					}
-				}
-				imp.save ();
-			}	//	for all new BPartners
-			rs.close ();
-			pstmt.close ();
-			//
-		}
-]]></source>
-<source file="/home/saeed/code/org/compiere/process/ImportInvoice.java" startline="487" endline="599" pcid="4044"><![CDATA[
-		{
-			PreparedStatement pstmt = DB.prepareStatement (sql.toString(), get_TrxName());
-			ResultSet rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				X_I_Invoice imp = new X_I_Invoice (getCtx(), rs, get_TrxName());
-				if (imp.getBPartnerValue () == null)
-				{
-					if (imp.getEMail () != null)
-						imp.setBPartnerValue (imp.getEMail ());
-					else if (imp.getName () != null)
-						imp.setBPartnerValue (imp.getName ());
-					else
-						continue;
-				}
-				if (imp.getName () == null)
-				{
-					if (imp.getContactName () != null)
-						imp.setName (imp.getContactName ());
-					else
-						imp.setName (imp.getBPartnerValue ());
-				}
-				//	BPartner
-				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
-				if (bp == null)
-				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
-					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
-					bp.setValue (imp.getBPartnerValue ());
-					bp.setName (imp.getName ());
-					if (!bp.save ())
-						continue;
-				}
-				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
-				
-				//	BP Location
-				MBPartnerLocation bpl = null; 
-				MBPartnerLocation[] bpls = bp.getLocations(true);
-				for (int i = 0; bpl == null && i < bpls.length; i++)
-				{
-					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
-						bpl = bpls[i];
-					//	Same Location ID
-					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
-						bpl = bpls[i];
-					//	Same Location Info
-					else if (imp.getC_Location_ID() == 0)
-					{
-						MLocation loc = bpls[i].getLocation(false);
-						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(), 
-								imp.getPostal(), "", imp.getCity(), 
-								imp.getAddress1(), imp.getAddress2()))
-							bpl = bpls[i];
-					}
-				}
-				if (bpl == null)
-				{
-					//	New Location
-					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
-					loc.setAddress1 (imp.getAddress1 ());
-					loc.setAddress2 (imp.getAddress2 ());
-					loc.setCity (imp.getCity ());
-					loc.setPostal (imp.getPostal ());
-					if (imp.getC_Region_ID () != 0)
-						loc.setC_Region_ID (imp.getC_Region_ID ());
-					loc.setC_Country_ID (imp.getC_Country_ID ());
-					if (!loc.save ())
-						continue;
-					//
-					bpl = new MBPartnerLocation (bp);
-					bpl.setC_Location_ID (imp.getC_Location_ID() > 0 ? imp.getC_Location_ID() : loc.getC_Location_ID());
-					if (!bpl.save ())
-						continue;
-				}
-				imp.setC_Location_ID (bpl.getC_Location_ID ());
-				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
-				
-				//	User/Contact
-				if (imp.getContactName () != null 
-					|| imp.getEMail () != null 
-					|| imp.getPhone () != null)
-				{
-					MUser[] users = bp.getContacts(true);
-					MUser user = null;
-					for (int i = 0; user == null && i < users.length;  i++)
-					{
-						String name = users[i].getName();
-						if (name.equals(imp.getContactName()) 
-							|| name.equals(imp.getName()))
-						{
-							user = users[i];
-							imp.setAD_User_ID (user.getAD_User_ID ());
-						}
-					}
-					if (user == null)
-					{
-						user = new MUser (bp);
-						if (imp.getContactName () == null)
-							user.setName (imp.getName ());
-						else
-							user.setName (imp.getContactName ());
-						user.setEMail (imp.getEMail ());
-						user.setPhone (imp.getPhone ());
-						if (user.save ())
-							imp.setAD_User_ID (user.getAD_User_ID ());
-					}
-				}
-				imp.save ();
-			}	//	for all new BPartners
-			rs.close ();
-			pstmt.close ();
-			//
-		}
-]]></source>
-<source file="/home/saeed/code/org/compiere/process/ImportInvoice.java" startline="491" endline="595" pcid="4045"><![CDATA[
-			{
-				X_I_Invoice imp = new X_I_Invoice (getCtx(), rs, get_TrxName());
-				if (imp.getBPartnerValue () == null)
-				{
-					if (imp.getEMail () != null)
-						imp.setBPartnerValue (imp.getEMail ());
-					else if (imp.getName () != null)
-						imp.setBPartnerValue (imp.getName ());
-					else
-						continue;
-				}
-				if (imp.getName () == null)
-				{
-					if (imp.getContactName () != null)
-						imp.setName (imp.getContactName ());
-					else
-						imp.setName (imp.getBPartnerValue ());
-				}
-				//	BPartner
-				MBPartner bp = MBPartner.get (getCtx(), imp.getBPartnerValue());
-				if (bp == null)
-				{
-					bp = new MBPartner (getCtx (), -1, get_TrxName());
-					bp.setClientOrg (imp.getAD_Client_ID (), imp.getAD_Org_ID ());
-					bp.setValue (imp.getBPartnerValue ());
-					bp.setName (imp.getName ());
-					if (!bp.save ())
-						continue;
-				}
-				imp.setC_BPartner_ID (bp.getC_BPartner_ID ());
-				
-				//	BP Location
-				MBPartnerLocation bpl = null; 
-				MBPartnerLocation[] bpls = bp.getLocations(true);
-				for (int i = 0; bpl == null && i < bpls.length; i++)
-				{
-					if (imp.getC_BPartner_Location_ID() == bpls[i].getC_BPartner_Location_ID())
-						bpl = bpls[i];
-					//	Same Location ID
-					else if (imp.getC_Location_ID() == bpls[i].getC_Location_ID())
-						bpl = bpls[i];
-					//	Same Location Info
-					else if (imp.getC_Location_ID() == 0)
-					{
-						MLocation loc = bpls[i].getLocation(false);
-						if (loc.equals(imp.getC_Country_ID(), imp.getC_Region_ID(), 
-								imp.getPostal(), "", imp.getCity(), 
-								imp.getAddress1(), imp.getAddress2()))
-							bpl = bpls[i];
-					}
-				}
-				if (bpl == null)
-				{
-					//	New Location
-					MLocation loc = new MLocation (getCtx (), 0, get_TrxName());
-					loc.setAddress1 (imp.getAddress1 ());
-					loc.setAddress2 (imp.getAddress2 ());
-					loc.setCity (imp.getCity ());
-					loc.setPostal (imp.getPostal ());
-					if (imp.getC_Region_ID () != 0)
-						loc.setC_Region_ID (imp.getC_Region_ID ());
-					loc.setC_Country_ID (imp.getC_Country_ID ());
-					if (!loc.save ())
-						continue;
-					//
-					bpl = new MBPartnerLocation (bp);
-					bpl.setC_Location_ID (imp.getC_Location_ID() > 0 ? imp.getC_Location_ID() : loc.getC_Location_ID());
-					if (!bpl.save ())
-						continue;
-				}
-				imp.setC_Location_ID (bpl.getC_Location_ID ());
-				imp.setC_BPartner_Location_ID (bpl.getC_BPartner_Location_ID ());
-				
-				//	User/Contact
-				if (imp.getContactName () != null 
-					|| imp.getEMail () != null 
-					|| imp.getPhone () != null)
-				{
-					MUser[] users = bp.getContacts(true);
-					MUser user = null;
-					for (int i = 0; user == null && i < users.length;  i++)
-					{
-						String name = users[i].getName();
-						if (name.equals(imp.getContactName()) 
-							|| name.equals(imp.getName()))
-						{
-							user = users[i];
-							imp.setAD_User_ID (user.getAD_User_ID ());
-						}
-					}
-					if (user == null)
-					{
-						user = new MUser (bp);
-						if (imp.getContactName () == null)
-							user.setName (imp.getName ());
-						else
-							user.setName (imp.getContactName ());
-						user.setEMail (imp.getEMail ());
-						user.setPhone (imp.getPhone ());
-						if (user.save ())
-							imp.setAD_User_ID (user.getAD_User_ID ());
-					}
-				}
-				imp.save ();
-			}	//	for all new BPartners
-]]></source>
-</class>
-
-<class id="8" nlines="70" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/CalloutInvoice.java" startline="133" endline="258" pcid="40118"><![CDATA[
-	{
-		Integer C_BPartner_ID = (Integer)value;
-		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
-			return "";
-
-		String sql = "SELECT p.AD_Language,p.C_PaymentTerm_ID,"
-			+ " COALESCE(p.M_PriceList_ID,g.M_PriceList_ID) AS M_PriceList_ID, p.PaymentRule,p.POReference,"
-			+ " p.SO_Description,p.IsDiscountPrinted,"
-			+ " p.SO_CreditLimit, p.SO_CreditLimit-p.SO_CreditUsed AS CreditAvailable,"
-			+ " l.C_BPartner_Location_ID,c.AD_User_ID,"
-			+ " COALESCE(p.PO_PriceList_ID,g.PO_PriceList_ID) AS PO_PriceList_ID, p.PaymentRulePO,p.PO_PaymentTerm_ID " 
-			+ "FROM C_BPartner p"
-			+ " INNER JOIN C_BP_Group g ON (p.C_BP_Group_ID=g.C_BP_Group_ID)"			
-			+ " LEFT OUTER JOIN C_BPartner_Location l ON (p.C_BPartner_ID=l.C_BPartner_ID AND l.IsBillTo=''Y'' AND l.IsActive=''Y'')"
-			+ " LEFT OUTER JOIN AD_User c ON (p.C_BPartner_ID=c.C_BPartner_ID) "
-			+ "WHERE p.C_BPartner_ID=? AND p.IsActive=''Y''";		//	#1
-
-		boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, C_BPartner_ID.intValue());
-			rs = pstmt.executeQuery();
-			//
-			if (rs.next())
-			{
-				//	PriceList & IsTaxIncluded & Currency
-				Integer ii = new Integer(rs.getInt(IsSOTrx ? "M_PriceList_ID" : "PO_PriceList_ID"));
-				if (!rs.wasNull())
-					mTab.setValue("M_PriceList_ID", ii);
-				else
-				{	//	get default PriceList
-					int i = Env.getContextAsInt(ctx, "#M_PriceList_ID");
-					if (i != 0)
-						mTab.setValue("M_PriceList_ID", new Integer(i));
-				}
-
-				//	PaymentRule
-				String s = rs.getString(IsSOTrx ? "PaymentRule" : "PaymentRulePO");
-				if (s != null && s.length() != 0)
-				{
-					if (Env.getContext(ctx, WindowNo, "DocBaseType").endsWith("C"))	//	Credits are Payment Term
-						s = "P";
-					else if (IsSOTrx && (s.equals("S") || s.equals("U")))	//	No Check/Transfer for SO_Trx
-						s = "P";											//  Payment Term
-					mTab.setValue("PaymentRule", s);
-				}
-				//  Payment Term
-				ii = new Integer(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
-				if (!rs.wasNull())
-					mTab.setValue("C_PaymentTerm_ID", ii);
-
-				//	Location
-				int locID = rs.getInt("C_BPartner_Location_ID");
-				//	overwritten by InfoBP selection - works only if InfoWindow
-				//	was used otherwise creates error (uses last value, may belong to differnt BP)
-				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
-				{
-					String loc = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_Location_ID");
-					if (loc.length() > 0)
-						locID = Integer.parseInt(loc);
-				}
-				if (locID == 0)
-					mTab.setValue("C_BPartner_Location_ID", null);
-				else
-					mTab.setValue("C_BPartner_Location_ID", new Integer(locID));
-
-				//	Contact - overwritten by InfoBP selection
-				int contID = rs.getInt("AD_User_ID");
-				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
-				{
-					String cont = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "AD_User_ID");
-					if (cont.length() > 0)
-						contID = Integer.parseInt(cont);
-				}
-				if (contID == 0)
-					mTab.setValue("AD_User_ID", null);
-				else
-					mTab.setValue("AD_User_ID", new Integer(contID));
-
-				//	CreditAvailable
-				if (IsSOTrx)
-				{
-					double CreditLimit = rs.getDouble("SO_CreditLimit");
-					if (CreditLimit != 0)
-					{
-						double CreditAvailable = rs.getDouble("CreditAvailable");
-						if (!rs.wasNull() && CreditAvailable < 0)
-							mTab.fireDataStatusEEvent("CreditLimitOver",
-								DisplayType.getNumberFormat(DisplayType.Amount).format(CreditAvailable),
-								false);
-					}
-				}
-				
-				//	PO Reference
-				s = rs.getString("POReference");
-				if (s != null && s.length() != 0)
-					mTab.setValue("POReference", s);
-				else
-					mTab.setValue("POReference", null);
-				//	SO Description
-				s = rs.getString("SO_Description");
-				if (s != null && s.trim().length() != 0)
-					mTab.setValue("Description", s);
-				//	IsDiscountPrinted
-				s = rs.getString("IsDiscountPrinted");
-				if (s != null && s.length() != 0)
-					mTab.setValue("IsDiscountPrinted", s);
-				else
-					mTab.setValue("IsDiscountPrinted", "N");
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, "bPartner", e);
-			return e.getLocalizedMessage();
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		return "";
-	}	//	bPartner
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/CalloutInvoiceBatch.java" startline="77" endline="175" pcid="26712"><![CDATA[
-	{
-		Integer C_BPartner_ID = (Integer)value;
-		if (C_BPartner_ID == null || C_BPartner_ID.intValue() == 0)
-			return "";
-
-		String sql = "SELECT p.AD_Language,p.C_PaymentTerm_ID,"
-			+ " COALESCE(p.M_PriceList_ID,g.M_PriceList_ID) AS M_PriceList_ID, p.PaymentRule,p.POReference,"
-			+ " p.SO_Description,p.IsDiscountPrinted,"
-			+ " p.SO_CreditLimit, p.SO_CreditLimit-p.SO_CreditUsed AS CreditAvailable,"
-			+ " l.C_BPartner_Location_ID,c.AD_User_ID,"
-			+ " COALESCE(p.PO_PriceList_ID,g.PO_PriceList_ID) AS PO_PriceList_ID, p.PaymentRulePO,p.PO_PaymentTerm_ID " 
-			+ "FROM C_BPartner p"
-			+ " INNER JOIN C_BP_Group g ON (p.C_BP_Group_ID=g.C_BP_Group_ID)"
-			+ " LEFT OUTER JOIN C_BPartner_Location l ON (p.C_BPartner_ID=l.C_BPartner_ID AND l.IsBillTo=''Y'' AND l.IsActive=''Y'')"
-			+ " LEFT OUTER JOIN AD_User c ON (p.C_BPartner_ID=c.C_BPartner_ID) "
-			+ "WHERE p.C_BPartner_ID=? AND p.IsActive=''Y''";		//	#1
-
-		boolean IsSOTrx = Env.getContext(ctx, WindowNo, "IsSOTrx").equals("Y");
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, C_BPartner_ID.intValue());
-			rs = pstmt.executeQuery();
-			//
-			if (rs.next())
-			{
-				//	PaymentRule
-				String s = rs.getString(IsSOTrx ? "PaymentRule" : "PaymentRulePO");
-				if (s != null && s.length() != 0)
-				{
-					if (Env.getContext(ctx, WindowNo, "DocBaseType").endsWith("C"))	//	Credits are Payment Term
-						s = "P";
-					else if (IsSOTrx && (s.equals("S") || s.equals("U")))	//	No Check/Transfer for SO_Trx
-						s = "P";											//  Payment Term
-			//		mTab.setValue("PaymentRule", s);
-				}
-				//  Payment Term
-				Integer ii = new Integer(rs.getInt(IsSOTrx ? "C_PaymentTerm_ID" : "PO_PaymentTerm_ID"));
-				if (!rs.wasNull())
-					mTab.setValue("C_PaymentTerm_ID", ii);
-
-				//	Location
-				int locID = rs.getInt("C_BPartner_Location_ID");
-				//	overwritten by InfoBP selection - works only if InfoWindow
-				//	was used otherwise creates error (uses last value, may belong to differnt BP)
-				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
-				{
-					String loc = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_Location_ID");
-					if (loc.length() > 0)
-						locID = Integer.parseInt(loc);
-				}
-				if (locID == 0)
-					mTab.setValue("C_BPartner_Location_ID", null);
-				else
-					mTab.setValue("C_BPartner_Location_ID", new Integer(locID));
-
-				//	Contact - overwritten by InfoBP selection
-				int contID = rs.getInt("AD_User_ID");
-				if (C_BPartner_ID.toString().equals(Env.getContext(ctx, WindowNo, Env.TAB_INFO, "C_BPartner_ID")))
-				{
-					String cont = Env.getContext(ctx, WindowNo, Env.TAB_INFO, "AD_User_ID");
-					if (cont.length() > 0)
-						contID = Integer.parseInt(cont);
-				}
-				if (contID == 0)
-					mTab.setValue("AD_User_ID", null);
-				else
-					mTab.setValue("AD_User_ID", new Integer(contID));
-
-				//	CreditAvailable
-				if (IsSOTrx)
-				{
-					double CreditLimit = rs.getDouble("SO_CreditLimit");
-					if (CreditLimit != 0)
-					{
-						double CreditAvailable = rs.getDouble("CreditAvailable");
-						if (!rs.wasNull() && CreditAvailable < 0)
-							mTab.fireDataStatusEEvent("CreditLimitOver",
-								DisplayType.getNumberFormat(DisplayType.Amount).format(CreditAvailable),
-								false);
-					}
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			return e.getLocalizedMessage();
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-		}
-		//
-		setDocumentNo(ctx, WindowNo, mTab);
-		return tax (ctx, WindowNo, mTab, mField, value);
-	}	//	bPartner
-]]></source>
-</class>
-
-<class id="9" nlines="68" nfragments="2">
-<source file="/home/saeed/code/org/compiere/util/WebUser.java" startline="164" endline="271" pcid="5582"><![CDATA[
-	{
-		log.info(email + " - AD_Client_ID=" + m_AD_Client_ID);
-		String sql = "SELECT * "
-			+ "FROM AD_User "
-			+ "WHERE AD_Client_ID=?"
-			+ " AND TRIM(EMail)=?";
-		if (email == null)
-			email = "";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_AD_Client_ID);
-			pstmt.setString(2, email.trim());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				m_bpc = new MUser (m_ctx, rs, null);
-				log.fine("Found BPC=" + m_bpc);
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-
-		//	Check Password
-		m_passwordOK = false;
-		/**	User has no password
-		if (m_bpc != null && m_bpc.getPassword() == null)
-		{
-			if (password != null)
-				m_bpc.setPassword(password);
-			m_passwordOK = true;
-		}	**/
-		//	We have a password
-		if (m_bpc != null && password != null && password.equals(m_bpc.getPassword()))
-			m_passwordOK = true;
-		if (m_passwordOK || m_bpc == null)
-			m_passwordMessage = null;
-		else
-			setPasswordOK (false, password);
-
-		//	Load BPartner
-		if (m_bpc != null)
-		{
-			m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
-			log.fine("Found BP=" + m_bp);
-		}
-		else
-			m_bp = null;
-		//	Load Loacation
-		if (m_bpc != null)
-		{
-			if (m_bpc.getC_BPartner_Location_ID() != 0)
-			{
-				m_bpl = new MBPartnerLocation (m_ctx, m_bpc.getC_BPartner_Location_ID (), null);
-				log.fine("Found BPL=" + m_bpl);
-			}
-			else
-			{
-				MBPartnerLocation[] bpls = m_bp.getLocations(false);
-				if (bpls != null && bpls.length > 0)
-				{
-					m_bpl = bpls[0];
-					log.fine("Found BPL=" + m_bpl);
-				}
-			}
-			if (m_bpl != null)
-			{
-				m_loc = MLocation.get (m_ctx, m_bpl.getC_Location_ID(), null);
-				log.fine("Found LOC=" + m_loc);
-			}
-			else
-				m_loc = null;
-		}
-		else
-		{
-			m_bpl = null;
-			m_loc = null;
-		}
-
-		//	Make sure that all entities exist
-		if (m_bpc == null)
-		{
-			m_bpc = new MUser (m_ctx, 0, null);
-			m_bpc.setEMail(email);
-			m_bpc.setPassword(password);
-		}
-		if (m_bp == null)
-		{
-			m_bp = new MBPartner (m_ctx); //	template
-			m_bp.setIsCustomer(true);
-		}
-		if (m_bpl == null)
-			m_bpl = new MBPartnerLocation (m_bp);
-		if (m_loc == null)
-			m_loc = new MLocation (m_ctx, 0, null);
-		//
-		log.config(m_bp + " - " + m_bpc);
-	}	//	load
-]]></source>
-<source file="/home/saeed/code/org/compiere/util/WebUser.java" startline="278" endline="370" pcid="5596"><![CDATA[
-	{
-		log.info("ID=" + AD_User_ID + ", AD_Client_ID=" + m_AD_Client_ID);
-		String sql = "SELECT * "
-			+ "FROM AD_User "
-			+ "WHERE AD_Client_ID=?"
-			+ " AND AD_User_ID=?";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_AD_Client_ID);
-			pstmt.setInt(2, AD_User_ID);
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				m_bpc = new MUser (m_ctx, rs, null);
-				log.fine("= found BPC=" + m_bpc);
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-
-		//	Password not entered
-		m_passwordOK = false;
-		m_loggedIn = false;
-
-		//	Load BPartner
-		if (m_bpc != null)
-		{
-			m_bp = new MBPartner (m_ctx, m_bpc.getC_BPartner_ID (), null);
-			log.fine("= Found BP=" + m_bp);
-		}
-		else
-			m_bp = null;
-		//	Load Loacation
-		if (m_bpc != null)
-		{
-			if (m_bpc.getC_BPartner_Location_ID() != 0)
-			{
-				m_bpl = new MBPartnerLocation (m_ctx, m_bpc.getC_BPartner_Location_ID (), null);
-				log.fine("= Found BPL=" + m_bpl);
-			}
-			else
-			{
-				MBPartnerLocation[] bpls = m_bp.getLocations(false);
-				if (bpls != null && bpls.length > 0)
-				{
-					m_bpl = bpls[0];
-					log.fine("= Found BPL=" + m_bpl);
-				}
-			}
-			if (m_bpl != null)
-			{
-				m_loc = MLocation.get (m_ctx, m_bpl.getC_Location_ID(), null);
-				log.fine("= Found LOC=" + m_loc);
-			}
-			else
-				m_loc = null;
-		}
-		else
-		{
-			m_bpl = null;
-			m_loc = null;
-		}
-
-		//	Make sure that all entities exist
-		if (m_bpc == null)
-		{
-			m_bpc = new MUser (m_ctx, 0, null);
-			m_bpc.setEMail("?");
-			m_bpc.setPassword("?");
-		}
-		if (m_bp == null)
-		{
-			m_bp = new MBPartner (m_ctx); //	template
-			m_bp.setIsCustomer(true);
-		}
-		if (m_bpl == null)
-			m_bpl = new MBPartnerLocation (m_bp);
-		if (m_loc == null)
-			m_loc = new MLocation (m_ctx, 0, null);
-		//
-		log.info("= " + m_bp + " - " + m_bpc);
-	}	//	load
-]]></source>
-</class>
-
-<class id="10" nlines="68" nfragments="2">
-<source file="/home/saeed/code/org/adempiere/util/GenerateModelJPA.java" startline="534" endline="640" pcid="48732"><![CDATA[
-	{
-		StringBuffer retValue = new StringBuffer();
-		retValue.append("\n/** ").append(columnName).append(" AD_Reference_ID=").append(AD_Reference_ID) .append(" */\n")
-			.append("public static final int ").append(columnName.toUpperCase())
-			.append("_AD_Reference_ID=").append(AD_Reference_ID).append(";");
-		//
-		boolean found = false;
-		StringBuffer values = new StringBuffer("Reference_ID=")
-			.append(AD_Reference_ID);
-		StringBuffer statement = new StringBuffer();
-		if (nullable)
-			statement.append("if (").append(columnName).append(" == null");
-		//
-		String sql = "SELECT Value, Name FROM AD_Ref_List WHERE AD_Reference_ID=?";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, AD_Reference_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				String value = rs.getString(1);
-				values.append(" - ").append(value);
-				if (statement.length() == 0)
-					statement.append("if (").append(columnName)
-						.append(".equals(\"").append(value).append("\")");
-				else
-					statement.append(" || ").append(columnName)
-						.append(".equals(\"").append(value).append("\")");
-				if (!found)
-				{
-					found = true;
-					sb.append("if (")
-						.append (columnName).append (" == null)"
-							+ " throw new IllegalArgumentException (\"")
-						.append(columnName).append(" is mandatory\");");
-				}
-				//	Name (SmallTalkNotation)
-				String name = rs.getString(2);
-				char[] nameArray = name.toCharArray();
-				StringBuffer nameClean = new StringBuffer();
-				boolean initCap = true;
-				for (int i = 0; i < nameArray.length; i++)
-				{
-					char c = nameArray[i];
-					if (Character.isJavaIdentifierPart(c))
-					{
-						if (initCap)
-							nameClean.append(Character.toUpperCase(c));
-						else
-							nameClean.append(c);
-						initCap = false;
-					}
-					else
-					{
-						if (c == ''+'')
-							nameClean.append("Plus");
-						else if (c == ''-'')
-							nameClean.append("_");
-						else if (c == ''>'')
-						{
-							if (name.indexOf(''<'') == -1)	//	ignore <xx>
-								nameClean.append("Gt");
-						}
-						else if (c == ''<'')
-						{
-							if (name.indexOf(''>'') == -1)	//	ignore <xx>
-								nameClean.append("Le");
-						}
-						else if (c == ''!'')
-							nameClean.append("Not");
-						else if (c == ''='')
-							nameClean.append("Eq");
-						else if (c == ''~'')
-							nameClean.append("Like");
-						initCap = true;
-					}
-				}
-				retValue.append("/** ").append(name).append(" = ").append(value).append(" */\n");
-				retValue.append("public static final String ").append(columnName.toUpperCase())
-					.append("_").append(nameClean)
-					.append(" = \"").append(value).append("\";");
-			}
- 		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			found = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		statement.append(")"
-			+ "; "
-			+ "else "
-			+ "throw new IllegalArgumentException (\"").append(columnName)
-			.append(" Invalid value - \" + ").append(columnName)
-			.append(" + \" - ").append(values).append("\");");
-		//
-		if (found && !columnName.equals("EntityType"))
-			sb.append (statement);
-		return retValue.toString();
-	}	//	addListValidation
-]]></source>
-<source file="/home/saeed/code/org/adempiere/util/ModelClassGenerator.java" startline="589" endline="692" pcid="48666"><![CDATA[
-	{
-		StringBuffer retValue = new StringBuffer();
-		retValue.append("\n\t/** ").append(columnName).append(" AD_Reference_ID=").append(AD_Reference_ID) .append(" */")
-			.append("\n\tpublic static final int ").append(columnName.toUpperCase())
-			.append("_AD_Reference_ID=").append(AD_Reference_ID).append(";");
-		//
-		boolean found = false;
-		StringBuffer values = new StringBuffer("Reference_ID=")
-			.append(AD_Reference_ID);
-		StringBuffer statement = new StringBuffer();
-		//
-		String sql = "SELECT Value, Name FROM AD_Ref_List WHERE AD_Reference_ID=? ORDER BY AD_Ref_List_ID";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, AD_Reference_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				String value = rs.getString(1);
-				values.append(" - ").append(value);
-				if (statement.length() == 0)
-					statement.append("\n\t\tif (").append(columnName)
-						.append(".equals(\"").append(value).append("\")");
-				else
-					statement.append(" || ").append(columnName)
-						.append(".equals(\"").append(value).append("\")");
-				//
-				if (!found)
-				{
-					found = true;
-				}
-
-
-				//	Name (SmallTalkNotation)
-				String name = rs.getString(2);
-				char[] nameArray = name.toCharArray();
-				StringBuffer nameClean = new StringBuffer();
-				boolean initCap = true;
-				for (int i = 0; i < nameArray.length; i++)
-				{
-					char c = nameArray[i];
-					if (Character.isJavaIdentifierPart(c))
-					{
-						if (initCap)
-							nameClean.append(Character.toUpperCase(c));
-						else
-							nameClean.append(c);
-						initCap = false;
-					}
-					else
-					{
-						if (c == ''+'')
-							nameClean.append("Plus");
-						else if (c == ''-'')
-							nameClean.append("_");
-						else if (c == ''>'')
-						{
-							if (name.indexOf(''<'') == -1)	//	ignore <xx>
-								nameClean.append("Gt");
-						}
-						else if (c == ''<'')
-						{
-							if (name.indexOf(''>'') == -1)	//	ignore <xx>
-								nameClean.append("Le");
-						}
-						else if (c == ''!'')
-							nameClean.append("Not");
-						else if (c == ''='')
-							nameClean.append("Eq");
-						else if (c == ''~'')
-							nameClean.append("Like");
-						initCap = true;
-					}
-				}
-				retValue.append("\n\t/** ").append(name).append(" = ").append(value).append(" */");
-				retValue.append("\n\tpublic static final String ").append(columnName.toUpperCase())
-					.append("_").append(nameClean)
-					.append(" = \"").append(value).append("\";");
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		statement.append(")"
-			+ "; "
-			+ "else "
-			+ "throw new IllegalArgumentException (\"").append(columnName)
-			.append(" Invalid value - \" + ").append(columnName)
-			.append(" + \" - ").append(values).append("\");");
-		// [1762461] - Remove hardcoded list items checking in generated models
-		// if (found && !columnName.equals("EntityType"))
-		//	sb.append (statement);
-		sb.append("\n");
-		return retValue.toString();
-	}	//	addListValidation
-]]></source>
-</class>
-
-<class id="11" nlines="67" nfragments="2">
-<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="480" endline="584" pcid="46949"><![CDATA[
-		{
-			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-			BigDecimal serviceAmt = Env.ZERO;
-
-			//  Charge          DR
-			fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
-				getC_Currency_ID(), getAmount(Doc.AMTTYPE_Charge), null);
-			//  TaxCredit       DR
-			for (int i = 0; i < m_taxes.length; i++)
-			{
-				FactLine tl = fact.createLine(null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
-					getC_Currency_ID(), m_taxes[i].getAmount(), null);
-				if (tl != null)
-					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-			}
-			//  Expense         DR
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				DocLine line = p_lines[i];
-				boolean landedCost = landedCost(as, fact, line, true);
-				if (landedCost && as.isExplicitCostAdjustment())
-				{
-					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
-						getC_Currency_ID(), line.getAmtSource(), null);
-					//
-					FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
-						getC_Currency_ID(), null, line.getAmtSource());
-					String desc = line.getDescription();
-					if (desc == null)
-						desc = "100%";
-					else
-						desc += " 100%";
-					fl.setDescription(desc);
-				}
-				if (!landedCost)
-				{
-					MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
-					if (line.isItem())
-						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
-					BigDecimal amt = line.getAmtSource();
-					BigDecimal dAmt = null;
-					if (as.isTradeDiscountPosted() && !line.isItem())
-					{
-						BigDecimal discount = line.getDiscount();
-						if (discount != null && discount.signum() != 0)
-						{
-							amt = amt.add(discount);
-							dAmt = discount;
-							MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
-							fact.createLine (line, tradeDiscountReceived,
-									getC_Currency_ID(), null, dAmt);
-						}
-					}
-					fact.createLine (line, expense,
-						getC_Currency_ID(), amt, null);
-					if (!line.isItem())
-					{
-						grossAmt = grossAmt.subtract(amt);
-						serviceAmt = serviceAmt.add(amt);
-					}
-					//
-					if (line.getM_Product_ID() != 0
-						&& line.getProduct().isService())	//	otherwise Inv Matching
-						MCostDetail.createInvoice(as, line.getAD_Org_ID(), 
-							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.get_ID(), 0,		//	No Cost Element
-							line.getAmtSource(), line.getQty(),
-							line.getDescription(), getTrxName());
-				}
-			}
-			//  Set Locations
-			FactLine[] fLines = fact.getLines();
-			for (int i = 0; i < fLines.length; i++)
-			{
-				if (fLines[i] != null)
-				{
-					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), true);  //  from Loc
-					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
-				}
-			}
-
-			//  Liability               CR
-			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
-			int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
-			if (m_allLinesItem || !as.isPostServices() 
-				|| payables_ID == payablesServices_ID)
-			{
-				grossAmt = getAmount(Doc.AMTTYPE_Gross);
-				serviceAmt = Env.ZERO;
-			}
-			else if (m_allLinesService)
-			{
-				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
-				grossAmt = Env.ZERO;
-			}
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), payables_ID),
-					getC_Currency_ID(), null, grossAmt);
-			if (serviceAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
-					getC_Currency_ID(), null, serviceAmt);
-			//
-			updateProductPO(as);	//	Only API
-			updateProductInfo (as.getC_AcctSchema_ID());    //  only API
-		}
-]]></source>
-<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="587" endline="686" pcid="46961"><![CDATA[
-		{
-			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-			BigDecimal serviceAmt = Env.ZERO;
-			//  Charge                  CR
-			fact.createLine (null, getAccount(Doc.ACCTTYPE_Charge, as),
-				getC_Currency_ID(), null, getAmount(Doc.AMTTYPE_Charge));
-			//  TaxCredit               CR
-			for (int i = 0; i < m_taxes.length; i++)
-			{
-				FactLine tl = fact.createLine (null, m_taxes[i].getAccount(m_taxes[i].getAPTaxType(), as),
-					getC_Currency_ID(), null, m_taxes[i].getAmount());
-				if (tl != null)
-					tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-			}
-			//  Expense                 CR
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				DocLine line = p_lines[i];
-				boolean landedCost = landedCost(as, fact, line, false);
-				if (landedCost && as.isExplicitCostAdjustment())
-				{
-					fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
-						getC_Currency_ID(), null, line.getAmtSource());
-					//
-					FactLine fl = fact.createLine (line, line.getAccount(ProductCost.ACCTTYPE_P_Expense, as),
-						getC_Currency_ID(), line.getAmtSource(), null);
-					String desc = line.getDescription();
-					if (desc == null)
-						desc = "100%";
-					else
-						desc += " 100%";
-					fl.setDescription(desc);
-				}
-				if (!landedCost)
-				{
-					MAccount expense = line.getAccount(ProductCost.ACCTTYPE_P_Expense, as);
-					if (line.isItem())
-						expense = line.getAccount (ProductCost.ACCTTYPE_P_InventoryClearing, as);
-					BigDecimal amt = line.getAmtSource();
-					BigDecimal dAmt = null;
-					if (as.isTradeDiscountPosted() && !line.isItem())
-					{
-						BigDecimal discount = line.getDiscount();
-						if (discount != null && discount.signum() != 0)
-						{
-							amt = amt.add(discount);
-							dAmt = discount;
-							MAccount tradeDiscountReceived = line.getAccount(ProductCost.ACCTTYPE_P_TDiscountRec, as);
-							fact.createLine (line, tradeDiscountReceived,
-									getC_Currency_ID(), dAmt, null);
-						}
-					}
-					fact.createLine (line, expense,
-						getC_Currency_ID(), null, amt);
-					if (!line.isItem())
-					{
-						grossAmt = grossAmt.subtract(amt);
-						serviceAmt = serviceAmt.add(amt);
-					}
-					//
-					if (line.getM_Product_ID() != 0
-						&& line.getProduct().isService())	//	otherwise Inv Matching
-						MCostDetail.createInvoice(as, line.getAD_Org_ID(), 
-							line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-							line.get_ID(), 0,		//	No Cost Element
-							line.getAmtSource().negate(), line.getQty(),
-							line.getDescription(), getTrxName());
-				}
-			}
-			//  Set Locations
-			FactLine[] fLines = fact.getLines();
-			for (int i = 0; i < fLines.length; i++)
-			{
-				if (fLines[i] != null)
-				{
-					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), true);  //  from Loc
-					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), false);    //  to Loc
-				}
-			}
-			//  Liability       DR
-			int payables_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability, as);
-			int payablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_V_Liability_Services, as);
-			if (m_allLinesItem || !as.isPostServices() 
-				|| payables_ID == payablesServices_ID)
-			{
-				grossAmt = getAmount(Doc.AMTTYPE_Gross);
-				serviceAmt = Env.ZERO;
-			}
-			else if (m_allLinesService)
-			{
-				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
-				grossAmt = Env.ZERO;
-			}
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), payables_ID),
-					getC_Currency_ID(), grossAmt, null);
-			if (serviceAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), payablesServices_ID),
-					getC_Currency_ID(), serviceAmt, null);
-		}
-]]></source>
-</class>
-
-<class id="12" nlines="61" nfragments="2">
-<source file="/home/saeed/code/org/compiere/acct/Doc_InOut.java" startline="163" endline="260" pcid="46852"><![CDATA[
-		{
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				DocLine line = p_lines[i];
-				// MZ Goodwill
-				// if Shipment CostDetail exist then get Cost from Cost Detail 
-				BigDecimal costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-				// end MZ
-				if (costs == null || costs.signum() == 0)	//	zero costs OK
-				{
-					MProduct product = line.getProduct();
-					if (product.isStocked())
-					{
-						p_Error = "No Costs for " + line.getProduct().getName();
-						log.log(Level.WARNING, p_Error);
-						return null;
-					}
-					else	//	ignore service
-						continue;
-				}
-				//  CoGS            DR
-				dr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
-					as.getC_Currency_ID(), costs, null);
-				if (dr == null)
-				{
-					p_Error = "FactLine DR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				dr.setM_Locator_ID(line.getM_Locator_ID());
-				dr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
-				dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				dr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
-				dr.setQty(line.getQty().negate());
-				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
-						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
-				{
-					//	Set AmtAcctDr from Original Shipment/Receipt
-					if (!dr.updateReverseLine (MInOut.Table_ID, 
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
-					{
-						p_Error = "Original Shipment/Receipt not posted yet";
-						return null;
-					}
-				}
-				
-				//  Inventory               CR
-				cr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
-					as.getC_Currency_ID(), null, costs);
-				if (cr == null)
-				{
-					p_Error = "FactLine CR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				cr.setM_Locator_ID(line.getM_Locator_ID());
-				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-				cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
-				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
-						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
-				{
-					//	Set AmtAcctCr from Original Shipment/Receipt
-					if (!cr.updateReverseLine (MInOut.Table_ID, 
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
-					{
-						p_Error = "Original Shipment/Receipt not posted yet";
-						return null;
-					}
-					costs = cr.getAcctBalance(); //get original cost
-				}
-				//
-				if (line.getM_Product_ID() != 0)
-				{
-					MCostDetail.createShipment(as, line.getAD_Org_ID(), 
-						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-						line.get_ID(), 0,
-						costs, line.getQty(),
-						line.getDescription(), true, getTrxName());
-				}
-			}	//	for all lines
-			updateProductInfo(as.getC_AcctSchema_ID());     //  only for SO!
-
-			/** Commitment release										****/
-			if (as.isAccrual() && as.isCreateSOCommitment())
-			{
-				for (int i = 0; i < p_lines.length; i++)
-				{
-					DocLine line = p_lines[i];
-					Fact factcomm = Doc_Order.getCommitmentSalesRelease(as, this, 
-						line.getQty(), line.get_ID(), Env.ONE);
-					if (factcomm != null)
-						facts.add(factcomm);
-				}
-			}	//	Commitment
-		
-		}	//	Shipment
-]]></source>
-<source file="/home/saeed/code/org/compiere/acct/Doc_InOut.java" startline="263" endline="347" pcid="46865"><![CDATA[
-		{
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				DocLine line = p_lines[i];
-				// MZ Goodwill
-				// if Shipment CostDetail exist then get Cost from Cost Detail 
-				BigDecimal costs = line.getProductCosts(as, line.getAD_Org_ID(), true, "M_InOutLine_ID=?");
-				// end MZ
-				
-				if (costs == null || costs.signum() == 0)	//	zero costs OK
-				{
-					MProduct product = line.getProduct();
-					if (product.isStocked())
-					{
-						p_Error = "No Costs for " + line.getProduct().getName();
-						log.log(Level.WARNING, p_Error);
-						return null;
-					}
-					else	//	ignore service
-						continue;
-				}
-				//  Inventory               DR
-				dr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Asset, as),
-					as.getC_Currency_ID(), costs, null);
-				if (dr == null)
-				{
-					p_Error = "FactLine DR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				dr.setM_Locator_ID(line.getM_Locator_ID());
-				dr.setLocationFromLocator(line.getM_Locator_ID(), true);    // from Loc
-				dr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  // to Loc
-				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
-						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
-				{
-					//	Set AmtAcctDr from Original Shipment/Receipt
-					if (!dr.updateReverseLine (MInOut.Table_ID, 
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
-					{
-						p_Error = "Original Shipment/Receipt not posted yet";
-						return null;
-					}
-					costs = dr.getAcctBalance(); //get original cost
-				}
-				//
-				if (line.getM_Product_ID() != 0)
-				{
-					MCostDetail.createShipment(as, line.getAD_Org_ID(), 
-						line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-						line.get_ID(), 0,
-						costs, line.getQty(),
-						line.getDescription(), true, getTrxName());
-				}
-				
-				//  CoGS            CR
-				cr = fact.createLine(line,
-					line.getAccount(ProductCost.ACCTTYPE_P_Cogs, as),
-					as.getC_Currency_ID(), null, costs);
-				if (cr == null)
-				{
-					p_Error = "FactLine CR not created: " + line;
-					log.log(Level.WARNING, p_Error);
-					return null;
-				}
-				cr.setM_Locator_ID(line.getM_Locator_ID());
-				cr.setLocationFromLocator(line.getM_Locator_ID(), true);    //  from Loc
-				cr.setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				cr.setAD_Org_ID(line.getOrder_Org_ID());		//	Revenue X-Org
-				cr.setQty(line.getQty().negate());
-				if (m_DocStatus.equals(MInOut.DOCSTATUS_Reversed) 
-						&& m_Reversal_ID !=0 && line.getReversalLine_ID() != 0)
-				{
-					//	Set AmtAcctCr from Original Shipment/Receipt
-					if (!cr.updateReverseLine (MInOut.Table_ID, 
-							m_Reversal_ID, line.getReversalLine_ID(),Env.ONE))
-					{
-						p_Error = "Original Shipment/Receipt not posted yet";
-						return null;
-					}					
-				}
-			}	//	for all lines
-			updateProductInfo(as.getC_AcctSchema_ID());     //  only for SO!
-		}	//	Sales Return
-]]></source>
-</class>
-
-<class id="13" nlines="60" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MOrderLine.java" startline="795" endline="917" pcid="26630"><![CDATA[
-	{
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "C_OrderLine"));
-			return false;
-		}
-		//	Get Defaults from Parent
-		if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0
-			|| getM_Warehouse_ID() == 0 
-			|| getC_Currency_ID() == 0)
-			setOrder (getParent());
-		if (m_M_PriceList_ID == 0)
-			setHeaderInfo(getParent());
-
-		
-		//	R/O Check - Product/Warehouse Change
-		if (!newRecord 
-			&& (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Warehouse_ID"))) 
-		{
-			if (!canChangeWarehouse())
-				return false;
-		}	//	Product Changed
-		
-		//	Charge
-		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
-				setM_Product_ID(0);
-		//	No Product
-		if (getM_Product_ID() == 0)
-			setM_AttributeSetInstance_ID(0);
-		//	Product
-		else	//	Set/check Product Price
-		{
-			//	Set Price if Actual = 0
-			if (m_productPrice == null 
-				&&  Env.ZERO.compareTo(getPriceActual()) == 0
-				&&  Env.ZERO.compareTo(getPriceList()) == 0)
-				setPrice();
-			//	Check if on Price list
-			if (m_productPrice == null)
-				getProductPricing(m_M_PriceList_ID);
-			if (!m_productPrice.isCalculated())
-			{
-				throw new ProductNotOnPriceListException(m_productPrice, getLine());
-			}
-		}
-
-		//	UOM
-		if (getC_UOM_ID() == 0 
-			&& (getM_Product_ID() != 0 
-				|| getPriceEntered().compareTo(Env.ZERO) != 0
-				|| getC_Charge_ID() != 0))
-		{
-			int C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
-			if (C_UOM_ID > 0)
-				setC_UOM_ID (C_UOM_ID);
-		}
-		//	Qty Precision
-		if (newRecord || is_ValueChanged("QtyEntered"))
-			setQtyEntered(getQtyEntered());
-		if (newRecord || is_ValueChanged("QtyOrdered"))
-			setQtyOrdered(getQtyOrdered());
-		
-		//	Qty on instance ASI for SO
-		if (m_IsSOTrx 
-			&& getM_AttributeSetInstance_ID() != 0
-			&& (newRecord || is_ValueChanged("M_Product_ID")
-				|| is_ValueChanged("M_AttributeSetInstance_ID")
-				|| is_ValueChanged("M_Warehouse_ID")))
-		{
-			MProduct product = getProduct();
-			if (product.isStocked())
-			{
-				int M_AttributeSet_ID = product.getM_AttributeSet_ID();
-				boolean isInstance = M_AttributeSet_ID != 0;
-				if (isInstance)
-				{
-					MAttributeSet mas = MAttributeSet.get(getCtx(), M_AttributeSet_ID);
-					isInstance = mas.isInstanceAttribute();
-				}
-				//	Max
-				if (isInstance)
-				{
-					MStorage[] storages = MStorage.getWarehouse(getCtx(), 
-						getM_Warehouse_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), 
-						M_AttributeSet_ID, false, null, true, get_TrxName());
-					BigDecimal qty = Env.ZERO;
-					for (int i = 0; i < storages.length; i++)
-					{
-						if (storages[i].getM_AttributeSetInstance_ID() == getM_AttributeSetInstance_ID())
-							qty = qty.add(storages[i].getQtyOnHand());
-					}
-					
-					if (getQtyOrdered().compareTo(qty) > 0)
-					{
-						log.warning("Qty - Stock=" + qty + ", Ordered=" + getQtyOrdered());
-						log.saveError("QtyInsufficient", "=" + qty); 
-						return false;
-					}
-				}
-			}	//	stocked
-		}	//	SO instance
-		
-		//	FreightAmt Not used
-		if (Env.ZERO.compareTo(getFreightAmt()) != 0)
-			setFreightAmt(Env.ZERO);
-
-		//	Set Tax
-		if (getC_Tax_ID() == 0)
-			setTax();
-
-		//	Get Line No
-		if (getLine() == 0)
-		{
-			String sql = "SELECT COALESCE(MAX(Line),0)+10 FROM C_OrderLine WHERE C_Order_ID=?";
-			int ii = DB.getSQLValue (get_TrxName(), sql, getC_Order_ID());
-			setLine (ii);
-		}
-		
-		//	Calculations & Rounding
-		setLineNetAmt();	//	extended Amount with or without tax
-		setDiscount();
-
-		return true;
-	}	//	beforeSave
-]]></source>
-<source file="/home/saeed/code/org/eevolution/model/MDDOrderLine.java" startline="515" endline="615" pcid="1432"><![CDATA[
-	{
-		if (newRecord && getParent().isComplete()) {
-			log.saveError("ParentComplete", Msg.translate(getCtx(), "DD_OrderLine"));
-			return false;
-		}
-		//	Get Defaults from Parent
-		/*if (getC_BPartner_ID() == 0 || getC_BPartner_Location_ID() == 0
-			|| getM_Warehouse_ID() == 0)
-			setOrder (getParent());*/
-		if (m_M_PriceList_ID == 0)
-			setHeaderInfo(getParent());
-		
-		//	R/O Check - Product/Warehouse Change
-		if (!newRecord 
-			&& (is_ValueChanged("M_Product_ID") || is_ValueChanged("M_Locator_ID") || is_ValueChanged("M_LocatorTo_ID"))) 
-		{
-			if (!canChangeWarehouse())
-				return false;
-		}	//	Product Changed
-		
-		//	Charge
-		if (getC_Charge_ID() != 0 && getM_Product_ID() != 0)
-				setM_Product_ID(0);
-		//	No Product
-		if (getM_Product_ID() == 0)
-			setM_AttributeSetInstance_ID(0);
-		//	Product
-		
-
-		//	UOM
-		if (getC_UOM_ID() == 0 
-			&& (getM_Product_ID() != 0 
-				|| getC_Charge_ID() != 0))
-		{
-			int C_UOM_ID = MUOM.getDefault_UOM_ID(getCtx());
-			if (C_UOM_ID > 0)
-				setC_UOM_ID (C_UOM_ID);
-		}
-		//	Qty Precision
-		if (newRecord || is_ValueChanged("QtyEntered"))
-			setQtyEntered(getQtyEntered());
-		if (newRecord || is_ValueChanged("QtyOrdered"))
-			setQtyOrdered(getQtyOrdered());
-		
-		//	Qty on instance ASI for SO
-		if (m_IsSOTrx 
-			&& getM_AttributeSetInstance_ID() != 0
-			&& (newRecord || is_ValueChanged("M_Product_ID")
-				|| is_ValueChanged("M_AttributeSetInstance_ID")
-				|| is_ValueChanged("M_Warehouse_ID")))
-		{
-			MProduct product = getProduct();
-			if (product.isStocked())
-			{
-				int M_AttributeSet_ID = product.getM_AttributeSet_ID();
-				boolean isInstance = M_AttributeSet_ID != 0;
-				if (isInstance)
-				{
-					MAttributeSet mas = MAttributeSet.get(getCtx(), M_AttributeSet_ID);
-					isInstance = mas.isInstanceAttribute();
-				}
-				//	Max
-				if (isInstance)
-				{
-					MLocator locator_from = MLocator.get(getCtx(), getM_Locator_ID());
-					MStorage[] storages = MStorage.getWarehouse(getCtx(), 
-							locator_from.getM_Warehouse_ID(), getM_Product_ID(), getM_AttributeSetInstance_ID(), 
-						M_AttributeSet_ID, false, null, true, get_TrxName());
-					BigDecimal qty = Env.ZERO;
-					for (int i = 0; i < storages.length; i++)
-					{
-						if (storages[i].getM_AttributeSetInstance_ID() == getM_AttributeSetInstance_ID())
-							qty = qty.add(storages[i].getQtyOnHand());
-					}
-					if (getQtyOrdered().compareTo(qty) > 0)
-					{
-						log.warning("Qty - Stock=" + qty + ", Ordered=" + getQtyOrdered());
-						log.saveError("QtyInsufficient", "=" + qty); 
-						return false;
-					}
-				}
-			}	//	stocked
-			
-		}	//	SO instance
-		
-		//	FreightAmt Not used
-		if (Env.ZERO.compareTo(getFreightAmt()) != 0)
-			setFreightAmt(Env.ZERO);
-
-
-		//	Get Line No
-		if (getLine() == 0)
-		{
-			String sql = "SELECT COALESCE(MAX(Line),0)+10 FROM C_OrderLine WHERE C_Order_ID=?";
-			int ii = DB.getSQLValue (get_TrxName(), sql, getDD_Order_ID());
-			setLine (ii);
-		}
-
-
-		return true;
-	}	//	beforeSave
-]]></source>
-</class>
-
-<class id="14" nlines="59" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="904" endline="988" pcid="23803"><![CDATA[
-	{
-		String sql = "SELECT t.MovementQty, mp.Qty, ol.QtyOrdered, ol.PriceCost, ol.PriceActual,"	//	1..5
-			+ " o.C_Currency_ID, o.DateAcct, o.C_ConversionType_ID,"	//	6..8
-			+ " o.AD_Client_ID, o.AD_Org_ID, t.M_Transaction_ID "		//	9..11
-			+ "FROM M_Transaction t"
-			+ " INNER JOIN M_MatchPO mp ON (t.M_InOutLine_ID=mp.M_InOutLine_ID)"
-			+ " INNER JOIN C_OrderLine ol ON (mp.C_OrderLine_ID=ol.C_OrderLine_ID)"
-			+ " INNER JOIN C_Order o ON (ol.C_Order_ID=o.C_Order_ID) "
-			+ "WHERE t.M_Product_ID=?";
-		if (AD_Org_ID != 0)
-			sql += " AND t.AD_Org_ID=?";
-		else if (M_AttributeSetInstance_ID != 0)
-			sql += " AND t.M_AttributeSetInstance_ID=?";
-		sql += " ORDER BY t.M_Transaction_ID";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		BigDecimal newStockQty = Env.ZERO;
-		//
-		BigDecimal newAverageAmt = Env.ZERO;
-		int oldTransaction_ID = 0;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, product.getM_Product_ID());
-			if (AD_Org_ID != 0)
-				pstmt.setInt (2, AD_Org_ID);
-			else if (M_AttributeSetInstance_ID != 0)
-				pstmt.setInt (2, M_AttributeSetInstance_ID);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				BigDecimal oldStockQty = newStockQty;
-				BigDecimal movementQty = rs.getBigDecimal(1);
-				int M_Transaction_ID = rs.getInt(11);
-				if (M_Transaction_ID != oldTransaction_ID)
-					newStockQty = oldStockQty.add(movementQty);
-				M_Transaction_ID = oldTransaction_ID;
-				//
-				BigDecimal matchQty = rs.getBigDecimal(2);
-				if (matchQty == null)
-				{
-					s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty);
-					continue;
-				}
-				//	Assumption: everything is matched
-				BigDecimal price = rs.getBigDecimal(4);
-				if (price == null || price.signum() == 0)	//	PO Cost
-					price = rs.getBigDecimal(5);			//	Actual
-				int C_Currency_ID = rs.getInt(6);
-				Timestamp DateAcct = rs.getTimestamp(7);
-				int C_ConversionType_ID = rs.getInt(8);
-				int Client_ID = rs.getInt(9);
-				int Org_ID = rs.getInt(10);
-				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
-					C_Currency_ID, as.getC_Currency_ID(),
-					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
-				//
-				BigDecimal oldAverageAmt = newAverageAmt;
-				BigDecimal averageCurrent = oldStockQty.multiply(oldAverageAmt);
-				BigDecimal averageIncrease = matchQty.multiply(cost);
-				BigDecimal newAmt = averageCurrent.add(averageIncrease);
-				newAmt = newAmt.setScale(as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
-				newAverageAmt = newAmt.divide(newStockQty, as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
-				s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty
-					+ ", Match=" + matchQty + ", Cost=" + cost + ", NewAvg=" + newAverageAmt);
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		//
-		if (newAverageAmt != null && newAverageAmt.signum() != 0)
-		{
-			s_log.finer(product.getName() + " = " + newAverageAmt);
-			return newAverageAmt;
-		}
-		return null;
-	}	//	calculateAveragePO
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MCost.java" startline="811" endline="892" pcid="23796"><![CDATA[
-	{
-		String sql = "SELECT t.MovementQty, mi.Qty, il.QtyInvoiced, il.PriceActual,"
-			+ " i.C_Currency_ID, i.DateAcct, i.C_ConversionType_ID, i.AD_Client_ID, i.AD_Org_ID, t.M_Transaction_ID "
-			+ "FROM M_Transaction t"
-			+ " INNER JOIN M_MatchInv mi ON (t.M_InOutLine_ID=mi.M_InOutLine_ID)"
-			+ " INNER JOIN C_InvoiceLine il ON (mi.C_InvoiceLine_ID=il.C_InvoiceLine_ID)"
-			+ " INNER JOIN C_Invoice i ON (il.C_Invoice_ID=i.C_Invoice_ID) "
-			+ "WHERE t.M_Product_ID=?";
-		if (AD_Org_ID != 0)
-			sql += " AND t.AD_Org_ID=?";
-		else if (M_AttributeSetInstance_ID != 0)
-			sql += " AND t.M_AttributeSetInstance_ID=?";
-		sql += " ORDER BY t.M_Transaction_ID";
-
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		BigDecimal newStockQty = Env.ZERO;
-		//
-		BigDecimal newAverageAmt = Env.ZERO;
-		int oldTransaction_ID = 0;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, product.getM_Product_ID());
-			if (AD_Org_ID != 0)
-				pstmt.setInt (2, AD_Org_ID);
-			else if (M_AttributeSetInstance_ID != 0)
-				pstmt.setInt (2, M_AttributeSetInstance_ID);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				BigDecimal oldStockQty = newStockQty;
-				BigDecimal movementQty = rs.getBigDecimal(1);
-				int M_Transaction_ID = rs.getInt(10);
-				if (M_Transaction_ID != oldTransaction_ID)
-					newStockQty = oldStockQty.add(movementQty);
-				M_Transaction_ID = oldTransaction_ID;
-				//
-				BigDecimal matchQty = rs.getBigDecimal(2);
-				if (matchQty == null)
-				{
-					s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty);
-					continue;
-				}
-				//	Assumption: everything is matched
-				BigDecimal price = rs.getBigDecimal(4);
-				int C_Currency_ID = rs.getInt(5);
-				Timestamp DateAcct = rs.getTimestamp(6);
-				int C_ConversionType_ID = rs.getInt(7);
-				int Client_ID = rs.getInt(8);
-				int Org_ID = rs.getInt(9);
-				BigDecimal cost = MConversionRate.convert(product.getCtx(), price,
-					C_Currency_ID, as.getC_Currency_ID(),
-					DateAcct, C_ConversionType_ID, Client_ID, Org_ID);
-				//
-				BigDecimal oldAverageAmt = newAverageAmt;
-				BigDecimal averageCurrent = oldStockQty.multiply(oldAverageAmt);
-				BigDecimal averageIncrease = matchQty.multiply(cost);
-				BigDecimal newAmt = averageCurrent.add(averageIncrease);
-				newAmt = newAmt.setScale(as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
-				newAverageAmt = newAmt.divide(newStockQty, as.getCostingPrecision(), BigDecimal.ROUND_HALF_UP);
-				s_log.finer("Movement=" + movementQty + ", StockQty=" + newStockQty
-					+ ", Match=" + matchQty + ", Cost=" + cost + ", NewAvg=" + newAverageAmt);
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		//
-		if (newAverageAmt != null && newAverageAmt.signum() != 0)
-		{
-			s_log.finer(product.getName() + " = " + newAverageAmt);
-			return newAverageAmt;
-		}
-		return null;
-	}	//	calculateAverageInv
-]]></source>
-</class>
-
-<class id="15" nlines="58" nfragments="2">
-<source file="/home/saeed/code/org/compiere/acct/Doc_Order.java" startline="501" endline="584" pcid="47353"><![CDATA[
-	{
-		int precision = -1;
-		//
-		ArrayList<DocLine> list = new ArrayList<DocLine>();
-		String sql = "SELECT * FROM C_OrderLine ol "
-			+ "WHERE EXISTS "
-				+ "(SELECT * FROM C_InvoiceLine il "
-				+ "WHERE il.C_OrderLine_ID=ol.C_OrderLine_ID"
-				+ " AND il.C_InvoiceLine_ID=?)"
-			+ " OR EXISTS "
-				+ "(SELECT * FROM M_MatchPO po "
-				+ "WHERE po.C_OrderLine_ID=ol.C_OrderLine_ID"
-				+ " AND po.C_InvoiceLine_ID=?)";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, C_InvoiceLine_ID);
-			pstmt.setInt (2, C_InvoiceLine_ID);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				if (maxQty.signum() == 0)
-					continue;
-				MOrderLine line = new MOrderLine (doc.getCtx(), rs, null);
-				DocLine docLine = new DocLine (line, doc);
-				//	Currency
-				if (precision == -1)
-				{
-					doc.setC_Currency_ID(docLine.getC_Currency_ID());
-					precision = MCurrency.getStdPrecision(doc.getCtx(), docLine.getC_Currency_ID());
-				}
-				//	Qty
-				BigDecimal Qty = line.getQtyOrdered().max(maxQty);
-				docLine.setQty(Qty, false);
-				//
-				BigDecimal PriceActual = line.getPriceActual();
-				BigDecimal PriceCost = line.getPriceCost();
-				BigDecimal LineNetAmt = null;
-				if (PriceCost != null && PriceCost.signum() != 0)
-					LineNetAmt = Qty.multiply(PriceCost);
-				else if (Qty.equals(maxQty))
-					LineNetAmt = line.getLineNetAmt();
-				else
-					LineNetAmt = Qty.multiply(PriceActual);
-				maxQty = maxQty.subtract(Qty);
-				
-				docLine.setAmount (LineNetAmt);	//	DR
-				BigDecimal PriceList = line.getPriceList();
-				int C_Tax_ID = docLine.getC_Tax_ID();
-				//	Correct included Tax
-				if (C_Tax_ID != 0 && line.getParent().isTaxIncluded())
-				{
-					MTax tax = MTax.get(doc.getCtx(), C_Tax_ID);
-					if (!tax.isZeroTax())
-					{
-						BigDecimal LineNetAmtTax = tax.calculateTax(LineNetAmt, true, precision);
-						s_log.fine("LineNetAmt=" + LineNetAmt + " - Tax=" + LineNetAmtTax);
-						LineNetAmt = LineNetAmt.subtract(LineNetAmtTax);
-						BigDecimal PriceListTax = tax.calculateTax(PriceList, true, precision);
-						PriceList = PriceList.subtract(PriceListTax);
-					}
-				}	//	correct included Tax
-				
-				docLine.setAmount (LineNetAmt, PriceList, Qty);
-				list.add(docLine);
-			}
-		}
-		catch (Exception e)
-		{
-			s_log.log (Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		
-		//	Return Array
-		DocLine[] dl = new DocLine[list.size()];
-		list.toArray(dl);
-		return dl;
-	}	//	getCommitments
-]]></source>
-<source file="/home/saeed/code/org/compiere/acct/Doc_Order.java" startline="646" endline="724" pcid="47365"><![CDATA[
-	{
-		int precision = -1;
-		//
-		ArrayList<DocLine> list = new ArrayList<DocLine>();
-		String sql = "SELECT * FROM C_OrderLine ol "
-			+ "WHERE EXISTS "
-				+ "(SELECT * FROM M_InOutLine il "
-				+ "WHERE il.C_OrderLine_ID=ol.C_OrderLine_ID"
-				+ " AND il.M_InOutLine_ID=?)";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, M_InOutLine_ID);
-			rs = pstmt.executeQuery ();
-			while (rs.next ())
-			{
-				if (maxQty.signum() == 0)
-					continue;
-				MOrderLine line = new MOrderLine (doc.getCtx(), rs, null);
-				DocLine docLine = new DocLine (line, doc);
-				//	Currency
-				if (precision == -1)
-				{
-					doc.setC_Currency_ID(docLine.getC_Currency_ID());
-					precision = MCurrency.getStdPrecision(doc.getCtx(), docLine.getC_Currency_ID());
-				}
-				//	Qty
-				BigDecimal Qty = line.getQtyOrdered().max(maxQty);
-				docLine.setQty(Qty, false);
-				//
-				BigDecimal PriceActual = line.getPriceActual();
-				BigDecimal PriceCost = line.getPriceCost();
-				BigDecimal LineNetAmt = null;
-				if (PriceCost != null && PriceCost.signum() != 0)
-					LineNetAmt = Qty.multiply(PriceCost);
-				else if (Qty.equals(maxQty))
-					LineNetAmt = line.getLineNetAmt();
-				else
-					LineNetAmt = Qty.multiply(PriceActual);
-				maxQty = maxQty.subtract(Qty);
-				
-				docLine.setAmount (LineNetAmt);	//	DR
-				BigDecimal PriceList = line.getPriceList();
-				int C_Tax_ID = docLine.getC_Tax_ID();
-				//	Correct included Tax
-				if (C_Tax_ID != 0 && line.getParent().isTaxIncluded())
-				{
-					MTax tax = MTax.get(doc.getCtx(), C_Tax_ID);
-					if (!tax.isZeroTax())
-					{
-						BigDecimal LineNetAmtTax = tax.calculateTax(LineNetAmt, true, precision);
-						s_log.fine("LineNetAmt=" + LineNetAmt + " - Tax=" + LineNetAmtTax);
-						LineNetAmt = LineNetAmt.subtract(LineNetAmtTax);
-						BigDecimal PriceListTax = tax.calculateTax(PriceList, true, precision);
-						PriceList = PriceList.subtract(PriceListTax);
-					}
-				}	//	correct included Tax
-				
-				docLine.setAmount (LineNetAmt, PriceList, Qty);
-				list.add(docLine);
-			}
-		}
-		catch (Exception e)
-		{
-			s_log.log (Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		
-		//	Return Array
-		DocLine[] dl = new DocLine[list.size()];
-		list.toArray(dl);
-		return dl;
-	}	//	getCommitmentsSales
-]]></source>
-</class>
-
-<class id="16" nlines="57" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MInOut.java" startline="1811" endline="1900" pcid="38788"><![CDATA[
-	{
-		//	Is this a counter doc ?
-		if (getRef_InOut_ID() != 0)
-			return null;
-
-		//	Org Must be linked to BPartner
-		MOrg org = MOrg.get(getCtx(), getAD_Org_ID());
-		int counterC_BPartner_ID = org.getLinkedC_BPartner_ID(get_TrxName());
-		if (counterC_BPartner_ID == 0)
-			return null;
-		//	Business Partner needs to be linked to Org
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
-		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int();
-		if (counterAD_Org_ID == 0)
-			return null;
-
-		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, null);
-		MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID, get_TrxName());
-		log.info("Counter BP=" + counterBP.getName());
-
-		//	Document Type
-		int C_DocTypeTarget_ID = 0;
-		MDocTypeCounter counterDT = MDocTypeCounter.getCounterDocType(getCtx(), getC_DocType_ID());
-		if (counterDT != null)
-		{
-			log.fine(counterDT.toString());
-			if (!counterDT.isCreateCounter() || !counterDT.isValid())
-				return null;
-			C_DocTypeTarget_ID = counterDT.getCounter_C_DocType_ID();
-		}
-		else	//	indirect
-		{
-			C_DocTypeTarget_ID = MDocTypeCounter.getCounterDocType_ID(getCtx(), getC_DocType_ID());
-			log.fine("Indirect C_DocTypeTarget_ID=" + C_DocTypeTarget_ID);
-			if (C_DocTypeTarget_ID <= 0)
-				return null;
-		}
-
-		//	Deep Copy
-		MInOut counter = copyFrom(this, getMovementDate(), getDateAcct(),
-			C_DocTypeTarget_ID, !isSOTrx(), true, get_TrxName(), true);
-
-		//
-		counter.setAD_Org_ID(counterAD_Org_ID);
-		counter.setM_Warehouse_ID(counterOrgInfo.getM_Warehouse_ID());
-		//
-		counter.setBPartner(counterBP);
-
-		if ( isDropShip() )
-		{
-			counter.setIsDropShip(true );
-			counter.setDropShip_BPartner_ID(getDropShip_BPartner_ID());
-			counter.setDropShip_Location_ID(getDropShip_Location_ID());
-			counter.setDropShip_User_ID(getDropShip_User_ID());
-		}
-
-		//	Refernces (Should not be required
-		counter.setSalesRep_ID(getSalesRep_ID());
-		counter.save(get_TrxName());
-
-		String MovementType = counter.getMovementType();
-		boolean inTrx = MovementType.charAt(1) == ''+'';	//	V+ Vendor Receipt
-
-		//	Update copied lines
-		MInOutLine[] counterLines = counter.getLines(true);
-		for (int i = 0; i < counterLines.length; i++)
-		{
-			MInOutLine counterLine = counterLines[i];
-			counterLine.setClientOrg(counter);
-			counterLine.setM_Warehouse_ID(counter.getM_Warehouse_ID());
-			counterLine.setM_Locator_ID(0);
-			counterLine.setM_Locator_ID(inTrx ? Env.ZERO : counterLine.getMovementQty());
-			//
-			counterLine.save(get_TrxName());
-		}
-
-		log.fine(counter.toString());
-
-		//	Document Action
-		if (counterDT != null)
-		{
-			if (counterDT.getDocAction() != null)
-			{
-				counter.setDocAction(counterDT.getDocAction());
-				counter.processIt(counterDT.getDocAction());
-				counter.save(get_TrxName());
-			}
-		}
-		return counter;
-	}	//	createCounterDoc
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MOrder.java" startline="1895" endline="1968" pcid="20530"><![CDATA[
-	{
-		//	Is this itself a counter doc ?
-		if (getRef_Order_ID() != 0)
-			return null;
-		
-		//	Org Must be linked to BPartner
-		MOrg org = MOrg.get(getCtx(), getAD_Org_ID());
-		int counterC_BPartner_ID = org.getLinkedC_BPartner_ID(get_TrxName()); 
-		if (counterC_BPartner_ID == 0)
-			return null;
-		//	Business Partner needs to be linked to Org
-		MBPartner bp = new MBPartner (getCtx(), getC_BPartner_ID(), get_TrxName());
-		int counterAD_Org_ID = bp.getAD_OrgBP_ID_Int(); 
-		if (counterAD_Org_ID == 0)
-			return null;
-		
-		MBPartner counterBP = new MBPartner (getCtx(), counterC_BPartner_ID, null);
-		MOrgInfo counterOrgInfo = MOrgInfo.get(getCtx(), counterAD_Org_ID, get_TrxName());
-		log.info("Counter BP=" + counterBP.getName());
-
-		//	Document Type
-		int C_DocTypeTarget_ID = 0;
-		MDocTypeCounter counterDT = MDocTypeCounter.getCounterDocType(getCtx(), getC_DocType_ID());
-		if (counterDT != null)
-		{
-			log.fine(counterDT.toString());
-			if (!counterDT.isCreateCounter() || !counterDT.isValid())
-				return null;
-			C_DocTypeTarget_ID = counterDT.getCounter_C_DocType_ID();
-		}
-		else	//	indirect
-		{
-			C_DocTypeTarget_ID = MDocTypeCounter.getCounterDocType_ID(getCtx(), getC_DocType_ID());
-			log.fine("Indirect C_DocTypeTarget_ID=" + C_DocTypeTarget_ID);
-			if (C_DocTypeTarget_ID <= 0)
-				return null;
-		}
-		//	Deep Copy
-		MOrder counter = copyFrom (this, getDateOrdered(), 
-			C_DocTypeTarget_ID, !isSOTrx(), true, false, get_TrxName());
-		//
-		counter.setAD_Org_ID(counterAD_Org_ID);
-		counter.setM_Warehouse_ID(counterOrgInfo.getM_Warehouse_ID());
-		//
-		counter.setBPartner(counterBP);
-		counter.setDatePromised(getDatePromised());		// default is date ordered 
-		//	Refernces (Should not be required
-		counter.setSalesRep_ID(getSalesRep_ID());
-		counter.save(get_TrxName());
-		
-		//	Update copied lines
-		MOrderLine[] counterLines = counter.getLines(true, null);
-		for (int i = 0; i < counterLines.length; i++)
-		{
-			MOrderLine counterLine = counterLines[i];
-			counterLine.setOrder(counter);	//	copies header values (BP, etc.)
-			counterLine.setPrice();
-			counterLine.setTax();
-			counterLine.save(get_TrxName());
-		}
-		log.fine(counter.toString());
-		
-		//	Document Action
-		if (counterDT != null)
-		{
-			if (counterDT.getDocAction() != null)
-			{
-				counter.setDocAction(counterDT.getDocAction());
-				counter.processIt(counterDT.getDocAction());
-				counter.save(get_TrxName());
-			}
-		}
-		return counter;
-	}	//	createCounterDoc
-]]></source>
-</class>
-
-<class id="17" nlines="57" nfragments="4">
-<source file="/home/saeed/code/org/adempiere/util/GenerateModel.java" startline="69" endline="153" pcid="48570"><![CDATA[
-	{
-		Adempiere.startupEnvironment((args.length > 4 && args[4].equals("Client")));
-		CLogMgt.setLevel(Level.FINE);
-		log.info("Generate Model   $Revision: 1.42 $");
-		log.info("----------------------------------");
-		//	first parameter
-		String directory = "C:\\Compiere\\compiere-all\\extend\\src\\compiere\\model\\";
-		if (args.length > 0)
-			directory = args[0];
-		if (directory == null || directory.length() == 0)
-		{
-			System.err.println("No Directory");
-			System.exit(1);
-		}
-		log.info("Directory: " + directory);
-		
-		//	second parameter
-		String packageName = "compiere.model";
-		if (args.length > 1)
-			packageName = args[1]; 
-		if (packageName == null || packageName.length() == 0)
-		{
-			System.err.println("No package");
-			System.exit(1);
-		}
-		log.info("Package:   " + packageName);
-		
-		//	third parameter
-		String entityType = "''U'',''A''";	//	User, Application
-		if (args.length > 2)
-			entityType = args[2]; 
-		if (entityType == null || entityType.length() == 0)
-		{
-			System.err.println("No EntityType");
-			System.exit(1);
-		}
-		StringBuffer sql = new StringBuffer("EntityType IN (")
-			.append(entityType).append(")");
-		log.info(sql.toString());
-		log.info("----------------------------------");
-		
-		String tableLike = null;
-		tableLike = "''%''";	//	All tables
-		// tableLike = "''AD_OrgInfo'', ''AD_Role'', ''C_CashLine'', ''C_Currency'', ''C_Invoice'', ''C_Order'', ''C_Payment'', ''M_InventoryLine'', ''M_PriceList'', ''M_Product'', ''U_POSTerminal''";	//	Only specific tables
-		if (args.length > 3)
-			tableLike = args[3];
-		log.info("Table Like: " + tableLike);
-
-		//	complete sql
-		sql.insert(0, "SELECT AD_Table_ID "
-			+ "FROM AD_Table "
-			+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')"	//	special views
-			+ " OR IsView=''N'')"
-			+ " AND IsActive = ''Y'' AND TableName NOT LIKE ''%_Trl'' AND ");
-		sql.append(" AND TableName LIKE ").append(tableLike);
-		//sql.append(" AND TableName IN (").append(tableLike).append(")"); // only specific tables
-
-		sql.append(" ORDER BY TableName");
-		
-		//
-		int count = 0;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				new ModelInterfaceGenerator(rs.getInt(1), directory, packageName);
-				new ModelClassGenerator(rs.getInt(1), directory, packageName);
-				count++;
-			}
- 		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql.toString(), e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		log.info("Generated = " + count);
-	}
-]]></source>
-<source file="/home/saeed/code/org/adempiere/util/ModelInterfaceGenerator.java" startline="760" endline="837" pcid="48561"><![CDATA[
-	public static void main(String[] args) {
-		Adempiere.startupEnvironment(true);
-		CLogMgt.setLevel(Level.FINE);
-		log.info("Generate Interface   $Revision: 1.0 $");
-		log.info("----------------------------------");
-		// first parameter
-		String directory = "C:\\Adempiere\\adempiere-all\\extend\\src\\compiere\\model\\";
-		if (args.length > 0)
-			directory = args[0];
-		if (directory == null || directory.length() == 0) {
-			System.err.println("No Directory");
-			System.exit(1);
-		}
-		log.info("Directory: " + directory);
-
-		// second parameter
-		String packageName = "compiere.model";
-		if (args.length > 1)
-			packageName = args[1];
-		if (packageName == null || packageName.length() == 0) {
-			System.err.println("No package");
-			System.exit(1);
-		}
-		log.info("Package:   " + packageName);
-
-		// third parameter
-		String entityType = "''U'',''A''"; // User, Application
-		if (args.length > 2)
-			entityType = args[2];
-		if (entityType == null || entityType.length() == 0) {
-			System.err.println("No EntityType");
-			System.exit(1);
-		}
-		StringBuffer sql = new StringBuffer("EntityType IN (").append(
-				entityType).append(")");
-		log.info(sql.toString());
-		log.info("----------------------------------");
-		
-		// Table name like
-		String tableLike = "''%''";	//	All tables
-		//tableLike = "''AD_OrgInfo'', ''AD_Role'', ''C_CashLine'', ''C_Currency'', ''C_Invoice'', ''C_Order'', ''C_Payment'', ''M_InventoryLine'', ''M_PriceList'', ''M_Product'', ''U_POSTerminal''"; // only specific tables
-		if (args.length > 3)
-			tableLike = args[3];
-		log.info("Table Like: " + tableLike);
-		
-		// complete sql
-		sql.insert(0, "SELECT AD_Table_ID " + "FROM AD_Table "
-				+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')" // special views
-				+ " OR IsView=''N'') AND IsActive = ''Y'' AND TableName NOT LIKE ''%_Trl'' AND ");
-		sql.append(" AND TableName LIKE ").append(tableLike);
-		//sql.append(" AND TableName IN (").append( tableLike ).append(")");
-		sql.append(" ORDER BY TableName");
-
-		//
-		int count = 0;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
-			rs = pstmt.executeQuery();
-			while (rs.next()) {
-				new ModelInterfaceGenerator(rs.getInt(1), directory, packageName);
-				count++;
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql.toString());
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		log.info("Generated = " + count);
-
-	}
-]]></source>
-<source file="/home/saeed/code/org/adempiere/util/ModelClassGenerator.java" startline="833" endline="914" pcid="48693"><![CDATA[
-	{
-		Adempiere.startupEnvironment(true);
-		CLogMgt.setLevel(Level.FINE);
-		log.info("Generate Model   $Revision: 1.42 $");
-		log.info("----------------------------------");
-		//	first parameter
-		String directory = "C:\\Adempiere\\adempiere-all\\extend\\src\\compiere\\model\\";
-		if (args.length > 0)
-			directory = args[0];
-		if (directory == null || directory.length() == 0)
-		{
-			System.err.println("No Directory");
-			System.exit(1);
-		}
-		log.info("Directory: " + directory);
-
-		//	second parameter
-		String packageName = "compiere.model";
-		if (args.length > 1)
-			packageName = args[1];
-		if (packageName == null || packageName.length() == 0)
-		{
-			System.err.println("No package");
-			System.exit(1);
-		}
-		log.info("Package:   " + packageName);
-
-		//	third parameter
-		String entityType = "''U'',''A''";	//	User, Application
-		if (args.length > 2)
-			entityType = args[2];
-		if (entityType == null || entityType.length() == 0)
-		{
-			System.err.println("No EntityType");
-			System.exit(1);
-		}
-		StringBuffer sql = new StringBuffer("EntityType IN (")
-			.append(entityType).append(")");
-		log.info(sql.toString());
-		log.info("----------------------------------");
-
-		String tableLike = "''%''";	//	All tables
-		//tableLike = "''AD_OrgInfo'', ''AD_Role'', ''C_CashLine'', ''C_Currency'', ''C_Invoice'', ''C_Order'', ''C_Payment'', ''M_InventoryLine'', ''M_PriceList'', ''M_Product'', ''U_POSTerminal''";
-		if (args.length > 3)
-			tableLike = args[3];
-		log.info("Table Like: " + tableLike);
-
-		//	complete sql
-		sql.insert(0, "SELECT AD_Table_ID "
-			+ "FROM AD_Table "
-			+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')"	//	special views
-			+ " OR IsView=''N'')"
-			+ " AND IsActive = ''Y'' AND TableName NOT LIKE ''%_Trl'' AND ");
-		sql.append(" AND TableName LIKE ").append(tableLike);
-
-		sql.append(" ORDER BY TableName");
-
-		//
-		int count = 0;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				new ModelClassGenerator(rs.getInt(1), directory, packageName);
-				count++;
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql.toString());
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		log.info("Generated = " + count);
-	}
-]]></source>
-<source file="/home/saeed/code/org/adempiere/util/GenerateModelJPA.java" startline="732" endline="808" pcid="48751"><![CDATA[
-	{
-		org.compiere.Adempiere.startupEnvironment(true);
-		CLogMgt.setLevel(Level.FINE);
-	//	CLogMgt.setLevel(Level.ALL);
-		log.info("Generate Model   $Revision: 1.5 $");
-		log.info("----------------------------------");
-		//	first parameter
-		String directory = "/app/adempiere/adempiere_branch_3.1.1/dbPort/src/org/adempiere/model/";
-		if (args.length > 0)
-			directory = args[0];
-		if (directory == null || directory.length() == 0)
-		{
-			System.err.println("No Directory");
-			System.exit(1);
-		}
-		log.info("Directory: " + directory);
-		
-		//	second parameter
-		String packageName = "adempiere.model";
-		if (args.length > 1)
-			packageName = args[1]; 
-		if (packageName == null || packageName.length() == 0)
-		{
-			System.err.println("No package");
-			System.exit(1);
-		}
-		log.info("Package:   " + packageName);
-		
-		//	third parameter
-		String entityType = "''U'',''A'',''D''";	//	User, Application
-		if (args.length > 2)
-			entityType = args[2]; 
-		if (entityType == null || entityType.length() == 0)
-		{
-			System.err.println("No EntityType");
-			System.exit(1);
-		}
-		StringBuffer sql = new StringBuffer("EntityType IN (")
-			.append(entityType).append(")");
-		log.info(sql.toString());
-		log.info("----------------------------------");
-		
-		//	complete sql
-		sql.insert(0, "SELECT AD_Table_ID "
-			+ "FROM AD_Table "
-			+ "WHERE (TableName IN (''RV_WarehousePrice'',''RV_BPartner'')"	//	special views
-			+ " OR IsView=''N'')"
-			+ " AND TableName NOT LIKE ''%_Trl'' AND ");
-		sql.append(" ORDER BY TableName");
-		
-		//
-		int count = 0;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql.toString(), null);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				new GenerateModelJPA(rs.getInt(1), directory, packageName);
-				count++;
-			}
- 		}
-		catch (Exception e)
-		{
-			log.severe("main - " + e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		
-		log.info("Generated = " + count);
-
-	}	//	main
-]]></source>
-</class>
-
-<class id="18" nlines="54" nfragments="2">
-<source file="/home/saeed/code/org/adempiere/util/ModelClassGenerator.java" startline="266" endline="338" pcid="48634"><![CDATA[
-	{
-		StringBuffer sb = new StringBuffer();
-		String sql = "SELECT c.ColumnName, c.IsUpdateable, c.IsMandatory,"		//	1..3
-			+ " c.AD_Reference_ID, c.AD_Reference_Value_ID, DefaultValue, SeqNo, "	//	4..7
-			+ " c.FieldLength, c.ValueMin, c.ValueMax, c.VFormat, c.Callout, "	//	8..12
-			+ " c.Name, c.Description, c.ColumnSQL, c.IsEncrypted, c.IsKey, c.IsIdentifier "  // 13..18
-			+ "FROM AD_Column c "
-			+ "WHERE c.AD_Table_ID=?"
-			+ " AND c.ColumnName NOT IN (''AD_Client_ID'', ''AD_Org_ID'', ''IsActive'', ''Created'', ''CreatedBy'', ''Updated'', ''UpdatedBy'')"
-			+ " AND c.IsActive=''Y''"
-			+ " ORDER BY c.ColumnName";
-		boolean isKeyNamePairCreated = false; // true if the method "getKeyNamePair" is already generated
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, AD_Table_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next())
-			{
-				String columnName = rs.getString(1);
-				boolean isUpdateable = "Y".equals(rs.getString(2));
-				boolean isMandatory = "Y".equals(rs.getString(3));
-				int displayType = rs.getInt(4);
-				int AD_Reference_Value_ID = rs.getInt(5);
-				String defaultValue = rs.getString(6);
-				int seqNo = rs.getInt(7);
-				int fieldLength = rs.getInt(8);
-				String ValueMin = rs.getString(9);
-				String ValueMax = rs.getString(10);
-				String VFormat = rs.getString(11);
-				String Callout = rs.getString(12);
-				String Name = rs.getString(13);
-				String Description = rs.getString(14);
-				String ColumnSQL = rs.getString(15);
-				boolean virtualColumn = ColumnSQL != null && ColumnSQL.length() > 0;
-				boolean IsEncrypted = "Y".equals(rs.getString(16));
-				boolean IsKey = "Y".equals(rs.getString(17));
-				boolean IsIdentifier = "Y".equals(rs.getString(18));
-				//
-				sb.append(
-					createColumnMethods (mandatory,
-							columnName, isUpdateable, isMandatory,
-							displayType, AD_Reference_Value_ID, fieldLength,
-							defaultValue, ValueMin, ValueMax, VFormat,
-							Callout, Name, Description, virtualColumn, IsEncrypted, IsKey,
-							AD_Table_ID)
-				);
-				//
-				if (seqNo == 1 && IsIdentifier) {
-					if (!isKeyNamePairCreated) {
-						sb.append(createKeyNamePair(columnName, displayType));
-						isKeyNamePairCreated = true;
-					}
-					else {
-						throw new RuntimeException("More than one primary identifier found "
-								+ " (AD_Table_ID=" + AD_Table_ID + ", ColumnName=" + columnName + ")");
-					}
-				}
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		return sb;
-	}	//	createColumns
-]]></source>
-<source file="/home/saeed/code/org/adempiere/util/ModelInterfaceGenerator.java" startline="226" endline="292" pcid="48496"><![CDATA[
-	private StringBuffer createColumns(int AD_Table_ID, StringBuffer mandatory) {
-		StringBuffer sb = new StringBuffer();
-		String sql = "SELECT c.ColumnName, c.IsUpdateable, c.IsMandatory," // 1..3
-				+ " c.AD_Reference_ID, c.AD_Reference_Value_ID, DefaultValue, SeqNo, " // 4..7
-				+ " c.FieldLength, c.ValueMin, c.ValueMax, c.VFormat, c.Callout, " // 8..12
-				+ " c.Name, c.Description, c.ColumnSQL, c.IsEncrypted, c.IsKey "   // 13..17
-				+ "FROM AD_Column c "
-				+ "WHERE c.AD_Table_ID=?"
-//				+ " AND c.ColumnName <> ''AD_Client_ID''"
-//				+ " AND c.ColumnName <> ''AD_Org_ID''"
-//				+ " AND c.ColumnName <> ''IsActive''"
-//				+ " AND c.ColumnName NOT LIKE ''Created%''"
-//				+ " AND c.ColumnName NOT LIKE ''Updated%'' "
-				+ " AND c.IsActive=''Y''"
-				+ " ORDER BY c.ColumnName";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try {
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, AD_Table_ID);
-			rs = pstmt.executeQuery();
-			while (rs.next()) {
-				String columnName = rs.getString(1);
-				boolean isUpdateable = "Y".equals(rs.getString(2));
-				boolean isMandatory = "Y".equals(rs.getString(3));
-				int displayType = rs.getInt(4);
-				int AD_Reference_Value_ID = rs.getInt(5);
-				String defaultValue = rs.getString(6);
-				//int seqNo = rs.getInt(7);
-				int fieldLength = rs.getInt(8);
-				String ValueMin = rs.getString(9);
-				String ValueMax = rs.getString(10);
-				String VFormat = rs.getString(11);
-				String Callout = rs.getString(12);
-				String Name = rs.getString(13);
-				String Description = rs.getString(14);
-				String ColumnSQL = rs.getString(15);
-				boolean virtualColumn = ColumnSQL != null
-						&& ColumnSQL.length() > 0;
-				boolean IsEncrypted = "Y".equals(rs.getString(16));
-				boolean IsKey = "Y".equals(rs.getString(17));
-				
-				// Create COLUMNNAME_ property (teo_sarca, [ 1662447 ])
-				sb.append("\n")
-				  .append("    /** Column name ").append(columnName).append(" */\n")
-				  .append("    public static final String COLUMNNAME_").append(columnName)
-				  .append(" = \"").append(columnName).append("\";");
-
-				//
-				sb.append(createColumnMethods(mandatory, columnName,
-						isUpdateable, isMandatory, displayType,
-						AD_Reference_Value_ID, fieldLength, defaultValue,
-						ValueMin, ValueMax, VFormat, Callout, Name,
-						Description, virtualColumn, IsEncrypted, IsKey, AD_Table_ID));
-			}
-		}
-		catch (SQLException e)
-		{
-			throw new DBException(e, sql);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		return sb;
-	}
-]]></source>
-</class>
-
-<class id="19" nlines="52" nfragments="4">
-<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="499" endline="624" pcid="11998"><![CDATA[
-	{
-		if (m_M_Product_ID == 0)
-			return false;
-
-		//	Get Price List
-		/**
-		if (m_M_PriceList_ID == 0)
-		{
-			String sql = "SELECT M_PriceList_ID, IsTaxIncluded "
-				+ "FROM M_PriceList pl"
-				+ " INNER JOIN M_Product p ON (pl.AD_Client_ID=p.AD_Client_ID) "
-				+ "WHERE M_Product_ID=? "
-				+ "ORDER BY IsDefault DESC";
-			PreparedStatement pstmt = null;
-			try
-			{
-				pstmt = DB.prepareStatement(sql);
-				pstmt.setInt(1, m_M_Product_ID);
-				ResultSet rs = pstmt.executeQuery();
-				if (rs.next())
-				{
-					m_M_PriceList_ID = rs.getInt(1);
-					m_isTaxIncluded = "Y".equals(rs.getString(2));
-				}
-				rs.close();
-				pstmt.close();
-				pstmt = null;
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, "calculatePL (PL)", e);
-			}
-			finally
-			{
-				try
-				{
-					if (pstmt != null)
-						pstmt.close ();
-				}
-				catch (Exception e)
-				{}
-				pstmt = null;
-			}
-		}
-		/** **/
-		if (m_M_PriceList_ID == 0)
-		{
-			log.log(Level.SEVERE, "No PriceList");
-			Trace.printStack();
-			return false;
-		}
-
-		//	Get Prices for Price List
-		String sql = "SELECT pp.PriceStd,"	//	1
-			+ " pp.PriceList,"		//	2
-			+ " pp.PriceLimit,"	//	3
-			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,pl.EnforcePriceLimit "	// 4..8
-			+ "FROM M_Product p"
-			+ " INNER JOIN M_ProductPriceVendorBreak pp ON (p.M_Product_ID=pp.M_Product_ID)"
-			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
-			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
-			+ "WHERE pv.IsActive=''Y''"
-			+ " AND pp.IsActive=''Y''"
-			+ " AND p.M_Product_ID=?"				//	#1
-			+ " AND pv.M_PriceList_ID=?"			//	#2
-			+ " AND pp.C_BPartner_ID=?"				//	#3
-			+ " AND ?>=pp.BreakValue"				//  #4
-			+ " ORDER BY pv.ValidFrom DESC, BreakValue DESC";
-		m_calculated = false;
-		if (m_PriceDate == null)
-			m_PriceDate = new Timestamp (System.currentTimeMillis());
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			pstmt.setInt(2, m_M_PriceList_ID);
-			pstmt.setInt(3, m_C_BPartner_ID);
-			pstmt.setBigDecimal(4, m_Qty);
-			rs = pstmt.executeQuery();
-			while (!m_calculated && rs.next())
-			{
-				Timestamp plDate = rs.getTimestamp(5);
-				//	we have the price list
-				//	if order date is after or equal PriceList validFrom
-				if (plDate == null || !m_PriceDate.before(plDate))
-				{
-					//	Prices
-					m_PriceStd = rs.getBigDecimal (1);
-					if (rs.wasNull ())
-						m_PriceStd = Env.ZERO;
-					m_PriceList = rs.getBigDecimal (2);
-					if (rs.wasNull ())
-						m_PriceList = Env.ZERO;
-					m_PriceLimit = rs.getBigDecimal (3);
-					if (rs.wasNull ())
-						m_PriceLimit = Env.ZERO;
-						//
-					m_C_UOM_ID = rs.getInt (4);
-					m_C_Currency_ID = rs.getInt (6);
-					m_M_Product_Category_ID = rs.getInt(7);
-					m_enforcePriceLimit = "Y".equals(rs.getString(8));
-					//
-					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
-						+ "(" + plDate + ")" + " - " + m_PriceStd);
-					m_calculated = true;
-					break;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			m_calculated = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		if (!m_calculated)
-			log.finer("Not found (PL)");
-		return m_calculated;
-	}	//	calculatePL_VB
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="216" endline="337" pcid="11980"><![CDATA[
-	{
-		if (m_M_Product_ID == 0)
-			return false;
-
-		//	Get Price List
-		/**
-		if (m_M_PriceList_ID == 0)
-		{
-			String sql = "SELECT M_PriceList_ID, IsTaxIncluded "
-				+ "FROM M_PriceList pl"
-				+ " INNER JOIN M_Product p ON (pl.AD_Client_ID=p.AD_Client_ID) "
-				+ "WHERE M_Product_ID=? "
-				+ "ORDER BY IsDefault DESC";
-			PreparedStatement pstmt = null;
-			try
-			{
-				pstmt = DB.prepareStatement(sql);
-				pstmt.setInt(1, m_M_Product_ID);
-				ResultSet rs = pstmt.executeQuery();
-				if (rs.next())
-				{
-					m_M_PriceList_ID = rs.getInt(1);
-					m_isTaxIncluded = "Y".equals(rs.getString(2));
-				}
-				rs.close();
-				pstmt.close();
-				pstmt = null;
-			}
-			catch (Exception e)
-			{
-				log.log(Level.SEVERE, "calculatePL (PL)", e);
-			}
-			finally
-			{
-				try
-				{
-					if (pstmt != null)
-						pstmt.close ();
-				}
-				catch (Exception e)
-				{}
-				pstmt = null;
-			}
-		}
-		/** **/
-		if (m_M_PriceList_ID == 0)
-		{
-			log.log(Level.SEVERE, "No PriceList");
-			Trace.printStack();
-			return false;
-		}
-
-		//	Get Prices for Price List
-		String sql = "SELECT bomPriceStd(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceStd,"	//	1
-			+ " bomPriceList(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceList,"		//	2
-			+ " bomPriceLimit(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceLimit,"	//	3
-			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,pl.EnforcePriceLimit "	// 4..8
-			+ "FROM M_Product p"
-			+ " INNER JOIN M_ProductPrice pp ON (p.M_Product_ID=pp.M_Product_ID)"
-			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
-			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
-			+ "WHERE pv.IsActive=''Y''"
-			+ " AND pp.IsActive=''Y''"
-			+ " AND p.M_Product_ID=?"				//	#1
-			+ " AND pv.M_PriceList_ID=?"			//	#2
-			+ " ORDER BY pv.ValidFrom DESC";
-		m_calculated = false;
-		if (m_PriceDate == null)
-			m_PriceDate = new Timestamp (System.currentTimeMillis());
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			pstmt.setInt(2, m_M_PriceList_ID);
-			rs = pstmt.executeQuery();
-			while (!m_calculated && rs.next())
-			{
-				Timestamp plDate = rs.getTimestamp(5);
-				//	we have the price list
-				//	if order date is after or equal PriceList validFrom
-				if (plDate == null || !m_PriceDate.before(plDate))
-				{
-					//	Prices
-					m_PriceStd = rs.getBigDecimal (1);
-					if (rs.wasNull ())
-						m_PriceStd = Env.ZERO;
-					m_PriceList = rs.getBigDecimal (2);
-					if (rs.wasNull ())
-						m_PriceList = Env.ZERO;
-					m_PriceLimit = rs.getBigDecimal (3);
-					if (rs.wasNull ())
-						m_PriceLimit = Env.ZERO;
-						//
-					m_C_UOM_ID = rs.getInt (4);
-					m_C_Currency_ID = rs.getInt (6);
-					m_M_Product_Category_ID = rs.getInt(7);
-					m_enforcePriceLimit = "Y".equals(rs.getString(8));
-					//
-					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
-						+ "(" + plDate + ")" + " - " + m_PriceStd);
-					m_calculated = true;
-					break;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			m_calculated = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		if (!m_calculated)
-			log.finer("Not found (PL)");
-		return m_calculated;
-	}	//	calculatePL
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="631" endline="710" pcid="12005"><![CDATA[
-	{
-		if (m_M_Product_ID == 0 || m_M_PriceList_ID == 0)
-			return false;
-		//
-		String sql = "SELECT pp.PriceStd,"	//	1
-			+ " pp.PriceList,"		//	2
-			+ " pp.PriceLimit,"	//	3
-			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
-			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
-			+ "FROM M_Product p"
-			+ " INNER JOIN M_ProductPriceVendorBreak pp ON (p.M_Product_ID=pp.M_Product_ID)"
-			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
-			+ " INNER JOIN M_Pricelist bpl ON (pv.M_PriceList_ID=bpl.M_PriceList_ID)"
-			+ " INNER JOIN M_Pricelist pl ON (bpl.M_PriceList_ID=pl.BasePriceList_ID) "
-			+ "WHERE pv.IsActive=''Y''"
-			+ " AND pp.IsActive=''Y''"
-			+ " AND p.M_Product_ID=?"				//	#1
-			+ " AND pl.M_PriceList_ID=?"			//	#2
-			+ " AND pp.C_BPartner_ID=?"				//	#3
-			+ " AND ?>=pp.BreakValue"				//  #4
-			+ " ORDER BY pv.ValidFrom DESC, BreakValue DESC";
-		m_calculated = false;
-		if (m_PriceDate == null)
-			m_PriceDate = new Timestamp (System.currentTimeMillis());
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			pstmt.setInt(2, m_M_PriceList_ID);
-			pstmt.setInt(3, m_C_BPartner_ID);
-			pstmt.setBigDecimal(4, m_Qty);
-			rs = pstmt.executeQuery();
-			while (!m_calculated && rs.next())
-			{
-				Timestamp plDate = rs.getTimestamp(5);
-				//	we have the price list
-				//	if order date is after or equal PriceList validFrom
-				if (plDate == null || !m_PriceDate.before(plDate))
-				{
-					//	Prices
-					m_PriceStd = rs.getBigDecimal (1);
-					if (rs.wasNull ())
-						m_PriceStd = Env.ZERO;
-					m_PriceList = rs.getBigDecimal (2);
-					if (rs.wasNull ())
-						m_PriceList = Env.ZERO;
-					m_PriceLimit = rs.getBigDecimal (3);
-					if (rs.wasNull ())
-						m_PriceLimit = Env.ZERO;
-						//
-					m_C_UOM_ID = rs.getInt (4);
-					m_C_Currency_ID = rs.getInt (6);
-					m_M_Product_Category_ID = rs.getInt(7);
-					m_enforcePriceLimit = "Y".equals(rs.getString(8));
-					m_isTaxIncluded = "Y".equals(rs.getString(9));
-					//
-					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
-						+ "(" + plDate + ")" + " - " + m_PriceStd);
-					m_calculated = true;
-					break;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			m_calculated = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		if (!m_calculated)
-			log.finer("Not found (BPL)");
-		return m_calculated;
-	}	//	calculateBPL_VB
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="344" endline="419" pcid="11987"><![CDATA[
-	{
-		if (m_M_Product_ID == 0 || m_M_PriceList_ID == 0)
-			return false;
-		//
-		String sql = "SELECT bomPriceStd(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceStd,"	//	1
-			+ " bomPriceList(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceList,"		//	2
-			+ " bomPriceLimit(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceLimit,"	//	3
-			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
-			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
-			+ "FROM M_Product p"
-			+ " INNER JOIN M_ProductPrice pp ON (p.M_Product_ID=pp.M_Product_ID)"
-			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
-			+ " INNER JOIN M_Pricelist bpl ON (pv.M_PriceList_ID=bpl.M_PriceList_ID)"
-			+ " INNER JOIN M_Pricelist pl ON (bpl.M_PriceList_ID=pl.BasePriceList_ID) "
-			+ "WHERE pv.IsActive=''Y''"
-			+ " AND pp.IsActive=''Y''"
-			+ " AND p.M_Product_ID=?"				//	#1
-			+ " AND pl.M_PriceList_ID=?"			//	#2
-			+ " ORDER BY pv.ValidFrom DESC";
-		m_calculated = false;
-		if (m_PriceDate == null)
-			m_PriceDate = new Timestamp (System.currentTimeMillis());
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			pstmt.setInt(2, m_M_PriceList_ID);
-			rs = pstmt.executeQuery();
-			while (!m_calculated && rs.next())
-			{
-				Timestamp plDate = rs.getTimestamp(5);
-				//	we have the price list
-				//	if order date is after or equal PriceList validFrom
-				if (plDate == null || !m_PriceDate.before(plDate))
-				{
-					//	Prices
-					m_PriceStd = rs.getBigDecimal (1);
-					if (rs.wasNull ())
-						m_PriceStd = Env.ZERO;
-					m_PriceList = rs.getBigDecimal (2);
-					if (rs.wasNull ())
-						m_PriceList = Env.ZERO;
-					m_PriceLimit = rs.getBigDecimal (3);
-					if (rs.wasNull ())
-						m_PriceLimit = Env.ZERO;
-						//
-					m_C_UOM_ID = rs.getInt (4);
-					m_C_Currency_ID = rs.getInt (6);
-					m_M_Product_Category_ID = rs.getInt(7);
-					m_enforcePriceLimit = "Y".equals(rs.getString(8));
-					m_isTaxIncluded = "Y".equals(rs.getString(9));
-					//
-					log.fine("M_PriceList_ID=" + m_M_PriceList_ID 
-						+ "(" + plDate + ")" + " - " + m_PriceStd);
-					m_calculated = true;
-					break;
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			m_calculated = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		if (!m_calculated)
-			log.finer("Not found (BPL)");
-		return m_calculated;
-	}	//	calculateBPL
-]]></source>
-</class>
-
-<class id="20" nlines="52" nfragments="2">
-<source file="/home/saeed/code/org/adempiere/pipo/handler/MenuElementHandler.java" startline="361" endline="429" pcid="49318"><![CDATA[
-			int AD_Menu_ID) throws SAXException {
-		PackOut packOut = (PackOut)ctx.get("PackOutProcess");
-		String sql = null;
-		// int x = 0;
-		sql = "SELECT A.Node_ID, B.AD_Menu_ID, B.Name, B.AD_WINDOW_ID, B.AD_WORKFLOW_ID, B.AD_TASK_ID, "
-				+ "B.AD_PROCESS_ID, B.AD_FORM_ID, B.AD_WORKBENCH_ID "
-				+ "FROM AD_TreeNoDemm A, AD_Menu B "
-				+ "WHERE A.Node_ID = "
-				+ AD_Menu_ID + " AND A.Node_ID = B.AD_Menu_ID";
-
-		AttributesImpl atts = new AttributesImpl();
-		PreparedStatement pstmt = null;
-		pstmt = DB.prepareStatement(sql, getTrxName(ctx));
-
-		try {
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-
-				X_AD_Menu m_Menu = new X_AD_Menu(ctx, rs.getInt("AD_Menu_ID"),
-						null);
-				atts = createMenuBinding(atts, m_Menu);
-				document.startElement("", "", "menu", atts);
-				if (rs.getInt("AD_WINDOW_ID") > 0
-						|| rs.getInt("AD_WORKFLOW_ID") > 0
-						|| rs.getInt("AD_TASK_ID") > 0
-						|| rs.getInt("AD_PROCESS_ID") > 0
-						|| rs.getInt("AD_FORM_ID") > 0
-						|| rs.getInt("AD_WORKBENCH_ID") > 0) {
-					// Call CreateWindow.
-					if (rs.getInt("AD_WINDOW_ID") > 0) {
-						packOut.createWindow(rs.getInt("AD_WINDOW_ID"), document);
-					}
-					// Call CreateProcess.
-					else if (rs.getInt("AD_PROCESS_ID") > 0) {
-						packOut.createProcess(rs.getInt("AD_PROCESS_ID"), document);
-					}
-					// Call CreateTask.
-					else if (rs.getInt("AD_TASK_ID") > 0) {
-						packOut.createTask(rs.getInt("AD_TASK_ID"), document);
-					}
-					// Call CreateForm.
-					else if (rs.getInt("AD_FORM_ID") > 0) {
-						packOut.createForm(rs.getInt("AD_FORM_ID"), document);
-					}
-					// Call CreateWorkflow
-					else if (rs.getInt("AD_Workflow_ID") > 0) {
-						packOut.createWorkflow(rs.getInt("AD_Workflow_ID"), 
-								document);
-					}
-					// Call CreateModule because entry is a summary menu
-				} else {
-					createModule(ctx, document, rs.getInt("Node_ID"));
-				}
-				document.endElement("", "", "menu");
-			}
-			rs.close();
-			pstmt.close();
-			pstmt = null;
-		} catch (Exception e) {
-			log.log(Level.SEVERE, "getWindows", e);
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-			} catch (Exception e) {
-			}
-			pstmt = null;
-		}
-	}
-]]></source>
-<source file="/home/saeed/code/org/adempiere/pipo/handler/MenuElementHandler.java" startline="432" endline="499" pcid="49332"><![CDATA[
-			int menu_id) throws SAXException {
-		PackOut packOut = (PackOut)ctx.get("PackOutProcess");
-		String sql = null;
-		sql = "SELECT A.Node_ID, B.AD_Menu_ID, B.Name, B.AD_WINDOW_ID, B.AD_WORKFLOW_ID, B.AD_TASK_ID, "
-				+ "B.AD_PROCESS_ID, B.AD_FORM_ID, B.AD_WORKBENCH_ID "
-				+ "FROM AD_TreeNoDemm A, AD_Menu B "
-				+ "WHERE A.Parent_ID = "
-				+ menu_id + " AND A.Node_ID = B.AD_Menu_ID";
-
-		AttributesImpl atts = new AttributesImpl();
-		PreparedStatement pstmt = null;
-		pstmt = DB.prepareStatement(sql, getTrxName(ctx));
-		try {
-			ResultSet rs = pstmt.executeQuery();
-			while (rs.next()) {
-				// Menu tag Start.
-				X_AD_Menu m_Menu = new X_AD_Menu(ctx, rs.getInt("AD_Menu_ID"),
-						null);
-				atts = createMenuBinding(atts, m_Menu);
-				document.startElement("", "", "menu", atts);
-				if (rs.getInt("AD_WINDOW_ID") > 0
-						|| rs.getInt("AD_WORKFLOW_ID") > 0
-						|| rs.getInt("AD_TASK_ID") > 0
-						|| rs.getInt("AD_PROCESS_ID") > 0
-						|| rs.getInt("AD_FORM_ID") > 0
-						|| rs.getInt("AD_WORKBENCH_ID") > 0) {
-					// Call CreateWindow.
-					if (rs.getInt("AD_WINDOW_ID") > 0) {
-						packOut.createWindow(rs.getInt("AD_WINDOW_ID"), document);
-					}
-					// Call CreateProcess.
-					else if (rs.getInt("AD_PROCESS_ID") > 0) {
-						packOut.createProcess(rs.getInt("AD_PROCESS_ID"), 
-								document);
-					}
-					// Call CreateTask.
-					else if (rs.getInt("AD_TASK_ID") > 0) {
-						packOut.createTask(rs.getInt("AD_TASK_ID"), document);
-					}
-					// Call CreateForm.
-					else if (rs.getInt("AD_FORM_ID") > 0) {
-						packOut.createForm(rs.getInt("AD_FORM_ID"), document);
-					}
-					// Call CreateWorkflow
-					else if (rs.getInt("AD_Workflow_ID") > 0) {
-						packOut.createWorkflow(rs.getInt("AD_Workflow_ID"), 
-								document);
-					}
-					// Call CreateModule because entry is a summary menu
-				} else {
-					createModule(ctx, document, rs.getInt("Node_ID"));
-				}
-				document.endElement("", "", "menu");
-			}
-			rs.close();
-			pstmt.close();
-			pstmt = null;
-		} catch (Exception e) {
-			log.log(Level.SEVERE, "getWindows", e);
-		} finally {
-			try {
-				if (pstmt != null)
-					pstmt.close();
-			} catch (Exception e) {
-			}
-			pstmt = null;
-		}
-	}
-]]></source>
-</class>
-
-<class id="21" nlines="52" nfragments="2">
-<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="318" endline="396" pcid="46927"><![CDATA[
-		{
-			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-			BigDecimal serviceAmt = Env.ZERO;
-			
-			//  Header Charge           CR
-			BigDecimal amt = getAmount(Doc.AMTTYPE_Charge);
-			if (amt != null && amt.signum() != 0)
-				fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
-					getC_Currency_ID(), null, amt);
-			//  TaxDue                  CR
-			for (int i = 0; i < m_taxes.length; i++)
-			{
-				amt = m_taxes[i].getAmount();
-				if (amt != null && amt.signum() != 0)
-				{
-					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
-						getC_Currency_ID(), null, amt);
-					if (tl != null)
-						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-				}
-			}
-			//  Revenue                 CR
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				amt = p_lines[i].getAmtSource();
-				BigDecimal dAmt = null;
-				if (as.isTradeDiscountPosted())
-				{
-					BigDecimal discount = p_lines[i].getDiscount();
-					if (discount != null && discount.signum() != 0)
-					{
-						amt = amt.add(discount);
-						dAmt = discount;
-						fact.createLine (p_lines[i],
-								p_lines[i].getAccount(ProductCost.ACCTTYPE_P_TDiscountGrant, as),
-								getC_Currency_ID(), dAmt, null);
-					}
-				}
-				fact.createLine (p_lines[i],
-					p_lines[i].getAccount(ProductCost.ACCTTYPE_P_Revenue, as),
-					getC_Currency_ID(), null, amt);
-				if (!p_lines[i].isItem())
-				{
-					grossAmt = grossAmt.subtract(amt);
-					serviceAmt = serviceAmt.add(amt);
-				}
-			}
-			//  Set Locations
-			FactLine[] fLines = fact.getLines();
-			for (int i = 0; i < fLines.length; i++)
-			{
-				if (fLines[i] != null)
-				{
-					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
-					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				}
-			}
-			
-			//  Receivables     DR
-			int receivables_ID = getValidCombination_ID(Doc.ACCTTYPE_C_Receivable, as);
-			int receivablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable_Services, as);
-			if (m_allLinesItem || !as.isPostServices() 
-				|| receivables_ID == receivablesServices_ID)
-			{
-				grossAmt = getAmount(Doc.AMTTYPE_Gross);
-				serviceAmt = Env.ZERO;
-			}
-			else if (m_allLinesService)
-			{
-				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
-				grossAmt = Env.ZERO;
-			}
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
-					getC_Currency_ID(), grossAmt, null);
-			if (serviceAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), receivablesServices_ID),
-					getC_Currency_ID(), serviceAmt, null);
-		}
-]]></source>
-<source file="/home/saeed/code/org/compiere/acct/Doc_Invoice.java" startline="399" endline="476" pcid="46938"><![CDATA[
-		{
-			BigDecimal grossAmt = getAmount(Doc.AMTTYPE_Gross);
-			BigDecimal serviceAmt = Env.ZERO;
-
-			//  Header Charge   DR
-			BigDecimal amt = getAmount(Doc.AMTTYPE_Charge);
-			if (amt != null && amt.signum() != 0)
-				fact.createLine(null, getAccount(Doc.ACCTTYPE_Charge, as),
-					getC_Currency_ID(), amt, null);
-			//  TaxDue          DR
-			for (int i = 0; i < m_taxes.length; i++)
-			{
-				amt = m_taxes[i].getAmount();
-				if (amt != null && amt.signum() != 0)
-				{
-					FactLine tl = fact.createLine(null, m_taxes[i].getAccount(DocTax.ACCTTYPE_TaxDue, as),
-						getC_Currency_ID(), amt, null);
-					if (tl != null)
-						tl.setC_Tax_ID(m_taxes[i].getC_Tax_ID());
-				}
-			}
-			//  Revenue         CR
-			for (int i = 0; i < p_lines.length; i++)
-			{
-				amt = p_lines[i].getAmtSource();
-				BigDecimal dAmt = null;
-				if (as.isTradeDiscountPosted())
-				{
-					BigDecimal discount = p_lines[i].getDiscount();
-					if (discount != null && discount.signum() != 0)
-					{
-						amt = amt.add(discount);
-						dAmt = discount;
-						fact.createLine (p_lines[i],
-								p_lines[i].getAccount (ProductCost.ACCTTYPE_P_TDiscountGrant, as),
-								getC_Currency_ID(), null, dAmt);
-					}
-				}
-				fact.createLine (p_lines[i],
-					p_lines[i].getAccount (ProductCost.ACCTTYPE_P_Revenue, as),
-					getC_Currency_ID(), amt, null);
-				if (!p_lines[i].isItem())
-				{
-					grossAmt = grossAmt.subtract(amt);
-					serviceAmt = serviceAmt.add(amt);
-				}
-			}
-			//  Set Locations
-			FactLine[] fLines = fact.getLines();
-			for (int i = 0; i < fLines.length; i++)
-			{
-				if (fLines[i] != null)
-				{
-					fLines[i].setLocationFromOrg(fLines[i].getAD_Org_ID(), true);      //  from Loc
-					fLines[i].setLocationFromBPartner(getC_BPartner_Location_ID(), false);  //  to Loc
-				}
-			}
-			//  Receivables             CR
-			int receivables_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable, as);
-			int receivablesServices_ID = getValidCombination_ID (Doc.ACCTTYPE_C_Receivable_Services, as);
-			if (m_allLinesItem || !as.isPostServices() 
-				|| receivables_ID == receivablesServices_ID)
-			{
-				grossAmt = getAmount(Doc.AMTTYPE_Gross);
-				serviceAmt = Env.ZERO;
-			}
-			else if (m_allLinesService)
-			{
-				serviceAmt = getAmount(Doc.AMTTYPE_Gross);
-				grossAmt = Env.ZERO;
-			}
-			if (grossAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), receivables_ID),
-					getC_Currency_ID(), null, grossAmt);
-			if (serviceAmt.signum() != 0)
-				fact.createLine(null, MAccount.get(getCtx(), receivablesServices_ID),
-					getC_Currency_ID(), null, serviceAmt);
-		}
-]]></source>
-</class>
-
-<class id="22" nlines="52" nfragments="2">
-<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="324" endline="403" pcid="47798"><![CDATA[
-	{		
-		int v_adj=0;
-		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
-		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
-			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
-			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
-			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
-			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
-		  
-		  
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  try {				
-				ResultSet rs = pstmt.executeQuery();
-				while (rs.next()){
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
-					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
-					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);
-					calendar.setTime(rs.getDate("DATEACCT"));
-					int DateAcctYear = calendar.get(Calendar.YEAR);
-					int DateAcctMonth = calendar.get(Calendar.MONTH);
-					if(p_Flag <2){
-						
-						//ADJUST PERIOD FOR MID-QUARTER CONVENTION
-						if(DateAcctYear == AssetServiceDateYear){					 
-					          if(AssetServiceDateMonth < 4 )
-					            return .875;
-					          else if (AssetServiceDateMonth  < 7 )
-					          	return  .625;
-					          else if (AssetServiceDateMonth < 10 )
-					          	return  .375;
-					          else if (AssetServiceDateMonth  > 9 )
-					          	return  .125;
-						}
-					   else if(DateAcctYear*12 + DateAcctMonth >= ((AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS"))*12 + AssetServiceDateMonth)){					   
-					          if(AssetServiceDateMonth < 4 )
-					        	return  .125;
-					          else if (AssetServiceDateMonth  < 7 )
-					      	    return  .375;
-					          else if (AssetServiceDateMonth < 10 )
-					      	    return  .625;
-					          else if (AssetServiceDateMonth  > 9 )
-					      	    return  .875;
-					   }
-					   else
-					     	return 1;						
-					}					
-										
-					if(p_Flag == 2){
-						if(AssetServiceDateMonth< 4 )
-				            return .875;
-				          else if (AssetServiceDateMonth  < 7 )
-				          	return  .625;
-				          else if (AssetServiceDateMonth  < 10 )
-				          	return  .375;
-				          else if (AssetServiceDateMonth > 9 )
-				        	return  .125;
-					}					
-			}				
-		  }
-		  catch (Exception e)
-		  {
-			  System.out.println("MQCON"+e);
-		  }
-		  finally
-		  {
-			  try
-			  {
-				  if (pstmt != null)
-					  pstmt.close ();
-			  }
-			  catch (Exception e)
-				{}
-				pstmt = null;
-		  }		  
-		  return v_adj;		
-	}	  
-]]></source>
-<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="185" endline="261" pcid="47776"><![CDATA[
-	{		
-		int v_adj=0;
-		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
-		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
-			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
-			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
-			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
-			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
-		  
-		  
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  try {				
-				ResultSet rs = pstmt.executeQuery();
-				while (rs.next()){
-					
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
-					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
-					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);
-					int AssetServiceDateDay = calendar.get(Calendar.DAY_OF_YEAR);
-					calendar.setTime(rs.getDate("DATEACCT"));
-					int DateAcctYear = calendar.get(Calendar.YEAR);
-					int DateAcctMonth = calendar.get(Calendar.MONTH);
-					
-					if(p_Flag ==0){
-						
-						 //ADJUST PERIOD FOR DAY CONVENTION
-							if(DateAcctYear == AssetServiceDateYear){									
-						           return ((365-(double)AssetServiceDateDay)/365);						
-							}
-							else if ((DateAcctYear*12 + DateAcctMonth) == (AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS"))*12 + AssetServiceDateMonth) 
-						    	   return ((double)AssetServiceDateDay/365);
-							else if ((DateAcctYear*12 + DateAcctMonth) > (AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS"))*12 + AssetServiceDateMonth)
-						    	   return ((double)AssetServiceDateDay/365);
-						    else        
-						           return 1;
-					}
-					
-					if(p_Flag ==1){						
-						 //ADJUST PERIOD FOR DAY CONVENTION
-							if(DateAcctYear == AssetServiceDateYear){								
-					           return ((365-(double)AssetServiceDateDay)/365);
-							}
-							if(DateAcctYear == (AssetServiceDateYear+rs.getInt("A_ASSET_LIFE_YEARS")+1))
-							   return ((double)AssetServiceDateDay/365);
-							else        
-						       return 1;					
-					}
-					
-					if(p_Flag == 2){
-					 //ADJUST PERIOD FOR DAY CONVENTION
-						return ((365-(double)AssetServiceDateDay)/365);
-					}					
-			}				
-		  }
-		  catch (Exception e)
-		  {
-			  System.out.println("DYCON"+e);
-		  }
-		  finally
-		  {
-			  try
-			  {
-				  if (pstmt != null)
-					  pstmt.close ();
-			  }
-			  catch (Exception e)
-				{}
-				pstmt = null;
-		  }
-		  
-		  return v_adj;
-		
-	}	   
-]]></source>
-</class>
-
-<class id="23" nlines="49" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/CalloutPayment.java" startline="55" endline="125" pcid="30578"><![CDATA[
-	{
-		Integer C_Invoice_ID = (Integer)value;
-		if (isCalloutActive () // assuming it is resetting value
-			|| C_Invoice_ID == null || C_Invoice_ID.intValue () == 0)
-			return "";
-		mTab.setValue ("C_Order_ID", null);
-		mTab.setValue ("C_Charge_ID", null);
-		mTab.setValue ("IsPrepayment", Boolean.FALSE);
-		//
-		mTab.setValue ("DiscountAmt", Env.ZERO);
-		mTab.setValue ("WriteOffAmt", Env.ZERO);
-		mTab.setValue ("IsOverUnderPayment", Boolean.FALSE);
-		mTab.setValue ("OverUnderAmt", Env.ZERO);
-		int C_InvoicePaySchedule_ID = 0;
-		if (Env.getContextAsInt (ctx, WindowNo, Env.TAB_INFO, "C_Invoice_ID") == C_Invoice_ID.intValue ()
-			&& Env.getContextAsInt (ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID") != 0)
-		{
-			C_InvoicePaySchedule_ID = Env.getContextAsInt (ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID");
-		}
-		// Payment Date
-		Timestamp ts = (Timestamp)mTab.getValue ("DateTrx");
-		if (ts == null)
-			ts = new Timestamp (System.currentTimeMillis ());
-		//
-		String sql = "SELECT C_BPartner_ID,C_Currency_ID," // 1..2
-			+ " invoiceOpen(C_Invoice_ID, ?)," // 3 #1
-			+ " invoiceDiscount(C_Invoice_ID,?,?), IsSOTrx " // 4..5 #2/3
-			+ "FROM C_Invoice WHERE C_Invoice_ID=?"; // #4
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement (sql, null);
-			pstmt.setInt (1, C_InvoicePaySchedule_ID);
-			pstmt.setTimestamp (2, ts);
-			pstmt.setInt (3, C_InvoicePaySchedule_ID);
-			pstmt.setInt (4, C_Invoice_ID.intValue ());
-			rs = pstmt.executeQuery ();
-			if (rs.next ())
-			{
-				mTab.setValue ("C_BPartner_ID", new Integer (rs.getInt (1)));
-				int C_Currency_ID = rs.getInt (2); // Set Invoice Currency
-				mTab.setValue ("C_Currency_ID", new Integer (C_Currency_ID));
-				//
-				BigDecimal InvoiceOpen = rs.getBigDecimal (3); // Set Invoice
-				// OPen Amount
-				if (InvoiceOpen == null)
-					InvoiceOpen = Env.ZERO;
-				BigDecimal DiscountAmt = rs.getBigDecimal (4); // Set Discount
-				// Amt
-				if (DiscountAmt == null)
-					DiscountAmt = Env.ZERO;
-				mTab.setValue ("PayAmt", InvoiceOpen.subtract (DiscountAmt));
-				mTab.setValue ("DiscountAmt", DiscountAmt);
-				// reset as dependent fields get reset
-				Env.setContext (ctx, WindowNo, "C_Invoice_ID", C_Invoice_ID
-					.toString ());
-				mTab.setValue ("C_Invoice_ID", C_Invoice_ID);
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log (Level.SEVERE, sql, e);
-			return e.getLocalizedMessage ();
-		}
-		finally
-		{
-			DB.close (rs, pstmt);
-		}
-		return docType (ctx, WindowNo, mTab, mField, value);
-	} // invoice
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/CalloutPaymentAllocate.java" startline="54" endline="127" pcid="34716"><![CDATA[
-	{
-		Integer C_Invoice_ID = (Integer)value;
-		if (isCalloutActive()		//	assuming it is resetting value
-			|| C_Invoice_ID == null || C_Invoice_ID.intValue() == 0)
-			return "";
-
-		//	Check Payment
-		int C_Payment_ID = Env.getContextAsInt(ctx, WindowNo, "C_Payment_ID");
-		MPayment payment = new MPayment (ctx, C_Payment_ID, null);
-		if (payment.getC_Charge_ID() != 0 || payment.getC_Invoice_ID() != 0 
-			|| payment.getC_Order_ID() != 0)
-			return Msg.getMsg(ctx, "PaymentIsAllocated");
-		
-		//
-		mTab.setValue("DiscountAmt", Env.ZERO);
-		mTab.setValue("WriteOffAmt", Env.ZERO);
-		mTab.setValue("OverUnderAmt", Env.ZERO);
-
-		int C_InvoicePaySchedule_ID = 0;
-		if (Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "C_Invoice_ID") == C_Invoice_ID.intValue()
-			&& Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID") != 0)
-		{
-			C_InvoicePaySchedule_ID = Env.getContextAsInt(ctx, WindowNo, Env.TAB_INFO, "C_InvoicePaySchedule_ID");
-		}
-
-		//  Payment Date
-		Timestamp ts = Env.getContextAsDate(ctx, WindowNo, "DateTrx");
-		//
-		String sql = "SELECT C_BPartner_ID,C_Currency_ID,"		//	1..2
-			+ " invoiceOpen(C_Invoice_ID, ?),"					//	3		#1
-			+ " invoiceDiscount(C_Invoice_ID,?,?), IsSOTrx "	//	4..5	#2/3
-			+ "FROM C_Invoice WHERE C_Invoice_ID=?";			//			#4
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, C_InvoicePaySchedule_ID);
-			pstmt.setTimestamp(2, ts);
-			pstmt.setInt(3, C_InvoicePaySchedule_ID);
-			pstmt.setInt(4, C_Invoice_ID.intValue());
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-			//	mTab.setValue("C_BPartner_ID", new Integer(rs.getInt(1)));
-			//	int C_Currency_ID = rs.getInt(2);					//	Set Invoice Currency
-			//	mTab.setValue("C_Currency_ID", new Integer(C_Currency_ID));
-				//
-				BigDecimal InvoiceOpen = rs.getBigDecimal(3);		//	Set Invoice OPen Amount
-				if (InvoiceOpen == null)
-					InvoiceOpen = Env.ZERO;
-				BigDecimal DiscountAmt = rs.getBigDecimal(4);		//	Set Discount Amt
-				if (DiscountAmt == null)
-					DiscountAmt = Env.ZERO;
-				mTab.setValue("InvoiceAmt", InvoiceOpen);
-				mTab.setValue("Amount", InvoiceOpen.subtract(DiscountAmt));
-				mTab.setValue("DiscountAmt", DiscountAmt);
-				//  reset as dependent fields get reset
-				Env.setContext(ctx, WindowNo, "C_Invoice_ID", C_Invoice_ID.toString());
-				mTab.setValue("C_Invoice_ID", C_Invoice_ID);
-			}
-		}
-		catch (SQLException e)
-		{
-			log.log(Level.SEVERE, sql, e);
-			return e.getLocalizedMessage();
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-		return "";
-	}	//	invoice
-]]></source>
-</class>
-
-<class id="24" nlines="48" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MInventory.java" startline="586" endline="658" pcid="11604"><![CDATA[
-		{
-			MProduct product = MProduct.get(getCtx(), line.getM_Product_ID());
-			if (qtyDiff.signum() > 0)	//	Incoming Trx
-			{
-				MAttributeSetInstance asi = null;
-				//auto balance negative on hand
-				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
-						null, MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false, line.getM_Locator_ID(), get_TrxName());
-				for (MStorage storage : storages)
-				{
-					if (storage.getQtyOnHand().signum() < 0)
-					{
-						asi = new MAttributeSetInstance(getCtx(), storage.getM_AttributeSetInstance_ID(), get_TrxName());
-						break;
-					}
-				}
-				if (asi == null)
-				{
-					asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
-				}
-				line.setM_AttributeSetInstance_ID(asi.getM_AttributeSetInstance_ID());
-				needSave = true;
-			}
-			else	//	Outgoing Trx
-			{
-				String MMPolicy = product.getMMPolicy();
-				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
-						null, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, line.getM_Locator_ID(), get_TrxName());
-
-				BigDecimal qtyToDeliver = qtyDiff.negate();
-
-				for (MStorage storage: storages)
-				{					
-					if (storage.getQtyOnHand().compareTo(qtyToDeliver) >= 0)
-					{
-						MInventoryLineMA ma = new MInventoryLineMA (line, 
-								storage.getM_AttributeSetInstance_ID(),
-								qtyToDeliver);
-						ma.saveEx();		
-						qtyToDeliver = Env.ZERO;
-						log.fine( ma + ", QtyToDeliver=" + qtyToDeliver);		
-					}
-					else
-					{	
-						MInventoryLineMA ma = new MInventoryLineMA (line, 
-								storage.getM_AttributeSetInstance_ID(),
-								storage.getQtyOnHand());
-						ma.saveEx();	
-						qtyToDeliver = qtyToDeliver.subtract(storage.getQtyOnHand());
-						log.fine( ma + ", QtyToDeliver=" + qtyToDeliver);		
-					}
-					if (qtyToDeliver.signum() == 0)
-						break;
-				}
-
-				//	No AttributeSetInstance found for remainder
-				if (qtyToDeliver.signum() != 0)
-				{
-					//deliver using new asi
-					MAttributeSetInstance asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
-					int M_AttributeSetInstance_ID = asi.getM_AttributeSetInstance_ID();
-					MInventoryLineMA ma = new MInventoryLineMA (line, M_AttributeSetInstance_ID , qtyToDeliver);
-
-					ma.saveEx();
-					log.fine("##: " + ma);
-				}
-			}	//	outgoing Trx
-
-			if (needSave)
-			{
-				line.saveEx();
-			}
-		}	//	for all lines
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MInOut.java" startline="1729" endline="1797" pcid="38777"><![CDATA[
-		{
-			//Validate Transaction
-			if (getMovementType().compareTo(MInOut.MOVEMENTTYPE_CustomerReturns) == 0 
-					|| getMovementType().compareTo(MInOut.MOVEMENTTYPE_VendorReceipts) == 0 )
-			{
-				MAttributeSetInstance asi = null;
-				//auto balance negative on hand
-				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), 0,
-						null, MClient.MMPOLICY_FiFo.equals(product.getMMPolicy()), false, line.getM_Locator_ID(), get_TrxName());
-				for (MStorage storage : storages)
-				{
-					if (storage.getQtyOnHand().signum() < 0)
-					{
-						asi = new MAttributeSetInstance(getCtx(), storage.getM_AttributeSetInstance_ID(), get_TrxName());
-						break;
-					}
-				}
-				//always create asi so fifo/lifo work.
-				if (asi == null)
-				{
-					asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
-				}
-				line.setM_AttributeSetInstance_ID(asi.getM_AttributeSetInstance_ID());
-				log.config("New ASI=" + line);
-				needSave = true;
-			}
-			// Create consume the Attribute Set Instance using policy FIFO/LIFO
-			else if(getMovementType().compareTo(MInOut.MOVEMENTTYPE_VendorReturns) == 0 || getMovementType().compareTo(MInOut.MOVEMENTTYPE_CustomerShipment) == 0)
-			{
-				String MMPolicy = product.getMMPolicy();
-				Timestamp minGuaranteeDate = getMovementDate();
-				MStorage[] storages = MStorage.getWarehouse(getCtx(), getM_Warehouse_ID(), line.getM_Product_ID(), line.getM_AttributeSetInstance_ID(),
-						minGuaranteeDate, MClient.MMPOLICY_FiFo.equals(MMPolicy), true, line.getM_Locator_ID(), get_TrxName());
-				BigDecimal qtyToDeliver = line.getMovementQty();
-				for (MStorage storage: storages)
-				{
-					if (storage.getQtyOnHand().compareTo(qtyToDeliver) >= 0)
-					{
-						MInOutLineMA ma = new MInOutLineMA (line,
-								storage.getM_AttributeSetInstance_ID(),
-								qtyToDeliver);
-						ma.saveEx();
-						qtyToDeliver = Env.ZERO;
-					}
-					else
-					{
-						MInOutLineMA ma = new MInOutLineMA (line,
-								storage.getM_AttributeSetInstance_ID(),
-								storage.getQtyOnHand());
-						ma.saveEx();
-						qtyToDeliver = qtyToDeliver.subtract(storage.getQtyOnHand());
-						log.fine( ma + ", QtyToDeliver=" + qtyToDeliver);
-					}
-
-					if (qtyToDeliver.signum() == 0)
-						break;
-				}
-
-				if (qtyToDeliver.signum() != 0)
-				{
-					//deliver using new asi
-					MAttributeSetInstance asi = MAttributeSetInstance.create(getCtx(), product, get_TrxName());
-					int M_AttributeSetInstance_ID = asi.getM_AttributeSetInstance_ID();
-					MInOutLineMA ma = new MInOutLineMA (line, M_AttributeSetInstance_ID, qtyToDeliver);
-					ma.saveEx();
-					log.fine("##: " + ma);
-				}
-			}	//	outgoing Trx
-		}	//	attributeSetInstance
-]]></source>
-</class>
-
-<class id="25" nlines="45" nfragments="2">
-<source file="/home/saeed/code/org/compiere/report/TrialBalance.java" startline="221" endline="277" pcid="9762"><![CDATA[
-	{
-		//	Date defined
-		if (p_DateAcct_From != null)
-		{
-			if (p_DateAcct_To == null)
-				p_DateAcct_To = new Timestamp (System.currentTimeMillis());
-			return;
-		}
-		//	Get Date from Period
-		if (p_C_Period_ID == 0)
-		{
-		   GregorianCalendar cal = new GregorianCalendar(Language.getLoginLanguage().getLocale());
-		   cal.setTimeInMillis(System.currentTimeMillis());
-		   cal.set(Calendar.HOUR_OF_DAY, 0);
-		   cal.set(Calendar.MINUTE, 0);
-		   cal.set(Calendar.SECOND, 0);
-		   cal.set(Calendar.MILLISECOND, 0);
-		   cal.set(Calendar.DAY_OF_MONTH, 1);		//	set to first of month
-		   p_DateAcct_From = new Timestamp (cal.getTimeInMillis());
-		   cal.add(Calendar.MONTH, 1);
-		   cal.add(Calendar.DAY_OF_YEAR, -1);		//	last of month
-		   p_DateAcct_To = new Timestamp (cal.getTimeInMillis());
-		   return;
-		}
-
-		String sql = "SELECT StartDate, EndDate FROM C_Period WHERE C_Period_ID=?";
-		PreparedStatement pstmt = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, p_C_Period_ID);
-			ResultSet rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				p_DateAcct_From = rs.getTimestamp(1);
-				p_DateAcct_To = rs.getTimestamp(2);
-			}
-			rs.close();
-			pstmt.close();
-			pstmt = null;
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			try
-			{
-				if (pstmt != null)
-					pstmt.close ();
-			}
-			catch (Exception e)
-			{}
-			pstmt = null;
-		}
-	}	//	setDateAcct
-]]></source>
-<source file="/home/saeed/code/org/compiere/report/FinStatement.java" startline="215" endline="263" pcid="9523"><![CDATA[
-	{
-		//	Date defined
-		if (p_DateAcct_From != null)
-		{
-			if (p_DateAcct_To == null)
-				p_DateAcct_To = new Timestamp (System.currentTimeMillis());
-			return;
-		}
-		//	Get Date from Period
-		if (p_C_Period_ID == 0)
-		{
-		   GregorianCalendar cal = new GregorianCalendar(Language.getLoginLanguage().getLocale());
-		   cal.setTimeInMillis(System.currentTimeMillis());
-		   cal.set(Calendar.HOUR_OF_DAY, 0);
-		   cal.set(Calendar.MINUTE, 0);
-		   cal.set(Calendar.SECOND, 0);
-		   cal.set(Calendar.MILLISECOND, 0);
-		   cal.set(Calendar.DAY_OF_MONTH, 1);		//	set to first of month
-		   p_DateAcct_From = new Timestamp (cal.getTimeInMillis());
-		   cal.add(Calendar.MONTH, 1);
-		   cal.add(Calendar.DAY_OF_YEAR, -1);		//	last of month
-		   p_DateAcct_To = new Timestamp (cal.getTimeInMillis());
-		   return;
-		}
-
-		String sql = "SELECT StartDate, EndDate FROM C_Period WHERE C_Period_ID=?";
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, p_C_Period_ID);
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				p_DateAcct_From = rs.getTimestamp(1);
-				p_DateAcct_To = rs.getTimestamp(2);
-			}
- 		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e);
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null; pstmt = null;
-		}
-	}	//	setDateAcct
-]]></source>
-</class>
-
-<class id="26" nlines="45" nfragments="2">
-<source file="/home/saeed/code/org/adempiere/model/POWrapper.java" startline="80" endline="138" pcid="51159"><![CDATA[
-	{
-		String methodName = method.getName();
-		if (methodName.startsWith("set") && args.length == 1)
-		{
-			String propertyName = methodName.substring(3);
-			po.set_ValueOfColumn(propertyName, args[0]);
-			return null;
-		}
-		else if (methodName.startsWith("get") && (args == null || args.length == 0))
-		{
-			String propertyName = methodName.substring(3);
-			Object value = null;
-			final int idx = po.get_ColumnIndex(propertyName);
-			if (idx >= 0)
-				value = po.get_Value(propertyName);
-			if (value != null)
-			{
-				return value;
-			}
-			//
-			if (method.getReturnType() == int.class)
-			{
-				value = Integer.valueOf(0);
-			}
-			else if (method.getReturnType() == BigDecimal.class)
-			{
-				value = BigDecimal.ZERO;
-			}
-			else if (isModelInterface(method.getReturnType()))
-			{
-				value = getReferencedObject(propertyName, method);
-			}
-			else if (PO.class.isAssignableFrom(method.getReturnType()))
-			{
-				throw new IllegalArgumentException("Method not supported - "+methodName);
-			}
-			return value;
-		}
-		else if (methodName.startsWith("is") && (args == null || args.length == 0))
-		{
-			String propertyName = methodName.substring(2);
-			int ii = po.get_ColumnIndex(propertyName);
-			if (ii >= 0)
-			{
-				return po.get_Value(ii);
-			}
-			ii = po.get_ColumnIndex("Is"+propertyName);
-			if (ii >= 0)
-			{
-				return po.get_Value(ii);
-			}
-			//
-			throw new IllegalArgumentException("Method not supported - "+methodName);
-		}
-		else
-		{
-			return method.invoke(po, args);
-		}
-	}
-]]></source>
-<source file="/home/saeed/code/org/adempiere/model/GridTabWrapper.java" startline="63" endline="122" pcid="51233"><![CDATA[
-	{
-		String methodName = method.getName();
-		if (methodName.startsWith("set") && args.length == 1)
-		{
-			String propertyName = methodName.substring(3);
-			m_gridTab.setValue(propertyName, args[0]);
-			// TODO: handle GridTab.setValue returning error  
-			return null;
-		}
-		else if (methodName.startsWith("get") && (args == null || args.length == 0))
-		{
-			String propertyName = methodName.substring(3);
-			Object value = m_gridTab.getValue(propertyName);
-			if (value != null)
-			{
-				return value;
-			}
-			//
-			if (method.getReturnType() == int.class)
-			{
-				value = Integer.valueOf(0);
-			}
-			else if (method.getReturnType() == BigDecimal.class)
-			{
-				value = BigDecimal.ZERO;
-			}
-			else if (isModelInterface(method.getReturnType()))
-			{
-				value = getReferencedObject(propertyName, method);
-			}
-			else if (PO.class.isAssignableFrom(method.getReturnType()))
-			{
-				throw new IllegalArgumentException("Method not supported - "+methodName);
-			}
-			return value;
-		}
-		else if (methodName.startsWith("is") && (args == null || args.length == 0))
-		{
-			String propertyName = methodName.substring(2);
-			GridField field = m_gridTab.getField(propertyName);
-			if (field != null)
-			{
-				final Object value = field.getValue();
-				return value instanceof Boolean ? value : "Y".equals(value);
-			}
-			//
-			field = m_gridTab.getField("Is"+propertyName);
-			if (field != null)
-			{
-				final Object value = field.getValue();
-				return value instanceof Boolean ? value : "Y".equals(value);
-			}
-			//
-			throw new IllegalArgumentException("Method not supported - "+methodName);
-		}
-		else
-		{
-			return method.invoke(m_gridTab, args);
-		}
-	}
-]]></source>
-</class>
-
-<class id="27" nlines="43" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MOrder.java" startline="1303" endline="1382" pcid="20479"><![CDATA[
-		{
-			retValue = true;
-			renumberLines (1000);		//	max 999 bom items	
-
-			//	Order Lines with non-stocked BOMs
-			MOrderLine[] lines = getLines (where, MOrderLine.COLUMNNAME_Line);
-			for (int i = 0; i < lines.length; i++)
-			{
-				MOrderLine line = lines[i];
-				MProduct product = MProduct.get (getCtx(), line.getM_Product_ID());
-				log.fine(product.getName());
-				//	New Lines
-				int lineNo = line.getLine ();
-				//find default BOM with valid dates and to this product
-				MPPProductBOM bom = MPPProductBOM.get(product, getAD_Org_ID(),getDatePromised(), get_TrxName());
-				if(bom != null)
-				{	
-					MPPProductBOMLine[] bomlines = bom.getLines(getDatePromised());
-					for (int j = 0; j < bomlines.length; j++)
-					{
-						MPPProductBOMLine bomline = bomlines[j];
-						MOrderLine newLine = new MOrderLine (this);
-						newLine.setLine (++lineNo);
-						newLine.setM_Product_ID (bomline.getM_Product_ID ());
-						newLine.setC_UOM_ID (bomline.getC_UOM_ID ());
-						newLine.setQty (line.getQtyOrdered ().multiply (
-							bomline.getQtyBOM()));
-						if (bomline.getDescription () != null)
-							newLine.setDescription (bomline.getDescription ());
-						//
-						newLine.setPrice ();
-						newLine.save (get_TrxName());
-					}
-				}	
-				
-				/*MProductBOM[] boms = MProductBOM.getBOMLines (product);
-				for (int j = 0; j < boms.length; j++)
-				{
-					//MProductBOM bom = boms[j];
-					MPPProductBOMLine bom = boms[j];
-					MOrderLine newLine = new MOrderLine (this);
-					newLine.setLine (++lineNo);
-					//newLine.setM_Product_ID (bom.getProduct ()
-					//	.getM_Product_ID ());
-					newLine.setM_Product_ID (bom.getM_Product_ID ());
-					//newLine.setC_UOM_ID (bom.getProduct ().getC_UOM_ID ());
-					newLine.setC_UOM_ID (bom.getC_UOM_ID ());
-					//newLine.setQty (line.getQtyOrdered ().multiply (
-					//		bom.getBOMQty ()));
-					newLine.setQty (line.getQtyOrdered ().multiply (
-						bom.getQtyBOM()));
-					if (bom.getDescription () != null)
-						newLine.setDescription (bom.getDescription ());
-					//
-					newLine.setPrice ();
-					newLine.save (get_TrxName());
-				}*/
-				
-				//	Convert into Comment Line
-				line.setM_Product_ID (0);
-				line.setM_AttributeSetInstance_ID (0);
-				line.setPrice (Env.ZERO);
-				line.setPriceLimit (Env.ZERO);
-				line.setPriceList (Env.ZERO);
-				line.setLineNetAmt (Env.ZERO);
-				line.setFreightAmt (Env.ZERO);
-				//
-				String description = product.getName ();
-				if (product.getDescription () != null)
-					description += " " + product.getDescription ();
-				if (line.getDescription () != null)
-					description += " " + line.getDescription ();
-				line.setDescription (description);
-				line.save (get_TrxName());
-			}	//	for all lines with BOM
-
-			m_lines = null;		//	force requery
-			count = DB.getSQLValue (get_TrxName(), sql, getC_Invoice_ID ());
-			renumberLines (10);
-		}	//	while count != 0
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MInvoice.java" startline="1391" endline="1464" pcid="43038"><![CDATA[
-		{
-			renumberLines (100);
-
-			//	Order Lines with non-stocked BOMs
-			MInvoiceLine[] lines = getLines (where);
-			for (int i = 0; i < lines.length; i++)
-			{
-				MInvoiceLine line = lines[i];
-				MProduct product = MProduct.get (getCtx(), line.getM_Product_ID());
-				log.fine(product.getName());
-				//	New Lines
-				int lineNo = line.getLine ();
-
-				//find default BOM with valid dates and to this product
-				MPPProductBOM bom = MPPProductBOM.get(product, getAD_Org_ID(),getDateInvoiced(), get_TrxName());
-				if(bom != null)
-				{
-					MPPProductBOMLine[] bomlines = bom.getLines(getDateInvoiced());
-					for (int j = 0; j < bomlines.length; j++)
-					{
-						MPPProductBOMLine bomline = bomlines[j];
-						MInvoiceLine newLine = new MInvoiceLine (this);
-						newLine.setLine (++lineNo);
-						newLine.setM_Product_ID (bomline.getM_Product_ID ());
-						newLine.setC_UOM_ID (bomline.getC_UOM_ID ());
-						newLine.setQty (line.getQtyInvoiced().multiply(
-								bomline.getQtyBOM ()));		//	Invoiced/Entered
-						if (bomline.getDescription () != null)
-							newLine.setDescription (bomline.getDescription ());
-						//
-						newLine.setPrice ();
-						newLine.saveEx (get_TrxName());
-					}
-				}
-
-				/*MProductBOM[] boms = MProductBOM.getBOMLines (product);
-				for (int j = 0; j < boms.length; j++)
-				{
-					MProductBOM bom = boms[j];
-					MInvoiceLine newLine = new MInvoiceLine (this);
-					newLine.setLine (++lineNo);
-					newLine.setM_Product_ID (bom.getProduct().getM_Product_ID(),
-						bom.getProduct().getC_UOM_ID());
-					newLine.setQty (line.getQtyInvoiced().multiply(
-						bom.getBOMQty ()));		//	Invoiced/Entered
-					if (bom.getDescription () != null)
-						newLine.setDescription (bom.getDescription ());
-					//
-					newLine.setPrice ();
-					newLine.save (get_TrxName());
-				}*/
-
-				//	Convert into Comment Line
-				line.setM_Product_ID (0);
-				line.setM_AttributeSetInstance_ID (0);
-				line.setPriceEntered (Env.ZERO);
-				line.setPriceActual (Env.ZERO);
-				line.setPriceLimit (Env.ZERO);
-				line.setPriceList (Env.ZERO);
-				line.setLineNetAmt (Env.ZERO);
-				//
-				String description = product.getName ();
-				if (product.getDescription () != null)
-					description += " " + product.getDescription ();
-				if (line.getDescription () != null)
-					description += " " + line.getDescription ();
-				line.setDescription (description);
-				line.saveEx (get_TrxName());
-			} //	for all lines with BOM
-
-			m_lines = null;
-			count = DB.getSQLValue (get_TrxName(), sql, getC_Invoice_ID ());
-			renumberLines (10);
-		}	//	while count != 0
-]]></source>
-</class>
-
-<class id="28" nlines="42" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="426" endline="492" pcid="11993"><![CDATA[
-	{
-		if (m_M_Product_ID == 0 || m_M_PriceList_Version_ID == 0)
-			return false;
-		//
-		String sql = "SELECT pp.PriceStd,"	//	1
-			+ " pp.PriceList,"		//	2
-			+ " pp.PriceLimit,"	//	3
-			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
-			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
-			+ "FROM M_Product p"
-			+ " INNER JOIN M_ProductPriceVendorBreak pp ON (p.M_Product_ID=pp.M_Product_ID)"
-			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
-			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
-			+ "WHERE pv.IsActive=''Y''"
-			+ " AND pp.IsActive=''Y''"
-			+ " AND p.M_Product_ID=?"				//	#1
-			+ " AND pv.M_PriceList_Version_ID=?"	//	#2
-			+ " AND pp.C_BPartner_ID=?"				//	#3
-			+ " AND ?>=pp.BreakValue"				//  #4
-			+ " ORDER BY BreakValue DESC";
-		m_calculated = false;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			pstmt.setInt(2, m_M_PriceList_Version_ID);
-			pstmt.setInt(3, m_C_BPartner_ID);
-			pstmt.setBigDecimal(4, m_Qty);
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				//	Prices
-				m_PriceStd = rs.getBigDecimal(1);
-				if (rs.wasNull())
-					m_PriceStd = Env.ZERO;
-				m_PriceList = rs.getBigDecimal(2);
-				if (rs.wasNull())
-					m_PriceList = Env.ZERO;
-				m_PriceLimit = rs.getBigDecimal(3);
-				if (rs.wasNull())
-					m_PriceLimit = Env.ZERO;
-				//
-				m_C_UOM_ID = rs.getInt(4);
-				m_C_Currency_ID = rs.getInt(6);
-				m_M_Product_Category_ID = rs.getInt(7);
-				m_enforcePriceLimit = "Y".equals(rs.getString(8));
-				m_isTaxIncluded = "Y".equals(rs.getString(9));
-				//
-				log.fine("M_PriceList_Version_ID=" + m_M_PriceList_Version_ID + " - " + m_PriceStd);
-				m_calculated = true;
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e); 
-			m_calculated = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		return m_calculated;
-	}	//	calculatePLV_VB
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MProductPricing.java" startline="148" endline="209" pcid="11975"><![CDATA[
-	{
-		if (m_M_Product_ID == 0 || m_M_PriceList_Version_ID == 0)
-			return false;
-		//
-		String sql = "SELECT bomPriceStd(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceStd,"	//	1
-			+ " bomPriceList(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceList,"		//	2
-			+ " bomPriceLimit(p.M_Product_ID,pv.M_PriceList_Version_ID) AS PriceLimit,"	//	3
-			+ " p.C_UOM_ID,pv.ValidFrom,pl.C_Currency_ID,p.M_Product_Category_ID,"	//	4..7
-			+ " pl.EnforcePriceLimit, pl.IsTaxIncluded "	// 8..9
-			+ "FROM M_Product p"
-			+ " INNER JOIN M_ProductPrice pp ON (p.M_Product_ID=pp.M_Product_ID)"
-			+ " INNER JOIN  M_PriceList_Version pv ON (pp.M_PriceList_Version_ID=pv.M_PriceList_Version_ID)"
-			+ " INNER JOIN M_Pricelist pl ON (pv.M_PriceList_ID=pl.M_PriceList_ID) "
-			+ "WHERE pv.IsActive=''Y''"
-			+ " AND pp.IsActive=''Y''"
-			+ " AND p.M_Product_ID=?"				//	#1
-			+ " AND pv.M_PriceList_Version_ID=?";	//	#2
-		m_calculated = false;
-		PreparedStatement pstmt = null;
-		ResultSet rs = null;
-		try
-		{
-			pstmt = DB.prepareStatement(sql, null);
-			pstmt.setInt(1, m_M_Product_ID);
-			pstmt.setInt(2, m_M_PriceList_Version_ID);
-			rs = pstmt.executeQuery();
-			if (rs.next())
-			{
-				//	Prices
-				m_PriceStd = rs.getBigDecimal(1);
-				if (rs.wasNull())
-					m_PriceStd = Env.ZERO;
-				m_PriceList = rs.getBigDecimal(2);
-				if (rs.wasNull())
-					m_PriceList = Env.ZERO;
-				m_PriceLimit = rs.getBigDecimal(3);
-				if (rs.wasNull())
-					m_PriceLimit = Env.ZERO;
-				//
-				m_C_UOM_ID = rs.getInt(4);
-				m_C_Currency_ID = rs.getInt(6);
-				m_M_Product_Category_ID = rs.getInt(7);
-				m_enforcePriceLimit = "Y".equals(rs.getString(8));
-				m_isTaxIncluded = "Y".equals(rs.getString(9));
-				//
-				log.fine("M_PriceList_Version_ID=" + m_M_PriceList_Version_ID + " - " + m_PriceStd);
-				m_calculated = true;
-			}
-		}
-		catch (Exception e)
-		{
-			log.log(Level.SEVERE, sql, e); 
-			m_calculated = false;
-		}
-		finally
-		{
-			DB.close(rs, pstmt);
-			rs = null;
-			pstmt = null;
-		}
-		return m_calculated;
-	}	//	calculatePLV
-]]></source>
-</class>
-
-<class id="29" nlines="41" nfragments="2">
-<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="263" endline="321" pcid="47788"><![CDATA[
-	{		
-		int v_adj=0;
-		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
-		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
-			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
-			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
-			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
-			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
-		  
-		  
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  try {				
-				ResultSet rs = pstmt.executeQuery();
-				while (rs.next()){
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));					
-					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);
-					calendar.setTime(rs.getDate("DATEACCT"));					
-					int DateAcctMonth = calendar.get(Calendar.MONTH);
-					if(p_Flag ==0){
-						if(DateAcctMonth - AssetServiceDateMonth >1)						
-						  return 1;
-						else
-						  return .5;
-					}					
-					if(p_Flag ==1){
-						if(p_Period == 0)
-							return .5;
-						else
-							return 1;						
-					}					
-					if(p_Flag == 2){
-						if (p_Period - AssetServiceDateMonth >1)
-						  return 1;
-						else
-						  return .5;
-					}					
-			}				
-		  }
-		  catch (Exception e)
-		  {
-			  System.out.println("MMCON"+e);
-		  }
-		  finally
-		  {
-			  try
-			  {
-				  if (pstmt != null)
-					  pstmt.close ();
-			  }
-			  catch (Exception e)
-				{}
-				pstmt = null;
-		  }		  
-		  return v_adj;		
-	}	  
-]]></source>
-<source file="/home/saeed/code/org/compiere/FA/Conventions.java" startline="123" endline="182" pcid="47767"><![CDATA[
-	{		
-		int v_adj=0;
-		  StringBuffer sqlB = new StringBuffer ("SELECT A_ASSET.ASSETSERVICEDATE," 
-		  	+ " A_DEPRECIATION_WORKFILE.A_PERIOD_POSTED,"
-			+ " A_DEPRECIATION_WORKFILE.A_ASSET_LIFE_YEARS, A_DEPRECIATION_WORKFILE.A_LIFE_PERIOD,"
-			+ " A_DEPRECIATION_WORKFILE.DATEACCT"
-			+ " FROM A_DEPRECIATION_WORKFILE, A_ASSET"
-			+ " WHERE A_ASSET.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.A_ASSET_ID = " + p_A_ASSET_ID 
-		    + " AND A_DEPRECIATION_WORKFILE.POSTINGTYPE = ''" + p_POSTINGTYPE+"''");
-		  
-		  
-		  PreparedStatement pstmt = null;
-		  pstmt = DB.prepareStatement (sqlB.toString(),null);
-		  try {				
-				ResultSet rs = pstmt.executeQuery();
-				while (rs.next()){
-					Calendar calendar = new GregorianCalendar();
-					calendar.setTime(rs.getDate("ASSETSERVICEDATE"));
-					int AssetServiceDateYear = calendar.get(Calendar.YEAR);
-					int AssetServiceDateMonth = calendar.get(Calendar.MONTH);					
-					calendar.setTime(rs.getDate("DATEACCT"));
-					int DateAcctYear = calendar.get(Calendar.YEAR);				
-					
-					int v_Months_of_Full_Year = 12 - AssetServiceDateMonth;					
-					if(p_Flag < 2){
-						//ADJUST PERIOD FOR FULL-YEAR CONVENTION
-						if(DateAcctYear == AssetServiceDateYear)				        
-				         v_adj =  12/v_Months_of_Full_Year;
-				        else
-				         v_adj = 1;
-					}
-					if(p_Flag == 2){
-					 //ADJUST COST CORRECTIONS FOR FULL-YEAR CONVENTION
-					       v_adj = 12/v_Months_of_Full_Year;
-					}
-					
-					
-			}				
-				
-		  }
-		  catch (Exception e)
-		  {
-			  System.out.println("FYCON"+e);
-		  }
-		  finally
-		  {
-			  try
-			  {
-				  if (pstmt != null)
-					  pstmt.close ();
-			  }
-			  catch (Exception e)
-				{}
-				pstmt = null;
-		  }
-		  
-		  return v_adj;
-		
-	}				
-]]></source>
-</class>
-
-<class id="30" nlines="41" nfragments="2">
-<source file="/home/saeed/code/org/compiere/tools/FileUtil.java" startline="292" endline="351" pcid="8910"><![CDATA[
-	{
-		String fileName = file.getAbsolutePath();
-		boolean isJava = fileName.endsWith(".java");
-		boolean isJSP = fileName.endsWith(".jsp");
-		boolean other = !(isJava || isJSP); 
-		BufferedReader in = new BufferedReader(new FileReader(file));
-		//
-		File tmpFile = new File(fileName + ".tmp");
-		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));
-
-		out.write(COPYRIGHT);
-		boolean found = false;
-
-		String line = null;
-		int lineNo = 0;
-		while ((line = in.readLine()) != null)
-		{
-			lineNo++;
-			if (!found)
-			{
-				if (line.startsWith("package ") && isJava)
-					found = true;
-			}
-			if (found)
-			{
-				out.write(line);
-				out.newLine();
-			}
-		}	//	while reading file
-		//
-		in.close();
-		out.close();
-		//
-		if (found)
-		{
-			File oldFile = new File (fileName + ".old");
-			if (file.renameTo(oldFile))
-			{
-				if (tmpFile.renameTo (new File (fileName)))
-				{
-					if (oldFile.delete ())
-					{
-		//				System.out.println (" - File updated: " + fileName);
-					}
-					else
-						System.err.println (" - Old File not deleted - " + fileName);
-				}
-				else
-					System.err.println (" - New File not renamed - " + fileName);
-			}
-			else
-				System.err.println(" - Old File not renamed - " + fileName);
-		}
-		else
-		{
-			System.err.println(" - No Copyright - " + fileName);
-			if (!tmpFile.delete())
-				System.err.println(" - Temp file not deleted - " + tmpFile.getAbsolutePath());
-		}
-	}	//	license
-]]></source>
-<source file="/home/saeed/code/org/compiere/tools/FileUtil.java" startline="182" endline="232" pcid="8900"><![CDATA[
-	{
-		String fileName = file.getAbsolutePath();
-		BufferedReader in = new BufferedReader(new FileReader(file));
-		//
-		File tmpFile = new File(fileName + ".tmp");
-		BufferedWriter out = new BufferedWriter (new FileWriter(tmpFile, false));
-		boolean found = false;
-
-		String line = null;
-		int lineNo = 0;
-		while ((line = in.readLine()) != null)
-		{
-			lineNo++;
-			if (line.indexOf(from) != -1)
-			{
-				found = true;
-				System.out.println("  " + lineNo + ": " + line);
-				line = Util.replace(line, from, to);
-				m_actions++;
-			}
-			out.write(line);
-			out.newLine();
-		}	//	while reading file
-		//
-		in.close();
-		out.close();
-		//
-		if (found)
-		{
-			File oldFile = new File (fileName + ".old");
-			if (file.renameTo(oldFile))
-			{
-				if (tmpFile.renameTo (new File (fileName)))
-				{
-					if (oldFile.delete ())
-						System.out.println (" - File updated: " + fileName);
-					else
-						System.err.println (" - Old File not deleted - " + fileName);
-				}
-				else
-					System.err.println (" - New File not renamed - " + fileName);
-			}
-			else
-				System.err.println(" - Old File not renamed - " + fileName);
-		}
-		else
-		{
-			if (!tmpFile.delete())
-				System.err.println(" - Temp file not deleted - " + tmpFile.getAbsolutePath());
-		}
-	}	//	replaceString
-]]></source>
-</class>
-
-<class id="31" nlines="41" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/MJournalBatch.java" startline="603" endline="667" pcid="31606"><![CDATA[
-	{
-		log.info("reverseCorrectIt - " + toString());
-		// Before reverseCorrect
-		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSECORRECT);
-		if (m_processMsg != null)
-			return false;
-				
-		MJournal[] journals = getJournals(true);
-		//	check prerequisites
-		for (int i = 0; i < journals.length; i++)
-		{
-			MJournal journal = journals[i];
-			if (!journal.isActive())
-				continue;
-			//	All need to be closed/Completed
-			if (DOCSTATUS_Completed.equals(journal.getDocStatus()))
-				;
-			else
-			{
-				m_processMsg = "All Journals need to be Completed: " + journal.getSummary();
-				return false;
-			}
-		}
-		
-		//	Reverse it
-		MJournalBatch reverse = new MJournalBatch (this);
-		reverse.setDateDoc(getDateDoc());
-		reverse.setC_Period_ID(getC_Period_ID());
-		reverse.setDateAcct(getDateAcct());
-		//	Reverse indicator
-		String description = reverse.getDescription();
-		if (description == null)
-			description = "** " + getDocumentNo() + " **";
-		else
-			description += " ** " + getDocumentNo() + " **";
-		reverse.setDescription(description);
-		//[ 1948157  ]
-		reverse.setReversal_ID(getGL_JournalBatch_ID());
-		reverse.saveEx();
-		//
-		
-		//	Reverse Journals
-		for (int i = 0; i < journals.length; i++)
-		{
-			MJournal journal = journals[i];
-			if (!journal.isActive())
-				continue;
-			if (journal.reverseCorrectIt(reverse.getGL_JournalBatch_ID()) == null)
-			{
-				m_processMsg = "Could not reverse " + journal;
-				return false;
-			}
-			journal.save();
-		}
-		
-		//[ 1948157  ]
-		setReversal_ID(reverse.getGL_JournalBatch_ID());
-		save();
-		// After reverseCorrect
-		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSECORRECT);
-		if (m_processMsg != null)
-			return false;
-		
-		return true;
-	}	//	reverseCorrectionIt
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/MJournalBatch.java" startline="675" endline="731" pcid="31611"><![CDATA[
-	{
-		log.info("reverseAccrualIt - " + toString());
-		// Before reverseAccrual
-		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_BEFORE_REVERSEACCRUAL);
-		if (m_processMsg != null)
-			return false;
-		
-		MJournal[] journals = getJournals(true);
-		//	check prerequisites
-		for (int i = 0; i < journals.length; i++)
-		{
-			MJournal journal = journals[i];
-			if (!journal.isActive())
-				continue;
-			//	All need to be closed/Completed
-			if (DOCSTATUS_Completed.equals(journal.getDocStatus()))
-				;
-			else
-			{
-				m_processMsg = "All Journals need to be Completed: " + journal.getSummary();
-				return false;
-			}
-		}
-		//	Reverse it
-		MJournalBatch reverse = new MJournalBatch (this);
-		reverse.setC_Period_ID(0);
-		reverse.setDateDoc(new Timestamp(System.currentTimeMillis()));
-		reverse.setDateAcct(reverse.getDateDoc());
-		//	Reverse indicator
-		String description = reverse.getDescription();
-		if (description == null)
-			description = "** " + getDocumentNo() + " **";
-		else
-			description += " ** " + getDocumentNo() + " **";
-		reverse.setDescription(description);
-		reverse.save();
-		
-		//	Reverse Journals
-		for (int i = 0; i < journals.length; i++)
-		{
-			MJournal journal = journals[i];
-			if (!journal.isActive())
-				continue;
-			if (journal.reverseAccrualIt(reverse.getGL_JournalBatch_ID()) == null)
-			{
-				m_processMsg = "Could not reverse " + journal;
-				return false;
-			}
-			journal.save();
-		}
-		// After reverseAccrual
-		m_processMsg = ModelValidationEngine.get().fireDocValidate(this,ModelValidator.TIMING_AFTER_REVERSEACCRUAL);
-		if (m_processMsg != null)
-			return false;
-				
-		return true;
-	}	//	reverseAccrualIt
-]]></source>
-</class>
-
-<class id="32" nlines="40" nfragments="2">
-<source file="/home/saeed/code/org/compiere/dbPort/JdbcTest.java" startline="394" endline="464" pcid="7981"><![CDATA[
-	{
-		ResultSet  rs   = null;
-		Statement  stmt = null;
-
-		try
-		{
-			while (!getGreenLight())
-				yield();
-			if (WITH_OUTPUT)
-				System.out.println("Thread " + m_myId + " started");
-
-			// Get the connection & statement
-			if (s_cType == C_SHARED)
-				stmt = s_sconn.createStatement ();
-			else if (s_cType == C_MULTIPLE)
-			{
-				s_conn[m_myId] = DriverManager.getConnection (CONNECTION, UID, PWD);
-				stmt = s_conn[m_myId].createStatement ();
-			}
-			else if (s_cType == C_PRECREATED)
-			{
-				stmt = s_conn[m_myId].createStatement ();
-			}
-			else if (s_cType == C_DATASOURCE)
-			{
-				s_conn[m_myId] = s_ds.getConnection();
-				stmt = s_conn[m_myId].createStatement ();
-			}
-		//	else if (s_cType == C_CACHE)
-		//	{
-		//		s_conn[m_myId] = s_cc.getConnection();
-		//		stmt = s_conn[m_myId].createStatement ();
-		//	}
-			stmt.setFetchSize(s_fetchSize);
-
-			// Execute the Query
-			rs = stmt.executeQuery (STATEMENT);
-
-			// Loop through the results
-			while (rs.next())
-			{
-				if (s_do_yield)
-					yield();  // Yield To other threads
-			}
-
-			// Close all the resources
-			rs.close();
-			rs = null;
-
-			// Close the statement
-			stmt.close();
-			stmt = null;
-
-			// Close the local connection
-			if (s_cType == C_SHARED || s_cType == C_PRECREATED)
-				;
-			else
-			{
-				s_conn[m_myId].close();
-				s_conn[m_myId] = null;
-			}
-		}
-		catch (Exception e)
-		{
-			System.out.println("Thread " + m_myId + " got Exception: " + e);
-			e.printStackTrace();
-			return;
-		}
-		if (WITH_OUTPUT)
-			System.out.println("Thread " + m_myId + " finished");
-	}
-]]></source>
-<source file="/home/saeed/code/org/compiere/dbPort/JdbcTestPG.java" startline="282" endline="344" pcid="7913"><![CDATA[
-	{
-		ResultSet  rs   = null;
-		Statement  stmt = null;
-
-		try
-		{
-			if (WITH_OUTPUT)
-				System.out.println("Thread " + m_myId + " waiting");
-			while (!getGreenLight())
-				yield();
-			if (WITH_OUTPUT)
-				System.out.println("Thread " + m_myId + " started");
-
-			// Get the connection & statement
-			if (s_cType == C_SHARED)
-				stmt = s_sconn.createStatement ();
-			else if (s_cType == C_MULTIPLE)
-			{
-				s_conn[m_myId] = DriverManager.getConnection (CONNECTION, UID, PWD);
-				stmt = s_conn[m_myId].createStatement ();
-			}
-			else if (s_cType == C_PRECREATED)
-			{
-				stmt = s_conn[m_myId].createStatement ();
-			}
-		//	stmt.setFetchSize(s_fetchSize);
-
-			// Execute the Query
-			rs = stmt.executeQuery (STATEMENT);
-
-			// Loop through the results
-			while (rs.next())
-			{
-				if (s_do_yield)
-					yield();  // Yield To other threads
-			}
-
-			// Close all the resources
-			rs.close();
-			rs = null;
-
-			// Close the statement
-			stmt.close();
-			stmt = null;
-
-			// Close the local connection
-			if (s_cType == C_SHARED || s_cType == C_PRECREATED)
-				;
-			else
-			{
-				s_conn[m_myId].close();
-				s_conn[m_myId] = null;
-			}
-		}
-		catch (Exception e)
-		{
-			System.out.println("Thread " + m_myId + " got Exception: " + e);
-			e.printStackTrace();
-			return;
-		}
-		if (WITH_OUTPUT)
-			System.out.println("Thread " + m_myId + " finished");
-	}
-]]></source>
-</class>
-
-<class id="33" nlines="40" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/ModelValidationEngine.java" startline="471" endline="534" pcid="18710"><![CDATA[
-	{
-		if (po == null || m_docValidateListeners.size() == 0)
-			return null;
-		
-		String propertyName = po.get_TableName() + "*";
-		ArrayList<ModelValidator> list = m_docValidateListeners.get(propertyName);
-		if (list != null)
-		{
-			//ad_entitytype.modelvalidationclasses
-			String error = fireDocValidate(po, docTiming, list);
-			if (error != null && error.length() > 0)
-				return error;
-		}
-		
-		propertyName = po.get_TableName() + po.getAD_Client_ID();
-		list = m_docValidateListeners.get(propertyName);
-		if (list != null)
-		{
-			//ad_client.modelvalidationclasses
-			String error = fireDocValidate(po, docTiming, list);
-			if (error != null && error.length() > 0)
-				return error;
-		}
-		
-		// now process the script model validator for this event
-		List<MTableScriptValidator> scriptValidators = 
-			MTableScriptValidator.getModelValidatorRules(
-					po.getCtx(), 
-					po.get_Table_ID(),
-					ModelValidator.documentEventValidators[docTiming]);
-		if (scriptValidators != null) {
-			for (MTableScriptValidator scriptValidator : scriptValidators) {
-				MRule rule = MRule.get(po.getCtx(), scriptValidator.getAD_Rule_ID());
-				// currently just JSR 223 supported
-				if (   rule != null 
-					&& rule.isActive()
-					&& rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs)
-					&& rule.getEventType().equals(MRule.EVENTTYPE_ModelValidatorDocumentEvent)) {
-					String error;
-					try {
-						ScriptEngine engine = rule.getScriptEngine();
-
-						MRule.setContext(engine, po.getCtx(), 0);  // no window
-						// now add the method arguments to the engine 
-						engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
-						engine.put(MRule.ARGUMENTS_PREFIX + "PO", po);
-						engine.put(MRule.ARGUMENTS_PREFIX + "Type", docTiming);
-						engine.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.documentEventValidators[docTiming]);
-					
-						Object retval = engine.eval(rule.getScript());
-						error = (retval == null ? "" : retval.toString());
-					} catch (Exception e) {
-						e.printStackTrace();
-						error = e.toString();
-					}
-					if (error != null && error.length() > 0)
-						return error;
-				}
-			}
-		}
-		//
-
-		return null;
-	}	//	fireDocValidate
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/ModelValidationEngine.java" startline="315" endline="378" pcid="18691"><![CDATA[
-	{
-		if (po == null || m_modelChangeListeners.size() == 0)
-			return null;
-		
-		String propertyName = po.get_TableName() + "*";
-		ArrayList<ModelValidator> list = m_modelChangeListeners.get(propertyName);
-		if (list != null)
-		{
-			//ad_entitytype.modelvalidationclasses
-			String error = fireModelChange(po, changeType, list);
-			if (error != null && error.length() > 0)
-				return error;
-		}
-		
-		propertyName = po.get_TableName() + po.getAD_Client_ID();
-		list = m_modelChangeListeners.get(propertyName);
-		if (list != null)
-		{
-			//ad_client.modelvalidationclasses
-			String error = fireModelChange(po, changeType, list);
-			if (error != null && error.length() > 0)
-				return error;
-		}
-		
-		// now process the script model validator for this event
-		List<MTableScriptValidator> scriptValidators = 
-			MTableScriptValidator.getModelValidatorRules(
-					po.getCtx(), 
-					po.get_Table_ID(),
-					ModelValidator.tableEventValidators[changeType]);
-		if (scriptValidators != null) {
-			for (MTableScriptValidator scriptValidator : scriptValidators) {
-				MRule rule = MRule.get(po.getCtx(), scriptValidator.getAD_Rule_ID());
-				// currently just JSR 223 supported
-				if (   rule != null 
-					&& rule.isActive()
-					&& rule.getRuleType().equals(MRule.RULETYPE_JSR223ScriptingAPIs)
-					&& rule.getEventType().equals(MRule.EVENTTYPE_ModelValidatorTableEvent)) {
-					String error;
-					try {
-						ScriptEngine engine = rule.getScriptEngine();
-
-						MRule.setContext(engine, po.getCtx(), 0);  // no window
-						// now add the method arguments to the engine 
-						engine.put(MRule.ARGUMENTS_PREFIX + "Ctx", po.getCtx());
-						engine.put(MRule.ARGUMENTS_PREFIX + "PO", po);
-						engine.put(MRule.ARGUMENTS_PREFIX + "Type", changeType);
-						engine.put(MRule.ARGUMENTS_PREFIX + "Event", ModelValidator.tableEventValidators[changeType]);
-					
-						Object retval = engine.eval(rule.getScript());
-						error = (retval == null ? "" : retval.toString());
-					} catch (Exception e) {
-						e.printStackTrace();
-						error = e.toString();
-					}
-					if (error != null && error.length() > 0)
-						return error;
-				}
-			}
-		}
-		//
-		
-		return null;
-	}	//	fireModelChange
-]]></source>
-</class>
-
-<class id="34" nlines="40" nfragments="2">
-<source file="/home/saeed/code/org/compiere/model/PP_PayFlowPro4.java" startline="81" endline="158" pcid="14700"><![CDATA[
-	{
-		log.fine(p_mpp.getHostAddress() + " " + p_mpp.getHostPort() + ", Timeout=" + getTimeout()
-			+ "; Proxy=" + p_mpp.getProxyAddress() + " " + p_mpp.getProxyPort() + " " + p_mpp.getProxyLogon() + " " + p_mpp.getProxyPassword());
-
-		if ( p_mpp.getC_Currency_ID() != 0 && p_mpp.getC_Currency_ID() != p_mp.getC_Currency_ID() )
-			throw new IllegalArgumentException("Payment currency not supported by processor.");
-		if ( p_mpp.getMinimumAmt().compareTo(p_mp.getPayAmt()) > 0)
-			throw new IllegalArgumentException("Payment amount is less than minimum accepted.");
-		if ( p_mpp.isRequireVV() && Util.isEmpty(p_mp.getCreditCardVV(), true) )
-			throw new IllegalArgumentException("Credit card verification code required.");
-		
-		
-		//
-		StringBuffer param = new StringBuffer();
-		//  Transaction Type
-		if (p_mp.getTrxType().equals(MPayment.TRXTYPE_Sales))
-			param.append("TRXTYPE=").append(p_mp.getTrxType());
-		else
-			throw new IllegalArgumentException("PP_PayFlowPro TrxType not supported - " + p_mp.getTrxType());
-
-		//  Mandatory Fields
-		param.append("&TENDER=C")										//	CreditCard
-			.append("&ACCT=").append(MPaymentValidate.checkNumeric(p_mp.getCreditCardNumber()));	//	CreditCard No
-		param.append("&EXPDATE=");										//	ExpNo
-		String month = String.valueOf(p_mp.getCreditCardExpMM());
-		if (month.length() == 1)
-			param.append("0");
-		param.append(month);
-		int expYY = p_mp.getCreditCardExpYY();
-		if (expYY > 2000)
-			expYY -= 2000;
-		String year = String.valueOf(expYY);
-		if (year.length() == 1)
-			param.append("0");
-		param.append(year);
-		
-		// CURRENCY
-		int precision = 2;  // cents
-		I_C_Currency currency = null;
-		currency = p_mp.getC_Currency();
-		if ( currency != null )
-		{
-			precision = currency.getStdPrecision();
-			param.append(createPair("&CURRENCY", currency.getISO_Code(), 3));
-		}
-		// rounded to cent
-		param.append("&AMT=").append(p_mp.getPayAmt().setScale(precision, RoundingMode.HALF_UP));					//	Amount
-
-		//  Optional Control Fields		- AuthCode & Orig ID
-		param.append(createPair("&AUTHCODE", p_mp.getVoiceAuthCode(), 6));
-		param.append(createPair("&ORIGID", p_mp.getOrig_TrxID(), 12));	//	PNREF - returned
-		//	CVV
-		param.append(createPair("&CVV2", p_mp.getCreditCardVV(), 4));
-	//	param.append(createPair("&SWIPE", p_mp.getXXX(), 80));			//	Track 1+2
-
-		//	Address
-		param.append(createPair("&NAME", p_mp.getA_Name(), 30));
-		param.append(createPair("&STREET", p_mp.getA_Street(), 30));	//	Street
-		param.append(createPair("&ZIP", p_mp.getA_Zip(), 9));			//	Zip 5-9
-		//	CITY 20, STATE 2,
-		param.append(createPair("&EMAIL", p_mp.getA_EMail(), 64));		//	EMail
-
-		//	Amex Fields
-		//	DESC, SHIPTOZIP, TAXAMT
-	//	param.append(createPair("&DESC", p_mp.getXXX(), 23));			//	Description
-		param.append(createPair("&SHIPTOZIP", p_mp.getA_Zip(), 6));		//	Zip 6
-		param.append(createPair("&TAXAMT", p_mp.getTaxAmt(), 10));		//	Tax
-
-		//	Invoice No
-		param.append(createPair("&INVNUM", p_mp.getC_Invoice_ID(), 9));
-
-		//	COMMENT1/2
-		param.append(createPair("&COMMENT1", p_mp.getC_Payment_ID(), 128));		//	Comment
-		param.append(createPair("&COMMENT2", p_mp.getC_BPartner_ID(), 128)); 	//	Comment2
-
-		return process(param.toString());
-
-	}
-]]></source>
-<source file="/home/saeed/code/org/compiere/model/PP_PayFlowPro.java" startline="85" endline="141" pcid="17493"><![CDATA[
-	{
-		log.fine(p_mpp.getHostAddress() + " " + p_mpp.getHostPort() + ", Timeout=" + getTimeout()
-			+ "; Proxy=" + p_mpp.getProxyAddress() + " " + p_mpp.getProxyPort() + " " + p_mpp.getProxyLogon() + " " + p_mpp.getProxyPassword());
-		//
-		StringBuffer param = new StringBuffer();
-		//  Transaction Type
-		if (p_mp.getTrxType().equals(MPayment.TRXTYPE_Sales))
-			param.append("TRXTYPE=").append(p_mp.getTrxType());
-		else
-			throw new IllegalArgumentException("PP_PayFlowPro TrxType not supported - " + p_mp.getTrxType());
-
-		//  Mandatory Fields
-		param.append("&TENDER=C")										//	CreditCard
-			.append("&ACCT=").append(MPaymentValidate.checkNumeric(p_mp.getCreditCardNumber()));	//	CreditCard No
-		param.append("&EXPDATE=");										//	ExpNo
-		String month = String.valueOf(p_mp.getCreditCardExpMM());
-		if (month.length() == 1)
-			param.append("0");
-		param.append(month);
-		int expYY = p_mp.getCreditCardExpYY();
-		if (expYY > 2000)
-			expYY -= 2000;
-		String year = String.valueOf(expYY);
-		if (year.length() == 1)
-			param.append("0");
-		param.append(year);
-		param.append("&AMT=").append(p_mp.getPayAmt());					//	Amount
-
-		//  Optional Control Fields		- AuthCode & Orig ID
-		param.append(createPair("&AUTHCODE", p_mp.getVoiceAuthCode(), 6));
-		param.append(createPair("&ORIGID", p_mp.getOrig_TrxID(), 12));	//	PNREF - returned
-		//	CVV
-		param.append(createPair("&CVV2", p_mp.getCreditCardVV(), 4));
-	//	param.append(createPair("&SWIPE", p_mp.getXXX(), 80));			//	Track 1+2
-
-		//	Address
-		param.append(createPair("&NAME", p_mp.getA_Name(), 30));
-		param.append(createPair("&STREET", p_mp.getA_Street(), 30));	//	Street
-		param.append(createPair("&ZIP", p_mp.getA_Zip(), 9));			//	Zip 5-9
-		//	CITY 20, STATE 2,
-		param.append(createPair("&EMAIL", p_mp.getA_EMail(), 64));		//	EMail
-
-		//	Amex Fields
-		//	DESC, SHIPTOZIP, TAXAMT
-	//	param.append(createPair("&DESC", p_mp.getXXX(), 23));			//	Description
-		param.append(createPair("&SHIPTOZIP", p_mp.getA_Zip(), 6));		//	Zip 6
-		param.append(createPair("&TAXAMT", p_mp.getTaxAmt(), 10));		//	Tax
-
-		//	Invoice No
-		param.append(createPair("&INVNUM", p_mp.getC_Invoice_ID(), 9));
-
-		//	COMMENT1/2
-		param.append(createPair("&COMMENT1", p_mp.getC_Payment_ID(), 128));		//	Comment
-		param.append(createPair("&COMMENT2", p_mp.getC_BPartner_ID(), 128)); 	//	Comment2
-
-		return process(param.toString());
-	}   //  processCC
-]]></source>
 </class>
 </clones>
 </source_elements>

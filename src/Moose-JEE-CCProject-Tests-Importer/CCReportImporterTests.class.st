@@ -16,15 +16,50 @@ CCReportImporterTests >> setUp [
 ]
 
 { #category : #'as yet unclassified' }
-CCReportImporterTests >> testImportFrom [
-	| result mm |
+CCReportImporterTests >> testImportFullReportWithoutCode [
+	| mm |
+	
+	self assert: (importer parser isMemberOf: XMLDOMParser).
+	self assert: importer parser document equals: nil.
 	
 	mm := MooseModel new.
-	importer := MJCCReportImporter new targetModel: mm.
+	self assert: importer targetModel equals: nil.
 	
-	result := importer importFrom: MJCCPSampleReports fullReportWithoutCode readStream.
+	importer targetModel: mm.
 	
-	self assert: (result isMemberOf: MooseModel).
+	importer importFrom: MJCCPSampleReports fullReportWithoutCode readStream.
+	
+	self assert: (importer parser document isMemberOf: XMLDocument).
+	self assert: importer targetModel equals: mm.
+	self assert: (mm allWithType: MJCCPClones) size equals: 1.
+	self assert: (mm allWithType: MJCCPSysteminfo) size equals: 1.
+	self assert: (mm allWithType: MJCCPClassinfo) size equals: 1.
+]
+
+{ #category : #'as yet unclassified' }
+CCReportImporterTests >> testImportSmallReport [
+	| mm |
+	
+	self assert: (importer parser isMemberOf: XMLDOMParser).
+	self assert: importer parser document equals: nil.
+	
+	mm := MooseModel new.
+	self assert: importer targetModel equals: nil.
+	
+	importer targetModel: mm.
+	
+	importer importFrom: MJCCPSampleReports smallReport readStream.
+	
+	self assert: (importer parser document isMemberOf: XMLDocument).
+	self assert: importer targetModel equals: mm.
+	self assert: (mm allWithType: MJCCPClones) size equals: 1.
+	self assert: (mm allWithType: MJCCPSysteminfo) size equals: 1.
+	self assert: (mm allWithType: MJCCPClassinfo) size equals: 1.
+	
+	self assert: (mm allWithType: MJCCPClass) size equals: 5.
+	self assert: (mm allWithType: MJCCPSource) size equals: 11.
+	
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -45,17 +80,6 @@ CCReportImporterTests >> testImporterCreationOn [
 	self assert: (importer parser isMemberOf: XMLDOMParser).
 	self assert: importer parser document equals: nil.
 	
-]
-
-{ #category : #'as yet unclassified' }
-CCReportImporterTests >> testParse [
-	
-	self assert: (importer parser isMemberOf: XMLDOMParser).
-	self assert: importer parser document equals: nil.
-	
-	importer importFrom: MJCCPSampleReports fullReportWithoutCode readStream.
-	
-	self assert: (importer parser document isMemberOf: XMLDocument).
 ]
 
 { #category : #'as yet unclassified' }
