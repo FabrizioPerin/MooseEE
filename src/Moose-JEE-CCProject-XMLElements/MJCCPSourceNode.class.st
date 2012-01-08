@@ -6,7 +6,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJCCPSourceNode >> createElementFrom: aMooseModel [
-	| source |
+	| source classes |
 	
 	source := MJCCPSource new.
 	
@@ -15,6 +15,13 @@ MJCCPSourceNode >> createElementFrom: aMooseModel [
 	source pcid: self id asNumber.
 	source startLine: self startLine asNumber.
 	
+	classes := (aMooseModel allWithType: FAMIXClass) select: [:class | self file transformInMoosePathFormat matches: class mooseName asString].
+	
+	(classes size > 1) 
+		ifTrue: [UIManager default alert: 'multiple classes detected'].
+	(classes size = 1)	
+		ifTrue: [classes first addClone: source].
+			
 	^source
 	
 ]
