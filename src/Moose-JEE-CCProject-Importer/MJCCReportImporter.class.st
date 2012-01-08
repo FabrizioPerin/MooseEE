@@ -56,7 +56,7 @@ MJCCReportImporter >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 	| result clones sources |
 
 	result := (root allElements select: [:eachElement | eachElement class = MJCCPClonesNode]) collect: [:eachElement |
-							eachElement createElementFrom: self].
+							eachElement createElementFrom: self targetModel].
 	
 	clones := result first.
 	
