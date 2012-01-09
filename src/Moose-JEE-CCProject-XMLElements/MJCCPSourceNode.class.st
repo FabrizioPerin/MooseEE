@@ -12,13 +12,13 @@ MJCCPSourceNode >> createElementFrom: aMooseModel [
 	
 	source endLine: self endLine asNumber.
 	source file: self file.
-	source pcid: self id asNumber.
+	source pcid: self id asNumber. 
 	source startLine: self startLine asNumber.
 	
-	classes := (aMooseModel allWithType: FAMIXClass) select: [:class | self file transformInMoosePathFormat matches: class mooseName asString].
+	classes := (aMooseModel allWithType: FAMIXClass) select: [:class | (self file removeSuffix: '.java') transformInMoosePathFormat  endsWith: class mooseName asString ].
 	
 	(classes size > 1) 
-		ifTrue: [UIManager default alert: 'multiple classes detected'].
+		ifTrue: [self halt].
 	(classes size = 1)	
 		ifTrue: [classes first addClone: source].
 			
