@@ -29,10 +29,16 @@ MJCCPSourceTests >> testCloneClass [
 
 { #category : #accessing }
 MJCCPSourceTests >> testCodeClass [
-
-	self assert: source cloneClass equals: nil.
+	| famixclass |
 	
-	MJCCPClass
+	self assert: source cloneClass equals: nil.
+		
+	famixclass := FAMIXClass new name: 'MSequence'.
+	famixclass addClone: source.	
+	
+	self assert: source codeClass equals: famixclass.
+	
+
 ]
 
 { #category : #accessing }
