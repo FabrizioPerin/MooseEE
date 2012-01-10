@@ -54,7 +54,14 @@ ConfigurationOfMooseJEEPHP >> default: spec [
 					className: 'ConfigurationOfMooseJEE';
 					file: 'ConfigurationOfMooseJEE';
 					version: 'defaultAllProjects';
-					repository: 'http://www.squeaksource.com/Moose' ]."		
+					repository: 'http://www.squeaksource.com/Moose' ]."
+		
+		spec project: 'PHPParser for MooseJEEPHP' with: [
+				spec
+					className: 'ConfigurationOfPetitPHPParser';
+					file: 'ConfigurationOfPetitPHPParser';
+					version: 'default';
+					repository: 'http://www.squeaksource.com/PetitPHPParser' ].		
 			
 		spec 
 			"Models"
@@ -63,7 +70,8 @@ ConfigurationOfMooseJEEPHP >> default: spec [
 			
 			"importers"
 			package: 'Moose-JEE-Importers-PHP' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.].
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('PHPParser for MooseJEEPHP')].
 	
 			"Tests"
 			"package: 'Moose-JEE-Tests-PHP-Resources' with: [
