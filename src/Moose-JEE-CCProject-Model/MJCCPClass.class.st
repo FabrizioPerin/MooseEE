@@ -64,3 +64,46 @@ MJCCPClass >> sources [
 	
 	^ sources
 ]
+
+{ #category : #accessing }
+MJCCPClass >> viewClonesSize [
+	<menuItem: 'Clones size' category: 'JEE Visualizations'> 
+	| aChartRenderer |
+
+	aChartRenderer := ESDiagramRenderer new.
+	self viewClonesSizeOn: aChartRenderer.
+	aChartRenderer open.
+]
+
+{ #category : #accessing }
+MJCCPClass >> viewClonesSizeOn: aChart [
+	| diag1 diag2 |
+	
+	diag1 := ESVerticalBarDiagram new
+		identifier: [ :source | source codeClass name ];
+		rotatedLabels: true;
+		y: [ :source | source codeClass numberOfLinesOfCode ];
+		regularAxis;
+		models: self sources;
+		yAxisLabel: 'LoC';
+		yourself.
+	
+	diag2 := ESVerticalBarDiagram new
+		y: [ :source | source endLine - source startLine ];
+		valueAxisLine;
+		gapFraction: 2 / 3;
+		preferredAxisMaxY: diag1 values max;
+		rightYAxis;
+		defaultColor: Color green;
+		axisColor: Color green;
+		yAxisLabel: 'Clone Size';
+		models: self sources;
+		yourself.
+	
+	(aChart compositeDiagram)
+		add: diag1;
+		add: diag2;
+		yPadding: 30;
+		height: 400;
+		width: 500.
+]
