@@ -38,6 +38,20 @@ MJCCPClass >> initialize [
 ]
 
 { #category : #accessing }
+MJCCPClass >> mooseNameOn: stream [ 
+
+	stream nextPutAll: 'id: '.
+	stream nextPutAll: self id asString.
+	stream nextPutAll: '#ofFragments: '.
+	stream nextPutAll: self numberOfFragments asString.
+	stream nextPutAll: '#ofLine '.
+	stream nextPutAll: self numberOfLines asString.
+	stream nextPutAll: ' (Clone Class)'.
+	
+	^stream
+]
+
+{ #category : #accessing }
 MJCCPClass >> numberOfFragments [
 	^ numberOfFragments
 ]
@@ -55,6 +69,18 @@ MJCCPClass >> numberOfLines [
 { #category : #accessing }
 MJCCPClass >> numberOfLines: anObject [
 	numberOfLines := anObject
+]
+
+{ #category : #accessing }
+MJCCPClass >> printOn: stream [ 
+
+	stream nextPutAll: 'id: '.
+	stream nextPutAll: self id asString.
+	stream nextPutAll: '#fragments: '.
+	stream nextPutAll: self numberOfFragments asString.
+	stream nextPutAll: ' (Clone Class)'.
+	
+	^stream
 ]
 
 { #category : #accessing }
@@ -82,7 +108,12 @@ MJCCPClass >> viewClonesSizeOn: aChart [
 	diag1 := ESVerticalBarDiagram new
 		identifier: [ :source | source codeClass name ];
 		rotatedLabels: true;
-		y: [ :source | source codeClass numberOfLinesOfCode ];
+		y: [ :source |
+			| text |
+			text := source codeClass sourceAnchor completeText. 
+			(text isNil not and: [text contents lineCount > 0]) 
+				ifTrue: [text contents lineCount]
+				ifFalse: [source codeClass numberOfLinesOfCode]];
 		regularAxis;
 		models: self sources;
 		yAxisLabel: 'LoC';
