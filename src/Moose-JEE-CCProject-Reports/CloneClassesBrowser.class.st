@@ -17,7 +17,11 @@ CloneClassesBrowser >> buildBrowser [
 		(a list)
 			title: 'Clone Classes';
 			display: [ :mm | mm allCloneClasses];
-			format: #name;
+			format: [:cloneClass |
+				| stream | 
+				stream := ReadWriteStream on: ''.
+				cloneClass mooseNameOn: stream.
+				stream contents];
 			act: #update icon: GLMUIThemeExtraIcons glamorousRefresh entitled: 'Update' ].
 	browser transmit 
 		from: #cloneClasses; 
@@ -31,7 +35,7 @@ CloneClassesBrowser >> buildBrowser [
 		andShow: [:a | 
 			a  eyesee 
 				title: 'Clone size vs LoC';
-				diagram: [:renderer :refASTAssoc | 
-					refASTAssoc viewClonesSizeOn: renderer ]].			
+				diagram: [:renderer :cloneClass | 
+					cloneClass viewClonesSizeOn: renderer ]].			
 	^ browser
 ]
