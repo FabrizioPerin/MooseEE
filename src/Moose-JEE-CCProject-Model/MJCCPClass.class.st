@@ -137,4 +137,8 @@ MJCCPClass >> viewClonesSizeOn: aChart [
 		yPadding: 30;
 		height: 400;
 		width: 500.
+	
+	aChart interaction popupText: #yourself.
+	
+	
 ]
