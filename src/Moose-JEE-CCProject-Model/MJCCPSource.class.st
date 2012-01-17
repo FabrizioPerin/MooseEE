@@ -7,7 +7,8 @@ Class {
 		'startLine',
 		'endLine',
 		'pcid',
-		'file'
+		'file',
+		'codeFile'
 	],
 	#category : #'Moose-JEE-CCProject-Model'
 }
@@ -31,12 +32,34 @@ MJCCPSource >> cloneClass: aMJCCPClass [
 
 { #category : #accessing }
 MJCCPSource >> codeClass [
+	<MSEProperty: #codeClass type: #FAMIXClass opposite: #clones>
+	<MSEComment: 'The famix class where the clone has been detected'>
 	^ codeClass
 ]
 
 { #category : #accessing }
 MJCCPSource >> codeClass: anObject [
-	codeClass := anObject
+	codeClass := FMMultivalueLink 
+						on: self
+						update: #clones
+						from: self codeClass  
+						to: anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> codeFile [
+	<MSEProperty: #codeFile type: #FAMIXFile opposite: #cloneSources>
+	<MSEComment: 'The famix file where the clone has been detected'>
+	^ codeFile
+]
+
+{ #category : #accessing }
+MJCCPSource >> codeFile: anObject [
+	codeFile := FMMultivalueLink 
+						on: self
+						update: #cloneSources
+						from: self codeFile  
+						to: anObject
 ]
 
 { #category : #accessing }
@@ -65,6 +88,7 @@ MJCCPSource >> initialize [
 	
 	cloneClass := nil.
 	codeClass := nil.
+	codeFile := nil.
 ]
 
 { #category : #accessing }

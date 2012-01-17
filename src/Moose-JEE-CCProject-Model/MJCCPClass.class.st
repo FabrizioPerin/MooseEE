@@ -76,7 +76,7 @@ MJCCPClass >> printOn: stream [
 
 	stream nextPutAll: 'id: '.
 	stream nextPutAll: self id asString.
-	stream nextPutAll: '#fragments: '.
+	stream nextPutAll: ' #fragments: '.
 	stream nextPutAll: self numberOfFragments asString.
 	stream nextPutAll: ' (Clone Class)'.
 	
