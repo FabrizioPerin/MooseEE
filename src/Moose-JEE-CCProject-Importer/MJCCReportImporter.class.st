@@ -5,7 +5,8 @@ Class {
 		'parser',
 		'doc',
 		'root',
-		'targetModel'
+		'targetModel',
+		'lastClone'
 	],
 	#category : #'Moose-JEE-CCProject-Importer'
 }
@@ -50,7 +51,8 @@ MJCCReportImporter >> initialize [
 MJCCReportImporter >> linkSourcesAndFilesOrClasses [
 	| famixClass famixFile sourcesToCheck |
 	
-	sourcesToCheck := self targetModel allCloneSources select: [:each | each codeClass isNil and: [each codeFile isNil ] ].
+	"sourcesToCheck := self targetModel allCloneSources select: [:each | each codeClass isNil and: [each codeFile isNil ] ]."
+	sourcesToCheck := lastClone classes flatCollect: [:class | class sources].
 	
 	self targetModel allFiles size = 0
 		ifTrue: [ 
@@ -78,20 +80,20 @@ MJCCReportImporter >> parser [
 
 { #category : #'as yet unclassified' }
 MJCCReportImporter >> populateTargetModelWith: aCollectionOfEnsuredNodes [
-	| result clones sources |
+	| result sources |
 
 	result := (root allElements select: [:eachElement | eachElement class = MJCCPClonesNode]) collect: [:eachElement |
 							eachElement createElementFrom: self targetModel].
 	
-	clones := result first.
+	lastClone := result first.
 	
-	targetModel silentlyAdd: clones systeminfo.
-	targetModel silentlyAdd: clones classinfo.
-	targetModel silentlyAddAll: clones classes.
+	targetModel silentlyAdd: lastClone systeminfo.
+	targetModel silentlyAdd: lastClone classinfo.
+	targetModel silentlyAddAll: lastClone classes.
 	
-	clones classes do: [:class | targetModel silentlyAddAll: class sources ].
+	lastClone classes do: [:class | targetModel silentlyAddAll: class sources ].
 	
-	targetModel add: clones.
+	targetModel add: lastClone.
 	
 	self linkSourcesAndFilesOrClasses.
 	
