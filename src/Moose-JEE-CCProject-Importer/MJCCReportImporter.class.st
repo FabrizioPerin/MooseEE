@@ -48,10 +48,13 @@ MJCCReportImporter >> initialize [
 
 { #category : #'as yet unclassified' }
 MJCCReportImporter >> linkSourcesAndFilesOrClasses [
-	| famixClass famixFile |
+	| famixClass famixFile sourcesToCheck |
+	
+	sourcesToCheck := self targetModel allCloneSources select: [:each | each codeClass isNil and: [each codeFile isNil ] ].
+	
 	self targetModel allFiles size = 0
 		ifTrue: [ 
-			self targetModel allCloneSources
+			sourcesToCheck
 				do: [ :source | 
 					famixClass := self targetModel allClasses
 						detect: [ :class | (source file removeSuffix: '.java') transformInMoosePathFormat endsWith: class mooseName asString ]
@@ -59,7 +62,7 @@ MJCCReportImporter >> linkSourcesAndFilesOrClasses [
 					famixClass isNil
 						ifFalse: [ famixClass addClone: source ] ] ]
 		ifFalse: [ 
-			self targetModel allCloneSources
+			sourcesToCheck
 				do: [ :source | 
 					famixFile := self targetModel allFiles
 						detect: [ :file | source file endsWith: (FileDirectory pathNameDelimiter asString , file name asString) ]
