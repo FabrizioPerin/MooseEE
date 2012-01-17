@@ -1,6 +1,23 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*moose-jee-ccproject-importer' }
+MooseModel >> importCloneInfoFromFolderUI [
+	<menuItem: 'Import clones info from folder XML report' category: 'JEAs Importers'>
+	| folder |
+	
+	folder := UITheme builder 
+		chooseDirectory: 'Import information from XML reports in a folder'.
+
+	folder isNil 
+		ifTrue: [ DialogWindow new alert: 'File not found.'.]
+		ifFalse: [
+			self halt.
+			folder 
+			self importClonesInfoFrom: folder readStream.
+			DialogWindow new inform: 'Import process completed'.].
+]
+
+{ #category : #'*moose-jee-ccproject-importer' }
 MooseModel >> importCloneInfoUI [
 	<menuItem: 'Import clones info from XML report' category: 'JEAs Importers'>
 	| file |
