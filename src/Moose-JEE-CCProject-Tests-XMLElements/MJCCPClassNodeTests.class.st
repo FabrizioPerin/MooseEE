@@ -99,9 +99,13 @@ MJCCPClassNodeTests >> testClassElementResolvingWithClass [
 	self assert: (result first sources allSatisfy: [:class | class isMemberOf: MJCCPSource ]).
 	self assert: result first sources first cloneClass equals: result first.
 	self assert: result first sources second cloneClass equals: result first.
-		
-	self assert: result first sources first codeClass equals: famixclass. 		
-	self assert: result first sources second codeClass equals: famixclass. 		
+	
+	"Accordingly to the last implementation of the importer the link between the classes and the sources will happen in a second moment
+	so the codeClass should be nil"
+	"self assert: result first sources first codeClass equals: famixclass. 		
+	self assert: result first sources second codeClass equals: famixclass."	
+	self assert: result first sources first codeClass equals: nil.		
+	self assert: result first sources second codeClass equals: nil.
 
 ]
 
