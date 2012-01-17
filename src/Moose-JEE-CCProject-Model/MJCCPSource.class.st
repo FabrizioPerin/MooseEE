@@ -83,6 +83,11 @@ MJCCPSource >> file: anObject [
 ]
 
 { #category : #accessing }
+MJCCPSource >> from [
+	^self cloneClass
+]
+
+{ #category : #accessing }
 MJCCPSource >> initialize [
 	super initialize.
 	
@@ -124,4 +129,14 @@ MJCCPSource >> startLine [
 { #category : #accessing }
 MJCCPSource >> startLine: anObject [
 	startLine := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> to [
+	
+	self codeClass isNil
+		ifFalse: [ ^self codeClass ].
+	
+	self codeFile isNil
+		ifFalse: [ ^self codeFile ].
 ]

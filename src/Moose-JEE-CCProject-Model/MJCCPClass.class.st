@@ -106,11 +106,20 @@ MJCCPClass >> viewClonesSizeOn: aChart [
 	| diag1 diag2 |
 	
 	diag1 := ESVerticalBarDiagram new
-		identifier: [ :source | source codeClass name ];
+		identifier: [ :source | 
+			source codeClass isNil
+				ifFalse: [ source codeClass name removeSuffix: '.java'].
+			source codeFile isNil
+				ifFalse: [ source codeFile name removeSuffix: '.java' ] ];
 		rotatedLabels: true;
 		y: [ :source |
 			| text |
-			text := source codeClass sourceAnchor completeText. 
+
+			source codeClass isNil
+				ifFalse: [text := source codeClass sourceAnchor completeText. ].
+			source codeFile isNil
+				ifFalse: [text := source codeFile sourceText. ].
+			 
 			(text isNil not and: [text contents lineCount > 0]) 
 				ifTrue: [text contents lineCount]
 				ifFalse: [source codeClass numberOfLinesOfCode]];
