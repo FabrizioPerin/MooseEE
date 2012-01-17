@@ -46,6 +46,28 @@ MJCCReportImporter >> initialize [
 
 ]
 
+{ #category : #'as yet unclassified' }
+MJCCReportImporter >> linkSourcesAndFilesOrClasses [
+	| famixClass famixFile |
+	self targetModel allFiles size = 0
+		ifTrue: [ 
+			self targetModel allCloneSources
+				do: [ :source | 
+					famixClass := self targetModel allClasses
+						detect: [ :class | (source file removeSuffix: '.java') transformInMoosePathFormat endsWith: class mooseName asString ]
+						ifNone: [ nil ].
+					famixClass isNil
+						ifFalse: [ famixClass addClone: source ] ] ]
+		ifFalse: [ 
+			self targetModel allCloneSources
+				do: [ :source | 
+					famixFile := self targetModel allFiles
+						detect: [ :file | source file endsWith: (FileDirectory pathNameDelimiter asString , file name asString) ]
+						ifNone: [ nil ].
+					famixFile isNil
+						ifFalse: [ source codeFile: famixFile ] ] ]
+]
+
 { #category : #accessing }
 MJCCReportImporter >> parser [
 	^parser
@@ -67,6 +89,8 @@ MJCCReportImporter >> populateTargetModelWith: aCollectionOfEnsuredNodes [
 	clones classes do: [:class | targetModel silentlyAddAll: class sources ].
 	
 	targetModel add: clones.
+	
+	self linkSourcesAndFilesOrClasses.
 	
 	^targetModel
 ]
