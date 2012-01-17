@@ -92,6 +92,21 @@ MJCCPSource >> initialize [
 ]
 
 { #category : #accessing }
+MJCCPSource >> mooseDisplayStringOn: aStream [
+
+	self cloneClass mooseDisplayStringOn: aStream.
+	aStream nextPutAll: ' -> '.
+	
+	self codeClass isNil
+		ifFalse: [
+			self codeClass mooseDisplayStringOn: aStream].
+	
+	self codeFile isNil
+		ifFalse: [
+			self codeFile mooseDisplayStringOn: aStream]
+]
+
+{ #category : #accessing }
 MJCCPSource >> pcid [
 	^ pcid
 ]
