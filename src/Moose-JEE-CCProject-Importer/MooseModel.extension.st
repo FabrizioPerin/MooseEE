@@ -9,11 +9,12 @@ MooseModel >> importCloneInfoFromFolderUI [
 		chooseDirectory: 'Import information from XML reports in a folder'.
 
 	folder isNil 
-		ifTrue: [ DialogWindow new alert: 'File not found.'.]
+		ifTrue: [ DialogWindow new alert: 'Folder not found.'.]
 		ifFalse: [
-			self halt.
-			folder 
-			self importClonesInfoFrom: folder readStream.
+			folder entries do: [:entry | 
+				(entry name endsWith: '.xml') "endsWith: is casesensitive"
+					ifTrue: [
+						self importClonesInfoFrom: entry readStream ] ].
 			DialogWindow new inform: 'Import process completed'.].
 ]
 
