@@ -13,15 +13,16 @@ MooseModel >> importCloneInfoFromFolderUI [
 		ifFalse: [
 			| xmlFiles |
 			xmlFiles := folder entries select: [:entry | entry name endsWith: '.xml'].
+			
 			MooseCustomTask 
-				runWithProgress: [
+				runWithProgress: [:bar | 
 					xmlFiles do: [:file | 
-						(file name endsWith: '.xml') "endsWith: is casesensitive"
-							ifTrue: [
-								self importClonesInfoFrom: file readStream ] ].
-					DialogWindow new inform: 'Import process completed'. ] 
+						self importClonesInfoFrom: file readStream.
+						bar increment. ] ] 
 				description: 'Importing ' , xmlFiles size asString , ' code clones reports'
-				length: xmlFiles size ].
+				length: xmlFiles size.
+			
+			DialogWindow new inform: 'Import process completed'. ].
 ]
 
 { #category : #'*moose-jee-ccproject-importer' }

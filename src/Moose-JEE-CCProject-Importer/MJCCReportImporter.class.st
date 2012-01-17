@@ -55,7 +55,7 @@ MJCCReportImporter >> linkSourcesAndFilesOrClasses [
 	sourcesToCheck := lastClone classes collection flatCollect: [:class | class sources].
 	
 	MooseCustomTask 
-		runWithProgress: [
+		runWithProgress: [:bar |
 			self targetModel allFiles size = 0
 				ifTrue: [ 
 					sourcesToCheck
@@ -64,7 +64,8 @@ MJCCReportImporter >> linkSourcesAndFilesOrClasses [
 								detect: [ :class | (source file removeSuffix: '.java') transformInMoosePathFormat endsWith: class mooseName asString ]
 								ifNone: [ nil ].
 							famixClass isNil
-								ifFalse: [ famixClass addClone: source ] ] ]
+								ifFalse: [ famixClass addClone: source ].
+							bar increment. ] ]
 				ifFalse: [ 
 					sourcesToCheck
 						do: [ :source | 
@@ -72,7 +73,8 @@ MJCCReportImporter >> linkSourcesAndFilesOrClasses [
 								detect: [ :file | source file endsWith: (FileDirectory pathNameDelimiter asString , file name asString) ]
 								ifNone: [ nil ].
 							famixFile isNil
-								ifFalse: [ source codeFile: famixFile ] ] ] ]
+								ifFalse: [ source codeFile: famixFile ].
+							bar increment. ] ] ]
 		description: 'Linking ' , sourcesToCheck size asString , ' Sources'
 		length: sourcesToCheck size
 	
