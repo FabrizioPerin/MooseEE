@@ -10,12 +10,22 @@ MJCCPClassInfoNode >> createElementFrom: aMooseModel [
 	
 	classinfo := MJCCPClassinfo new.
 	
-	classinfo numberOfClones: self numberOfClones asNumber.
+	classinfo
+		numberOfClones:
+			(self numberOfClones first isDigit
+				ifTrue: [ self numberOfClones asNumber ]
+				ifFalse: [ self numberOfClones ]).
 	classinfo numberOfClasses: self numberOfClasses asNumber.
-	classinfo numberOfPairs: self numberOfPairs asNumber.
-	classinfo numberOfFragments: self numberOfFragments asNumber.
-	
-	^classinfo
+	classinfo numberOfPairs: 
+		(self numberOfPairs first isDigit
+				ifTrue: [ self numberOfPairs asNumber ]
+				ifFalse: [ self numberOfPairs ]).
+	classinfo numberOfFragments:
+		(self numberOfFragments first isDigit
+				ifTrue: [ self numberOfFragments asNumber ]
+				ifFalse: [ self numberOfFragments ]).
+				
+	^ classinfo
 ]
 
 { #category : #'as yet unclassified' }

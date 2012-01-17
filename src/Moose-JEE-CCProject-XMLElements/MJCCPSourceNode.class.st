@@ -14,18 +14,6 @@ MJCCPSourceNode >> createElementFrom: aMooseModel [
 	source file: self file.
 	source pcid: self id asNumber. 
 	source startLine: self startLine asNumber.
-
-	 (aMooseModel allFiles size = 0)
-		ifTrue: [
-			famixClass := aMooseModel allClasses detect: [:class | (self file removeSuffix: '.java') transformInMoosePathFormat endsWith: class mooseName asString ] ifNone: [nil].
-
-			famixClass isNil	
-				ifFalse: [famixClass addClone: source].]
-		ifFalse: [
-			famixFile := aMooseModel allFiles detect: [:file | self file endsWith: ( FileDirectory pathNameDelimiter asString , file name asString )] ifNone: [nil].
-			
-			famixFile isNil
-				ifFalse: [source codeFile: famixFile ] ].
 			
 	^source
 	
