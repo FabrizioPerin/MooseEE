@@ -17639,6 +17639,38 @@ MJCCPSampleReports class >> smallReport [
 </project>'
 ]
 
+{ #category : #tests }
+MJCCPSampleReports class >> smallReportWithDashes [
+	^'<clones>
+<systeminfo system="org" granularity="blocks" threshold="30%" minlines="5" maxlines="500"/>
+<classinfo npcs="-----" nclones="----" nfragments="----" npairs="-----" nclasses="2"/>
+<runinfo ncompares="--------" cputime="--------"/>
+
+<class id="1" nlines="9" nfragments="3">
+<source file="/home/saeed/code/org/eevolution/model/MDDOrder.java" startline="529" endline="538" pcid="1623" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MInvoiceLine.java" startline="1232" endline="1241" pcid="32659" group="2"></source>
+<source file="/home/saeed/code/org/compiere/model/MInvoiceLine.java" startline="745" endline="754" pcid="32611" group="2"></source>
+</class>
+<class id="2" nlines="5" nfragments="15">
+<source file="/home/saeed/code/org/compiere/model/MInventory.java" startline="160" endline="166" pcid="11561" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MCash.java" startline="658" endline="664" pcid="12979" group="1"></source>
+<source file="/home/saeed/code/org/eevolution/model/MDDOrder.java" startline="222" endline="228" pcid="1593" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MRMA.java" startline="751" endline="757" pcid="43713" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MPayment.java" startline="1544" endline="1550" pcid="43313" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MInvoice.java" startline="798" endline="804" pcid="42975" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MJournal.java" startline="202" endline="208" pcid="39613" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MTimeExpense.java" startline="159" endline="165" pcid="39063" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MInOut.java" startline="558" endline="564" pcid="38649" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MMovementConfirm.java" startline="184" endline="190" pcid="15409" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MInOutConfirm.java" startline="173" endline="179" pcid="34941" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MInvoiceLine.java" startline="307" endline="313" pcid="32572" group="2"></source>
+<source file="/home/saeed/code/org/compiere/model/MBankStatement.java" startline="147" endline="153" pcid="30840" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MMovement.java" startline="138" endline="144" pcid="20950" group="1"></source>
+<source file="/home/saeed/code/org/compiere/model/MOrder.java" startline="268" endline="274" pcid="20379" group="1"></source>
+</class>
+</clones>'
+]
+
 { #category : #'as yet unclassified' }
 MJCCPSampleReports >> seeClassSide [
 ]
