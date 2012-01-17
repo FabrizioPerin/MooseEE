@@ -52,7 +52,7 @@ MJCCReportImporter >> linkSourcesAndFilesOrClasses [
 	| famixClass famixFile sourcesToCheck |
 	
 	"sourcesToCheck := self targetModel allCloneSources select: [:each | each codeClass isNil and: [each codeFile isNil ] ]."
-	sourcesToCheck := lastClone classes flatCollect: [:class | class sources].
+	sourcesToCheck := lastClone classes collection flatCollect: [:class | class sources].
 	
 	self targetModel allFiles size = 0
 		ifTrue: [ 
