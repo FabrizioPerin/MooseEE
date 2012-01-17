@@ -10,24 +10,15 @@ Class {
 { #category : #'as yet unclassified' }
 CloneClassesBrowser >> buildBrowser [ 
 	browser := GLMTabulator new.
-"	self browserActions."
 	browser title: 'Clone Classes Generic Browser'.
 	browser 
 		column: [:col |
 			col 
-				"row: #filters;"
 				row: #cloneClasses];
 		column: [:col | 
 			col 
 				row: #clonesComparisonGraph;
 				row: #sourceCode] span: 3.
-	
-	"browser transmit to: #filters; andShow: [:a |
-		a dropDownList
-			display: [:mm | 
-				#(0.1 0.2 0.3)];
-			format: [:number | number asString];
-			title: 'Clone size on Class file size ratio']."
 	
 	browser transmit to: #cloneClasses; andShow: [:a | "a is aGLMCompositePresentation"
 		a list
@@ -59,21 +50,28 @@ CloneClassesBrowser >> buildBrowser [
 		andShow: [:a | 
 			a text
 			title: 'Source code';
-			"transformation: [:cloneClass | cloneClass model];"
 			display: [:eyeseeComponent | 
-				| source |
+				| source text |
 				source := eyeseeComponent model.
-				source codeClass sourceAnchor completeText.]].
+				source codeFile isNil
+					ifFalse: [ text := source codeFile sourceText ].
+				source codeClass isNil
+					ifFalse: [ text := source codeClass sourceAnchor completeText ].
+				text ] ].
 		
 	browser transmit 
 		to: #sourceCode->#selectionInterval; 
 		from: #clonesComparisonGraph; 
 		when: [:source | source notNil];
 		transformed: [:eyeseeComponent | 
-			| source startIndex endIndex |
+			| source text startIndex endIndex |
 			source := eyeseeComponent model.
-			startIndex := (source codeClass sourceAnchor completeText intervalOfLine: source startLine) first.
-			endIndex := (source codeClass sourceAnchor completeText intervalOfLine: source endLine) last.
+			source codeFile isNil
+					ifFalse: [ text := source codeFile sourceText ].
+			source codeClass isNil
+					ifFalse: [ text := source codeClass sourceAnchor completeText ].
+			startIndex := (text intervalOfLine: source startLine) first.
+			endIndex := (text intervalOfLine: source endLine) last.
 			startIndex to: endIndex].
 	
 	^ browser
