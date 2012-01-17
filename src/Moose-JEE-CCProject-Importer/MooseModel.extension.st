@@ -11,11 +11,17 @@ MooseModel >> importCloneInfoFromFolderUI [
 	folder isNil 
 		ifTrue: [ DialogWindow new alert: 'Folder not found.'.]
 		ifFalse: [
-			folder entries do: [:entry | 
-				(entry name endsWith: '.xml') "endsWith: is casesensitive"
-					ifTrue: [
-						self importClonesInfoFrom: entry readStream ] ].
-			DialogWindow new inform: 'Import process completed'.].
+			| xmlFiles |
+			xmlFiles := folder entries select: [:entry | entry name endsWith: '.xml'].
+			MooseCustomTask 
+				runWithProgress: [
+					xmlFiles do: [:file | 
+						(file name endsWith: '.xml') "endsWith: is casesensitive"
+							ifTrue: [
+								self importClonesInfoFrom: file readStream ] ].
+					DialogWindow new inform: 'Import process completed'. ] 
+				description: 'Importing ' , xmlFiles size asString , ' code clones reports'
+				length: xmlFiles size ].
 ]
 
 { #category : #'*moose-jee-ccproject-importer' }
