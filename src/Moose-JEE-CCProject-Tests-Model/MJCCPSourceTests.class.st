@@ -42,6 +42,20 @@ MJCCPSourceTests >> testCodeClass [
 ]
 
 { #category : #accessing }
+MJCCPSourceTests >> testCodeFile [
+	| famixFile |
+	
+	self assert: source codeFile equals: nil.
+		
+	famixFile := FAMIXFile new name: 'MSequence'.
+	famixFile addCloneSource: source.	
+	
+	self assert: source codeFile equals: famixFile.
+	
+
+]
+
+{ #category : #accessing }
 MJCCPSourceTests >> testEndLine [
 
 	self assert: source endLine equals: nil.
