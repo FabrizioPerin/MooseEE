@@ -16,9 +16,16 @@ MooseModel >> importCloneInfoFromFolderUI [
 			
 			MooseCustomTask 
 				runWithProgress: [:bar | 
+					| importer |
+
+					importer := MJCCReportImporter on: self.
+			
 					xmlFiles do: [:file | 
-						self importClonesInfoFrom: file readStream.
-						bar increment. ] ] 
+						self importCloneReportWith: importer From: file readStream.
+						bar increment. ].
+					
+					importer linkSourcesAndFilesOrClasses.] 
+		
 				description: 'Importing ' , xmlFiles size asString , ' code clones reports'
 				length: xmlFiles size.
 			
@@ -37,17 +44,18 @@ MooseModel >> importCloneInfoUI [
 	file isNil 
 		ifTrue: [ DialogWindow new alert: 'File not found.'.]
 		ifFalse: [
-			self importClonesInfoFrom: file readStream.
+			| importer |
+			
+			importer := MJCCReportImporter on: self.
+			self importCloneReportWith: importer From: file readStream.
+			importer linkSourcesAndFilesOrClasses.
+			
 			DialogWindow new inform: 'Import process completed'.].
 ]
 
 { #category : #'*moose-jee-ccproject-importer' }
-MooseModel >> importClonesInfoFrom: aStream [
-	| importer |
+MooseModel >> importCloneReportWith: anImporter From: aStream [
 
-	importer := MJCCReportImporter on: self.
-	
-	importer importFrom: aStream.
-	
+	anImporter importFrom: aStream.
 	
 ]
