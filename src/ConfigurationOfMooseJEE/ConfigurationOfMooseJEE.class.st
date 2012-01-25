@@ -493,7 +493,11 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec requires: 'Merlin'];
 			package: 'Moose-JEE-CCProject-XMLElements' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-CCProject-Reports' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: 'Moose-JEE-CCProject-Model'];
 			package: 'Moose-JEE-Help' with: [spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			
 			
 			"Tests"
 			package: 'Moose-JEE-Tests-Resources' with: [
