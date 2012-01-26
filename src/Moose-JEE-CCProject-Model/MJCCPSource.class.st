@@ -99,7 +99,10 @@ MJCCPSource >> initialize [
 { #category : #accessing }
 MJCCPSource >> mooseDisplayStringOn: aStream [
 
-	self cloneClass mooseDisplayStringOn: aStream.
+	self cloneClass isNil
+		ifFalse: [
+			self cloneClass mooseDisplayStringOn: aStream].
+		
 	aStream nextPutAll: ' -> '.
 	
 	self codeClass isNil
@@ -119,6 +122,12 @@ MJCCPSource >> pcid [
 { #category : #accessing }
 MJCCPSource >> pcid: anObject [
 	pcid := anObject
+]
+
+{ #category : #accessing }
+MJCCPSource >> sourceAnchor [ 
+
+	^nil
 ]
 
 { #category : #accessing }
