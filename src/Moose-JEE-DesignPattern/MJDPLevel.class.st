@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPLevel,
-	#superclass : #FAMIXEntity,
+	#superclass : #MJDPEntity,
 	#instVars : [
 		'parentLevel',
 		'childLevels',

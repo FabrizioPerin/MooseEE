@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPRole,
-	#superclass : #FAMIXEntity,
+	#superclass : #MJDPEntity,
 	#instVars : [
 		'associatedClass'
 	],

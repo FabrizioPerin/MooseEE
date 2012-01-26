@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPRoleAssociation,
-	#superclass : #FAMIXAssociation,
+	#superclass : #MJDPAssociation,
 	#instVars : [
 		'role',
 		'implementor'

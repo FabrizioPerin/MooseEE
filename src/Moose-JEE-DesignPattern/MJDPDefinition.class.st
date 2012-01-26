@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPDefinition,
-	#superclass : #FAMIXAssociation,
+	#superclass : #MJDPAssociation,
 	#instVars : [
 		'patternName',
 		'implementedPattern'

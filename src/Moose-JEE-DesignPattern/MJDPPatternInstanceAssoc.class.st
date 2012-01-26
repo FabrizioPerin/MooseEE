@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPPatternInstanceAssoc,
-	#superclass : #FAMIXAssociation,
+	#superclass : #MJDPAssociation,
 	#instVars : [
 		'patternDefinition',
 		'levelInstance'

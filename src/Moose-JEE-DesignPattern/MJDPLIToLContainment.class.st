@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPLIToLContainment,
-	#superclass : #FAMIXAssociation,
+	#superclass : #MJDPAssociation,
 	#instVars : [
 		'level',
 		'levelInstance'

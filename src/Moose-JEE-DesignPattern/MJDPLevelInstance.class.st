@@ -1,6 +1,6 @@
 Class {
 	#name : #MJDPLevelInstance,
-	#superclass : #FAMIXEntity,
+	#superclass : #MJDPEntity,
 	#instVars : [
 		'containedLevels',
 		'patternDefinition'
