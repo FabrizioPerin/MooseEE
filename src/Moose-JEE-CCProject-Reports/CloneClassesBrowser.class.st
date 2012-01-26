@@ -12,9 +12,7 @@ CloneClassesBrowser >> buildBrowser [
 	browser := GLMTabulator new.
 	browser title: 'Clone Classes Generic Browser'.
 	browser 
-		column: [:col |
-			col 
-				row: #cloneClasses];
+		column: #cloneClasses;
 		column: [:col | 
 			col 
 				row: #clonesComparisonGraph;
@@ -23,12 +21,8 @@ CloneClassesBrowser >> buildBrowser [
 	browser transmit to: #cloneClasses; andShow: [:a | "a is aGLMCompositePresentation"
 		a list
 			title: 'Clone Classes';
-			display: [ :mm | mm allCloneClasses];
-			format: [:cloneClass |
-				| stream | 
-				stream := ReadWriteStream on: ''.
-				cloneClass mooseNameOn: stream.
-				stream contents];
+			display: #allCloneClasses;
+			format: #mooseName;
 			
 			filterOn: [:text :each | Compiler evaluate: '| each | each := self. ', text for: each logged: false ];
 			helpMessage:  'Enter a filtering request (e.g., "each numberOfLines > 40")';
