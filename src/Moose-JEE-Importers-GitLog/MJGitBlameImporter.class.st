@@ -17,19 +17,22 @@ MJGitBlameImporter class >> on: aModel [
 
 { #category : #accessing }
 MJGitBlameImporter >> computeTheConnectionsWithClasses [
-
-	self targetModel allClasses do: [ :class | 
-			self targetModel allBlameFiles select: [ :bf | 
+	| result |
+	result := OrderedCollection new.
+		
+	(self targetModel allClasses reject: [:class | class name startsWithDigit]) do: [ :class | 
+			self targetModel allBlameFiles collect: [ :bf | 
 					class hasSourceAnchor
-						ifTrue: [ (class sourceAnchor fileName endsWith: bf fileName)
+						ifTrue: [ (class sourceAnchor fileName endsWith: bf mooseName asString)
 									ifTrue: [ 
 										| assoc |
 										assoc := MJBlameClassAssociation new.
-										assoc target: class.
-										assoc source: bf.
-										class associatedBlameFile 
-										
-										] ] ] ]
+										assoc targetClass: class.
+										assoc sourceBlameFile: bf.
+										class associatedBlameFile.
+										result add: assoc.
+										] ] ] ].
+	^result
 ]
 
 { #category : #accessing }
@@ -93,7 +96,7 @@ MJGitBlameImporter >> importBlameFilesIn: aFolder [
 	| index files aCollectionOfEnsuredNodes |
 	
 	index := 1.
-	files := aFolder entries select: [ :file | file name endsWith: '.blame' ].
+	files := (aFolder entries select: [ :file | file name endsWith: '.blame' ]) reject: [:each | each fileSize = 0].
 	aCollectionOfEnsuredNodes := OrderedCollection new.
 	
 	UIManager default
@@ -104,7 +107,7 @@ MJGitBlameImporter >> importBlameFilesIn: aFolder [
 		during: [ :bar | 
 			
 			bar value: index.
-			files
+			files 
 				do: [ :file | 
 					| nodes |
 					nodes := gitLogASTParser parse: (StandardFileStream readOnlyFileNamed: file fullName) contents.
