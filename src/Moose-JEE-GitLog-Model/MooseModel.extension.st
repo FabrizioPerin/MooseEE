@@ -53,6 +53,7 @@ MooseModel >> importClassOwnershipFromSVNBlameFilesGUI [
 	
 	importer := MJSVNBalmeImporter on: self.
 	importer importBlameFilesInAFolder.
+	importer computeTheConnectionsWithClasses.
 
 	^self
 ]

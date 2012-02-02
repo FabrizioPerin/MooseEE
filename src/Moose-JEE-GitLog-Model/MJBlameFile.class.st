@@ -70,6 +70,15 @@ MJBlameFile >> fileName: anObject [
 ]
 
 { #category : #accessing }
+MJBlameFile >> fullName [
+
+	
+	"self fileName isNil ifFalse: [aStream nextPutAll: self fileName asString].
+	aStream nextPutAll: ' (BlameFile)'.
+"
+]
+
+{ #category : #accessing }
 MJBlameFile >> initialize [
 	super initialize.
 	lines := OrderedCollection new.
@@ -91,8 +100,8 @@ MJBlameFile >> lines: aCollection [
 
 { #category : #accessing }
 MJBlameFile >> mooseNameOn: aStream [ 
-	
-	aStream nextPutAll: self fileName asString
+	super mooseNameOn: aStream
+	"aStream nextPutAll: self name asString"
 ]
 
 { #category : #accessing }
