@@ -2,7 +2,7 @@ Extension { #name : #MooseModel }
 
 { #category : #'*moose-jee-ccproject-importer' }
 MooseModel >> importCloneInfoFromFolderUI [
-	<menuItem: 'Import clones info from folder XML report' category: 'JEAs Importers'>
+	<menuItem: 'Import XML clones reports from folder' category: 'JEAs Importers'>
 	| folder |
 	
 	folder := UITheme builder 
@@ -34,7 +34,7 @@ MooseModel >> importCloneInfoFromFolderUI [
 
 { #category : #'*moose-jee-ccproject-importer' }
 MooseModel >> importCloneInfoUI [
-	<menuItem: 'Import clones info from XML report' category: 'JEAs Importers'>
+	<menuItem: 'Import XML clones report' category: 'JEAs Importers'>
 	| file |
 	
 	file := UITheme builder 
