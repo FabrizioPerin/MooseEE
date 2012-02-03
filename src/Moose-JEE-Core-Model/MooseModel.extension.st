@@ -26,6 +26,32 @@ MooseModel >> cleanUpDuplicatedDeriveDependencies [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
+MooseModel >> deleteAllDeriveDependencies [
+	<menuItem: 'Delete all derived dependencies' category: 'JEAs Utilities'>
+	
+	self silentlyRemoveAll: self allDerivedDependencies.
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+MooseModel >> exportDerivedAssociationsOnCSV [
+	| stream dependencies header block |
+	
+	stream := MultiByteFileStream forceNewFileNamed: 'DerivedAssociationsOutput.csv'.
+	
+	dependencies := self allDerivedDependencies.
+	
+	header := 'Source' , '; ' , 'Target' , '; ' , 'Rational' , String cr.
+	
+	block := [:dependency | dependency from mooseName asString , '; ' , dependency to mooseName asString , '; ' , dependency rationale , String cr ].
+	
+	MooseJEEScripts 
+		print: dependencies
+		asCSVOn: stream
+		with: header
+		using: block.
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 MooseModel >> fixFileAnchorsFrom: aFolder [ 
 	| index startingPoint javaFiles |
 
