@@ -432,6 +432,28 @@ MooseJEEScripts class >> packageOrganizerCleanUp [
 ]
 
 { #category : #cleanup }
+MooseJEEScripts class >> print: aCollectionOfElements asCSVOn: aStream with: aHeader using: aBlock [ 
+	
+	UIManager default
+		displayProgress: 'Exporting in CSV'
+		at: Sensor cursorPoint
+		from: 1 
+		to: aCollectionOfElements size
+		during: [ :bar | 
+			| index |
+			index := 1.
+			aStream nextPutAll: aHeader.
+			aCollectionOfElements
+				do: [ :edge | 
+				
+					aStream nextPutAll: (aBlock value: edge).
+					
+					index := index + 1.
+					bar value: index. ]].
+	aStream close.  
+]
+
+{ #category : #cleanup }
 MooseJEEScripts class >> scriptLoaderPackageNameForCleanUp [
 	^'ScriptLoader',  CurrentMajorVersionNumber asString copyWithout: $. 
 ]
