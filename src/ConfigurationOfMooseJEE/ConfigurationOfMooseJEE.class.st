@@ -383,12 +383,12 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				version: '1.2.0';
 				repository: 'http://www.squeaksource.com/XMLSupport' ]."
 		
-		"spec  project: 'PetitSQLParser for MooseJEE' with: [
+		spec  project: 'PetitSQLParser for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfPetitSQLParser';
 				file: 'ConfigurationOfPetitSQLParser';
-				version: 'default';
-				repository: 'http://www.squeaksource.com/PetitSQLParser' ]."
+				version: 'defaultWithoutPetit';
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
 			
 		spec  project: 'FAMIX SQL for MooseJEE' with: [
 			spec
@@ -401,21 +401,21 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 			spec
 				className: 'ConfigurationOfPetitJSPParser';
 				file: 'ConfigurationOfPetitJSPParser';
-				version: 'default';
+				version: 'defaultWithoutPetit';
 				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 			
 		spec  project: 'PetitGitLogParser for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfGitLogParser';
 				file: 'ConfigurationOfGitLogParser';
-				version: 'default';
+				version: 'defaultWithoutPetit';
 				repository: 'http://www.squeaksource.com/PetitGitLogParser'].
 		
 		spec  project: 'PetitPHPParser for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfPetitPHPParser';
 				file: 'ConfigurationOfPetitPHPParser';
-				version: 'default';
+				version: 'defaultWithoutPetit';
 				repository: 'http://www.squeaksource.com/PetitPHPParser'].
 		
 		spec  project: 'Maze for MooseJEE' with: [
@@ -432,12 +432,12 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				version: 'defaultWithoutMooseJEE';
 				repository: 'http://www.squeaksource.com/Babel' ].
 		
-		spec  project: 'Spy for MooseJEE' with: [
+		"spec  project: 'Spy for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfSpy';
 				file: 'ConfigurationOfSpy';
 				version: 'default';
-				repository: 'http://www.squeaksource.com/Spy' ].
+				repository: 'http://www.squeaksource.com/Spy' ]."
 			
 		spec 
 			"Extra Projects"
