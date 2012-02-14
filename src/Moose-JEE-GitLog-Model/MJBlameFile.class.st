@@ -100,8 +100,8 @@ MJBlameFile >> lines: aCollection [
 
 { #category : #accessing }
 MJBlameFile >> mooseNameOn: aStream [ 
-	super mooseNameOn: aStream
-	"aStream nextPutAll: self name asString"
+	"super mooseNameOn: aStream"
+	aStream nextPutAll: self fileName asString
 ]
 
 { #category : #accessing }
