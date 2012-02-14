@@ -267,7 +267,7 @@ ConfigurationOfMooseJEE >> default: spec [
 			spec
 				className: 'ConfigurationOfPetitJSPParser';
 				file: 'ConfigurationOfPetitJSPParser';
-				version: 'default';
+				version: 'defaultWithoutPetit';
 				repository: 'http://www.squeaksource.com/PetitJSParser' ].
 			
 		spec 
