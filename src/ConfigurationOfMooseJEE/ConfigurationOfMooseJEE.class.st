@@ -235,12 +235,12 @@ ConfigurationOfMooseJEE >> default: spec [
 	
 	spec for: #common do: [
 		spec blessing: #default.
-		spec project: 'Moose for MooseJEE' with: [
+		"spec project: 'Moose for MooseJEE' with: [
 				spec
 					className: 'ConfigurationOfMoose';
 					file: 'ConfigurationOfMoose';
 					version: 'default';
-					repository: 'http://www.squeaksource.com/Moose' ].
+					repository: 'http://www.squeaksource.com/Moose' ]."
 		
 		"spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
@@ -369,12 +369,12 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 	
 	spec for: #common do: [
 		spec blessing: #default.
-		spec project: 'Moose for MooseJEE' with: [
+		"spec project: 'Moose for MooseJEE' with: [
 				spec
 					className: 'ConfigurationOfMoose';
 					file: 'ConfigurationOfMoose';
 					version: 'default';
-					repository: 'http://www.squeaksource.com/Moose' ].
+					repository: 'http://www.squeaksource.com/Moose' ]."
 		
 		"spec  project: 'XMLSupport for MooseJEE' with: [
 			spec
