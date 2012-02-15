@@ -8,7 +8,7 @@ MooseModel >> allDataLayer [
 
 { #category : #'*moose-jee-tiers-model' }
 MooseModel >> allLayers [
-	<navigation: 'All Maps'>
+	<navigation: 'All Layers'>
 
 	| group |
 
