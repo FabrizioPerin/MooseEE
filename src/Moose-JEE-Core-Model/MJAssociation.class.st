@@ -11,3 +11,9 @@ MJAssociation class >> annotation [
 	<package: #'Moose-JEE-Model'>
 
 ]
+
+{ #category : #'as yet unclassified' }
+MJAssociation >> sourceAnchor [ 
+
+	^nil
+]
