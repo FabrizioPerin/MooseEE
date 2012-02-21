@@ -9,3 +9,14 @@ MJFAMIXBusinessLayer class >> annotation [
 	<MSEClass: #MJFAMIXBusinessLayer super: #MJFAMIXLayer>
 	<package: #'Moose-JEE-Model'>
 ]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXBusinessLayer >> acceptStrategy: aLayeringStrategy [
+	aLayeringStrategy populateBusinessLayer: self  
+	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXBusinessLayer >> name [
+	^'Business Layer'
+]

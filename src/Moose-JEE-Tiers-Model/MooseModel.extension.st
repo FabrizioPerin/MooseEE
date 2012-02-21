@@ -1,6 +1,12 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*moose-jee-tiers-model' }
+MooseModel >> allBusinessLayer [
+
+	^self allWithType: MJFAMIXBusinessLayer  "asMetaDescription"
+]
+
+{ #category : #'*moose-jee-tiers-model' }
 MooseModel >> allDataLayer [
 	"it should always be one"
 	^self allWithType: MJFAMIXDataLayer
@@ -16,6 +22,7 @@ MooseModel >> allLayers [
 	group addAll: self allLogicLayer.
 	group addAll: self allDataLayer.
 	group addAll: self allServiceLayer.
+	group addAll: self allBusinessLayer.
 	
 	group description: 'All Standard Layers'.
 	^group
