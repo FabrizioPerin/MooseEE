@@ -11,6 +11,23 @@ FAMIXNamedEntity >> addOutgoingDerivedDependency: aDerivedDependency [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
+FAMIXNamedEntity >> cleanAllDerivedDependencies [
+	self cleanIncomingDerivedDependencies.
+	self cleanOutgoingDerivedDependencies.
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXNamedEntity >> cleanIncomingDerivedDependencies [
+	^self privateState attributeAt: #incomingDerivedDependency put: [FMMultivalueLink on: self opposite: #target:].
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXNamedEntity >> cleanOutgoingDerivedDependencies [
+	
+	^self privateState attributeAt: #outgoingDerivedDependency put: [FMMultivalueLink on: self opposite: #source:].
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXNamedEntity >> derivedDependenciesDirection: directionSymbol on: dependencyList [
 
 	"From a list of dependencies of a given type, select the ones going to or coming from receiver"
