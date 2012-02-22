@@ -65,33 +65,3 @@ MJFAMIXLayer >> populate: aMooseModel [
 MJFAMIXLayer >> selectClassesFrom: aMooseModel [
 	^self subclassResponsibility
 ]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXLayer >> viewCSLayer [
-	<menuItem: 'CS Layer' category: 'Visualize'> 
-	| view |
-	
-	view := MOViewRenderer new.
-	self viewCSLayerOn: view.
-	view open.
-]
-
-{ #category : #'as yet unclassified' }
-MJFAMIXLayer >> viewCSLayerOn: view [
-	| groupOfContainedElements |
-
-	groupOfContainedElements := BAComponentGroup withAll: containedClasses.
-
-	view interaction popupText.
-	view interaction menuMorphBlock: [ :each | each mooseMenuMorph ].
-	view shape rectangle
-		width: [ :el | el containedElements size ];
-		height: [ :el | el containedElements size ];
-		linearFillColor: [ :el | el numberOfLinesOfCode ]	within: groupOfContainedElements;
-		withBorder.
-	view nodes: self containedClasses.
-	
-	view edges: self mooseModel allComponentAssociations from: #source to: #target.
-	
-	view treeLayout.
-]
