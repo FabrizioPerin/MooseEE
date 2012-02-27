@@ -15,6 +15,75 @@ MJPHPImporter class >> on: aMooseModel [
 ]
 
 { #category : #accessing }
+MJPHPImporter >> ensureAClass: aPPPHPClassNode [
+	
+	| classNode inheritance |
+	
+	classNode := MJFAMIXPHPClass new.
+	classNode name: aPPPHPClassNode typeName.
+	"super inheritance is used by allSuperclassesDo ...."
+	inheritance := FAMIXInheritance new.
+	inheritance superclass: nil.
+	inheritance subclass: classNode.
+	""
+	classNode addSuperInheritance: inheritance.
+	aPPPHPClassNode interfaces do: [ :interface|
+			classNode addInterface: nil.
+		].
+	aPPPHPClassNode methods do:[
+			classNode addMethod: nil. 
+		].
+	^classNode.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAField: aPPPHPFieldNode [
+	
+	| fieldNode |
+	fieldNode := self ensureAnAttribute: aPPPHPFieldNode.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
+	
+	| methodNode |
+	
+	methodNode := MJFAMIXPHPMethod new.
+	aPPPHPMethodNode parameters do: [
+			methodNode addParameter: nil.
+		].
+	
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureANamespace: aPPPHPNamespaceStack [
+	| spaceNode parentNode |
+	
+	parentNode := nil.
+	aPPPHPNamespaceStack do: [ :item |
+			spaceNode := MJFAMIXPHPNamespace new.
+			spaceNode name: item namespaceName.
+			spaceNode parentScope: parentNode.
+			parentNode := spaceNode.
+		].
+	spaceNode
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
+	
+	| param |
+	param := self ensureAnAttribute: aPPPHPParameterNode .
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAnAttribute: aPPPHPAttributeNode [
+	
+	| attributeNode |
+	attributeNode := MJFAMIXPHPAttribute new.
+]
+
+{ #category : #accessing }
 MJPHPImporter >> initialize [
 
 	phpVisitor := PPPHPConcreteVisitor new importer: self.
