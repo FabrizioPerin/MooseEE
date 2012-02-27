@@ -15,7 +15,7 @@ MooseModelMJExtensionTests >> testAllDataLayer [
 	self assert: (mooseModel allDataLayer size = 1).
 	self assert: (mooseModel allDataLayer first  = dataLayer).
 	
-	self assert: dataLayer containedClasses size = 2.
+	self assert: dataLayer containedElements size = 2.
 ]
 
 { #category : #tests }
@@ -45,7 +45,7 @@ MooseModelMJExtensionTests >> testAllLogicLayer [
 	
 	self assert: (mooseModel allLogicLayer size = 1).
 	self assert: (mooseModel allLogicLayer first  = logicLayer).
-	self assert: logicLayer containedClasses size = 0.
+	self assert: logicLayer containedElements size = 0.
 ]
 
 { #category : #tests }
@@ -59,7 +59,7 @@ MooseModelMJExtensionTests >> testAllPresentitonLayer [
 	
 	self assert: (mooseModel allPresentationLayer size = 1).
 	self assert: (mooseModel allPresentationLayer first = presentationLayer).
-	self assert: presentationLayer containedClasses size = 0.
+	self assert: presentationLayer containedElements size = 0.
 ]
 
 { #category : #tests }
