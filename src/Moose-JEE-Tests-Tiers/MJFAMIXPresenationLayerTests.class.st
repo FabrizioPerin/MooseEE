@@ -20,7 +20,7 @@ MJFAMIXPresenationLayerTests >> testFAMIXPresentationLayerAcceptStrategy [
 	
 	self assert: ((mooseModel allWithType: MJFAMIXPresentationLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXPresentationLayer) first  = presentationLayer).
-	self assert: presentationLayer containedClasses size = 0.
+	self assert: presentationLayer containedElements size = 0.
 ]
 
 { #category : #testsOnJEEModel }
@@ -35,7 +35,7 @@ MJFAMIXPresenationLayerTests >> testFAMIXPresentationLayerPopulate [
 	
 	self assert: ((mooseModel allWithType: MJFAMIXPresentationLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXPresentationLayer) first  = presentationLayer).
-	self assert: (presentationLayer containedClasses size = 0).
+	self assert: (presentationLayer containedElements size = 0).
 ]
 
 { #category : #tests }

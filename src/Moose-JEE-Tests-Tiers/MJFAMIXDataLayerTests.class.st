@@ -20,7 +20,7 @@ MJFAMIXDataLayerTests >> testFAMIXDataLayerAcceptStrategy [
 		
 	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) first  = dataLayer).
-	self assert: dataLayer containedClasses size = 2.
+	self assert: dataLayer containedElements size = 2.
 ]
 
 { #category : #testsOnJEEModel }
@@ -36,7 +36,7 @@ MJFAMIXDataLayerTests >> testFAMIXDataLayerPopulate [
 	
 	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXDataLayer) first  = dataLayer).
-	self assert: dataLayer containedClasses size = 2.
+	self assert: dataLayer containedElements size = 2.
 ]
 
 { #category : #tests }

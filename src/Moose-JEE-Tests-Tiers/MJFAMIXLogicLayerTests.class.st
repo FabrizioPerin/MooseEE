@@ -20,7 +20,7 @@ MJFAMIXLogicLayerTests >> testFAMIXLogicLayerAcceptStrategy [
 	
 	self assert: ((mooseModel allWithType: MJFAMIXLogicLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXLogicLayer) first  = logicLayer).
-	self assert: logicLayer containedClasses size = 0.
+	self assert: logicLayer containedElements size = 0.
 ]
 
 { #category : #testsOnJEEModel }
@@ -35,7 +35,7 @@ MJFAMIXLogicLayerTests >> testFAMIXLogicLayerPopulate [
 	
 	self assert: ((mooseModel allWithType: MJFAMIXLogicLayer) size = 1).
 	self assert: ((mooseModel allWithType: MJFAMIXLogicLayer) first  = logicLayer).
-	self assert: (logicLayer containedClasses size = 0).
+	self assert: (logicLayer containedElements size = 0).
 ]
 
 { #category : #tests }
