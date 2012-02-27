@@ -40,7 +40,7 @@ MJFAMIXServiceLayer >> name [
 { #category : #'as yet unclassified' }
 MJFAMIXServiceLayer >> selectClassesFrom: aMooseModel [
 
-	containedClasses addAll:( aMooseModel allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ]).
+	containedElements addAll:( aMooseModel allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ]).
 	containedSessionBeans addAll: (aMooseModel allSessionBeans collect: [:bean | bean implementationClass] ).
 	
 	

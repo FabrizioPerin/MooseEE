@@ -2,7 +2,9 @@ Class {
 	#name : #MJFAMIXLayer,
 	#superclass : #FAMIXEntity,
 	#instVars : [
-		'containedClasses'
+		'rationale',
+		'layerStrategyName',
+		'containedElements'
 	],
 	#category : #'Moose-JEE-Tiers-Model'
 }
@@ -24,9 +26,9 @@ MJFAMIXLayer >> belongsTo [
 ]
 
 { #category : #accessing }
-MJFAMIXLayer >> containedClasses [
+MJFAMIXLayer >> containedElements [
 	<navigation: 'Contained Elements'>
-	^containedClasses
+	^containedElements
 ]
 
 { #category : #'as yet unclassified' }
@@ -39,7 +41,7 @@ MJFAMIXLayer >> fileOutContainedClasses [
 	
 	stream := MultiByteFileStream forceNewFileNamed: (name , '.out').
 	
-	self containedClasses do: [:class |
+	self containedElements do: [:class |
 		stream nextPutAll: (class mooseName asString , String cr asString)].
 	stream close.
 ]
@@ -47,8 +49,18 @@ MJFAMIXLayer >> fileOutContainedClasses [
 { #category : #initialization }
 MJFAMIXLayer >> initialize [ 
 	super initialize.
-	containedClasses := Set new.
+	containedElements := Set new.
 	^self
+]
+
+{ #category : #accessing }
+MJFAMIXLayer >> layerStrategyName [
+	^ layerStrategyName
+]
+
+{ #category : #accessing }
+MJFAMIXLayer >> layerStrategyName: anObject [
+	layerStrategyName := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -59,6 +71,16 @@ MJFAMIXLayer >> populate: aMooseModel [
 	layer := self selectClassesFrom: aMooseModel.
 	aMooseModel add: layer.
 	
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXLayer >> rationale [
+	^rationale
+]
+
+{ #category : #accessing }
+MJFAMIXLayer >> rationale: anObject [
+	rationale := anObject
 ]
 
 { #category : #'as yet unclassified' }
