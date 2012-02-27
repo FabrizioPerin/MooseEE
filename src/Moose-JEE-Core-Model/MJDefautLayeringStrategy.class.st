@@ -17,7 +17,7 @@ MJDefautLayeringStrategy >> instanciateLayers [
 MJDefautLayeringStrategy >> populateDataLayer: aLayerInstance [
 
 	
-	aLayerInstance containedClasses addAll:  (model allClasses select: [:class | 
+	aLayerInstance containedElements addAll:  (model allClasses select: [:class | 
 					(class doesImplements: #Serializable)  or: [ 
 					class  methods anySatisfy: [ :eachMethod | eachMethod isADataLayerMethod and: [ eachMethod isConstructor not ] ] ] ] ).
 	
@@ -39,7 +39,7 @@ MJDefautLayeringStrategy >> populateLogicLayer: aLayerInstance [
 { #category : #'as yet unclassified' }
 MJDefautLayeringStrategy >> populatePresentationLayer: aLayerInstance [
 
-	aLayerInstance containedClasses addAll: (model allClasses select: [:class | class methods anySatisfy: [:method | (method name = #doPost) or: [ method name = #doGet ] ] ] ).
+	aLayerInstance containedElements addAll: (model allClasses select: [:class | class methods anySatisfy: [:method | (method name = #doPost) or: [ method name = #doGet ] ] ] ).
 	
 	model add: aLayerInstance.
 	
@@ -48,7 +48,7 @@ MJDefautLayeringStrategy >> populatePresentationLayer: aLayerInstance [
 { #category : #'as yet unclassified' }
 MJDefautLayeringStrategy >> populateServiceLayer: aLayerInstance [
 
-	aLayerInstance containedClasses addAll:( model allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ]).
+	aLayerInstance containedElements addAll:( model allClasses select: [:class | class methods anySatisfy: [:method | method couldBeAnEntryPoint ] ]).
 	aLayerInstance containedSessionBeans addAll: (model allSessionBeans collect: [:bean | bean implementationClass] ).
 	
 	model add: aLayerInstance.

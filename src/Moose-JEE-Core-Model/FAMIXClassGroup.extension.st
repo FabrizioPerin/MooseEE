@@ -370,11 +370,11 @@ FAMIXClassGroup >> viewSystemByLayerOn: view [
 		view interaction nodraggable.
 		view interaction menuMorphBlock: [:each | each mooseMenuMorph].  
 		view shape rectangle withBorder.
-		view nodes: dataLayer containedClasses forEach: [:class | 
+		view nodes: dataLayer containedElements forEach: [:class | 
 					 class viewMethodsIncludeIn: class methods ForUnsafeQueriesOn: view].
 		
 		view shape line color: Color veryLightGray.  
-		view edges: dataLayer containedClasses from: #superclass to: #yourself.
+		view edges: dataLayer containedElements from: #superclass to: #yourself.
 		
 		view treeLayout].
 ]
