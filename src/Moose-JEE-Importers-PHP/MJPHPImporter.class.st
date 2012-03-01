@@ -16,22 +16,24 @@ MJPHPImporter class >> on: aMooseModel [
 
 { #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
-	
 	| classNode inheritance |
 	
+	self flag: 'How to add an interface?'.
 	classNode := MJFAMIXPHPClass new.
 	classNode name: aPPPHPClassNode typeName.
-	"super inheritance is used by allSuperclassesDo ...."
+	
 	inheritance := FAMIXInheritance new.
 	inheritance superclass: nil.
 	inheritance subclass: classNode.
-	""
+	
 	classNode addSuperInheritance: inheritance.
+	
 	aPPPHPClassNode interfaces do: [ :interface|
 			classNode addInterface: nil.
 		].
-	aPPPHPClassNode methods do:[
-			classNode addMethod: nil. 
+	
+	aPPPHPClassNode behaviouralEntities do:[ :method |
+			classNode addMethod: (self ensureAMethod: method).
 		].
 	^classNode.
 ]
