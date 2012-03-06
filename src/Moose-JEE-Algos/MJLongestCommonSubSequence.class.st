@@ -138,14 +138,14 @@ MJLongestCommonSubSequence >> valuesMatrix [
 	^ valuesMatrix
 ]
 
-{ #category : #algorithms }
+{ #category : #export }
 MJLongestCommonSubSequence >> writeResultAsCVSEntryOn: aStream [
 	
 	aStream nextPutAll: (firstSequence , ';' , secondSequence , ';' , (self printLCSRecursivlyStartingFrom: firstSequence size to: secondSequence size) size asString , ';' , result , String cr).
 	^aStream
 ]
 
-{ #category : #algorithms }
+{ #category : #export }
 MJLongestCommonSubSequence >> writeResultAsCVSEntryWithHeaderOn: aStream [
 	self class writeCVSEntryHeaderOn: aStream.
 	self writeResultAsCVSEntryOn: aStream.
