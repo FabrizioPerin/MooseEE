@@ -101,6 +101,12 @@ ConfigurationOfMooseJEE class >> loadVersion11 [
 
 ]
 
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadVersion13 [
+
+	(self project version: '1.3') load.
+]
+
 { #category : #accessing }
 ConfigurationOfMooseJEE class >> project [
 
@@ -871,9 +877,13 @@ ConfigurationOfMooseJEE >> version13: spec [
 		spec description: 'release all the project for 1.3'.
 		spec timestamp: '09/03/2012 16:00'.
 		
-		"spec project: 'Moose for MooseJEE' with: '4.1'."
-		"spec project: 'XMLSupport for MooseJEE' with: '1.1.1'."
-		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
+		spec  project: 'PetitSQLParser for MooseJEE' with: 'defaultWithoutPetit'.
+		spec  project: 'FAMIX SQL for MooseJEE' with: 'default'.
+		spec  project: 'PetitJSPParser for MooseJEE' with: 'defaultWithoutPetit'.
+		spec  project: 'PetitGitLogParser for MooseJEE' with: 'defaultWithoutPetit'.
+		spec  project: 'PetitPHPParser for MooseJEE' with: 'defaultWithoutPetit'.
+		spec  project: 'Maze for MooseJEE' with: 'default'.
+		spec  project: 'Babel for MooseJEE' with: 'defaultWithoutMooseJEE'.
 		
 		spec
 			package: 'Merlin' with: 'Merlin-CesarCouto.140';
