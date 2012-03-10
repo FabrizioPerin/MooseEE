@@ -230,6 +230,117 @@ ConfigurationOfMooseJEE >> baseline12: spec [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> baseline13: spec [ 
+        <version: '1.3-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.squeaksource.com/MooseJEE'.
+		
+		spec  project: 'PetitSQLParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitSQLParser';
+				file: 'ConfigurationOfPetitSQLParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.squeaksource.com/PetitSQLParser' ].
+			
+		spec  project: 'FAMIX SQL for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfFamixSQL';
+				file: 'ConfigurationOfFamixSQL';
+				"version: 'default';"
+				repository: 'http://www.squeaksource.com/Moose' ].
+
+		spec  project: 'PetitJSPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitJSPParser';
+				file: 'ConfigurationOfPetitJSPParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.squeaksource.com/PetitJSParser' ].
+			
+		spec  project: 'PetitGitLogParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfGitLogParser';
+				file: 'ConfigurationOfGitLogParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.squeaksource.com/PetitGitLogParser'].
+		
+		spec  project: 'PetitPHPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitPHPParser';
+				file: 'ConfigurationOfPetitPHPParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.squeaksource.com/PetitPHPParser'].
+		
+		spec  project: 'Maze for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMaze';
+				file: 'ConfigurationOfMaze';
+				"version: 'default';"
+				repository: 'http://www.squeaksource.com/Maze' ].
+			
+		spec  project: 'Babel for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfBabel';
+				file: 'ConfigurationOfBabel';
+				"version: 'defaultWithoutMooseJEE';"
+				repository: 'http://www.squeaksource.com/Babel' ].
+
+		
+		spec 
+			"Extra Projects"
+			package: 'Merlin' with: [spec repository: 'http://www.squeaksource.com/Merlin'];
+			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
+			
+			"Models"
+			package: 'Moose-JEE-Core-Model';
+			package: 'Moose-JEE-SQL-Model';
+			package: 'Moose-JEE-JSP-Model';
+			package: 'Moose-JEE-EJB-Model';
+			package: 'Moose-JEE-DesignPattern';
+			package: 'Moose-JEE-Tiers-Model';
+			package: 'Moose-JEE-GitLog-Model';
+			package: 'Moose-JEE-CCProject-Model';
+						
+			"importers"
+			package: 'Moose-JEE-Importers-SQL' with: [spec requires: 'FAMIX SQL for MooseJEE'];
+			package: 'Moose-JEE-Importers-JSP' with: [spec requires: 'PetitJSPParser for MooseJEE'];
+			package: 'Moose-JEE-Importers-GitLog' with: [spec requires: 'PetitGitLogParser for MooseJEE'];
+			package: 'Moose-JEE-CCProject-Importer' with: [spec requires: 'PetitGitLogParser for MooseJEE'];
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-EJBDraftObjs';
+			package: 'Moose-JEE-Browsers' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-Algos';
+			package: 'Moose-JEE-Wizard' with: [spec requires: 'Merlin'];
+			package: 'Moose-JEE-CCProject-XMLElements';
+			package: 'Moose-JEE-CCProject-Reports' with: [spec requires: 'Moose-JEE-CCProject-Model'];
+			package: 'Moose-JEE-Help';
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources';
+			package: 'Moose-JEE-Tests-Core' with: [spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-GitLog' with: [spec requires: #('Moose-JEE-GitLog-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Algos' with: [spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec requires: #('Moose-JEE-EJBDraftObjs' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL' with: [spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-JSP' with: [spec requires: #('Moose-JEE-JSP-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJB' with: [spec requires: #('Moose-JEE-EJB-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Extensions' with: [spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-GitLog' with: [spec requires: #('Moose-JEE-Importers-GitLog' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Tiers' with: [spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-DesignPattern' with: [spec requires: #('Moose-JEE-DesignPattern')];
+			package: 'Moose-JEE-CCProject-Tests-Resources';
+			package: 'Moose-JEE-CCProject-Tests-Model' with: [spec requires: #('Moose-JEE-CCProject-Model' 'Moose-JEE-CCProject-Tests-Resources')];
+			package: 'Moose-JEE-CCProject-Tests-Importer' with: [spec requires: #('Moose-JEE-CCProject-Model' 'Moose-JEE-CCProject-Tests-Resources')];
+			package: 'Moose-JEE-CCProject-Tests-XMLElements' with: [spec requires: #('Moose-JEE-CCProject-XMLElements' 'Moose-JEE-CCProject-Tests-Resources')].
+	].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> default: spec [ 
 	<version: 'default'>
 	
@@ -747,5 +858,88 @@ ConfigurationOfMooseJEE >> version12: spec [
 			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.13';
 			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.12'.
 			
+		].
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> version13: spec [
+	<version: '1.3' imports: #('1.3-baseline')>
+
+	spec for: #common do: [
+		spec blessing: #release.
+		spec author: 'FabrizioPerin'.
+		spec description: 'release all the project for 1.3'.
+		spec timestamp: '09/03/2012 16:00'.
+		
+		"spec project: 'Moose for MooseJEE' with: '4.1'."
+		"spec project: 'XMLSupport for MooseJEE' with: '1.1.1'."
+		spec project: 'PetitSQLParser for MooseJEE' with: 'default'.
+		
+		spec
+			package: 'Merlin' with: 'Merlin-CesarCouto.140';
+			package: 'pagerank' with: 'PageRank-lr.6';
+			
+			"Models"
+			package: 'Moose-JEE-Core-Model' with: 'Moose-JEE-Core-Model-FabrizioPerin.18';
+			package: 'Moose-JEE-SQL-Model' with: 'Moose-JEE-SQL-Model-FabrizioPerin.13';			
+			package: 'Moose-JEE-JSP-Model' with: 'Moose-JEE-JSP-Model-FabrizioPerin.4';			
+			package: 'Moose-JEE-EJB-Model' with: 'Moose-JEE-EJB-Model-FabrizioPerin.4';
+			package: 'Moose-JEE-DesignPattern' with: 'Moose-JEE-DesignPattern-FabrizioPerin.5';
+			package: 'Moose-JEE-Tiers-Model' with: 'Moose-JEE-Tiers-Model-FabrizioPerin.8';
+			package: 'Moose-JEE-GitLog-Model' with: 'Moose-JEE-GitLog-Model-FabrizioPerin.20';
+			package: 'Moose-JEE-CCProject-Model' with: 'Moose-JEE-CCProject-Model-FabrizioPerin.14';
+						
+			"importers"
+			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.43';			
+			package: 'Moose-JEE-Importers-JSP' with: 'Moose-JEE-Importers-JSP-FabrizioPerin.4';			
+			package: 'Moose-JEE-Importers-GitLog' with: 'Moose-JEE-Importers-GitLog-FabrizioPerin.16';			
+			package: 'Moose-JEE-CCProject-Importer' with: 'Moose-JEE-CCProject-Importer-FabrizioPerin.15';
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: 'Moose-JEE-Reports-FabrizioPerin.15';			
+			package: 'Moose-JEE-EJBDraftObjs' with: 'Moose-JEE-EJBDraftObjs-FabrizioPerin.2';
+			package: 'Moose-JEE-Browsers' with: 'Moose-JEE-Browsers-FabrizioPerin.5';
+			package: 'Moose-JEE-Algos' with: 'Moose-JEE-Algos-FabrizioPerin.6';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.34';
+			package: 'Moose-JEE-CCProject-XMLElements' with: 'Moose-JEE-CCProject-XMLElements-FabrizioPerin.8';
+			package: 'Moose-JEE-CCProject-Reports' with: 'Moose-JEE-CCProject-Reports-FabrizioPerin.5';
+			package: 'Moose-JEE-Help' with: 'Moose-JEE-Help-FabrizioPerin.2';			
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources' with: 'Moose-JEE-Tests-Resources-FabrizioPerin.9';
+			package: 'Moose-JEE-Tests-Core' with: 'Moose-JEE-Tests-Core-FabrizioPerin.6';
+			package: 'Moose-JEE-Tests-GitLog' with: 'Moose-JEE-GitLog-Model-FabrizioPerin.20';
+			package: 'Moose-JEE-Tests-Algos' with: 'Moose-JEE-Tests-Algos-FabrizioPerin.7';
+			package: 'Moose-JEE-Tests-Importers-JSP' with: 'Moose-JEE-Tests-Importers-JSP-FabrizioPerin.1';
+			package: 'Moose-JEE-Tests-Importers-SQL' with: 'Moose-JEE-Tests-Importers-SQL-FabrizioPerin.7';
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: 'Moose-JEE-Tests-EJBDraftObjs-FabrizioPerin.1';
+			package: 'Moose-JEE-Tests-SQL' with: 'Moose-JEE-Tests-SQL-FabrizioPerin.16';			
+			package: 'Moose-JEE-Tests-JSP' with: 'Moose-JEE-Tests-JSP-FabrizioPerin.2';
+			package: 'Moose-JEE-Tests-EJB' with: 'Moose-JEE-Tests-EJB-FabrizioPerin.5';
+			package: 'Moose-JEE-Tests-Extensions' with: 'Moose-JEE-Tests-Extensions-FabrizioPerin.8';
+			package: 'Moose-JEE-Tests-Importers-GitLog' with: 'Moose-JEE-Tests-GitLog-FabrizioPerin.8';
+			package: 'Moose-JEE-Tests-Tiers' with: 'Moose-JEE-Tests-Tiers-FabrizioPerin.3';
+			package: 'Moose-JEE-Tests-DesignPattern' with: 'Moose-JEE-Tests-DesignPattern-FabrizioPerin.6';
+			package: 'Moose-JEE-CCProject-Tests-Resources' with: 'Moose-JEE-CCProject-Tests-Resources-FabrizioPerin.2';
+			package: 'Moose-JEE-CCProject-Tests-Model' with: 'Moose-JEE-CCProject-Tests-Model-FabrizioPerin.7';
+			package: 'Moose-JEE-CCProject-Tests-Importer' with: 'Moose-JEE-CCProject-Tests-Importer-FabrizioPerin.4';
+			package: 'Moose-JEE-CCProject-Tests-XMLElements' with: 'Moose-JEE-CCProject-Tests-XMLElements-FabrizioPerin.5'.
+			
+		
+		spec group: 'Tests' with: #( 
+			'Moose-JEE-Tests-Core'
+			'Moose-JEE-Tests-SQL'
+			'Moose-JEE-Tests-JSP'
+			'Moose-JEE-Tests-EJB'
+			'Moose-JEE-Tests-Tiers'
+			'Moose-JEE-Tests-Extensions'
+			'Moose-JEE-Tests-Importers-SQL'
+			'Moose-JEE-Tests-Importers-JSP'
+			'Moose-JEE-Tests-Importers-GitLog'
+			'Moose-JEE-Tests-EJBDraftObjs'
+			'Moose-JEE-Tests-Algos'
+			'Moose-JEE-Tests-DesignPattern'
+			'Moose-JEE-CCProject-Tests-Model'
+			'Moose-JEE-CCProject-Tests-XMLElements').			
 		].
 ]
