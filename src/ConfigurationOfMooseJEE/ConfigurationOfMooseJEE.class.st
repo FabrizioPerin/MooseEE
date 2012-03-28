@@ -787,6 +787,117 @@ ConfigurationOfMooseJEE >> project [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> refreshMooseCore: spec [
+	"(self project version: 'refreshMooseCore') load."
+	<version: 'refreshMooseCore'>
+	spec
+		for: #common
+		do: [ 
+			spec blessing: #development.	"Moose packages"
+			spec repository: 'http://www.squeaksource.com/Moose'.
+			
+			spec project: 'MooseAlgos for Moose' with: [
+				spec
+					className: 'ConfigurationOfMooseAlgos';
+					file: 'ConfigurationOfMooseAlgos';
+					version: 'default';
+					repository: 'http://www.squeaksource.com/MooseAlgos' ].
+				
+			spec project: 'Fame' with: [
+				spec
+					className: 'ConfigurationOfFame';
+					version: 'default';
+					file:  'ConfigurationOfFame';
+					repository: 'http://www.squeaksource.com/Fame' ].
+			spec
+				package: 'Moose-Help';
+				package: 'Moose-Core' with: [ spec requires: 'Fame' ];
+				package: 'Famix-Specifications';
+				package: 'Famix-Core' with: [ spec requires: #('Moose-Core') ];
+				package: 'Famix-Implementation' with: [ spec requires: 'Famix-Core' ];
+				package: 'Famix-Smalltalk'
+					with: [ 
+							spec file: 'Famix-Smalltalk-'.
+							spec requires: 'Famix-Core' ];
+				package: 'Famix-Java' with: [ spec requires: #('Famix-Core') ];
+				package: 'Famix-C' with: [ spec requires: #('Famix-Core') ];
+				package: 'Famix-Extensions' with: [ spec requires: #('Famix-Core' 'MooseAlgos for Moose') ];
+				package: 'Famix-File' with: [ spec requires: #('Famix-Core' ) ];
+				package: 'PetitMSE' with: [ spec repository: 'http://source.lukas-renggli.ch/petit' ];
+				package: 'PetitJava' with: [ spec repository: 'http://www.squeaksource.com/PetitJava' ];
+				package: 'PetitSmalltalk' with: [ spec repository: 'http://source.lukas-renggli.ch/petit' ];
+				package: 'Moose-Hismo' with: [ spec requires: 'Moose-Core' ];
+				package: 'Famix-SourceAnchor' with: [ spec requires: #('Famix-Core') ];
+				package: 'Dynamix-Core'
+					with: [ 
+							spec repository: 'http://www.squeaksource.com/DynaMoose'.
+							spec requires: 'Famix-Core' ];
+				package: 'Moose-GenericImporter' with: [ spec requires: 'Moose-Core' ];
+				package: 'Moose-SmalltalkImporter' with: [ spec requires: #('Moose-GenericImporter') ];
+				package: 'Moose-MonticelloImporter' with: [ spec requires: #('Moose-SmalltalkImporter') ];
+				package: 'Moose-Finder' with: [ spec requires: #('Famix-Extensions') ];
+				package: 'Moose-Settings' with: [ spec requires: #('Moose-Finder') ];
+				package: 'Moose-Wizard' with: [ spec requires: #('Moose-Finder') ];
+				package: 'Arki-Reporter-Core' with: [ spec repository: 'http://www.squeaksource.com/Arki' ];
+				package: 'Arki-Reporter-Browser'
+					with: [ 
+							spec repository: 'http://www.squeaksource.com/Arki'.
+							spec requires: #('Arki-Reporter-Core' 'Moose-Finder') ];
+				package: 'Arki-Tests-Reporter'
+					with: [ 
+							spec repository: 'http://www.squeaksource.com/Arki'.
+							spec requires: #('Arki-Reporter-Core') ];
+				package: 'Moose-Tests-Core' with: [ spec requires: 'Moose-Core' ];
+				package: 'Famix-Tests-Core' with: [ spec requires: 'Moose-Tests-SmalltalkImporter-KGB' ];
+				package: 'Famix-Tests-Java' with: [ spec requires: 'Moose-Tests-Core' ];
+				package: 'Famix-Tests-C';
+				package: 'Famix-Tests-Extensions';
+				package: 'Dynamix-Tests-Core' with: [ spec repository: 'http://www.squeaksource.com/DynaMoose' ];
+				package: 'Moose-Tests-Finder' with: [ spec requires: #('Moose-Finder' 'Famix-Tests-Java') ];
+				package: 'MondrianGraphVizLayout' with: [ spec repository: 'http://www.squeaksource.com/Mondrian' ];
+				package: 'Moose-MondrianPaintings'
+					with: [ spec requires: #('MooseAlgos for Moose' 'Moose-Hismo' 'Famix-Extensions') ];
+				package: 'Moose-Tests-MondrianPaintings' with: [ spec requires: #('Moose-MondrianPaintings') ];
+				package: 'Moose-DistributionMap' with: [ spec requires: #('MooseAlgos for Moose') ];
+				package: 'Moose-MultiDimensionsDistributionMap'
+					with: [ spec requires: #( 'MooseAlgos for Moose') ];
+				package: 'Moose-Tests-DistributionMap' with: [ spec requires: #('Moose-DistributionMap') ];
+				package: 'Moose-EyeSeeCharts' with: [ spec requires: 'Moose-Core' ];
+				package: 'Moose-Development-Tools';
+				package: 'Moose-Tests-SmalltalkImporter-Core' with: [ spec requires: 'Moose-Tests-Core' ];
+				package: 'Moose-TestResources-Reference-Core';
+				package: 'Moose-TestResources-Reference-PackageOne';
+				package: 'Moose-TestResources-Reference-PackageTwo' with: [ spec requires: 'Moose-Tests-SmalltalkImporter-Core' ];
+				package: 'Moose-Tests-SmalltalkImporter-LAN' with: [ spec requires: 'Moose-Tests-Core' ];
+				package: 'Moose-TestResources-LAN';
+				package: 'Moose-Tests-SmalltalkImporter-KGB' with: [ spec requires: 'Moose-Tests-Core' ];
+				package: 'Moose-TestResources-KGB-P4FullInteracted';
+				package: 'Moose-TestResources-KGB-P6InteractedReferee';
+				package: 'Moose-TestResources-KGB-P5FullReferee'
+					with: [ spec requires: 'Moose-TestResources-KGB-P6InteractedReferee' ];
+				package: 'Moose-TestResources-KGB-P1FullReferencer';
+				package: 'Moose-TestResources-KGB-P2InteractedReferencerReferee'
+					with: [ spec requires: 'Moose-TestResources-KGB-P5FullReferee' ];
+				package: 'Moose-TestResources-KGB-P3InteractedReferencer';
+				package: 'Moose-TestResources-KGB-P7ReferencerReferee';
+				package: 'Moose-TestResources-KGB-P8FullReferencer'
+					with: [ spec requires: 'Moose-TestResources-KGB-P7ReferencerReferee' ];
+				package: 'Moose-TestResources-KGB-P9FullReferencer';
+				package: 'Moose-TestResources-KGB-P10InteractedReferee';
+				package: 'Moose-TestResources-KGB-P11FullReferee';
+				package: 'Moose-TestResources-KGB-P12FullReferencer';
+				package: 'Moose-TestResources-KGB-P13FullReferencer';
+				package: 'Moose-TestResources-KGB-P14FullReferee';
+				package: 'Moose-TestResources-KGB-PExtensions'
+					with: [ spec requires: #('Moose-TestResources-KGB-P12FullReferencer' 'Moose-TestResources-KGB-P11FullReferee') ];
+				package: 'Moose-TestResources-PackageBlueprint-P1';
+				package: 'Moose-TestResources-PackageBlueprint-P2';
+				package: 'Moose-TestResources-PackageBlueprint-P3';
+				package: 'Moose-TestResources-PackageBlueprint-P4';
+				package: 'Moose-Tests-MonticelloImporter' ]
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> version10: spec [
 	<version: '1.0' imports: #('1.0-baseline')>
 
