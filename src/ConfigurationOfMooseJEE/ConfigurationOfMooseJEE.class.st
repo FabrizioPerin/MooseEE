@@ -113,6 +113,13 @@ ConfigurationOfMooseJEE class >> project [
 	^self new project
 ]
 
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> refreshMooseCore [
+
+	(self project version: 'refreshMooseCore') load.
+	Smalltalk organization sortCategories.
+]
+
 { #category : #baselines }
 ConfigurationOfMooseJEE >> baseline10: spec [ 
         <version: '1.0-baseline'>
