@@ -22,13 +22,19 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	classNode := MJFAMIXPHPClass new.
 	classNode name: aPPPHPClassNode typeName.
 	
-	inheritance := FAMIXInheritance new.
-	inheritance superclass: nil.
-	inheritance subclass: classNode.
+	aPPPHPClassNode superTypes do: [ :superType |
+			
+			inheritance := FAMIXInheritance new.
+			inheritance superclass: nil.
+			inheritance subclass: classNode.
+			
+			classNode addSuperInheritance: nil.
+		].
 	
 	classNode addSuperInheritance: inheritance.
 	
-	aPPPHPClassNode interfaces do: [ :interface|
+	aPPPHPClassNode interfaces do: [ :interface |
+			"The Class node has an is interface "
 			classNode addInterface: nil.
 		].
 	
@@ -83,6 +89,11 @@ MJPHPImporter >> ensureAnAttribute: aPPPHPAttributeNode [
 	
 	| attributeNode |
 	attributeNode := MJFAMIXPHPAttribute new.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> import: aStream [
+	
 ]
 
 { #category : #accessing }
