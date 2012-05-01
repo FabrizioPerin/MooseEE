@@ -23,7 +23,7 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			bar value: 2.
 			
 			files do: [:file |
-					bar value: 'Parsing ' , counter , '/' ,(files size). 
+					bar value: 'Parsing ' , counter asString , '/' , (files size) asString. 
 					importer import: (file readStream contentsOfEntireFile asString).
 					counter := counter + 1.
 				].
@@ -32,21 +32,17 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 ]
 
 { #category : #'*moose-jee-importers-php' }
-MooseModel >> importPHPSourcesFromSubfolder: aFolder [
+MooseModel >> importPHPSourcesFromSubfolder: aDirectoryFile [
 	| files |
 	files := OrderedCollection new.
 	
-	aFolder isDirectory ifFalse: [
-		^ aFolder.
-	].
-
-	aFolder entries do: [ :entry |
+	aDirectoryFile entries do: [ :entry |
 			entry isDirectory ifFalse: [
-					files addAll: (entry select: [ :fileEntry |
-						fileEntry fullName asString endsWith: '.php' 
-					]).
+					(entry fullName asString endsWith: '.php') ifTrue: [
+							files add: entry.
+						].
 				] ifTrue: [
-					files addAll: ( self importPHPSourcesFromSubfolder: entry ).
+					files addAll: ( self importPHPSourcesFromSubfolder: entry asFileDirectory ).
 				].
 		].
 	^ files.

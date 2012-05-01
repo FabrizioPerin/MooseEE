@@ -93,7 +93,7 @@ MJPHPImporter >> ensureAnAttribute: aPPPHPAttributeNode [
 
 { #category : #accessing }
 MJPHPImporter >> import: aStream [
-	
+	self phpParser parse: aStream.
 ]
 
 { #category : #accessing }
