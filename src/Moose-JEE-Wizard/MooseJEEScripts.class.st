@@ -506,6 +506,20 @@ MooseJEEScripts class >> standardCleanUp [
 	Author reset
 ]
 
+{ #category : #cleanup }
+MooseJEEScripts class >> transformToArray: anIconImageFileName [
+"This method return an array representing the icon file given in input"
+"| form |
+form := Form fromBinaryStream: (FileStream fileNamed: '/Users/fabrizioperin/Desktop/drawing.png')."
+"with this you get the array that represent the image"
+"form bits asArray"
+	| form |
+	
+	form := Form fromBinaryStream: (FileStream fileNamed: anIconImageFileName).
+	^form bits asArray.
+ 
+]
+
 { #category : #'as yet unclassified' }
 MooseJEEScripts >> seeClassSide [
 ]
