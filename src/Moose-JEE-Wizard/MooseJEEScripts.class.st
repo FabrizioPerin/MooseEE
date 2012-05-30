@@ -260,6 +260,16 @@ MooseJEEScripts class >> defaultFontsSetting [
 	Preferences setButtonFontTo: defaultFont.
 ]
 
+{ #category : #icons }
+MooseJEEScripts class >> flush: aForm toBMPFile: named [ 
+	BMPReadWriter putForm: aForm onFileNamed: named
+]
+
+{ #category : #icons }
+MooseJEEScripts class >> flush: aForm toPNGFile: named [ 
+	PNGReadWriter putForm: aForm onFileNamed: named
+]
+
 { #category : #'font-settings' }
 MooseJEEScripts class >> fontsSettingWindows [
 	| menuFont titleFont codeFont defaultFont |
@@ -506,7 +516,7 @@ MooseJEEScripts class >> standardCleanUp [
 	Author reset
 ]
 
-{ #category : #cleanup }
+{ #category : #icons }
 MooseJEEScripts class >> transformToArray: anIconImageFileName [
 "This method return an array representing the icon file given in input"
 "| form |
