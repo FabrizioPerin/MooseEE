@@ -16,6 +16,11 @@ MJFAMIXDataLayer >> acceptStrategy: aLayeringStrategy [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXDataLayer >> isDataLayer [
+	^true
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXDataLayer >> name [
 	^'Data Layer'
 ]

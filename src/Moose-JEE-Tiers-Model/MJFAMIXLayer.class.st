@@ -54,6 +54,26 @@ MJFAMIXLayer >> initialize [
 ]
 
 { #category : #accessing }
+MJFAMIXLayer >> isBusinessLayer [
+	^false
+]
+
+{ #category : #accessing }
+MJFAMIXLayer >> isDataLayer [
+	^false
+]
+
+{ #category : #accessing }
+MJFAMIXLayer >> isPresentationLayer [
+	^false
+]
+
+{ #category : #accessing }
+MJFAMIXLayer >> isServiceLayer [
+	^false
+]
+
+{ #category : #accessing }
 MJFAMIXLayer >> layerStrategyName [
 	^ layerStrategyName
 ]

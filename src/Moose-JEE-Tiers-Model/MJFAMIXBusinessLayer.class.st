@@ -17,6 +17,11 @@ MJFAMIXBusinessLayer >> acceptStrategy: aLayeringStrategy [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXBusinessLayer >> isBusinessLayer [
+	^true
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXBusinessLayer >> name [
 	^'Business Layer'
 ]

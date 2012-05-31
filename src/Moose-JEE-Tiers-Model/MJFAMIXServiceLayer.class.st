@@ -33,6 +33,11 @@ MJFAMIXServiceLayer >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXServiceLayer >> isServiceLayer [
+	^true
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXServiceLayer >> name [
 	^'Service Layer'
 ]

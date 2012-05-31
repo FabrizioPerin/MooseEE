@@ -17,6 +17,11 @@ MJFAMIXPresentationLayer >> acceptStrategy: aLayeringStrategy [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXPresentationLayer >> isPresentationLayer [
+	^true
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXPresentationLayer >> name [
 	^'Presentation Layer'
 ]
