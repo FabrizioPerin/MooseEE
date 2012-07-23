@@ -171,8 +171,8 @@ MooseModel >> importEjbJarFromFolder: aString [
 	
 	| fileSystem entries directoryEntries parser factory doc root counter |
 	
-	fileSystem := FSFilesystem onDisk referenceTo: aString.
-	entries := FSCollectVisitor breadthFirst: fileSystem.
+	fileSystem := FileSystem onDisk referenceTo: aString.
+	entries := CollectVisitor breadthFirst: fileSystem.
 	
 	directoryEntries := entries select: [:entry| '.*ejb-jar.xml$' asRegex matches: entry reference name ].
 
