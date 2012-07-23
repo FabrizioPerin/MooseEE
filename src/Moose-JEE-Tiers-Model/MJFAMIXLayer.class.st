@@ -64,6 +64,11 @@ MJFAMIXLayer >> isDataLayer [
 ]
 
 { #category : #accessing }
+MJFAMIXLayer >> isLogicLayer [
+	^false
+]
+
+{ #category : #accessing }
 MJFAMIXLayer >> isPresentationLayer [
 	^false
 ]
