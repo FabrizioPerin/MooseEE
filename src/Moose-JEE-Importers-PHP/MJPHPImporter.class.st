@@ -35,7 +35,7 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	
 	aPPPHPClassNode interfaces do: [ :interface |
 			"The Class node has an is interface "
-			classNode addInterface: nil.
+			classNode addInterface: (MJFAMIXPHPClass new isInterface: true).
 		].
 	
 	aPPPHPClassNode behaviouralEntities do:[ :method |
