@@ -20,7 +20,7 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	
 	self flag: 'How to add an interface?'.
 	classNode := MJFAMIXPHPClass new.
-	classNode name: aPPPHPClassNode typeName.
+	classNode name: aPPPHPClassNode nodeName.
 	
 	aPPPHPClassNode superTypes do: [ :superType |
 			
