@@ -48,8 +48,6 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 MJPHPImporter >> ensureAField: aPPPHPFieldNode [
 	| fieldNode |
 	
-	self flag: 'TODO: ensure annotations.'.
-	
 	fieldNode := MJFAMIXPHPAttribute new.
 	fieldNode name: aPPPHPFieldNode nodeName.
 	fieldNode isPrivate: aPPPHPFieldNode scope isPrivate.
@@ -65,22 +63,30 @@ MJPHPImporter >> ensureAField: aPPPHPFieldNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 	
-	| methodNode |
+	| methodNode annotation|
 	
 	methodNode := MJFAMIXPHPMethod new.
 	methodNode name: aPPPHPMethodNode nodeName.
+	methodNode isConstructor: methodNode name = '__construct'.
 	
 	methodNode isPublic: aPPPHPMethodNode scope isPublic.
 	methodNode isProtected: aPPPHPMethodNode scope isProtected.
 	methodNode isPrivate: aPPPHPMethodNode scope isPrivate.
 	methodNode isAbstract: aPPPHPMethodNode isAbstract.
-	
 	methodNode isStatic: aPPPHPMethodNode isStatic.
 	
+	aPPPHPMethodNode hasDocBlock ifTrue: [
+		methodNode addComment: aPPPHPMethodNode docBlock.
+			aPPPHPMethodNode docBlockAnnotations ifNotNilDo: [ :item |
+				annotation := self ensureAnAnnotation: item.
+			]. 
+	].
 	aPPPHPMethodNode parameters do: [ :param |
 		methodNode addParameter: (self ensureAParameter: param).
 	].
-	
+	aPPPHPMethodNode isAbstract ifFalse: [
+		self flag: 'TODO: add the body!'.
+	].
 ]
 
 { #category : #accessing }
@@ -115,6 +121,14 @@ MJPHPImporter >> ensureAType: aPPPHPPNamespaceStack [
 	| type |
 	type := FAMIXType new.
 	^type
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
+	| annotation |
+	annotation := FAMIXAnnotationInstance new.
+	
+	^ annotation.
 ]
 
 { #category : #accessing }
