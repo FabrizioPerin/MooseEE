@@ -29,26 +29,37 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 			inheritance subclass: classNode.
 			
 			classNode addSuperInheritance: nil.
-		].
+	].
 	
 	classNode addSuperInheritance: inheritance.
 	
 	aPPPHPClassNode interfaces do: [ :interface |
 			"The Class node has an is interface "
 			classNode addInterface: (MJFAMIXPHPClass new isInterface: true).
-		].
+	].
 	
 	aPPPHPClassNode behaviouralEntities do:[ :method |
 			classNode addMethod: (self ensureAMethod: method).
-		].
+	].
 	^classNode.
 ]
 
 { #category : #accessing }
 MJPHPImporter >> ensureAField: aPPPHPFieldNode [
-	
 	| fieldNode |
-	fieldNode := self ensureAnAttribute: aPPPHPFieldNode.
+	
+	self flag: 'TODO: ensure annotations.'.
+	
+	fieldNode := MJFAMIXPHPAttribute new.
+	fieldNode name: aPPPHPFieldNode nodeName.
+	fieldNode isPrivate: aPPPHPFieldNode scope isPrivate.
+	fieldNode isProtected: aPPPHPFieldNode scope isProtected.
+	fieldNode isPublic: aPPPHPFieldNode scope isPublic.
+	fieldNode modifierSet: aPPPHPFieldNode isStatic for: #static.
+	fieldNode modifierSet: aPPPHPFieldNode isConstant for: #constant.
+	fieldNode defaultValue: aPPPHPFieldNode defaultValue.
+	
+	^ fieldNode
 ]
 
 { #category : #accessing }
@@ -57,31 +68,53 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 	| methodNode |
 	
 	methodNode := MJFAMIXPHPMethod new.
-	aPPPHPMethodNode parameters do: [
-			methodNode addParameter: nil.
-		].
+	methodNode name: aPPPHPMethodNode nodeName.
+	
+	methodNode isPublic: aPPPHPMethodNode scope isPublic.
+	methodNode isProtected: aPPPHPMethodNode scope isProtected.
+	methodNode isPrivate: aPPPHPMethodNode scope isPrivate.
+	methodNode isAbstract: aPPPHPMethodNode isAbstract.
+	
+	methodNode isStatic: aPPPHPMethodNode isStatic.
+	
+	aPPPHPMethodNode parameters do: [ :param |
+		methodNode addParameter: (self ensureAParameter: param).
+	].
 	
 ]
 
 { #category : #accessing }
-MJPHPImporter >> ensureANamespace: aPPPHPNamespaceStack [
-	| spaceNode parentNode |
+MJPHPImporter >> ensureANamespace: aPPPHPNamespaceNode [
+	| scopeNode lastNode parentNode |
+	scopeNode := FAMIXNamespace new.
+	scopeNode name: aPPPHPNamespaceNode namespaceName.
 	
-	parentNode := nil.
-	aPPPHPNamespaceStack do: [ :item |
-			spaceNode := MJFAMIXPHPNamespace new.
-			spaceNode name: item namespaceName.
-			spaceNode parentScope: parentNode.
-			parentNode := spaceNode.
-		].
-	spaceNode
+	lastNode := aPPPHPNamespaceNode.
+	(lastNode isRoot) ifFalse: [
+		scopeNode parentScope: (self ensureANamespace: lastNode parentNamespace ).
+	].
+	^ scopeNode
 ]
 
 { #category : #accessing }
 MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
-	
 	| param |
-	param := self ensureAnAttribute: aPPPHPParameterNode .
+	param := MJFAMIXPHPParameter new.
+	param name: aPPPHPParameterNode nodeName.
+	aPPPHPParameterNode hasTypeHint ifTrue: [
+		param declaredType: (self ensureAType: aPPPHPParameterNode typeHint).
+	].
+	aPPPHPParameterNode hasDefaultValue ifTrue: [
+		param defaultValue: aPPPHPParameterNode defaultValue.
+	].
+	^ param.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAType: aPPPHPPNamespaceStack [
+	| type |
+	type := FAMIXType new.
+	^type
 ]
 
 { #category : #accessing }
