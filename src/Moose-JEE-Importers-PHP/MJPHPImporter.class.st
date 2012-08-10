@@ -67,13 +67,11 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	aPPPHPClassNode superTypes do: [ :superType |
 			
 			inheritance := FAMIXInheritance new.
-			inheritance superclass: nil.
+			inheritance superclass: (self ensureAClass: superType).
 			inheritance subclass: classNode.
 			
-			classNode addSuperInheritance: nil.
+			classNode addSuperInheritance: inheritance.
 	].
-	
-	classNode addSuperInheritance: inheritance.
 	
 	aPPPHPClassNode interfaces do: [ :interface |
 			"The Class node has an is interface "
