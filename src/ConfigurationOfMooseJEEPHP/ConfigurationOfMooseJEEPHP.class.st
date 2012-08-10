@@ -71,12 +71,13 @@ ConfigurationOfMooseJEEPHP >> default: spec [
 			"importers"
 			package: 'Moose-JEE-Importers-PHP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('PHPParser for MooseJEEPHP')].
+				spec requires: #('PHPParser for MooseJEEPHP')];
 	
 			"Tests"
-			"package: 'Moose-JEE-Tests-PHP-Resources' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
-			package: 'Moose-JEE-Tests-PHP' with: [
+			package: 'Moose-JEE-Tests-Importers-PHP' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.
+				spec requires: #('Moose-JEE-Importers-PHP')].
+			"package: 'Moose-JEE-Tests-PHP' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.
 				spec requires: #('Moose-JEE-PHP-Model' 'Moose-JEE-Tests-PHP-Resources')];
 			package: 'Moose-JEE-Tests-Importers-PHP' with: [
