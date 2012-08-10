@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'targetModel',
 		'phpParser',
-		'phpVisitor'
+		'phpVisitor',
+		'annotationTypes'
 	],
 	#category : #'Moose-JEE-Importers-PHP'
 }
@@ -15,8 +16,49 @@ MJPHPImporter class >> on: aMooseModel [
 ]
 
 { #category : #accessing }
+MJPHPImporter >> annotationTypes [
+	^ annotationTypes
+]
+
+{ #category : #accessing }
+MJPHPImporter >> annotationTypes: anObject [
+	annotationTypes := anObject
+]
+
+{ #category : #accessing }
+MJPHPImporter >> createAnnotationType: aPPPHPAnnotationNode [
+	| type |
+	annotationTypes at: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName 
+	ifAbsentPut: [
+		type := FAMIXAnnotationType new.
+		type name: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName.
+		type.
+	].
+	self flag: 'recheck the attributes'.
+	^ annotationTypes at: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName.
+	
+]
+
+{ #category : #accessing }
+MJPHPImporter >> createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: aFAMIXAnnotationType [
+	| attributes typeAttribute |
+	attributes := aFAMIXAnnotationType attributes select: [ :item |
+		item name = aPPPHPAttributeNode nodeName
+	]. 
+	attributes ifEmpty: [
+		typeAttribute := FAMIXAnnotationTypeAttribute new.
+		typeAttribute name: aPPPHPAttributeNode nodeName.
+		typeAttribute parentAnnotationType: aFAMIXAnnotationType.
+		^ typeAttribute.
+	] ifNotEmpty:[
+		^ attributes at: 1.
+	].
+	
+]
+
+{ #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
-	| classNode inheritance |
+	| classNode inheritance annotation |
 	
 	self flag: 'How to add an interface?'.
 	classNode := MJFAMIXPHPClass new.
@@ -40,6 +82,12 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	
 	aPPPHPClassNode behaviouralEntities do:[ :method |
 			classNode addMethod: (self ensureAMethod: method).
+	].
+	aPPPHPClassNode docBlockHasAnnotations ifTrue: [
+		aPPPHPClassNode docBlockAnnotations do: [ :item | 
+			annotation := (self ensureAnAnnotation: item).
+			annotation annotatedEntity: classNode.
+		].
 	].
 	^classNode.
 ]
@@ -79,6 +127,7 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 		methodNode addComment: aPPPHPMethodNode docBlock.
 			aPPPHPMethodNode docBlockAnnotations ifNotNilDo: [ :item |
 				annotation := self ensureAnAnnotation: item.
+				annotation annotatedEntity: methodNode.
 			]. 
 	].
 	aPPPHPMethodNode parameters do: [ :param |
@@ -91,6 +140,7 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 
 { #category : #accessing }
 MJPHPImporter >> ensureANamespace: aPPPHPNamespaceNode [
+	"Recursively bubbles up the passed namespace and returns the representation of the passed node (linked to its parents)"
 	| scopeNode lastNode parentNode |
 	scopeNode := FAMIXNamespace new.
 	scopeNode name: aPPPHPNamespaceNode namespaceName.
@@ -117,25 +167,27 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 ]
 
 { #category : #accessing }
-MJPHPImporter >> ensureAType: aPPPHPPNamespaceStack [
-	| type |
-	type := FAMIXType new.
-	^type
+MJPHPImporter >> ensureAType: aNode [
+	^ FAMIXType new.
 ]
 
 { #category : #accessing }
 MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
-	| annotation |
+	| annotation annotationType annotationParameters annotationParameter |
+	
 	annotation := FAMIXAnnotationInstance new.
+	annotation annotationType: (self createAnnotationType: aPPPHPAnnotationNode).
 	
-	^ annotation.
-]
+	aPPPHPAnnotationNode hasParameters ifTrue: [
+		aPPPHPAnnotationNode parameters do: [ :aPPPHPAttributeNode |
+			annotationParameter := FAMIXAnnotationInstanceAttribute new.
+			annotationParameter value: aPPPHPAttributeNode attributeValue.
+			annotationParameter parentAnnotationInstance: annotation.
+			annotationParameter annotationTypeAttribute: (self createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: annotation annotationType).
+		].
+	].
 
-{ #category : #accessing }
-MJPHPImporter >> ensureAnAttribute: aPPPHPAttributeNode [
-	
-	| attributeNode |
-	attributeNode := MJFAMIXPHPAttribute new.
+	^ annotation.
 ]
 
 { #category : #accessing }
@@ -146,8 +198,9 @@ MJPHPImporter >> import: aStream [
 { #category : #accessing }
 MJPHPImporter >> initialize [
 
-	phpVisitor := PPPHPConcreteVisitor new importer: self.
-	phpParser := PPPHPCoreParser new.
+	phpVisitor 			:= PPPHPConcreteVisitor new importer: self.
+	phpParser 			:= PPPHPCoreParser new.
+	annotationTypes 	:= Dictionary new. 
 ]
 
 { #category : #accessing }
