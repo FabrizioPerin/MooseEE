@@ -28,7 +28,7 @@ MJPHPImporter >> annotationTypes: anObject [
 { #category : #accessing }
 MJPHPImporter >> createAnnotationType: aPPPHPAnnotationNode [
 	| type |
-	annotationTypes at: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName 
+	annotationTypes at: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName
 	ifAbsentPut: [
 		type := FAMIXAnnotationType new.
 		type name: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName.
