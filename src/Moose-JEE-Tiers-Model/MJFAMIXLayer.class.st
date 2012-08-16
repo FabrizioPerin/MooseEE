@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXLayer,
-	#superclass : #FAMIXEntity,
+	#superclass : #MEEArchitecturalEntity,
 	#instVars : [
 		'rationale',
 		'layerStrategyName',
@@ -11,8 +11,10 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXLayer class >> annotation [
-	<MSEClass: #MJFAMIXLayer super: #FAMIXEntity>
-	<package: #'Moose-JEE-Model'>
+	<MSEClass: #MJFAMIXLayer super: #MEEArchitecturalEntity>
+	<package: #'Moose-JEE-Tiers-Model'>
+	
+	^self 
 ]
 
 { #category : #'as yet unclassified' }
