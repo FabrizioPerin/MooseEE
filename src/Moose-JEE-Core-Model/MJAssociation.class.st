@@ -6,10 +6,10 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJAssociation class >> annotation [
-
 	<MSEClass: #MJAssociation super: #FAMIXAssociation>
-	<package: #'Moose-JEE-Model'>
-
+	<package: #'Moose-JEE-Core-Model'>
+	
+	^self
 ]
 
 { #category : #'as yet unclassified' }

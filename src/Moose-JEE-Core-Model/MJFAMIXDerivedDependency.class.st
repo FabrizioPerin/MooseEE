@@ -25,7 +25,8 @@ Class {
 { #category : #'as yet unclassified' }
 MJFAMIXDerivedDependency class >> annotation [
 	<MSEClass: #MJFAMIXDerivedDependency super: #MJAssociation>
-	<package: #'Moose-JEE-Model'>
+	<package: #'Moose-JEE-Core-Model'>
+	
 	^self
 ]
 
