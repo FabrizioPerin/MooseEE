@@ -58,35 +58,18 @@ MJPHPImporter >> createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: aFAM
 
 { #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
-	| classNode inheritance annotation |
+	| classNode |
 	
-	classNode := MJFAMIXPHPClass new.
-	classNode name: aPPPHPClassNode nodeName.
-	
-	aPPPHPClassNode superTypes do: [ :superType |
-			
-			inheritance := FAMIXInheritance new.
-			inheritance superclass: (self ensureAClass: superType).
-			inheritance subclass: classNode.
-			
-			classNode addSuperInheritance: inheritance.
-	].
+	classNode := self ensureAType: 
+					MJFAMIXPHPClass new 
+					from: aPPPHPClassNode.
 	
 	aPPPHPClassNode interfaces do: [ :interface |
-			"The Class node has an is interface "
-			classNode addInterface: (MJFAMIXPHPClass new isInterface: true).
+		"The Class node has an is interfac"
+		classNode addInterface: (interface attach: self phpVisitor).
 	].
 	
-	aPPPHPClassNode behaviouralEntities do:[ :method |
-			classNode addMethod: (self ensureAMethod: method).
-	].
-	aPPPHPClassNode docBlockHasAnnotations ifTrue: [
-		aPPPHPClassNode docBlockAnnotations do: [ :item | 
-			annotation := (self ensureAnAnnotation: item).
-			annotation annotatedEntity: classNode.
-		].
-	].
-	^classNode.
+	^ classNode.
 ]
 
 { #category : #accessing }
@@ -128,16 +111,18 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 	aPPPHPMethodNode hasDocBlock ifTrue: [
 		methodNode addComment: aPPPHPMethodNode docBlock.
 			aPPPHPMethodNode docBlockAnnotations ifNotNilDo: [ :item |
-				annotation := self ensureAnAnnotation: item.
+				annotation := item attach: self phpVisitor.
 				annotation annotatedEntity: methodNode.
 			]. 
 	].
 	aPPPHPMethodNode parameters do: [ :param |
-		methodNode addParameter: (self ensureAParameter: param).
+		methodNode addParameter: ( param attach: self phpVisitor ).
 	].
 	aPPPHPMethodNode isAbstract ifFalse: [
 		self flag: 'TODO: add the body!'.
 	].
+	
+	^ methodNode.
 ]
 
 { #category : #accessing }
@@ -149,7 +134,7 @@ MJPHPImporter >> ensureANamespace: aPPPHPNamespaceNode [
 	
 	lastNode := aPPPHPNamespaceNode.
 	(lastNode isRoot) ifFalse: [
-		scopeNode parentScope: (self ensureANamespace: lastNode parentNamespace ).
+		scopeNode parentScope: (lastNode parentNamespace attach: self phpVisitor ).
 	].
 	^ scopeNode
 ]
@@ -160,7 +145,7 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 	param := MJFAMIXPHPParameter new.
 	param name: aPPPHPParameterNode nodeName.
 	aPPPHPParameterNode hasTypeHint ifTrue: [
-		param declaredType: (self ensureAType: aPPPHPParameterNode typeHint).
+		param declaredType: (aPPPHPParameterNode typeHint attach: self phpVisitor).
 	].
 	aPPPHPParameterNode hasDefaultValue ifTrue: [
 		param defaultValue: aPPPHPParameterNode defaultValue.
@@ -169,8 +154,36 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 ]
 
 { #category : #accessing }
-MJPHPImporter >> ensureAType: aNode [
-	^ FAMIXType new.
+MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
+	"this one expects the original node and the correct famix node"
+	| inheritance annotation |
+	aTypeNode name: aPPPHPTypeNode nodeName.
+	
+	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
+	aPPPHPTypeNode superTypes do: [ :superType |
+		
+		inheritance := FAMIXInheritance new.
+		inheritance superclass: (superType attach: self phpVisitor).
+		inheritance subclass: aTypeNode.
+			
+		aTypeNode addSuperInheritance: inheritance.
+	].
+	"This is valid for all types"
+	aPPPHPTypeNode attributes do: [:attribute | 
+		aTypeNode addAttribute: (attribute attach: self phpVisitor).
+	].
+	"this is valid for all types"
+	aPPPHPTypeNode behaviouralEntities do:[ :method |
+			aTypeNode addMethod: (method attach: self phpVisitor).
+	].
+	"this is valid for all types"
+	aPPPHPTypeNode docBlockHasAnnotations ifTrue: [
+		aPPPHPTypeNode docBlockAnnotations do: [ :item | 
+			annotation := (item attach: self phpVisitor).
+			annotation annotatedEntity: aTypeNode.
+		].
+	].
+	^ aTypeNode
 ]
 
 { #category : #accessing }
@@ -194,7 +207,14 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 
 { #category : #accessing }
 MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
-	^aPPPHPInterfaceNode
+	| interfaceNode |
+	interfaceNode := self ensureAType: 
+					(MJFAMIXPHPClass new isInterface: true) 
+					from: aPPPHPInterfaceNode.
+	
+	interfaceNode superTypes do: [ :superType | superType isInterface: true. ].
+	
+	^ interfaceNode.
 ]
 
 { #category : #accessing }
