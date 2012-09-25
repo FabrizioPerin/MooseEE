@@ -60,7 +60,6 @@ MJPHPImporter >> createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: aFAM
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	| classNode inheritance annotation |
 	
-	self flag: 'How to add an interface?'.
 	classNode := MJFAMIXPHPClass new.
 	classNode name: aPPPHPClassNode nodeName.
 	
@@ -104,6 +103,11 @@ MJPHPImporter >> ensureAField: aPPPHPFieldNode [
 	fieldNode defaultValue: aPPPHPFieldNode defaultValue.
 	
 	^ fieldNode
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAFunction: aPPPHPFunctionNode [
+	^ aPPPHPFunctionNode
 ]
 
 { #category : #accessing }
@@ -186,6 +190,11 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 	].
 
 	^ annotation.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
+	^aPPPHPInterfaceNode
 ]
 
 { #category : #accessing }
