@@ -164,7 +164,7 @@ MJPHPImporterTests >> testEnsureAParameter [
 	self assert: (param isMemberOf: MJFAMIXPHPParameter).
 	self assert: (param name = 'parameter').
 	self assert: (param defaultValue = 'null').
-	self assert: (param declaredType isMemberOf: FAMIXType).
+	self assert: (param declaredType isKindOf: FAMIXType).
 ]
 
 { #category : #tests }
@@ -184,7 +184,7 @@ MJPHPImporterTests >> testEnsureAnAnnotationMultipleParameter [
 	| inp annotation attribute |
 	inp := MJPHPImporter new.
 	
-	annotation := inp ensureAnAnnotation: (annotations at: 2).
+	annotation := inp ensureAnAnnotation: (self setUpAnnotations at: 2).
 	
 	self assert: (annotation isMemberOf: FAMIXAnnotationInstance ).
 	self assert: (annotation annotationType isMemberOf: FAMIXAnnotationType).
@@ -213,7 +213,8 @@ MJPHPImporterTests >> testEnsureAnAnnotationMultipleParameter [
 MJPHPImporterTests >> testEnsureAnAnnotationSingleParameter [
 	| inp annotation attribute |
 	inp := MJPHPImporter new.
-	annotation := inp ensureAnAnnotation: (annotations at: 1).
+	
+	annotation := inp ensureAnAnnotation: (self setUpAnnotations at: 1).
 	
 	self assert: (annotation isMemberOf: FAMIXAnnotationInstance ).
 	self assert: (annotation annotationType isMemberOf: FAMIXAnnotationType).
