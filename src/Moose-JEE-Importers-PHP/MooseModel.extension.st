@@ -24,7 +24,7 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			
 			files do: [:file |
 					bar value: 'Parsing ' , (file fullName asString) , ' (' , counter asString , '/' , (files size asString), ')'. 
-					importer import: (file readStream contentsOfEntireFile asString).
+					importer importPHPFile: file.
 					counter := counter + 1.
 				].
 			].
@@ -61,5 +61,5 @@ MooseModel >> importPHPSourcesFromUI [
 		
 	folder isNil 
 		ifTrue: [ DialogWindow new alert: 'Folder not found.'.]
-		ifFalse:[self importPHPSourcesFrom: folder].
+		ifFalse:[ self importPHPSourcesFrom: folder].
 ]

@@ -217,9 +217,15 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 	^ interfaceNode.
 ]
 
-{ #category : #accessing }
-MJPHPImporter >> import: aStream [
-	self phpParser parse: aStream.
+{ #category : #'as yet unclassified' }
+MJPHPImporter >> importPHPFile: aFile [
+	| file nodes |
+	nodes 	:= self phpParser parse:  (aFile readStream contentsOfEntireFile).
+
+	file 		:= FAMIXFile new.
+	file entities addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
+	
+	^self populateTargetModelFrom: file.
 ]
 
 { #category : #accessing }
@@ -238,6 +244,12 @@ MJPHPImporter >> phpParser [
 { #category : #accessing }
 MJPHPImporter >> phpVisitor [
 	^ phpVisitor
+]
+
+{ #category : #accessing }
+MJPHPImporter >> populateTargetModelFrom: aFileNode [
+	"Collect and add the nodes to the model."
+	^ self targetModel.
 ]
 
 { #category : #accessing }
