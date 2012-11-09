@@ -89,6 +89,12 @@ MJPHPImporter >> ensureAField: aPPPHPFieldNode [
 ]
 
 { #category : #accessing }
+MJPHPImporter >> ensureAFile: aFile [
+	| famFile |
+	^ FAMIXFile named: aFile fullName filedIn: aFile directory.
+]
+
+{ #category : #accessing }
 MJPHPImporter >> ensureAFunction: aPPPHPFunctionNode [
 	^ aPPPHPFunctionNode
 ]
@@ -222,8 +228,8 @@ MJPHPImporter >> importPHPFile: aFile [
 	| file nodes |
 	nodes 	:= self phpParser parse:  (aFile readStream contentsOfEntireFile).
 
-	file 		:= FAMIXFile new.
-	file entities addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
+	file	:= FAMIXFile new.
+	file addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
 	
 	^self populateTargetModelFrom: file.
 ]
@@ -248,7 +254,52 @@ MJPHPImporter >> phpVisitor [
 
 { #category : #accessing }
 MJPHPImporter >> populateTargetModelFrom: aFileNode [
-	"Collect and add the nodes to the model."
+	"
+	| dataBases counter aBlackBoard |
+	
+	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: FAMIXDataBase].
+	alterTableStatements do: [:alterTable | self reifyAnAlterTableStatementFrom: alterTable.].  
+	tables keysAndValuesDo: [:key :value | columns addAll: value columns].
+	
+	counter := 1.
+	
+	UIManager default
+		displayProgress: 'Importing DB From an SQL file'
+		at: Sensor cursorPoint
+		from: 1 
+		to: (tables size + columns size)
+		during: [ :bar | 
+		
+			counter := counter + 1.
+			bar value: counter.
+			bar value: 'Adding data base'.
+			
+			self targetModel addAll: dataBases.
+
+			bar value: ('Adding ', tables size asString ,' tables').
+			tables valuesDo: [:table | 
+				self targetModel silentlyAdd: table.
+				counter := counter + 1.
+				bar value: counter].
+			
+			bar value: ('Adding' , columns size asString , 'attributes').	
+			columns do: [:col |
+				self targetModel silentlyAdd: col.
+				counter := counter + 1.
+				bar value: counter].	
+				
+			connect columns and tables
+			self targetModel allTables do: [:table | table columns do: [:col | col ownerTable: table]].
+			
+			adding table's constraint to the model
+			self targetModel allTables do: [:table | self targetModel silentlyAddAll: table constraints ].
+			
+			bar value: 'Computing primary keys constraints'.
+			self computePrimaryKeys.
+			
+			bar value: 'Computing foreign keys constraints'.			
+			self targetModel silentlyAddAll: self computeForeignKeys.].
+	"
 	^ self targetModel.
 ]
 
