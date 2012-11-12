@@ -227,10 +227,12 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 MJPHPImporter >> importPHPFile: aFile [
 	| file nodes |
 	nodes 	:= self phpParser parse:  (aFile readStream contentsOfEntireFile).
-
-	file	:= FAMIXFile new.
-	file addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
-	
+	(nodes isMemberOf: PPFailure) ifFalse: [
+		file	:= FAMIXFile new.
+		file entities addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
+	] ifTrue: [
+		DialogWindow new alert: 'Parsing of ',(aFile fullName),' failed with message',nodes message.
+	].
 	^self populateTargetModelFrom: file.
 ]
 
