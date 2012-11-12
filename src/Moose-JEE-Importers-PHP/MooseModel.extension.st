@@ -3,7 +3,7 @@ Extension { #name : #MooseModel }
 { #category : #'*moose-jee-importers-php' }
 MooseModel >> importPHPSourcesFrom: aFolder [
 	
-	| importer files|
+	| importer files result|
 	
 	UIManager default
 		displayProgress: 'Importing PHP source code...'
@@ -24,8 +24,12 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			
 			files do: [:file |
 					bar value: 'Parsing ' , (file fullName asString) , ' (' , counter asString , '/' , (files size asString), ')'. 
-					importer importPHPFile: file.
-					counter := counter + 1.
+					result := importer importPHPFile: file.
+					result isNil ifTrue: [
+							^ nil.
+						] ifFalse: [
+							counter := counter + 1.
+						].
 				].
 			].
 	^self

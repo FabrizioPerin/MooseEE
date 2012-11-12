@@ -230,10 +230,11 @@ MJPHPImporter >> importPHPFile: aFile [
 	(nodes isMemberOf: PPFailure) ifFalse: [
 		file	:= FAMIXFile new.
 		file entities addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
+		^ self populateTargetModelFrom: file.
 	] ifTrue: [
 		DialogWindow new alert: 'Parsing of ',(aFile fullName),' failed with message',nodes message.
+		^ nil.
 	].
-	^self populateTargetModelFrom: file.
 ]
 
 { #category : #accessing }
