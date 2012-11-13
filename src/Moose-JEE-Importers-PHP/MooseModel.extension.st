@@ -31,6 +31,7 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 							counter := counter + 1.
 						].
 				].
+			DialogWindow new alert: counter,' files parsed!'.
 			].
 	^self
 ]
