@@ -3,7 +3,9 @@ Extension { #name : #MooseModel }
 { #category : #'*moose-jee-importers-php' }
 MooseModel >> importPHPSourcesFrom: aFolder [
 	
-	| importer files result|
+	| importer files result alerts|
+	
+	alerts := OrderedCollection new.
 	
 	UIManager default
 		displayProgress: 'Importing PHP source code...'
@@ -25,13 +27,13 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			files do: [:file |
 					bar value: 'Parsing ' , (file fullName asString) , ' (' , counter asString , '/' , (files size asString), ')'. 
 					result := importer importPHPFile: file.
-					result isNil ifTrue: [
-							^ nil.
+					(result isMemberOf: PPFailure) ifTrue: [
+							alerts add: 'Parsing of ', file fullName, ' failed with message ', result message.
 						] ifFalse: [
 							counter := counter + 1.
 						].
 				].
-			DialogWindow new alert: counter asString ,' files parsed!'.
+			DialogWindow new alert: counter asString ,' files parsed (', alerts size asString, ' failed!)'.
 			].
 	^self
 ]

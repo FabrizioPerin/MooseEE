@@ -117,8 +117,10 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 	aPPPHPMethodNode hasDocBlock ifTrue: [
 		methodNode addComment: aPPPHPMethodNode docBlock.
 			aPPPHPMethodNode docBlockAnnotations ifNotNilDo: [ :item |
-				annotation := item attach: self phpVisitor.
-				annotation annotatedEntity: methodNode.
+				item do: [ :annot |
+					annotation := annot attach: self phpVisitor.
+					annotation annotatedEntity: methodNode.
+				].
 			]. 
 	].
 	aPPPHPMethodNode parameters do: [ :param |
@@ -225,15 +227,17 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 
 { #category : #'as yet unclassified' }
 MJPHPImporter >> importPHPFile: aFile [
-	| file nodes |
+	| file nodes entities |
 	nodes 	:= self phpParser parse:  (aFile readStream contentsOfEntireFile).
 	(nodes isMemberOf: PPFailure) ifFalse: [
 		file	:= FAMIXFile new.
-		file entities addAll: (nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: phpVisitor]]).
+		entities := nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: self phpVisitor]] thenSelect: [:item | item notNil ].		
+		
+		file entities addAll: entities.
+		
 		^ self populateTargetModelFrom: file.
 	] ifTrue: [
-		DialogWindow new alert: 'Parsing of ',(aFile fullName),' failed with message',nodes message.
-		^ nil.
+		^ nodes
 	].
 ]
 
@@ -257,53 +261,13 @@ MJPHPImporter >> phpVisitor [
 
 { #category : #accessing }
 MJPHPImporter >> populateTargetModelFrom: aFileNode [
-	"
-	| dataBases counter aBlackBoard |
-	
-	dataBases := aCollectionOfEnsuredNodes select: [:aNode | aNode isMemberOf: FAMIXDataBase].
-	alterTableStatements do: [:alterTable | self reifyAnAlterTableStatementFrom: alterTable.].  
-	tables keysAndValuesDo: [:key :value | columns addAll: value columns].
-	
-	counter := 1.
-	
-	UIManager default
-		displayProgress: 'Importing DB From an SQL file'
-		at: Sensor cursorPoint
-		from: 1 
-		to: (tables size + columns size)
-		during: [ :bar | 
-		
-			counter := counter + 1.
-			bar value: counter.
-			bar value: 'Adding data base'.
-			
-			self targetModel addAll: dataBases.
-
-			bar value: ('Adding ', tables size asString ,' tables').
-			tables valuesDo: [:table | 
-				self targetModel silentlyAdd: table.
-				counter := counter + 1.
-				bar value: counter].
-			
-			bar value: ('Adding' , columns size asString , 'attributes').	
-			columns do: [:col |
-				self targetModel silentlyAdd: col.
-				counter := counter + 1.
-				bar value: counter].	
-				
-			connect columns and tables
-			self targetModel allTables do: [:table | table columns do: [:col | col ownerTable: table]].
-			
-			adding table's constraint to the model
-			self targetModel allTables do: [:table | self targetModel silentlyAddAll: table constraints ].
-			
-			bar value: 'Computing primary keys constraints'.
-			self computePrimaryKeys.
-			
-			bar value: 'Computing foreign keys constraints'.			
-			self targetModel silentlyAddAll: self computeForeignKeys.].
-	"
-	^ self targetModel.
+	self targetModel silentlyAdd: aFileNode.
+	aFileNode entities
+		do: [ :entity | 
+			self targetModel silentlyAdd: entity.
+			(entity isMemberOf: FAMIXClass)
+				ifTrue: [ entity behaviouralEntities do: [ :method | self targetModel silentlyAdd: method. ] ] ].
+	^ self targetModel
 ]
 
 { #category : #accessing }
