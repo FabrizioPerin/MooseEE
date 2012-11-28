@@ -587,6 +587,8 @@ ConfigurationOfMooseJEE >> defaultAllProjects: spec [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 			package: 'Moose-JEE-CCProject-Model' with: [
 				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
+			package: 'Moose-JEE-Architecture' with: [
+				spec repository: 'http://www.squeaksource.com/MooseJEE'.];
 						
 			"importers"
 			package: 'Moose-JEE-Importers-SQL' with: [
