@@ -77,6 +77,16 @@ ConfigurationOfMooseJEE class >> loadDefaultSQLWithoutTests [
 ]
 
 { #category : #loading }
+ConfigurationOfMooseJEE class >> loadDevelopment [
+	^(self project version: #development) load
+]
+
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadStable [
+	^(self project version: #stable) load
+]
+
+{ #category : #loading }
 ConfigurationOfMooseJEE class >> loadVersion10 [
 	
 	"Transcript open.
@@ -105,6 +115,12 @@ ConfigurationOfMooseJEE class >> loadVersion11 [
 ConfigurationOfMooseJEE class >> loadVersion13 [
 
 	(self project version: '1.3') load.
+]
+
+{ #category : #loading }
+ConfigurationOfMooseJEE class >> loadVersion15 [
+
+	(self project version: '1.5') load.
 ]
 
 { #category : #accessing }
@@ -871,6 +887,14 @@ ConfigurationOfMooseJEE >> defaultSQLWithoutTests: spec [
 	]
 ]
 
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> development: spec [
+	<symbolicVersion: #development>
+
+	spec for: #'common' version: '1.5-baseline'.
+
+]
+
 { #category : #accessing }
 ConfigurationOfMooseJEE >> project [
 
@@ -992,6 +1016,14 @@ ConfigurationOfMooseJEE >> refreshMooseCore: spec [
 				package: 'Moose-TestResources-PackageBlueprint-P3';
 				package: 'Moose-TestResources-PackageBlueprint-P4';
 				package: 'Moose-Tests-MonticelloImporter' ]
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> stable: spec [
+	<symbolicVersion: #'stable'>
+
+	spec for: #common version: '1.5'.
+
 ]
 
 { #category : #baselines }
