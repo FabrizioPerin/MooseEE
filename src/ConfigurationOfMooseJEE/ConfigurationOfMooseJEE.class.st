@@ -424,7 +424,6 @@ ConfigurationOfMooseJEE >> baseline15: spec [
 			"Tests"
 			package: 'Moose-JEE-Tests-Resources';
 			package: 'Moose-JEE-Tests-Core' with: [spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
-			package: 'Moose-JEE-Tests-GitLog' with: [spec requires: #('Moose-JEE-GitLog-Model' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Algos' with: [spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
 			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
