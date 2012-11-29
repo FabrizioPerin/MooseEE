@@ -27,8 +27,8 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 	
 	| result fileSystem entries fileEntries counter |
 
-	fileSystem := FSFilesystem onDisk referenceTo: aFolderPath.
-	entries := FSCollectVisitor breadthFirst: fileSystem.
+	fileSystem := FileSystem onDisk referenceTo: aFolderPath.
+	entries := CollectVisitor breadthFirst: fileSystem.
 	
 	fileEntries := entries select: [:entry | '^.*.jsp$' asRegexIgnoringCase matches: entry reference name ].
 
