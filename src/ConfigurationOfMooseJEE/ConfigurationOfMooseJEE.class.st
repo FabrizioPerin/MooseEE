@@ -407,7 +407,6 @@ ConfigurationOfMooseJEE >> baseline15: spec [
 			package: 'Moose-JEE-JSP-Model';
 			package: 'Moose-JEE-EJB-Model';
 			package: 'Moose-JEE-Tiers-Model';
-			package: 'Moose-JEE-GitLog-Model';
 			package: 'Moose-JEE-Architecture-Model';
 						
 			"importers"
