@@ -1176,7 +1176,6 @@ ConfigurationOfMooseJEE >> version15: spec [
 		spec  project: 'PetitSQLParser for MooseJEE' with: 'defaultWithoutPetit'.
 		spec  project: 'FAMIX SQL for MooseJEE' with: 'default'.
 		spec  project: 'PetitJSPParser for MooseJEE' with: 'defaultWithoutPetit'.
-		spec  project: 'PetitGitLogParser for MooseJEE' with: 'defaultWithoutPetit'.
 		spec  project: 'PetitPHPParser for MooseJEE' with: 'defaultWithoutPetit'.
 		spec  project: 'Maze for MooseJEE' with: 'default'.
 		
