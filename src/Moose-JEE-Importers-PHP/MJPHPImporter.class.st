@@ -58,18 +58,16 @@ MJPHPImporter >> createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: aFAM
 
 { #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
-	| classNode |
-	
-	classNode := self ensureAType: 
-					MJFAMIXPHPClass new 
-					from: aPPPHPClassNode.
-	
-	aPPPHPClassNode interfaces do: [ :interface |
-		"The Class node has an is interfac"
-		classNode addInterface: (interface attach: self phpVisitor).
-	].
-	
-	^ classNode.
+	| classNode inheritance |
+	classNode := self ensureAType: MJFAMIXPHPClass new from: aPPPHPClassNode.
+	aPPPHPClassNode interfaces
+		do: [ :interface | 
+			inheritance := FAMIXInheritance new.
+			inheritance isInterface: true.
+			inheritance superclass: (interface attach: self phpVisitor).
+			inheritance subclass: interface.
+			classNode addSuperInheritance: inheritance ].
+	^ classNode
 ]
 
 { #category : #accessing }
@@ -227,18 +225,25 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 
 { #category : #'as yet unclassified' }
 MJPHPImporter >> importPHPFile: aFile [
-	| file nodes entities |
-	nodes 	:= self phpParser parse:  (aFile readStream contentsOfEntireFile).
-	(nodes isMemberOf: PPFailure) ifFalse: [
-		file	:= FAMIXFile new.
-		entities := nodes collect: [: node | (node isKindOf: PPPHPNode) ifTrue: [node accept: self phpVisitor]] thenSelect: [:item | item notNil ].		
-		
-		file entities addAll: entities.
-		
-		^ self populateTargetModelFrom: file.
-	] ifTrue: [
-		^ nodes
-	].
+	| file nodes entities folder lang |
+	lang := FAMIXCustomSourceLanguage new.
+	lang name: 'PHP'.
+	
+	nodes := self phpParser parse: aFile readStream contentsOfEntireFile.
+	(nodes isMemberOf: PPFailure)
+		ifFalse: [
+			file := FAMIXFile named: aFile fullName filedIn: folder.
+			entities := nodes
+				collect: [ :node | 
+					(node isKindOf: PPPHPNode)
+						ifTrue: [ node accept: self phpVisitor ] ]
+				thenSelect: [ :item | item notNil ].
+			entities do: [:item | 
+				item declaredSourceLanguage: lang.
+				file entities add: item.
+				].
+			^ self populateTargetModelFrom: file ]
+		ifTrue: [ ^ nodes ]
 ]
 
 { #category : #accessing }
@@ -265,9 +270,24 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 	aFileNode entities
 		do: [ :entity | 
 			self targetModel silentlyAdd: entity.
-			(entity isMemberOf: FAMIXClass)
-				ifTrue: [ entity behaviouralEntities do: [ :method | self targetModel silentlyAdd: method. ] ] ].
-	^ self targetModel
+			(entity isMemberOf: MJFAMIXPHPClass)
+				ifTrue: [
+					self targetModel silentlyAddAll: entity superInheritances.
+					entity methods
+						do: [ :method |
+							 
+							self targetModel silentlyAdd: method.
+							self targetModel silentlyAddAll: method annotationInstances.
+							self targetModel silentlyAddAll: method parameters.
+							
+							method parameters do: [:param | 
+									param declaredType notNil ifTrue: [
+											"self targetModel silentlyAdd: param declaredType."
+										].
+								].
+							].
+					entity attributes do: [ :attribute | self targetModel silentlyAdd: attribute ] ] ].
+	^ aFileNode
 ]
 
 { #category : #accessing }

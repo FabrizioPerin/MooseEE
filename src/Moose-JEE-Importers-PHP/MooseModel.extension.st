@@ -3,7 +3,7 @@ Extension { #name : #MooseModel }
 { #category : #'*moose-jee-importers-php' }
 MooseModel >> importPHPSourcesFrom: aFolder [
 	
-	| importer files result alerts|
+	| importer files result alerts root language |
 	
 	alerts := OrderedCollection new.
 	
@@ -20,6 +20,14 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			bar value: 1.
 			bar value: 'Loading files.'.
 			
+			language := FAMIXCustomSourceLanguage new.
+			language name: 'PHP'.
+			
+			self sourceLanguage: language.
+			self add: language.
+			
+			root := FAMIXFolder named: aFolder fullName filedIn: nil.
+			
 			files := self importPHPSourcesFromSubfolder: aFolder.
 			
 			bar value: 2.
@@ -31,16 +39,18 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 							alerts add: 'Parsing of ', file fullName, ' failed with message ', result message.
 						] ifFalse: [
 							counter := counter + 1.
+							root addFile: result.
 						].
 				].
-			DialogWindow new alert: counter asString ,' files parsed (', alerts size asString, ' failed!)'.
+			self silentlyAdd: root.
+			"DialogWindow new alert: counter asString ,' files parsed (', alerts size asString, ' failed!)'."
 			].
 	^self
 ]
 
 { #category : #'*moose-jee-importers-php' }
 MooseModel >> importPHPSourcesFromSubfolder: aDirectoryFile [
-	| files |
+	| files folder |
 	files := OrderedCollection new.
 	
 	aDirectoryFile entries do: [ :entry |
