@@ -1,5 +1,5 @@
 Class {
 	#name : #MJDPAssociation,
-	#superclass : #FAMIXAssociation,
+	#superclass : #MJAssociation,
 	#category : #'Moose-JEE-DesignPattern'
 }

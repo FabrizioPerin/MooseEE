@@ -62,7 +62,7 @@ MJDPRoleAssociation >> printOn: aStream [
 
 { #category : #'as yet unclassified' }
 MJDPRoleAssociation >> role [
-	<MSEProperty: #role type: #MJDPRole opposite: #associatedClass>
+	<MSEProperty: #role type: #MJDPRole opposite: #associatedClass> 
 	<MSEComment: 'Design Pattern role'>
 	
 	^role
