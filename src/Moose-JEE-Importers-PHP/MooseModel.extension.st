@@ -11,7 +11,7 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 		displayProgress: 'Importing PHP source code...'
 		at: Sensor cursorPoint
 		from: 1 
-		to: 2
+		to: 3
 		during: [ :bar | 
 			| counter |
 			counter := 1.
@@ -20,11 +20,8 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			bar value: 1.
 			bar value: 'Loading files.'.
 			
-			language := FAMIXCustomSourceLanguage new.
-			language name: 'PHP'.
-			
-			self sourceLanguage: language.
-			self add: language.
+			self sourceLanguage: importer sourceLanguage.
+			self add: importer sourceLanguage.
 			
 			root := FAMIXFolder named: aFolder fullName filedIn: nil.
 			
@@ -42,7 +39,11 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 							root addFile: result.
 						].
 				].
-			self silentlyAdd: root.
+			
+			bar value: 3.
+			bar value: 'Populating the model.'.
+			
+			importer populateTargetModelFromRootFolder: root.
 			"DialogWindow new alert: counter asString ,' files parsed (', alerts size asString, ' failed!)'."
 			].
 	^self

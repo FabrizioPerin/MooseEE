@@ -5,7 +5,8 @@ Class {
 		'targetModel',
 		'phpParser',
 		'phpVisitor',
-		'annotationTypes'
+		'annotationTypes',
+		'sourceLanguage'
 	],
 	#category : #'Moose-JEE-Importers-PHP'
 }
@@ -63,9 +64,8 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	aPPPHPClassNode interfaces
 		do: [ :interface | 
 			inheritance := FAMIXInheritance new.
-			inheritance isInterface: true.
-			inheritance superclass: (interface attach: self phpVisitor).
-			inheritance subclass: interface.
+			inheritance superclass: (interface accept: self phpVisitor).
+			inheritance subclass: classNode.
 			classNode addSuperInheritance: inheritance ].
 	^ classNode
 ]
@@ -116,13 +116,13 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 		methodNode addComment: aPPPHPMethodNode docBlock.
 			aPPPHPMethodNode docBlockAnnotations ifNotNilDo: [ :item |
 				item do: [ :annot |
-					annotation := annot attach: self phpVisitor.
+					annotation := annot accept: self phpVisitor.
 					annotation annotatedEntity: methodNode.
 				].
 			]. 
 	].
 	aPPPHPMethodNode parameters do: [ :param |
-		methodNode addParameter: ( param attach: self phpVisitor ).
+		methodNode addParameter: ( param accept: self phpVisitor ).
 	].
 	aPPPHPMethodNode isAbstract ifFalse: [
 		self flag: 'TODO: add the body!'.
@@ -140,7 +140,7 @@ MJPHPImporter >> ensureANamespace: aPPPHPNamespaceNode [
 	
 	lastNode := aPPPHPNamespaceNode.
 	(lastNode isRoot) ifFalse: [
-		scopeNode parentScope: (lastNode parentNamespace attach: self phpVisitor ).
+		scopeNode parentScope: (lastNode parentNamespace accept: self phpVisitor ).
 	].
 	^ scopeNode
 ]
@@ -151,7 +151,7 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 	param := MJFAMIXPHPParameter new.
 	param name: aPPPHPParameterNode nodeName.
 	aPPPHPParameterNode hasTypeHint ifTrue: [
-		param declaredType: (aPPPHPParameterNode typeHint attach: self phpVisitor).
+		param declaredType: (aPPPHPParameterNode typeHint accept: self phpVisitor).
 	].
 	aPPPHPParameterNode hasDefaultValue ifTrue: [
 		param defaultValue: aPPPHPParameterNode defaultValue.
@@ -169,23 +169,23 @@ MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	aPPPHPTypeNode superTypes do: [ :superType |
 		
 		inheritance := FAMIXInheritance new.
-		inheritance superclass: (superType attach: self phpVisitor).
+		inheritance superclass: (superType accept: self phpVisitor).
 		inheritance subclass: aTypeNode.
 			
 		aTypeNode addSuperInheritance: inheritance.
 	].
 	"This is valid for all types"
 	aPPPHPTypeNode attributes do: [:attribute | 
-		aTypeNode addAttribute: (attribute attach: self phpVisitor).
+		aTypeNode addAttribute: (attribute accept: self phpVisitor).
 	].
 	"this is valid for all types"
 	aPPPHPTypeNode behaviouralEntities do:[ :method |
-			aTypeNode addMethod: (method attach: self phpVisitor).
+			aTypeNode addMethod: (method accept: self phpVisitor).
 	].
 	"this is valid for all types"
 	aPPPHPTypeNode docBlockHasAnnotations ifTrue: [
 		aPPPHPTypeNode docBlockAnnotations do: [ :item | 
-			annotation := (item attach: self phpVisitor).
+			annotation := (item accept: self phpVisitor).
 			annotation annotatedEntity: aTypeNode.
 		].
 	].
@@ -218,31 +218,28 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 					(MJFAMIXPHPClass new isInterface: true) 
 					from: aPPPHPInterfaceNode.
 	
-	interfaceNode superTypes do: [ :superType | superType isInterface: true. ].
+	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true. ].
 	
 	^ interfaceNode.
 ]
 
 { #category : #'as yet unclassified' }
 MJPHPImporter >> importPHPFile: aFile [
-	| file nodes entities folder lang |
-	lang := FAMIXCustomSourceLanguage new.
-	lang name: 'PHP'.
-	
+	| file nodes entities folder |
 	nodes := self phpParser parse: aFile readStream contentsOfEntireFile.
 	(nodes isMemberOf: PPFailure)
-		ifFalse: [
+		ifFalse: [ 
 			file := FAMIXFile named: aFile fullName filedIn: folder.
 			entities := nodes
 				collect: [ :node | 
 					(node isKindOf: PPPHPNode)
 						ifTrue: [ node accept: self phpVisitor ] ]
 				thenSelect: [ :item | item notNil ].
-			entities do: [:item | 
-				item declaredSourceLanguage: lang.
-				file entities add: item.
-				].
-			^ self populateTargetModelFrom: file ]
+			entities
+				do: [ :item | 
+					item declaredSourceLanguage: sourceLanguage.
+					file entities add: item ].
+			^ file ]
 		ifTrue: [ ^ nodes ]
 ]
 
@@ -252,6 +249,7 @@ MJPHPImporter >> initialize [
 	phpVisitor 			:= PPPHPConcreteVisitor new importer: self.
 	phpParser 			:= PPPHPCoreParser new.
 	annotationTypes 	:= Dictionary new. 
+	sourceLanguage 	:= FAMIXCustomSourceLanguage new name: 'PHP'.
 ]
 
 { #category : #accessing }
@@ -288,6 +286,29 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 							].
 					entity attributes do: [ :attribute | self targetModel silentlyAdd: attribute ] ] ].
 	^ aFileNode
+]
+
+{ #category : #accessing }
+MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
+	"This method was added to make it possible to track all types first.
+		1. iterate over files -
+		2. get the entities, filter types and add them to the model -
+		3. reiterate the entities and add:
+			3.1. type annotations
+			3.2. properties
+				3.2.1. annotations
+			3.3. methods
+				3.3.1. parameters
+				3.3.2. annotations"
+	"remove duplicates"
+	aFAMIXFolder files do: [ :file | self targetModel silentlyAddAll: (file entities select: [ :node |  node isKindOf: FAMIXType ]) ].
+	aFAMIXFolder files do: [ :file | self populateTargetModelFrom: file ].
+	self targetModel silentlyAdd: aFAMIXFolder.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> sourceLanguage [
+	^ sourceLanguage
 ]
 
 { #category : #accessing }
