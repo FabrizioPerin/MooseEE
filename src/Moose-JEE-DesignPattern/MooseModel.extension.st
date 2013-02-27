@@ -1,6 +1,13 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*moose-jee-designpattern' }
+MooseModel >> allRoles [
+	<navigation: 'All DP Roles'>
+
+	^self allWithType: MJDPRole ofGroupClass: MJDPRoleGroup
+]
+
+{ #category : #'*moose-jee-designpattern' }
 MooseModel >> importPatternDefinitionFromUI [
 	<menuItem: 'Import pattern definition from file' category: 'JEAs Importers'>
 	| file |
