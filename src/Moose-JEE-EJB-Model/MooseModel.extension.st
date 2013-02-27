@@ -29,13 +29,6 @@ MooseModel >> allMessageDrivenBeans [
 ]
 
 { #category : #'*moose-jee-ejb-model' }
-MooseModel >> allRoles [
-	<navigation: 'All DP Roles'>
-
-	^self allWithType: MJDPRole ofGroupClass: MJDPRoleGroup
-]
-
-{ #category : #'*moose-jee-ejb-model' }
 MooseModel >> allSessionBeans [
 	<navigation: 'All Session Beans'>
 
