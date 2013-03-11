@@ -6,7 +6,8 @@ Class {
 		'phpParser',
 		'phpVisitor',
 		'annotationTypes',
-		'sourceLanguage'
+		'sourceLanguage',
+		'types'
 	],
 	#category : #'Moose-JEE-Importers-PHP'
 }
@@ -14,6 +15,12 @@ Class {
 { #category : #'as yet unclassified' }
 MJPHPImporter class >> on: aMooseModel [
 	^self new targetModel: aMooseModel.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> addAllAnnotations: anAnnotationTypeCollection [
+	self flag: 'resolve aliases and link it up to defined classes'.
+	self targetModel silentlyAddAll: anAnnotationTypeCollection.
 ]
 
 { #category : #accessing }
@@ -28,16 +35,22 @@ MJPHPImporter >> annotationTypes: anObject [
 
 { #category : #accessing }
 MJPHPImporter >> createAnnotationType: aPPPHPAnnotationNode [
-	| type |
-	annotationTypes at: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName
-	ifAbsentPut: [
-		type := FAMIXAnnotationType new.
-		type name: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName.
-		type.
-	].
-	self flag: 'recheck the attributes'.
-	^ annotationTypes at: aPPPHPAnnotationNode nodeName fullyQualifiedNamespaceName.
+	| type nodeName |
 	
+	nodeName := aPPPHPAnnotationNode nodeName.
+	(nodeName isKindOf: PPPHPNamespaceStack )
+		ifTrue: [ 
+			nodeName := nodeName fullyQualifiedNamespaceName. ].
+		
+	annotationTypes
+		at: nodeName
+		ifAbsentPut: [ 
+			type := FAMIXAnnotationType new.
+			type name: nodeName.
+			type isStub: true.
+			type ].
+		
+	^ annotationTypes at: nodeName
 ]
 
 { #category : #accessing }
@@ -134,14 +147,13 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 { #category : #accessing }
 MJPHPImporter >> ensureANamespace: aPPPHPNamespaceNode [
 	"Recursively bubbles up the passed namespace and returns the representation of the passed node (linked to its parents)"
+
 	| scopeNode lastNode parentNode |
 	scopeNode := FAMIXNamespace new.
 	scopeNode name: aPPPHPNamespaceNode namespaceName.
-	
 	lastNode := aPPPHPNamespaceNode.
-	(lastNode isRoot) ifFalse: [
-		scopeNode parentScope: (lastNode parentNamespace accept: self phpVisitor ).
-	].
+	lastNode isRoot
+		ifFalse: [ scopeNode parentScope: (lastNode parentNamespace accept: self phpVisitor) ].
 	^ scopeNode
 ]
 
@@ -219,7 +231,6 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 					from: aPPPHPInterfaceNode.
 	
 	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true. ].
-	
 	^ interfaceNode.
 ]
 
@@ -248,7 +259,8 @@ MJPHPImporter >> initialize [
 
 	phpVisitor 			:= PPPHPConcreteVisitor new importer: self.
 	phpParser 			:= PPPHPCoreParser new.
-	annotationTypes 	:= Dictionary new. 
+	annotationTypes 	:= Dictionary new.
+	types 				:= Dictionary new.
 	sourceLanguage 	:= FAMIXCustomSourceLanguage new name: 'PHP'.
 ]
 
@@ -264,6 +276,7 @@ MJPHPImporter >> phpVisitor [
 
 { #category : #accessing }
 MJPHPImporter >> populateTargetModelFrom: aFileNode [
+	"we need to check if the given annotation type or class exists otherwise we need to mark it as a stub!"
 	self targetModel silentlyAdd: aFileNode.
 	aFileNode entities
 		do: [ :entity | 
@@ -301,7 +314,11 @@ MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
 				3.3.1. parameters
 				3.3.2. annotations"
 	"remove duplicates"
+	"add all types, otherwise moose is failing"
 	aFAMIXFolder files do: [ :file | self targetModel silentlyAddAll: (file entities select: [ :node |  node isKindOf: FAMIXType ]) ].
+	"add all the annotation types"
+	self addAllAnnotations: annotationTypes.
+	"for each file track the content"
 	aFAMIXFolder files do: [ :file | self populateTargetModelFrom: file ].
 	self targetModel silentlyAdd: aFAMIXFolder.
 ]
