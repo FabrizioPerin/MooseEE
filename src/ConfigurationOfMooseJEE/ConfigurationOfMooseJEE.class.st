@@ -552,7 +552,7 @@ ConfigurationOfMooseJEE >> baseline20: spec [
 				className: 'ConfigurationOfFamixSQL';
 				file: 'ConfigurationOfFamixSQL';
 				"version: 'development';"
-				repository: 'http://www.squeaksource.com/Moose' ].
+				repository: 'http://www.squeaksource.com/MooseJEE' ].
 
 		spec  project: 'PetitJSPParser for MooseJEE' with: [
 			spec
