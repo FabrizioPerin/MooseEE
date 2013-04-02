@@ -8,12 +8,13 @@ FAMIXFKAssociationGroupTests >> testExportListOfFKsAsCSVFile [
 
 	logicLayer := mooseModel allFKAssociations.
 
-	self deny: (FileDirectory default fileNames includes: 'listOfFkAssoc').
+	self deny: (FileSystem workingDirectory fileNames includes: 'listOfFkAssoc').
 
 	logicLayer exportListOfFKsAsCSVFileNamed: 'listOfFkAssoc'.
 	
-	self assert: (FileDirectory default fileNames includes: 'listOfFkAssoc.csv').
+	self assert: (FileSystem workingDirectory fileNames includes: 'listOfFkAssoc.csv').
+
+	(FileSystem workingDirectory / 'listOfFkAssoc.csv') asFileReference delete. 
 	
-	FileDirectory default deleteFileNamed: 'listOfFkAssoc.csv'.
-	self deny: (FileDirectory default fileNames includes: 'listOfFkAssoc.csv').
+	self deny: (FileSystem workingDirectory fileNames includes: 'listOfFkAssoc.csv').
 ]
