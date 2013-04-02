@@ -6,31 +6,26 @@ Class {
 
 { #category : #'as yet unclassified' }
 MapColumnsOnMethodsAndAttributes >> buildMapsOn: aTargetModel [
-	| attributesAndMethods classes counter allIndexes ejbVer|
+	| attributesAndMethods classes allIndexes ejbVer|
 
 	aTargetModel ejbVersion isNil 
 				ifTrue: [
 					ejbVer := UITheme builder 
 								chooseDropList: 'Choose the ejb type' list: #(#'EJB21' #'EJB30').
 					aTargetModel ejbVersion: ejbVer.].
+	
 	aTargetModel isEJB30 
 	ifTrue:[	
 		attributesAndMethods := (aTargetModel allAnnotationTypes select: [:each | each name = #Column or: [each name = #GeneratedValue]]) flatCollect: [:each | each annotatedEntities ].
 		classes := (attributesAndMethods collect: [:each | each parentType ]) asSet.
 
-		counter :=  1.
-		
-		UIManager default
-			displayProgress: 'Building relations among Columns and Attributes'
-			at: Sensor cursorPoint
-			from: counter
-			to: classes size
-			during: [ :bar |
-				counter := counter+1.
-				bar value: counter.
+
+		MooseCustomTask 	
+			runWithProgress: [: bar | 
+				bar increment.
 
 				classes do: [:class |
-					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns internalCounter classMethods |
+					| source currentAtt currentCol dictionaryOfColumns dictionaryOfAttributes classAttributes tableColumns classMethods |
 					source := class sourceText.
 					dictionaryOfColumns := Dictionary new.
 					dictionaryOfAttributes := Dictionary new.
@@ -41,32 +36,27 @@ MapColumnsOnMethodsAndAttributes >> buildMapsOn: aTargetModel [
 					class mappedRelationalEntities isEmpty ifFalse: [tableColumns := class mappedRelationalEntities first columns ].
 					
 					"try to match with methods"
-					internalCounter := 1.
-					UIManager default
-						displayProgress: 'Trying to match with methods'
-						at: Sensor cursorPoint
-						from: 1
-						to: (classMethods size * tableColumns size)
-						during: [ :internalBar |
-														
+					MooseCustomTask 	
+						runWithProgress: [:internalBar | 
 							"first try to match with methods"
 							classMethods do: [:method |
 								tableColumns do: [:column | 
-									
-									internalCounter := internalCounter + 1.
-									internalBar value: internalCounter. 
+									internalBar increment. 
 
 									((method sourceText findString: ('@Column(name = "',column name,'"') startingAt: 1 caseSensitive: false) > 0) ifTrue: [
 										| mapping |
 										mapping := FAMIXMapping new mapTarget: column; mapSource: method.
 										method addMaps: mapping.
 										column addMappedBy: mapping.
-										aTargetModel silentlyAdd: mapping]]]].
+										aTargetModel silentlyAdd: mapping]]]]
+						description: 'Trying to match with methods'
+		 				length: (classMethods size * tableColumns size). 
+						
+						
 				
 					
 					"now try to match the rest"
-					counter := counter+1.
-					bar value: counter.
+					bar increment.
 					
 					tableColumns do: [:column | 
 						| ind |
@@ -86,13 +76,8 @@ MapColumnsOnMethodsAndAttributes >> buildMapsOn: aTargetModel [
 					
 					currentAtt := currentCol := nil.
 					
-					internalCounter := 1.
-					UIManager default
-						displayProgress: 'Trying to match with attributes'
-						at: Sensor cursorPoint
-						from: 1
-						to: allIndexes size
-						during: [ :internalBar |
+					MooseCustomTask 	
+						runWithProgress: [:internalBar | 
 							allIndexes do: [:ind |
 								| mapping |
 							
@@ -112,9 +97,11 @@ MapColumnsOnMethodsAndAttributes >> buildMapsOn: aTargetModel [
 										aTargetModel silentlyAdd: mapping.
 										currentAtt := currentCol := nil.].
 								
-								internalCounter := internalCounter + 1.
-								internalBar value: internalCounter. ]]].
+								internalBar increment ]]
+						description: 'Trying to match with attributes'
+		 				length: allIndexes size.
 				
-					counter := counter+1.
-					bar value: counter]].
+					bar increment ] ]
+			description: 'Building relations between columns and methods and attributes'
+		 	length: classes size + 1]
 ]
