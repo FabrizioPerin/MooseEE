@@ -24,12 +24,12 @@ MJFAMIXLayerTests >> testFileOutContainedClasses [
 	logicLayer := MJFAMIXLogicLayer new.
 	logicLayer populate: mooseModel.
 
-	self deny: (FileDirectory default fileNames includes: 'Logic.out').
+	self deny: (FileSystem workingDirectory fileNames includes: 'Logic.out').
 	
 	MJFAMIXLogicLayer new fileOutContainedClasses.
 	
-	self assert: (FileDirectory default fileNames includes: 'Logic.out').
+	self assert: (FileSystem workingDirectory fileNames includes: 'Logic.out').
 	
-	FileDirectory default deleteFileNamed: 'Logic.out'.
-	self deny: (FileDirectory default fileNames includes: 'Logic.out').
+	(FileSystem workingDirectory / 'Logic.out') asFileReference delete.
+	self deny: (FileSystem workingDirectory fileNames includes: 'Logic.out').
 ]
