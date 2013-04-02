@@ -4,8 +4,10 @@ Extension { #name : #String }
 String >> transformInMoosePathFormat [
 	| res |
 	
-	res := self removePrefix: FileDirectory pathNameDelimiter asString.
-	res := res copyReplaceAll: FileDirectory pathNameDelimiter asString with: '::'.
+	res := self removePrefix: $/ asString.
+	res := res removePrefix: $\ asString.
+	res := res copyReplaceAll: $/ asString with: '::'.
+	res := res copyReplaceAll: $\ asString with: '::'.
 	^ res
 	
 	"'/home/saeed/code/org/compiere/model/MSequence.java' transformInMoosePathFormat 'home::saeed::code::org::compiere::model::MSequence.java'"
