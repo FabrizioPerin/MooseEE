@@ -280,7 +280,7 @@ MoosePanel open.
 MooseModel >> instanciateJBeansFromAnnotations [
 	<menuItem: 'Import beans from annotations' category: 'JEAs Importers'>
 	
-	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes counter |
+	| entityBeansAnnotations messageDrivenBeansAnnotations sessionBeansAnnotations transactionAttributes |
 	
 	entityBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'Entity'].
 	messageDrivenBeansAnnotations := self allAnnotationInstances entities select: [:each | each annotationType name = 'MessageDriven'].
@@ -289,18 +289,11 @@ MooseModel >> instanciateJBeansFromAnnotations [
 																					each annotationType name = 'Stateful'] ].
 	transactionAttributes := self allAnnotationTypes select: [:each | each name = 'TransactionAttribute'].
 	
-	counter := 1.
-																					
-	UIManager default
-		displayProgress: 'Importing DB From an SQL file'
-		at: Sensor cursorPoint
-		from: 1 
-		to: (entityBeansAnnotations size + messageDrivenBeansAnnotations size + sessionBeansAnnotations size + transactionAttributes size)
-		during: [ :bar | 
+	MooseCustomTask
+		runWithProgress: [ :bar | 
+			bar increment.
 	
-			bar value: counter.
-	
-			bar value: 'Importing Entity Beans'.
+			"bar value: 'Importing Entity Beans'."
 			entityBeansAnnotations do: [:annotation | 
 				| bean |
 				bean := MJFAMIXEntityBean new name: annotation mooseName.
@@ -308,11 +301,10 @@ MooseModel >> instanciateJBeansFromAnnotations [
 					class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
 																					each parentEJBBean: bean.
 																					bean implementationClass: each.].
-				counter := counter +1.
-				bar value: counter.
+				bar increment.
 				self silentlyAdd: bean ].
 
-			bar value: 'Importing Message Driven Beans'.
+			"bar value: 'Importing Message Driven Beans'."
 			messageDrivenBeansAnnotations do: [:annotation | 
 				| bean |
 				bean := MJFAMIXMessageDrivenBean new name: annotation mooseName.
@@ -320,11 +312,10 @@ MooseModel >> instanciateJBeansFromAnnotations [
 					class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
 																					each parentEJBBean: bean.
 																					bean implementationClass: each.].
-				counter := counter +1.
-				bar value: counter.
+				bar increment.
 				self silentlyAdd: bean ].
 	
-			bar value: 'Importing Session Beans'.
+			"bar value: 'Importing Session Beans'."
 			sessionBeansAnnotations do: [:annotation | 
 				| bean |
 				bean := MJFAMIXSessionBean new name: annotation mooseName.
@@ -333,11 +324,10 @@ MooseModel >> instanciateJBeansFromAnnotations [
 					class mooseID = (annotation annotatedEntity mooseID).] ) do: [:each | 
 																					each parentEJBBean: bean.
 																					bean implementationClass: each.].
-				counter := counter +1.
-				bar value: counter.
+				bar increment.
 				self silentlyAdd: bean].
 	
-			bar value: 'Importing Transaction Attributes'.
+			"bar value: 'Importing Transaction Attributes'."
 			transactionAttributes do: [:annotation |
 				"maintain the order: classes have to be analized before methods because annotations at method level they override the class one"
 				| classes methods |
@@ -348,9 +338,10 @@ MooseModel >> instanciateJBeansFromAnnotations [
 				classes do: [:class | class methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ] ].
 				methods do: [:method | method ejbTransactionType: 'REQUIRES_NEW' ].	
 					
-				counter := counter +1.
-				bar value: counter.	
-			]].
+				bar increment.
+			]]
+		description: 'Importing DB From an SQL file'
+		length: 	(entityBeansAnnotations size + messageDrivenBeansAnnotations size + sessionBeansAnnotations size + transactionAttributes size).													
 	
 	^self
 ]
