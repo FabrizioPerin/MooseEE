@@ -574,6 +574,13 @@ ConfigurationOfMooseJEE >> baseline20: spec [
 				file: 'ConfigurationOfMaze';
 				"version: 'default';"
 				repository: 'http://www.squeaksource.com/Maze' ].
+
+		spec  project: 'Carrack for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfCarrack';
+				file: 'ConfigurationOfCarrack';
+				"version: 'default';"
+				repository: 'http://www.squeaksource.com/Carrack' ].
 			
 		spec 
 			"Extra Projects"
