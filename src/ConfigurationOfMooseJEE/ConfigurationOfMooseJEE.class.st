@@ -657,14 +657,14 @@ ConfigurationOfMooseJEE >> baseline21: spec [
 				className: 'ConfigurationOfMaze';
 				file: 'ConfigurationOfMaze';
 				"version: 'default';"
-				repository: 'http://www.squeaksource.com/Maze' ].
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Maze/main' ].
 
 		spec  project: 'Carrack for MooseJEE' with: [
 			spec
 				className: 'ConfigurationOfCarrack';
 				file: 'ConfigurationOfCarrack';
 				"version: 'default';"
-				repository: 'http://www.squeaksource.com/Carrack' ].
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Carrack/main' ].
 			
 		spec 
 			"Extra Projects"
