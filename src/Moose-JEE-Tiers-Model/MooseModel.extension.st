@@ -17,12 +17,10 @@ MooseModel >> allLayers [
 	<navigation: 'All Layers'>
 
 	| group |
+	
+	group := MJFAMIXLayerGroup new.
 
-	group := MJFAMIXLayerGroup new addAll: self allPresentationLayer.
-	group addAll: self allLogicLayer.
-	group addAll: self allDataLayer.
-	group addAll: self allServiceLayer.
-	group addAll: self allBusinessLayer.
+	MJFAMIXLayer allSubclasses do: [ :each | group addAll: each allInstances ].
 	
 	group description: 'All Standard Layers'.
 	^group
@@ -65,7 +63,7 @@ MooseModel >> populateSystemLayers [
 	question ifTrue: [self cleanUpLayers].   
 
 	strategy := UITheme builder chooseDropList: 'Choose the strategy to populate the layers ' list: (MJLayeringStrategy allSubclasses).
-	
+
 	strategy  isNil 
 		ifTrue: [ DialogWindow new alert: 'Strategy not selected, operation aborted.']
 		ifFalse: [

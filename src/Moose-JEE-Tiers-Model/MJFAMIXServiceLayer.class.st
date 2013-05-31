@@ -24,7 +24,7 @@ MJFAMIXServiceLayer >> containedSessionBeans [
 	^containedSessionBeans
 ]
 
-{ #category : #initialization }
+{ #category : #'as yet unclassified' }
 MJFAMIXServiceLayer >> initialize [ 
 	super initialize.
 	containedSessionBeans := OrderedCollection new.

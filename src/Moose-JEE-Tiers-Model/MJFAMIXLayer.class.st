@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'rationale',
 		'layerStrategyName',
-		'containedElements'
+		'containedElements',
+		'upperLevel',
+		'lowerLevel'
 	],
 	#category : #'Moose-JEE-Tiers-Model'
 }
@@ -52,6 +54,8 @@ MJFAMIXLayer >> fileOutContainedClasses [
 MJFAMIXLayer >> initialize [ 
 	super initialize.
 	containedElements := Set new.
+	upperLevel := nil.
+	lowerLevel := nil.
 	^self
 ]
 
@@ -91,6 +95,22 @@ MJFAMIXLayer >> layerStrategyName: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXLayer >> lowerLevel [
+	<MSEProperty: #lowerLevel type: #MJFAMIXLayer opposite: #upperLevel:>
+	<MSEComment: 'Pointer to the layer beneath this.'>
+	
+	^upperLevel
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXLayer >> lowerLevel: aFamixLayer [
+	lowerLevel := FMMultivalueLink on: self
+					update: #upperLevel
+					from: self lowerLevel
+					to: aFamixLayer
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXLayer >> populate: aMooseModel [
 
 	| layer |
@@ -113,4 +133,20 @@ MJFAMIXLayer >> rationale: anObject [
 { #category : #'as yet unclassified' }
 MJFAMIXLayer >> selectClassesFrom: aMooseModel [
 	^self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXLayer >> upperLevel [
+	<MSEProperty: #upperLevel type: #MJFAMIXLayer opposite: #lowerLevel:>
+	<MSEComment: 'Pointer to the layer above this.'>
+	
+	^upperLevel
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXLayer >> upperLevel: aFamixLayer [
+	upperLevel := FMMultivalueLink on: self
+					update: #lowerLevel
+					from: self upperLevel
+					to: aFamixLayer
 ]
