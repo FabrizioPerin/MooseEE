@@ -1,3 +1,6 @@
+"
+A MJAbstractGroup is an abstract MooseGroup for Moose EE group classes.
+"
 Class {
 	#name : #MJAbstractGroup,
 	#superclass : #MooseGroup,

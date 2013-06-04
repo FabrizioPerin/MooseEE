@@ -1,3 +1,6 @@
+"
+A MJDefautLayeringStrategy is the default strategy used to build architectural layers out of the entities composing the model.
+"
 Class {
 	#name : #MJDefautLayeringStrategy,
 	#superclass : #MJLayeringStrategy,
