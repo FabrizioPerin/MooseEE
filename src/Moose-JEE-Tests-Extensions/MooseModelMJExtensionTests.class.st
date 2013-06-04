@@ -20,7 +20,7 @@ MooseModelMJExtensionTests >> testAllDataLayer [
 
 { #category : #tests }
 MooseModelMJExtensionTests >> testAllLayers [
-	| mooseModel dataLayer allLayers strategy |
+	| mooseModel |
 
 	mooseModel := JEETestModels new sampleMooseModelWithTransAndQueryComplex.
 	
