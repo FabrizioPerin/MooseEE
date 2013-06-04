@@ -20,7 +20,10 @@ MooseModel >> allLayers [
 	
 	group := MJFAMIXLayerGroup new.
 
-	MJFAMIXLayer allSubclasses do: [ :each | group addAll: each allInstances ].
+	MJFAMIXLayer allSubclasses do: [ :class | 
+		class allInstances do: [:each | 
+			(each mooseModel = self)
+				ifTrue: [group add: each ] ] ].
 	
 	group description: 'All Standard Layers'.
 	^group
