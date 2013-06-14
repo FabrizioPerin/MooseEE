@@ -85,7 +85,7 @@ MEEComponentAssociation >> rationale: aString [
 
 { #category : #accessing }
 MEEComponentAssociation >> source [
-	<MSEProperty: #source type: #MEEArchitecturalComponent opposite: #outgoingComponentAssociation>
+	<MSEProperty: #source type: #MEEArchitecturalComponent opposite: #outgoingComponentAssociations>
 	<MSEComment: 'Source component of the association. from-side of the association'>
 	
 	^source
@@ -94,14 +94,14 @@ MEEComponentAssociation >> source [
 { #category : #accessing }
 MEEComponentAssociation >> source: aComponent [
 	source := FMMultivalueLink on: self
-					update: #outgoingComponentAssociation
+					update: #outgoingComponentAssociations
 					from: self source
 					to: aComponent
 ]
 
 { #category : #accessing }
 MEEComponentAssociation >> target [
-	<MSEProperty: #target type: #MEEArchitecturalComponent opposite: #incomingComponentAssociation>
+	<MSEProperty: #target type: #MEEArchitecturalComponent opposite: #incomingComponentAssociations>
 	<MSEComment: 'Target component of the association. to-side of the association'>
 	
 	^target
@@ -110,7 +110,7 @@ MEEComponentAssociation >> target [
 { #category : #accessing }
 MEEComponentAssociation >> target: aComponent [
 	target := FMMultivalueLink on: self
-					update: #incomingComponentAssociation
+					update: #incomingComponentAssociations
 					from: self target
 					to: aComponent
 ]
