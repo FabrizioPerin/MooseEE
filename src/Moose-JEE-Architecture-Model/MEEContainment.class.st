@@ -18,8 +18,8 @@ MEEContainment class >> annotation [
 { #category : #accessing }
 MEEContainment >> containedElement [
 	
-	<MSEProperty: #containedElement type: #FAMIXType opposite: #containerComponents>
-	<MSEComment: 'Type contained in the component.'>
+	<MSEProperty: #containedElement type: #FAMIXEntity opposite: #containerComponents>
+	<MSEComment: 'Entity contained in the component.'>
 	
 	^containedElement
 ]

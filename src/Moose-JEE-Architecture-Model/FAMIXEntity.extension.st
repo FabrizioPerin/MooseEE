@@ -1,18 +1,18 @@
-Extension { #name : #FAMIXType }
+Extension { #name : #FAMIXEntity }
 
 { #category : #'*moose-jee-architecture-model' }
-FAMIXType >> addContainerComponent: aBAContainment [
+FAMIXEntity >> addContainerComponent: aBAContainment [
 	self containerComponents add: aBAContainment
 ]
 
 { #category : #'*moose-jee-architecture-model' }
-FAMIXType >> clearContainerComponents [
+FAMIXEntity >> clearContainerComponents [
 	
 	^self privateState attributeAt: #containerComponents put: [FMMultivalueLink on: self opposite: #containedElement:].
 ]
 
 { #category : #'*moose-jee-architecture-model' }
-FAMIXType >> containerComponents [
+FAMIXEntity >> containerComponents [
 	<MSEProperty: #containerComponents type: #MEEContainment opposite: #containedElement> <multivalued>  <derived>
 	<MSEComment: 'Containment relationships.'>
 	
