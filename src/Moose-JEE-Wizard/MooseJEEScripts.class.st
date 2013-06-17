@@ -4,6 +4,15 @@ Class {
 	#category : #'Moose-JEE-Wizard'
 }
 
+{ #category : #'font-settings' }
+MooseJEEScripts class >> cleanRepositories [
+	"self cleanRepositories"
+	
+	MCRepositoryGroup instVarNamed: 'default' put: nil. 
+	self removeAllRepositories.
+	self addHomeRepositoryToAllPackages
+]
+
 { #category : #cleanup }
 MooseJEEScripts class >> cleanUpAllTests [
 
@@ -181,10 +190,7 @@ MooseJEEScripts class >> deepCleanUp [
 	
 	"trim MC ancestory information"
 	MCVersionInfo allInstances do: [ :each | each instVarNamed: 'ancestors' put: nil ].	
-
-	"delete logo"	
-	LogoImageMorph default: nil.
-
+		
 	"delete ScriptLoader log"
 	ScriptLoader resetLogStream.
 
@@ -461,6 +467,12 @@ MooseJEEScripts class >> print: aCollectionOfElements asCSVOn: aStream with: aHe
 					index := index + 1.
 					bar value: index. ]].
 	aStream close.  
+]
+
+{ #category : #cleanup }
+MooseJEEScripts class >> resetAuthor [
+	Author reset.
+
 ]
 
 { #category : #cleanup }
