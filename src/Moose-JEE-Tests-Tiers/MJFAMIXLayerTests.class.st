@@ -33,3 +33,39 @@ MJFAMIXLayerTests >> testFileOutContainedClasses [
 	(FileSystem workingDirectory / 'Logic.out') asFileReference delete.
 	self deny: (FileSystem workingDirectory fileNames includes: 'Logic.out').
 ]
+
+{ #category : #tests }
+MJFAMIXLayerTests >> testLowerLevel [
+	| logicLayer presentation |
+
+	logicLayer := MJFAMIXLogicLayer new.
+	presentation := MJFAMIXPresentationLayer new.
+
+	self assert: logicLayer lowerLevel equals: nil.
+	self assert: logicLayer upperLevel equals: nil.
+	self assert: presentation lowerLevel equals: nil.
+	self assert: presentation upperLevel equals: nil.
+	
+	presentation lowerLevel: logicLayer.
+	
+	self assert: presentation lowerLevel equals: logicLayer.
+	self assert: logicLayer upperLevel equals: presentation. 
+]
+
+{ #category : #tests }
+MJFAMIXLayerTests >> testUpperLevel [
+	| logicLayer presentation |
+
+	logicLayer := MJFAMIXLogicLayer new.
+	presentation := MJFAMIXPresentationLayer new.
+
+	self assert: logicLayer lowerLevel equals: nil.
+	self assert: logicLayer upperLevel equals: nil.
+	self assert: presentation lowerLevel equals: nil.
+	self assert: presentation upperLevel equals: nil.
+	
+	logicLayer upperLevel: presentation.
+	
+	self assert: presentation lowerLevel equals: logicLayer.
+	self assert: logicLayer upperLevel equals: presentation. 
+]
