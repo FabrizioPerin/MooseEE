@@ -96,18 +96,20 @@ MJFAMIXLayer >> layerStrategyName: anObject [
 
 { #category : #'as yet unclassified' }
 MJFAMIXLayer >> lowerLevel [
-	<MSEProperty: #lowerLevel type: #MJFAMIXLayer opposite: #upperLevel:>
+	<MSEProperty: #lowerLevel type: #MJFAMIXLayer opposite: #upperLevel>
 	<MSEComment: 'Pointer to the layer beneath this.'>
 	
-	^upperLevel
+	^lowerLevel
 ]
 
 { #category : #'as yet unclassified' }
 MJFAMIXLayer >> lowerLevel: aFamixLayer [
-	lowerLevel := FMMultivalueLink on: self
-					update: #upperLevel
-					from: self lowerLevel
-					to: aFamixLayer
+	(lowerLevel ~= aFamixLayer) ifTrue: [ 
+		| old |
+		old := lowerLevel.
+		lowerLevel := aFamixLayer.
+		old notNil ifTrue: [ old upperLevel: nil ].
+		aFamixLayer notNil ifTrue: [ aFamixLayer upperLevel: self ]]
 ]
 
 { #category : #'as yet unclassified' }
@@ -137,7 +139,7 @@ MJFAMIXLayer >> selectClassesFrom: aMooseModel [
 
 { #category : #'as yet unclassified' }
 MJFAMIXLayer >> upperLevel [
-	<MSEProperty: #upperLevel type: #MJFAMIXLayer opposite: #lowerLevel:>
+	<MSEProperty: #upperLevel type: #MJFAMIXLayer opposite: #lowerLevel>
 	<MSEComment: 'Pointer to the layer above this.'>
 	
 	^upperLevel
@@ -145,8 +147,11 @@ MJFAMIXLayer >> upperLevel [
 
 { #category : #'as yet unclassified' }
 MJFAMIXLayer >> upperLevel: aFamixLayer [
-	upperLevel := FMMultivalueLink on: self
-					update: #lowerLevel
-					from: self upperLevel
-					to: aFamixLayer
+	(upperLevel ~= aFamixLayer) ifTrue: [ 
+		| old |
+		old := upperLevel.
+		upperLevel := aFamixLayer.
+
+		old notNil ifTrue: [ old lowerLevel: nil ].
+		aFamixLayer notNil ifTrue: [ aFamixLayer lowerLevel: self ]]
 ]

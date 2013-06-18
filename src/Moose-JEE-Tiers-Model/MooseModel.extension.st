@@ -49,7 +49,7 @@ MooseModel >> allServiceLayer [
 
 { #category : #'*moose-jee-tiers-model' }
 MooseModel >> cleanUpLayers [
-	<menuItem: 'Clean up all layers' category: 'JEAs Utilities'>
+	<menuItem: 'Delete all layers' category: 'JEAs Utilities'>
 	
 	MJFAMIXLayer allSubclasses do: [:each | self silentlyRemoveAll: (self allWithType: each)].
 	
