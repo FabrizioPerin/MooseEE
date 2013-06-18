@@ -14,24 +14,24 @@ MooseModel >> allComponentAssociations [
 
 { #category : #'*moose-jee-architecture-model' }
 MooseModel >> allComponentContainment [
-	<navigation: 'All Component Containment'>
+	<navigation: 'All Component Containments'>
 
 	| group |
 
 	group := self allWithType: MEEContainment.
-	group description: 'All Component Containment'.
+	group description: 'All Component Containments'.
 	
 	^group
 ]
 
 { #category : #'*moose-jee-architecture-model' }
 MooseModel >> allComponents [
-	<navigation: 'All Components'>
+	<navigation: 'All Architectural Components'>
 
 	| group |
 
 	group := MEEArchitecturalComponentGroup new addAll: (self allWithSubTypesOf: MEEArchitecturalComponent).
-	group description: 'All Components'.
+	group description: 'All Architectural Components'.
 	
 	^group
 ]

@@ -6,8 +6,8 @@ Class {
 
 { #category : #'as yet unclassified' }
 MEEArchitecturalComponentGroup class >> annotation [
-	<MSEClass: #MEEArchitecturalComponentGroup super: #MooseGroup>
-	<package: #'Babel-Model'>
+	<MSEClass: #ArchitecturalComponentGroup super: #MEEArchitecturalGroup>
+	<package: #MEE>
 	^self
 ]
 
