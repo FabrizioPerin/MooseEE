@@ -16,17 +16,21 @@ MooseModel >> allDataLayer [
 MooseModel >> allLayers [
 	<navigation: 'All Layers'>
 
-	| group |
-	
-	group := MJFAMIXLayerGroup new.
+	^self
+		lookUpPropertyNamed: #allLayers
+		computedAs: [
+			| group |
+			group := MJFAMIXLayerGroup new.
 
-	MJFAMIXLayer allSubclasses do: [ :class | 
-		class allInstances do: [:each | 
-			(each mooseModel = self)
-				ifTrue: [group add: each ] ] ].
+			MJFAMIXLayer allSubclasses do: [ :class | 
+				class allInstances do: [:each | 
+					(each mooseModel = self)
+						ifTrue: [group add: each ] ] ].
 	
-	group description: 'All Standard Layers'.
-	^group
+			group description: 'All Standard Layers'.
+			^ group ]
+	
+	
 ]
 
 { #category : #'*moose-jee-tiers-model' }
