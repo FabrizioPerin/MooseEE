@@ -5,6 +5,32 @@ Class {
 }
 
 { #category : #tests }
+MJFAMIXLayerTests >> testAddContainedElements [
+	| presentation el1 el2 el3 |
+
+	presentation := MJFAMIXPresentationLayer new.
+
+	self assert: (presentation containedElements isMemberOf: FMMultivalueLink).
+	self assert: presentation containedElements size equals: 0.
+	
+	el1 := FAMIXEntity new.
+	el2 := FAMIXEntity new.
+	el3 := FAMIXEntity new.
+	
+	presentation addContainedElement: el1.
+	presentation addContainedElement: el2.
+	presentation addContainedElement: el3.
+	
+	self assert: presentation containedElements size equals: 3.
+	
+	self assert: el1 containerLayer equals: presentation.
+	self assert: el2 containerLayer equals: presentation.
+	self assert: el3 containerLayer equals: presentation.
+	
+	
+]
+
+{ #category : #tests }
 MJFAMIXLayerTests >> testAnnotation [
 	self assert: MJFAMIXLayer annotation == MJFAMIXLayer.
 ]
@@ -12,6 +38,24 @@ MJFAMIXLayerTests >> testAnnotation [
 { #category : #tests }
 MJFAMIXLayerTests >> testBelongsTo [
 	self assert: MJFAMIXLayer new belongsTo = ''.
+]
+
+{ #category : #tests }
+MJFAMIXLayerTests >> testContainedElements [
+	| presentation el1 |
+
+	presentation := MJFAMIXPresentationLayer new.
+
+	self assert: (presentation containedElements isMemberOf: FMMultivalueLink).
+	self assert: presentation containedElements size equals: 0.
+	
+	el1 := FAMIXEntity new.
+		
+	presentation addContainedElement: el1.
+	
+	
+	self assert: presentation containedElements size equals: 1.
+
 ]
 
 { #category : #tests }
