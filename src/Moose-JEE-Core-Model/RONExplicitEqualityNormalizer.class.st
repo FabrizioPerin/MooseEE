@@ -7,6 +7,7 @@ Class {
 { #category : #'as yet unclassified' }
 RONExplicitEqualityNormalizer >> initialize [
 	super initialize.
+	colorIndex := 6.
 	dictionary := Dictionary new.
 ]
 
