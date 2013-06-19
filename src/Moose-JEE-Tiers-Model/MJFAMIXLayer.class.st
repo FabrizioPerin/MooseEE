@@ -25,6 +25,11 @@ MJFAMIXLayer >> acceptStrategy: aLayeringStrategy [
 ]
 
 { #category : #accessing }
+MJFAMIXLayer >> addContainedElement: aFAMIXEntity [
+	self containedElements add: aFAMIXEntity
+]
+
+{ #category : #accessing }
 MJFAMIXLayer >> belongsTo [ 
 	^''
 ]
@@ -32,6 +37,8 @@ MJFAMIXLayer >> belongsTo [
 { #category : #accessing }
 MJFAMIXLayer >> containedElements [
 	<navigation: 'Contained Elements'>
+	<MSEProperty: #containedElements type: #FAMIXEntity opposite: #containerLayer:> <multivalued> <derived>
+	<MSEComment: 'List of elements contained in this layer.'>
 	^containedElements
 ]
 
@@ -53,7 +60,7 @@ MJFAMIXLayer >> fileOutContainedClasses [
 { #category : #initialization }
 MJFAMIXLayer >> initialize [ 
 	super initialize.
-	containedElements := Set new.
+	containedElements := FMMultivalueLink on: self opposite: #containerLayer:.
 	upperLevel := nil.
 	lowerLevel := nil.
 	^self

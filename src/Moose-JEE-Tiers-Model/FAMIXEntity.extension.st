@@ -1,10 +1,18 @@
 Extension { #name : #FAMIXEntity }
 
 { #category : #'*moose-jee-tiers-model' }
+FAMIXEntity >> clearContainerLayer [
+	
+	^self privateState attributeAt: #containerLayer put: [nil].
+]
+
+{ #category : #'*moose-jee-tiers-model' }
 FAMIXEntity >> containerLayer [
-	
-	^self
-		lookUpPropertyNamed: #containerLayer
-		computedAs: [ self mooseModel allLayers detect: [ :each | each containedElements includes: self ] ifNone: [nil] ]
-	
+	<navigation: 'Container layer'>
+	^self privateState attributeAt: #containerLayer ifAbsentPut: [nil].
+]
+
+{ #category : #'*moose-jee-tiers-model' }
+FAMIXEntity >> containerLayer: aMJLayer [
+	self privateState attributeAt: #containerLayer put: aMJLayer
 ]
