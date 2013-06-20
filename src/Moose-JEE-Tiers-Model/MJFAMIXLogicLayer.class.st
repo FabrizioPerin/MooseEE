@@ -22,7 +22,7 @@ MJFAMIXLogicLayer >> isLogicLayer [
 
 { #category : #'as yet unclassified' }
 MJFAMIXLogicLayer >> name [
-	^'Logic Layer'
+	^#Logic
 ]
 
 { #category : #'as yet unclassified' }

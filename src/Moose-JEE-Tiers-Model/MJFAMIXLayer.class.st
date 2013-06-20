@@ -130,6 +130,14 @@ MJFAMIXLayer >> populate: aMooseModel [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXLayer >> printOn: aStream [
+	
+	self name isNil ifFalse: [ aStream nextPutAll: self name ].
+	
+	aStream nextPutAll: ' (Layer)'
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXLayer >> rationale [
 	^rationale
 ]

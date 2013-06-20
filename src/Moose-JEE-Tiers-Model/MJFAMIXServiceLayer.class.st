@@ -39,7 +39,7 @@ MJFAMIXServiceLayer >> isServiceLayer [
 
 { #category : #'as yet unclassified' }
 MJFAMIXServiceLayer >> name [
-	^'Service Layer'
+	^#Service
 ]
 
 { #category : #'as yet unclassified' }

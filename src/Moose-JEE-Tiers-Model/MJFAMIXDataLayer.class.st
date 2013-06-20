@@ -22,7 +22,7 @@ MJFAMIXDataLayer >> isDataLayer [
 
 { #category : #'as yet unclassified' }
 MJFAMIXDataLayer >> name [
-	^'Data Layer'
+	^#Data
 ]
 
 { #category : #'as yet unclassified' }

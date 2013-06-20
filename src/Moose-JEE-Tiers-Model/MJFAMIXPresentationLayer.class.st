@@ -23,7 +23,7 @@ MJFAMIXPresentationLayer >> isPresentationLayer [
 
 { #category : #'as yet unclassified' }
 MJFAMIXPresentationLayer >> name [
-	^'Presentation Layer'
+	^#Presentation
 ]
 
 { #category : #'as yet unclassified' }

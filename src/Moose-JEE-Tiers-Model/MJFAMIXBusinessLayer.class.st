@@ -23,5 +23,5 @@ MJFAMIXBusinessLayer >> isBusinessLayer [
 
 { #category : #'as yet unclassified' }
 MJFAMIXBusinessLayer >> name [
-	^'Business Layer'
+	^#Business
 ]
