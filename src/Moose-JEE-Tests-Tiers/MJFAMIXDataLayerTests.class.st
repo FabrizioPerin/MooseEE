@@ -41,5 +41,17 @@ MJFAMIXDataLayerTests >> testFAMIXDataLayerPopulate [
 
 { #category : #tests }
 MJFAMIXDataLayerTests >> testName [
-	self assert: (MJFAMIXDataLayer new name = 'Data Layer')
+	self assert: (MJFAMIXDataLayer new name = #Data)
+]
+
+{ #category : #tests }
+MJFAMIXDataLayerTests >> testPrintOn [
+	| aStream serviceLayer |
+	
+	aStream := ReadWriteStream on: ''.
+	serviceLayer := MJFAMIXDataLayer new.
+
+	serviceLayer printOn: aStream.
+
+	self assert: aStream contents equals: 'Data (Layer)'.
 ]

@@ -40,5 +40,17 @@ MJFAMIXPresenationLayerTests >> testFAMIXPresentationLayerPopulate [
 
 { #category : #tests }
 MJFAMIXPresenationLayerTests >> testName [
-	self assert: (MJFAMIXPresentationLayer new name = 'Presentation Layer')
+	self assert: (MJFAMIXPresentationLayer new name = #Presentation )
+]
+
+{ #category : #tests }
+MJFAMIXPresenationLayerTests >> testPrintOn [
+	| aStream presentationLayer |
+	
+	aStream := ReadWriteStream on: ''.
+	presentationLayer := MJFAMIXPresentationLayer new.
+
+	presentationLayer printOn: aStream.
+
+	self assert: aStream contents equals: 'Presentation (Layer)'.
 ]

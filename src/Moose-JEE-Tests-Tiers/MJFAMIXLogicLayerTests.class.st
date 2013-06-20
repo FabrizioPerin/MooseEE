@@ -40,5 +40,17 @@ MJFAMIXLogicLayerTests >> testFAMIXLogicLayerPopulate [
 
 { #category : #tests }
 MJFAMIXLogicLayerTests >> testName [
-	self assert: (MJFAMIXLogicLayer new name = 'Logic Layer')
+	self assert: (MJFAMIXLogicLayer new name = #Logic )
+]
+
+{ #category : #tests }
+MJFAMIXLogicLayerTests >> testPrintOn [
+	| aStream logicLayer |
+	
+	aStream := ReadWriteStream on: ''.
+	logicLayer := MJFAMIXLogicLayer new.
+
+	logicLayer printOn: aStream.
+
+	self assert: aStream contents equals: 'Logic (Layer)'.
 ]

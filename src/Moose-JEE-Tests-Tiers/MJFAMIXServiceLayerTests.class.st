@@ -41,5 +41,17 @@ MJFAMIXServiceLayerTests >> testFAMIXServiceLayerPopulate [
 
 { #category : #tests }
 MJFAMIXServiceLayerTests >> testName [
-	self assert: (MJFAMIXServiceLayer new name = 'Service Layer')
+	self assert: (MJFAMIXServiceLayer new name = #Service )
+]
+
+{ #category : #tests }
+MJFAMIXServiceLayerTests >> testPrintOn [
+	| aStream serviceLayer |
+	
+	aStream := ReadWriteStream on: ''.
+	serviceLayer := MJFAMIXServiceLayer new.
+
+	serviceLayer printOn: aStream.
+
+	self assert: aStream contents equals: 'Service (Layer)'.
 ]
