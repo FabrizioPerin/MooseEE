@@ -225,7 +225,7 @@ MooseJEEScripts class >> deepCleanUp [
 
 { #category : #'font-settings' }
 MooseJEEScripts class >> defaultDejaVuFonts [
-	StrikeFont installDejaVu.
+	"StrikeFont installDejaVu."
 	StandardFonts setFontsFromSpec: #(
 	        (balloonFont: 'BitmapDejaVu' 8)
 	        (buttonFont: 'BitmapDejaVu' 9)
@@ -308,7 +308,7 @@ MooseJEEScripts class >> fontsSettingWindows [
 
 { #category : #'font-settings' }
 MooseJEEScripts class >> largeDemoDejaVuFonts [
-	StrikeFont installDejaVu.
+	"StrikeFont installDejaVu."
 	StandardFonts setDefaultFonts: #(
 	        (balloonFont: 'BitmapDejaVu' 10)
 	        (buttonFont: 'BitmapDejaVu' 12)
