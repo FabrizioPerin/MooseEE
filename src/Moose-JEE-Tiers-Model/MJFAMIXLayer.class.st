@@ -36,7 +36,6 @@ MJFAMIXLayer >> belongsTo [
 
 { #category : #accessing }
 MJFAMIXLayer >> containedElements [
-	<navigation: 'Contained Elements'>
 	<MSEProperty: #containedElements type: #FAMIXEntity opposite: #containerLayer:> <multivalued> <derived>
 	<MSEComment: 'List of elements contained in this layer.'>
 	^containedElements
