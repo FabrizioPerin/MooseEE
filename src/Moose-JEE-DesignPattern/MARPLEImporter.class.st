@@ -40,10 +40,10 @@ MARPLEImporter >> populateTargetModelWith: implementors [
 	role patternName: implementors removeFirst.
 	allClasses := targetModel allClasses.
 	targetModel silentlyAdd: role.
-	
+
 	implementors asSet do: [:each |
 		| implementor |
-		implementor := allClasses select: [:class | class mooseName asString = each ].
+		implementor := allClasses select: [:class | (class name asString = each) or: [class mooseName asString = each] ].
 		implementor isEmpty ifFalse: [
 			| assoc |
 			assoc := MJDPRoleAssociation new.
