@@ -79,9 +79,22 @@ MJPHPImporter >> createComment: content [
 ]
 
 { #category : #accessing }
+MJPHPImporter >> createNamespace: aPPPHPNamespaceNode [
+	| current |
+	current := FAMIXNamespace new.
+	aPPPHPNamespaceNode ifNotNilDo: [ :ns |
+		| parent |
+		current := FAMIXNamespace new.
+		current name: ns namespaceName.
+		current parentScope: (self createNamespace: ns parentNamespace).
+	].
+	^ current
+]
+
+{ #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	| classNode inheritance node |
-	classNode := self types at: aPPPHPClassNode fullyQualifiedTypeName ifAbsentPut: [ MJFAMIXPHPClass new isStub: true; yourself  ]. 
+	classNode := self types at: aPPPHPClassNode fullyQualifiedTypeName ifAbsentPut: [ FAMIXClass new isStub: true; yourself  ]. 
 	self ensureAType: classNode from: aPPPHPClassNode.
 	aPPPHPClassNode interfaces
 		do: [ :interface |
@@ -183,11 +196,12 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	"this one expects the original node and the correct famix node"
 
-	| inheritance annotation |
+	| inheritance annotation nsnode |
 	aTypeNode name: aPPPHPTypeNode fullyQualifiedTypeName.	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
 	(aPPPHPTypeNode isFragment and: [aTypeNode isStub]) ifTrue: [
 		^ aTypeNode.
 	].
+	"(self createNamespace: aPPPHPTypeNode parentNamespace) addType: aTypeNode."
 	aPPPHPTypeNode superTypes
 		do: [ :superType | 
 			inheritance := FAMIXInheritance new.
@@ -231,7 +245,7 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 	| interfaceNode |
-	interfaceNode := self types at: aPPPHPInterfaceNode fullyQualifiedTypeName ifAbsentPut: [ MJFAMIXPHPClass new isInterface: true; isStub: true; yourself ].
+	interfaceNode := self types at: aPPPHPInterfaceNode fullyQualifiedTypeName ifAbsentPut: [ FAMIXClass new isInterface: true; isStub: true; yourself ].
 	self ensureAType: interfaceNode from: aPPPHPInterfaceNode.
 	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true ].
 	^ interfaceNode
@@ -290,7 +304,7 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 			self targetModel silentlyAdd: entity.
 			(entity isMemberOf: FAMIXFunction)
 				ifTrue: [ self targetModel silentlyAddAll: entity parameters ].
-			(entity isMemberOf: MJFAMIXPHPClass)
+			(entity isKindOf: FAMIXType)
 				ifTrue: [
 					self targetModel silentlyAddAll: entity superInheritances.
 					self targetModel silentlyAddAll: entity subInheritances.
@@ -352,6 +366,10 @@ MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
 { #category : #accessing }
 MJPHPImporter >> sourceLanguage [
 	^ sourceLanguage
+]
+
+{ #category : #accessing }
+MJPHPImporter >> synchronizeAnnotationType: anAnnotationType with: aType [
 ]
 
 { #category : #accessing }
