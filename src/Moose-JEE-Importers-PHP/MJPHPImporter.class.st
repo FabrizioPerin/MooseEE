@@ -81,7 +81,7 @@ MJPHPImporter >> createComment: content [
 { #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	| classNode inheritance node |
-	classNode := self types at: aPPPHPClassNode nodeName ifAbsentPut: [ MJFAMIXPHPClass new ]. 
+	classNode := self types at: aPPPHPClassNode fullyQualifiedTypeName ifAbsentPut: [ MJFAMIXPHPClass new isStub: true; yourself  ]. 
 	self ensureAType: classNode from: aPPPHPClassNode.
 	aPPPHPClassNode interfaces
 		do: [ :interface |
@@ -184,9 +184,8 @@ MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	"this one expects the original node and the correct famix node"
 
 	| inheritance annotation |
-	aTypeNode name: aPPPHPTypeNode nodeName.	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
-	aPPPHPTypeNode isFragment ifTrue: [
-		aTypeNode stub: true.
+	aTypeNode name: aPPPHPTypeNode fullyQualifiedTypeName.	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
+	(aPPPHPTypeNode isFragment and: [aTypeNode isStub]) ifTrue: [
 		^ aTypeNode.
 	].
 	aPPPHPTypeNode superTypes
@@ -232,7 +231,7 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 	| interfaceNode |
-	interfaceNode := self types at: aPPPHPInterfaceNode nodeName ifAbsentPut: [ MJFAMIXPHPClass new isInterface: true; yourself ].
+	interfaceNode := self types at: aPPPHPInterfaceNode fullyQualifiedTypeName ifAbsentPut: [ MJFAMIXPHPClass new isInterface: true; isStub: true; yourself ].
 	self ensureAType: interfaceNode from: aPPPHPInterfaceNode.
 	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true ].
 	^ interfaceNode
@@ -241,11 +240,11 @@ MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 { #category : #'as yet unclassified' }
 MJPHPImporter >> importPHPFile: aFile [
 	| file nodes entities folder contents |
-	contents := [ aFile readStream contentsOfEntireFile ]
+	contents := [ (StandardFileStream readOnlyFileFullyNamed: aFile fullName) contentsOfEntireFile ]
 		on: Error
 		do: [ ^ PPFailure new initializeMessage: 'Unreadable File' at: 0 ].
 	nodes := self phpParser parse: contents.
-	(nodes isMemberOf: PPFailure)
+	nodes isPetitFailure
 		ifFalse: [ 
 			file := FAMIXFile named: aFile fullName filedIn: folder.
 			entities := nodes
@@ -257,8 +256,8 @@ MJPHPImporter >> importPHPFile: aFile [
 				do: [ :item | 
 					item declaredSourceLanguage: sourceLanguage.
 					file entities add: item ].
-			^ file ]
-		ifTrue: [ ^ nodes ]
+			^ file ].
+	^ nodes
 ]
 
 { #category : #accessing }
@@ -292,7 +291,7 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 			(entity isMemberOf: FAMIXFunction)
 				ifTrue: [ self targetModel silentlyAddAll: entity parameters ].
 			(entity isMemberOf: MJFAMIXPHPClass)
-				ifTrue: [ 
+				ifTrue: [
 					self targetModel silentlyAddAll: entity superInheritances.
 					self targetModel silentlyAddAll: entity subInheritances.
 					self targetModel silentlyAddAll: entity comments.
@@ -339,12 +338,14 @@ MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
 				3.3.1. parameters
 				3.3.2. annotations"
 	"remove duplicates"
-	"add all types, otherwise moose is failing"
-	aFAMIXFolder files do: [ :file | self targetModel silentlyAddAll: (file entities select: [ :node |  node isKindOf: FAMIXType ]) ].
+	"add all types, otherwise moose is failing?"
+	"aFAMIXFolder files do: [ :file | self targetModel silentlyAddAll: (file entities select: [ :node |  node isKindOf: FAMIXType ]) ]."
 	"add all the annotation types"
 	self addAllAnnotations: annotationTypes.
 	"for each file track the content"
 	aFAMIXFolder files do: [ :file | self populateTargetModelFrom: file ].
+	"add remaining stubs"
+	self targetModel silentlyAddAll: (self types select: [:type | type isStub ]).
 	self targetModel silentlyAdd: aFAMIXFolder.
 ]
 
@@ -360,6 +361,8 @@ MJPHPImporter >> targetModel [
 
 { #category : #accessing }
 MJPHPImporter >> targetModel: anObject [
+	anObject sourceLanguage: self sourceLanguage.
+	anObject add: self sourceLanguage.
 	targetModel := anObject
 ]
 
