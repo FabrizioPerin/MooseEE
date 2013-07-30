@@ -71,15 +71,24 @@ MJPHPImporter >> createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: aFAM
 ]
 
 { #category : #accessing }
+MJPHPImporter >> createComment: content [
+	| comment |
+	comment := FAMIXComment new.
+	comment content: content.
+	^ comment
+]
+
+{ #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
-	| classNode inheritance |
-	classNode := self ensureAType: MJFAMIXPHPClass new from: aPPPHPClassNode.
+	| classNode inheritance node |
+	classNode := self types at: aPPPHPClassNode nodeName ifAbsentPut: [ MJFAMIXPHPClass new ]. 
+	self ensureAType: classNode from: aPPPHPClassNode.
 	aPPPHPClassNode interfaces
-		do: [ :interface | 
+		do: [ :interface |
 			inheritance := FAMIXInheritance new.
 			inheritance superclass: (interface accept: self phpVisitor).
 			inheritance subclass: classNode.
-			classNode addSuperInheritance: inheritance ].
+		].
 	^ classNode
 ]
 
@@ -107,41 +116,40 @@ MJPHPImporter >> ensureAFile: aFile [
 
 { #category : #accessing }
 MJPHPImporter >> ensureAFunction: aPPPHPFunctionNode [
-	^ aPPPHPFunctionNode
+	| function |
+	function := FAMIXFunction new.
+	function name: aPPPHPFunctionNode nodeName.
+	
+	aPPPHPFunctionNode parameters do: [ :param |
+		function addParameter: ( param accept: self phpVisitor ).
+	].
+	^ function
 ]
 
 { #category : #accessing }
 MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
-	
-	| methodNode annotation|
-	
+	| methodNode annotation |
 	methodNode := MJFAMIXPHPMethod new.
 	methodNode name: aPPPHPMethodNode nodeName.
 	methodNode isConstructor: methodNode name = '__construct'.
-	
 	methodNode isPublic: aPPPHPMethodNode scope isPublic.
 	methodNode isProtected: aPPPHPMethodNode scope isProtected.
 	methodNode isPrivate: aPPPHPMethodNode scope isPrivate.
 	methodNode isAbstract: aPPPHPMethodNode isAbstract.
 	methodNode isStatic: aPPPHPMethodNode isStatic.
-	
-	aPPPHPMethodNode hasDocBlock ifTrue: [
-		methodNode addComment: aPPPHPMethodNode docBlock.
-			aPPPHPMethodNode docBlockAnnotations ifNotNilDo: [ :item |
-				item do: [ :annot |
-					annotation := annot accept: self phpVisitor.
-					annotation annotatedEntity: methodNode.
-				].
-			]. 
-	].
-	aPPPHPMethodNode parameters do: [ :param |
-		methodNode addParameter: ( param accept: self phpVisitor ).
-	].
-	aPPPHPMethodNode isAbstract ifFalse: [
-		self flag: 'TODO: add the body!'.
-	].
-	
-	^ methodNode.
+	aPPPHPMethodNode hasDocBlock
+		ifTrue: [ 
+			methodNode addComment: (self createComment: aPPPHPMethodNode docBlock).
+			aPPPHPMethodNode docBlockAnnotations
+				ifNotNilDo: [ :item | 
+					item
+						do: [ :annot | 
+							annotation := annot accept: self phpVisitor.
+							annotation annotatedEntity: methodNode ] ] ].
+	aPPPHPMethodNode parameters do: [ :param | methodNode addParameter: (param accept: self phpVisitor) ].
+	aPPPHPMethodNode isAbstract
+		ifFalse: [ self flag: 'TODO: add the body!' ].
+	^ methodNode
 ]
 
 { #category : #accessing }
@@ -174,33 +182,31 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	"this one expects the original node and the correct famix node"
+
 	| inheritance annotation |
-	aTypeNode name: aPPPHPTypeNode nodeName.
-	
-	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
-	aPPPHPTypeNode superTypes do: [ :superType |
-		
-		inheritance := FAMIXInheritance new.
-		inheritance superclass: (superType accept: self phpVisitor).
-		inheritance subclass: aTypeNode.
-			
-		aTypeNode addSuperInheritance: inheritance.
+	aTypeNode name: aPPPHPTypeNode nodeName.	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
+	aPPPHPTypeNode isFragment ifTrue: [
+		aTypeNode stub: true.
+		^ aTypeNode.
 	].
-	"This is valid for all types"
-	aPPPHPTypeNode attributes do: [:attribute | 
-		aTypeNode addAttribute: (attribute accept: self phpVisitor).
-	].
-	"this is valid for all types"
-	aPPPHPTypeNode behaviouralEntities do:[ :method |
-			aTypeNode addMethod: (method accept: self phpVisitor).
-	].
-	"this is valid for all types"
-	aPPPHPTypeNode docBlockHasAnnotations ifTrue: [
-		aPPPHPTypeNode docBlockAnnotations do: [ :item | 
-			annotation := (item accept: self phpVisitor).
-			annotation annotatedEntity: aTypeNode.
-		].
-	].
+	aPPPHPTypeNode superTypes
+		do: [ :superType | 
+			inheritance := FAMIXInheritance new.
+			inheritance superclass: (superType accept: self phpVisitor).
+			inheritance subclass: aTypeNode ].	"This is valid for all types"
+	aPPPHPTypeNode attributes do: [ :attribute | aTypeNode addAttribute: (attribute accept: self phpVisitor) ].	"this is valid for all types"
+	aPPPHPTypeNode behaviouralEntities do: [ :method | aTypeNode addMethod: (method accept: self phpVisitor) ].	"this is valid for all types"
+	aPPPHPTypeNode hasDocBlock
+		ifTrue: [ 
+			aTypeNode addComment: (self createComment: aPPPHPTypeNode docBlock).
+			aPPPHPTypeNode docBlockHasAnnotations
+				ifTrue: [ 
+					aPPPHPTypeNode docBlockAnnotations
+						do: [ :item | 
+							annotation := item accept: self phpVisitor.
+							annotation annotatedEntity: aTypeNode ] ] ].
+	aTypeNode isStub: false.
+	types at: aTypeNode name put: aTypeNode.
 	^ aTypeNode
 ]
 
@@ -226,18 +232,19 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 	| interfaceNode |
-	interfaceNode := self ensureAType: 
-					(MJFAMIXPHPClass new isInterface: true) 
-					from: aPPPHPInterfaceNode.
-	
-	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true. ].
-	^ interfaceNode.
+	interfaceNode := self types at: aPPPHPInterfaceNode nodeName ifAbsentPut: [ MJFAMIXPHPClass new isInterface: true; yourself ].
+	self ensureAType: interfaceNode from: aPPPHPInterfaceNode.
+	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true ].
+	^ interfaceNode
 ]
 
 { #category : #'as yet unclassified' }
 MJPHPImporter >> importPHPFile: aFile [
-	| file nodes entities folder |
-	nodes := self phpParser parse: aFile readStream contentsOfEntireFile.
+	| file nodes entities folder contents |
+	contents := [ aFile readStream contentsOfEntireFile ]
+		on: Error
+		do: [ ^ PPFailure new initializeMessage: 'Unreadable File' at: 0 ].
+	nodes := self phpParser parse: contents.
 	(nodes isMemberOf: PPFailure)
 		ifFalse: [ 
 			file := FAMIXFile named: aFile fullName filedIn: folder.
@@ -277,27 +284,45 @@ MJPHPImporter >> phpVisitor [
 { #category : #accessing }
 MJPHPImporter >> populateTargetModelFrom: aFileNode [
 	"we need to check if the given annotation type or class exists otherwise we need to mark it as a stub!"
+
 	self targetModel silentlyAdd: aFileNode.
 	aFileNode entities
 		do: [ :entity | 
 			self targetModel silentlyAdd: entity.
+			(entity isMemberOf: FAMIXFunction)
+				ifTrue: [ self targetModel silentlyAddAll: entity parameters ].
 			(entity isMemberOf: MJFAMIXPHPClass)
-				ifTrue: [
+				ifTrue: [ 
 					self targetModel silentlyAddAll: entity superInheritances.
+					self targetModel silentlyAddAll: entity subInheritances.
+					self targetModel silentlyAddAll: entity comments.
+					entity annotationInstances
+						do: [ :annotation | 
+							self targetModel silentlyAdd: annotation.
+							self targetModel silentlyAddAll: annotation attributes ].
 					entity methods
-						do: [ :method |
-							 
+						do: [ :method | 
 							self targetModel silentlyAdd: method.
-							self targetModel silentlyAddAll: method annotationInstances.
+							self targetModel silentlyAddAll: method comments.
+							method annotationInstances
+								do: [ :annotation | 
+									self targetModel silentlyAdd: annotation.
+									self targetModel silentlyAddAll: annotation attributes ].
 							self targetModel silentlyAddAll: method parameters.
-							
-							method parameters do: [:param | 
-									param declaredType notNil ifTrue: [
+							method parameters
+								do: [ :param | 
+									param declaredType notNil
+										ifTrue: [ 
 											"self targetModel silentlyAdd: param declaredType."
-										].
-								].
-							].
-					entity attributes do: [ :attribute | self targetModel silentlyAdd: attribute ] ] ].
+											 ] ] ].
+					entity attributes
+						do: [ :attribute | 
+							self targetModel add: attribute.
+							self targetModel addAll: attribute comments.
+							attribute annotationInstances
+								do: [ :annotation | 
+									self targetModel silentlyAdd: annotation.
+									self targetModel silentlyAddAll: annotation attributes ] ] ] ].
 	^ aFileNode
 ]
 
@@ -336,4 +361,9 @@ MJPHPImporter >> targetModel [
 { #category : #accessing }
 MJPHPImporter >> targetModel: anObject [
 	targetModel := anObject
+]
+
+{ #category : #accessing }
+MJPHPImporter >> types [
+	^ types
 ]

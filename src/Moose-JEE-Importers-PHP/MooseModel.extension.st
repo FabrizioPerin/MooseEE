@@ -44,7 +44,7 @@ MooseModel >> importPHPSourcesFrom: aFolder [
 			bar value: 'Populating the model.'.
 			
 			importer populateTargetModelFromRootFolder: root.
-			"DialogWindow new alert: counter asString ,' files parsed (', alerts size asString, ' failed!)'."
+			DialogWindow new alert: counter asString ,' files parsed (', alerts size asString, ' failed!)'.
 			].
 	^self
 ]
