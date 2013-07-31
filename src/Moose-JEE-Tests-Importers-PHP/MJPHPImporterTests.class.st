@@ -205,7 +205,7 @@ MJPHPImporterTests >> testEnsureAnAnnotationMultipleParameter [
 	self assert: (attribute parentAnnotationInstance == annotation).
 	self assert: (attribute annotationTypeAttribute isMemberOf: FAMIXAnnotationTypeAttribute ).
 	self assert: (attribute annotationTypeAttribute annotationAttributeInstances size = 1).
-	self assert: (attribute name = 2 ). "just the index"
+	self assert: (attribute name = 2 asString ). "just the index"
 	
 ]
 
