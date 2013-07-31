@@ -23,11 +23,12 @@ MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 	| importer files result alerts root language model |
 	model := MooseModel new.
 	alerts := OrderedCollection new.
+	files := aFolder fullNamesOfAllFilesInSubtree select: [ :item | item endsWith: '.php' ]. 
 	UIManager default
 		displayProgress: 'Importing PHP source code...'
 		at: Sensor cursorPoint
 		from: 1
-		to: 3
+		to: files size
 		during: [ :bar | 
 			| counter |
 			counter := 1.
@@ -37,26 +38,22 @@ MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 			bar
 				value: 1;
 				value: 'Loading files.'.
-			files := aFolder fullNamesOfAllFilesInSubtree
-				select: [ :item | item endsWith: '.php' ].
-			bar value: 2.
+			
 			files
-				do: [ :filename |
+				do: [ :filename | 
 					| file |
-					file := filename asFileReference. 
-					bar value: 'Parsing ' , file fullName asString , ' (' , counter asString , '/' , files size asString , ')'.
+					file := filename asFileReference.
+					bar value: counter.
+					bar value: 'Parsing ' , file basename asString , ' (' , counter asString , '/' , files size asString , ')'.
 					result := importer importPHPFile: file.
-					(result isMemberOf: PPFailure)
-						ifTrue: [ alerts add: 'Parsing of ' , file fullName , ' failed with message ' , result message ]
+					result isPetitFailure
+						ifTrue: [ self onError: result with: alerts in: file ]
 						ifFalse: [ 
 							counter := counter + 1.
 							root addFile: result ] ].
-			bar value: 3.
 			bar value: 'Populating the model.'.
 			importer populateTargetModelFromRootFolder: root.
-			alerts size > 0 ifTrue: [
-				DialogWindow new alert: counter asString , ' files parsed (' , alerts size asString , ' failed!)'. 
-			].
+			self reportErrors: alerts from: files.
 			^ model ].
 	^ model
 ]
@@ -69,4 +66,20 @@ MJPHPImportCommand >> initialize [
 { #category : #'as yet unclassified' }
 MJPHPImportCommand >> label [
 	^ 'Import PHP sources from directory system.'
+]
+
+{ #category : #'as yet unclassified' }
+MJPHPImportCommand >> onError: aPPFailure with: anErrorCollection in: aFile [
+	anErrorCollection add: 'Parsing of ' , aFile fullName , ' failed with message ' , aPPFailure message.
+	^ aPPFailure
+]
+
+{ #category : #'as yet unclassified' }
+MJPHPImportCommand >> reportErrors: aCollectionOfErrorMessages from: aCollectionOfFiles [
+	"react on errors at the end of importing"
+
+	aCollectionOfErrorMessages size > 0
+		ifTrue: [ 
+			DialogWindow new
+				alert: aCollectionOfFiles size asString , ' files parsed (' , aCollectionOfErrorMessages size asString , ' failed!)' ]
 ]
