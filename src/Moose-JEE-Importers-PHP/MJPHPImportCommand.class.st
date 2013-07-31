@@ -55,9 +55,8 @@ MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 			bar value: 'Populating the model.'.
 			importer populateTargetModelFromRootFolder: root.
 			alerts size > 0 ifTrue: [
-				self halt.
+				DialogWindow new alert: counter asString , ' files parsed (' , alerts size asString , ' failed!)'. 
 			].
-			DialogWindow new alert: counter asString , ' files parsed (' , alerts size asString , ' failed!)'. 
 			^ model ].
 	^ model
 ]

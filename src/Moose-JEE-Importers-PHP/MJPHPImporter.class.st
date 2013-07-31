@@ -46,7 +46,7 @@ MJPHPImporter >> createAnnotationType: aPPPHPAnnotationNode [
 		at: nodeName
 		ifAbsentPut: [ 
 			type := FAMIXAnnotationType new.
-			type name: nodeName.
+			type name: nodeName asString.
 			type isStub: true.
 			type ].
 		
@@ -61,7 +61,7 @@ MJPHPImporter >> createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: aFAM
 	]. 
 	attributes ifEmpty: [
 		typeAttribute := FAMIXAnnotationTypeAttribute new.
-		typeAttribute name: aPPPHPAttributeNode nodeName.
+		typeAttribute name: aPPPHPAttributeNode nodeName asString.
 		typeAttribute parentAnnotationType: aFAMIXAnnotationType.
 		^ typeAttribute.
 	] ifNotEmpty:[
