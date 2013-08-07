@@ -20,6 +20,15 @@ MJPHPImporter class >> on: aMooseModel [
 { #category : #accessing }
 MJPHPImporter >> addAllAnnotations: anAnnotationTypeCollection [
 	self flag: 'resolve aliases and link it up to defined classes'.
+	anAnnotationTypeCollection do: [ :annotation |
+		self types at: annotation name ifPresent: [:type |
+			| inheritance |
+			inheritance := FAMIXInheritance new.
+			inheritance superclass: type.
+			inheritance subclass: annotation.
+			self targetModel silentlyAdd: inheritance.
+		].
+	].
 	self targetModel silentlyAddAll: anAnnotationTypeCollection.
 ]
 
