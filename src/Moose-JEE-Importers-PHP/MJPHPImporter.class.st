@@ -54,7 +54,7 @@ MJPHPImporter >> createAnnotationType: aPPPHPAnnotationNode [
 	annotationTypes
 		at: nodeName
 		ifAbsentPut: [ 
-			type := FAMIXAnnotationType new.
+			type := MJFAMIXPHPAnnotation new.
 			type name: nodeName asString.
 			type isStub: true.
 			type ].
