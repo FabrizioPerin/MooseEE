@@ -21,7 +21,7 @@ MJPHPImportCommand >> execute [
 { #category : #'as yet unclassified' }
 MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 	| importer files result alerts root language model |
-	model := MooseModel new.
+	model := MoosePHPModel new.
 	alerts := OrderedCollection new.
 	files := aFolder fullNamesOfAllFilesInSubtree select: [ :item | item endsWith: '.php' ]. 
 	UIManager default
@@ -33,7 +33,7 @@ MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 			| counter |
 			counter := 1.
 			root := FAMIXFolder named: aFolder fullName filedIn: nil.
-			model := MooseModel new name: aFolder basename.
+			model name: aFolder basename.
 			importer := MJPHPImporter new targetModel: model.
 			bar
 				value: 1;

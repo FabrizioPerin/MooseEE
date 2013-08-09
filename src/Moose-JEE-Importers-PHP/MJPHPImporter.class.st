@@ -103,14 +103,23 @@ MJPHPImporter >> createNamespace: aPPPHPNamespaceNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	| classNode inheritance node |
-	classNode := self types at: aPPPHPClassNode fullyQualifiedTypeName ifAbsentPut: [ FAMIXClass new isStub: true; yourself  ]. 
+	classNode := self types
+		at: aPPPHPClassNode fullyQualifiedTypeName
+		ifAbsentPut: [
+			|stubType| 
+			aPPPHPClassNode isAnnotation ifTrue: [
+					stubType := MJFAMIXPHPAnnotation new.
+				] ifFalse: [
+					stubType := FAMIXClass new.
+				].
+			stubType stub: true;
+				yourself ].
 	self ensureAType: classNode from: aPPPHPClassNode.
 	aPPPHPClassNode interfaces
-		do: [ :interface |
+		do: [ :interface | 
 			inheritance := FAMIXInheritance new.
 			inheritance superclass: (interface accept: self phpVisitor).
-			inheritance subclass: classNode.
-		].
+			inheritance subclass: classNode ].
 	^ classNode
 ]
 
