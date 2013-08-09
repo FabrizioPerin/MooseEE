@@ -15,6 +15,7 @@ MJFAMIXPHPAttribute class >> annotation [
 
 { #category : #accessing }
 MJFAMIXPHPAttribute >> defaultValue [
+	<navigation: 'Default Value'>
 	^ defaultValue
 ]
 

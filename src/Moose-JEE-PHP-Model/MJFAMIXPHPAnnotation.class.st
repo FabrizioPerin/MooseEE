@@ -44,9 +44,9 @@ MJFAMIXPHPAnnotation >> initialize [
 	instances := FMMultivalueLink 
 		on: self
 		opposite: #annotationType:.
-	attributes := FMMultivalueLink 
+	"attributes := FMMultivalueLink 
 		on: self
-		opposite: #annotationType:.
+		opposite: #annotationType:."
 	container := nil.
 
 ]
