@@ -109,6 +109,8 @@ MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 			|stubType| 
 			aPPPHPClassNode isAnnotation ifTrue: [
 					stubType := MJFAMIXPHPAnnotation new.
+					"Rediscover attributes!"
+					"self annotationTypes at: aPPPHPClassNode fullyQualifiedTypeName put: stubType."
 				] ifFalse: [
 					stubType := FAMIXClass new.
 				].

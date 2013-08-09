@@ -44,7 +44,7 @@ MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 					| file |
 					file := filename asFileReference.
 					bar value: counter.
-					bar value: 'Parsing ' , file basename asString , ' (' , counter asString , '/' , files size asString , ')'.
+					bar value: 'Parsing ' , (self progressBarLabelFor: file) , ' (' , counter asString , '/' , files size asString , ')'.
 					result := importer importPHPFile: file.
 					result isPetitFailure
 						ifTrue: [ self onError: result with: alerts in: file ]
@@ -72,6 +72,11 @@ MJPHPImportCommand >> label [
 MJPHPImportCommand >> onError: aPPFailure with: anErrorCollection in: aFile [
 	anErrorCollection add: 'Parsing of ' , aFile fullName , ' failed with message ' , aPPFailure message.
 	^ aPPFailure
+]
+
+{ #category : #'as yet unclassified' }
+MJPHPImportCommand >> progressBarLabelFor: aFile [
+	^ aFile basename
 ]
 
 { #category : #'as yet unclassified' }
