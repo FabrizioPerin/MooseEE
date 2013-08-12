@@ -11,18 +11,17 @@ MoosePHPModel class >> asMooseDescription [
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allAnnotationTypes [
-	<navigation: 'All annotation Types'>
 	^ self allWithType: MJFAMIXPHPAnnotation
 ]
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allAttributes [
-	<navigation: 'All Attributes'>
+	"<navigation: 'All Attributes'>"
 	^ self allWithType: MJFAMIXPHPAttribute
 ]
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allMethods [
-	<navigation: 'All Methods'>
+	"<navigation: 'All Methods'>"
 	^ self allWithType: MJFAMIXPHPMethod
 ]
