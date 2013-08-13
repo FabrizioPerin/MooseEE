@@ -23,7 +23,7 @@ MJPHPImportCommand >> importPHPSourcesFrom: aFolder [
 	| importer files result alerts root language model |
 	model := MoosePHPModel new.
 	alerts := OrderedCollection new.
-	files := aFolder fullNamesOfAllFilesInSubtree select: [ :item | item endsWith: '.php' ]. 
+	files := aFolder fullNamesOfAllFilesInSubtree select: [ :item | (item endsWith: '.php') or: [item endsWith: '.inc'] ]. 
 	UIManager default
 		displayProgress: 'Importing PHP source code...'
 		at: Sensor cursorPoint
