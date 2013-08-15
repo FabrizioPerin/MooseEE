@@ -19,17 +19,11 @@ MJPHPImporter class >> on: aMooseModel [
 
 { #category : #accessing }
 MJPHPImporter >> addAllAnnotations: anAnnotationTypeCollection [
-	self flag: 'resolve aliases and link it up to defined classes'.
 	anAnnotationTypeCollection do: [ :annotation |
-		self types at: annotation name ifPresent: [:type |
-			| inheritance |
-			inheritance := FAMIXInheritance new.
-			inheritance superclass: type.
-			inheritance subclass: annotation.
-			self targetModel silentlyAdd: inheritance.
+		self types at: annotation name ifAbsent:[
+			self targetModel silentlyAdd: annotation.
 		].
 	].
-	self targetModel silentlyAddAll: anAnnotationTypeCollection.
 ]
 
 { #category : #accessing }
@@ -45,21 +39,15 @@ MJPHPImporter >> annotationTypes: anObject [
 { #category : #accessing }
 MJPHPImporter >> createAnnotationType: aPPPHPAnnotationNode [
 	| type nodeName |
-	
-	nodeName := aPPPHPAnnotationNode nodeName.
-	(nodeName isKindOf: PPPHPNamespaceStack )
-		ifTrue: [ 
-			nodeName := nodeName fullyQualifiedNamespaceName. ].
-		
-	annotationTypes
+	nodeName := aPPPHPAnnotationNode fullyQualifiedTypeName.
+	^ self annotationTypes
 		at: nodeName
 		ifAbsentPut: [ 
 			type := MJFAMIXPHPAnnotation new.
 			type name: nodeName asString.
-			type isStub: true.
-			type ].
-		
-	^ annotationTypes at: nodeName
+			type
+				isStub: true;
+				yourself ]
 ]
 
 { #category : #accessing }
@@ -101,21 +89,25 @@ MJPHPImporter >> createNamespace: aPPPHPNamespaceNode [
 ]
 
 { #category : #accessing }
+MJPHPImporter >> createType: aPPPHPTypeNode [
+	| nodeName |
+	nodeName := aPPPHPTypeNode fullyQualifiedTypeName.
+	^ self types
+		at: nodeName
+		ifAbsentPut: [ 
+			| stubType |
+			aPPPHPTypeNode isAnnotation
+				ifTrue: [ stubType := self createAnnotationType: aPPPHPTypeNode ]
+				ifFalse: [ stubType := FAMIXClass new ].
+			stubType
+				stub: true;
+				yourself ]
+]
+
+{ #category : #accessing }
 MJPHPImporter >> ensureAClass: aPPPHPClassNode [
 	| classNode inheritance node |
-	classNode := self types
-		at: aPPPHPClassNode fullyQualifiedTypeName
-		ifAbsentPut: [
-			|stubType| 
-			aPPPHPClassNode isAnnotation ifTrue: [
-					stubType := MJFAMIXPHPAnnotation new.
-					"Rediscover attributes!"
-					"self annotationTypes at: aPPPHPClassNode fullyQualifiedTypeName put: stubType."
-				] ifFalse: [
-					stubType := FAMIXClass new.
-				].
-			stubType stub: true;
-				yourself ].
+	classNode := self createType: aPPPHPClassNode.
 	self ensureAType: classNode from: aPPPHPClassNode.
 	aPPPHPClassNode interfaces
 		do: [ :interface | 
@@ -265,7 +257,8 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 { #category : #accessing }
 MJPHPImporter >> ensureAnInterface: aPPPHPInterfaceNode [
 	| interfaceNode |
-	interfaceNode := self types at: aPPPHPInterfaceNode fullyQualifiedTypeName ifAbsentPut: [ FAMIXClass new isInterface: true; isStub: true; yourself ].
+	interfaceNode := self createType: aPPPHPInterfaceNode.
+	interfaceNode isInterface: true.
 	self ensureAType: interfaceNode from: aPPPHPInterfaceNode.
 	interfaceNode allSuperclassesDo: [ :superType | superType isInterface: true ].
 	^ interfaceNode
