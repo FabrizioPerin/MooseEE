@@ -11,17 +11,26 @@ MoosePHPModel class >> asMooseDescription [
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allAnnotationTypes [
-	^ self allWithType: MJFAMIXPHPAnnotation
+	^ self allWithSubTypesOf: MJFAMIXPHPAnnotation
 ]
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allAttributes [
-	"<navigation: 'All Attributes'>"
 	^ self allWithType: MJFAMIXPHPAttribute
 ]
 
 { #category : #'as yet unclassified' }
+MoosePHPModel >> allClasses [
+	^ self allWithSubTypesOf: FAMIXClass
+]
+
+{ #category : #'as yet unclassified' }
 MoosePHPModel >> allMethods [
-	"<navigation: 'All Methods'>"
 	^ self allWithType: MJFAMIXPHPMethod
+]
+
+{ #category : #'as yet unclassified' }
+MoosePHPModel >> allResolvedAnnotationTypes [
+	<navigation:'All resolved annotation types'>
+	^ self allAnnotationTypes select: [:node | node isStub not]
 ]
