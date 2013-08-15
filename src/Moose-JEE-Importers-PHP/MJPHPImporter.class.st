@@ -144,7 +144,6 @@ MJPHPImporter >> ensureAFunction: aPPPHPFunctionNode [
 	| function |
 	function := FAMIXFunction new.
 	function name: aPPPHPFunctionNode nodeName.
-	
 	aPPPHPFunctionNode parameters do: [ :param |
 		function addParameter: ( param accept: self phpVisitor ).
 	].
@@ -209,18 +208,17 @@ MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	"this one expects the original node and the correct famix node"
 
 	| inheritance annotation nsnode |
-	aTypeNode name: aPPPHPTypeNode fullyQualifiedTypeName.	"this is valid for all types, but supertypes have to be set to isInterface on interfaces"
-	(aPPPHPTypeNode isFragment and: [aTypeNode isStub]) ifTrue: [
-		^ aTypeNode.
-	].
-	"(self createNamespace: aPPPHPTypeNode parentNamespace) addType: aTypeNode."
+	aTypeNode name: aPPPHPTypeNode fullyQualifiedTypeName.
+	(aPPPHPTypeNode isFragment and: [ aTypeNode isStub ])
+		ifTrue: [ ^ aTypeNode ].	"(self createNamespace: aPPPHPTypeNode parentNamespace) addType: aTypeNode."
 	aPPPHPTypeNode superTypes
-		do: [ :superType | 
+		do: [ :superType |
+			"inheritances"
 			inheritance := FAMIXInheritance new.
 			inheritance superclass: (superType accept: self phpVisitor).
-			inheritance subclass: aTypeNode ].	"This is valid for all types"
+			inheritance subclass: aTypeNode ].	
 	aPPPHPTypeNode attributes do: [ :attribute | aTypeNode addAttribute: (attribute accept: self phpVisitor) ].	"this is valid for all types"
-	aPPPHPTypeNode behaviouralEntities do: [ :method | aTypeNode addMethod: (method accept: self phpVisitor) ].	"this is valid for all types"
+	aPPPHPTypeNode behaviouralEntities do: [ :method | aTypeNode addMethod: (method accept: self phpVisitor) ].
 	aPPPHPTypeNode hasDocBlock
 		ifTrue: [ 
 			aTypeNode addComment: (self createComment: aPPPHPTypeNode docBlock).
@@ -309,13 +307,11 @@ MJPHPImporter >> phpVisitor [
 
 { #category : #accessing }
 MJPHPImporter >> populateTargetModelFrom: aFileNode [
-	"we need to check if the given annotation type or class exists otherwise we need to mark it as a stub!"
-
 	self targetModel silentlyAdd: aFileNode.
 	aFileNode entities
 		do: [ :entity | 
 			self targetModel silentlyAdd: entity.
-			(entity isMemberOf: FAMIXFunction)
+			(entity isKindOf: FAMIXFunction)
 				ifTrue: [ self targetModel silentlyAddAll: entity parameters ].
 			(entity isKindOf: FAMIXType)
 				ifTrue: [
@@ -354,19 +350,6 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 
 { #category : #accessing }
 MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
-	"This method was added to make it possible to track all types first.
-		1. iterate over files -
-		2. get the entities, filter types and add them to the model -
-		3. reiterate the entities and add:
-			3.1. type annotations
-			3.2. properties
-				3.2.1. annotations
-			3.3. methods
-				3.3.1. parameters
-				3.3.2. annotations"
-	"remove duplicates"
-	"add all types, otherwise moose is failing?"
-	"aFAMIXFolder files do: [ :file | self targetModel silentlyAddAll: (file entities select: [ :node |  node isKindOf: FAMIXType ]) ]."
 	"add all the annotation types"
 	self addAllAnnotations: annotationTypes.
 	"for each file track the content"
@@ -379,10 +362,6 @@ MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
 { #category : #accessing }
 MJPHPImporter >> sourceLanguage [
 	^ sourceLanguage
-]
-
-{ #category : #accessing }
-MJPHPImporter >> synchronizeAnnotationType: anAnnotationType with: aType [
 ]
 
 { #category : #accessing }
