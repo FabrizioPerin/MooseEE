@@ -110,7 +110,10 @@ MJPHPImporter >> createSubspaces: aCollection [
 	node := self namespaces at: first namespaceName ifAbsentPut: [
 		self createSpaceFrom: first
 	].
-	^ self createSubspaces: aCollection for: node 
+	aCollection isEmpty ifFalse: [
+		^ self createSubspaces: aCollection for: node
+	].
+	^ node
 ]
 
 { #category : #accessing }
@@ -303,7 +306,6 @@ MJPHPImporter >> ensureAnAnnotation: aPPPHPAnnotationNode [
 			annotationParameter annotationTypeAttribute: (self createAnnotationTypeAttributeFrom: aPPPHPAttributeNode on: annotation annotationType).
 		].
 	].
-
 	^ annotation.
 ]
 
@@ -379,9 +381,7 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 					entity parameters
 						do: [ :param | 
 							param declaredType notNil
-								ifTrue: [ 
-									self types at: param declaredType fullName ifAbsent: [ param declaredType isStub: true ].
-									self targetModel silentlyAdd: param declaredType ] ] ].
+								ifTrue: [ self types at: param declaredType fullName ifAbsent: [ param declaredType isStub: true ] ] ] ].
 			(entity isKindOf: FAMIXType)
 				ifTrue: [ 
 					self targetModel silentlyAddAll: entity superInheritances.
@@ -389,8 +389,10 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 					self targetModel silentlyAddAll: entity comments.
 					entity annotationInstances
 						do: [ :annotation | 
-							self targetModel silentlyAdd: annotation.
-							self targetModel silentlyAddAll: annotation attributes ].
+							annotation annotationType isStub
+								ifFalse: [ 
+									self targetModel silentlyAdd: annotation.
+									self targetModel silentlyAddAll: annotation attributes ] ].
 					entity methods
 						do: [ :method | 
 							self targetModel silentlyAdd: method.
@@ -403,9 +405,7 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 							method parameters
 								do: [ :param | 
 									param declaredType notNil
-										ifTrue: [ 
-											self types at: param declaredType fullName ifAbsent: [ param declaredType isStub: true ].
-											self targetModel silentlyAdd: param declaredType ] ] ].
+										ifTrue: [ self types at: param declaredType fullName ifAbsent: [ param declaredType isStub: true ] ] ] ].
 					entity attributes
 						do: [ :attribute | 
 							self targetModel add: attribute.
