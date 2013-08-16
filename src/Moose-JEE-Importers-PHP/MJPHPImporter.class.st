@@ -7,7 +7,9 @@ Class {
 		'phpVisitor',
 		'annotationTypes',
 		'sourceLanguage',
-		'types'
+		'types',
+		'defaultNamespace',
+		'namespaces'
 	],
 	#category : #'Moose-JEE-Importers-PHP'
 }
@@ -20,10 +22,23 @@ MJPHPImporter class >> on: aMooseModel [
 { #category : #accessing }
 MJPHPImporter >> addAllAnnotations: anAnnotationTypeCollection [
 	anAnnotationTypeCollection do: [ :annotation |
-		self types at: annotation name ifAbsent:[
+		self types at: annotation fullName ifAbsent:[
 			self targetModel silentlyAdd: annotation.
 		].
 	].
+]
+
+{ #category : #accessing }
+MJPHPImporter >> addAllNamespaces: aCollection [
+	aCollection do: [ :space |
+		self addNamespace: space
+	].
+]
+
+{ #category : #accessing }
+MJPHPImporter >> addNamespace: namespace [
+	self targetModel silentlyAdd: namespace.
+	self targetModel silentlyAddAll: namespace allChildScopes.
 ]
 
 { #category : #accessing }
@@ -77,15 +92,45 @@ MJPHPImporter >> createComment: content [
 
 { #category : #accessing }
 MJPHPImporter >> createNamespace: aPPPHPNamespaceNode [
-	| current |
-	current := FAMIXNamespace new.
-	aPPPHPNamespaceNode ifNotNilDo: [ :ns |
-		| parent |
-		current := FAMIXNamespace new.
-		current name: ns namespaceName.
-		current parentScope: (self createNamespace: ns parentNamespace).
+	|collection|
+	"remove classname"
+	collection := aPPPHPNamespaceNode asSanitizedCollection.
+	^ self createSubspaces: collection
+]
+
+{ #category : #accessing }
+MJPHPImporter >> createSpaceFrom: aPPPHPNamespaceNode [
+	^ MJFAMIXPHPNamespace new name: aPPPHPNamespaceNode namespaceName; yourself
+]
+
+{ #category : #accessing }
+MJPHPImporter >> createSubspaces: aCollection [
+	|node first |
+	first := aCollection removeAtIndex: 1.
+	node := self namespaces at: first namespaceName ifAbsentPut: [
+		self createSpaceFrom: first
 	].
-	^ current
+	^ self createSubspaces: aCollection for: node 
+]
+
+{ #category : #accessing }
+MJPHPImporter >> createSubspaces: aCollection for: aNamespaceNode [
+	| node space next |
+	node := aCollection removeAtIndex: 1.
+	space := nil.
+	aNamespaceNode allChildScopesDo: [:child |
+		child name = node namespaceName ifTrue: [
+			space := child.
+		].
+	].
+	space ifNil: [
+		space := self createSpaceFrom: node.
+	].
+	space parentScope: aNamespaceNode.
+	aCollection notEmpty ifTrue: [
+		^ self createSubspaces: aCollection for: space
+	].
+	^ space
 ]
 
 { #category : #accessing }
@@ -95,13 +140,24 @@ MJPHPImporter >> createType: aPPPHPTypeNode [
 	^ self types
 		at: nodeName
 		ifAbsentPut: [ 
-			| stubType |
+			| stubType parentNamespace |
 			aPPPHPTypeNode isAnnotation
 				ifTrue: [ stubType := self createAnnotationType: aPPPHPTypeNode ]
-				ifFalse: [ stubType := FAMIXClass new ].
+				ifFalse: [ stubType := MJFAMIXPHPClass new ].
+			stubType name: aPPPHPTypeNode nodeName.
+			stubType fullName: aPPPHPTypeNode fullyQualifiedTypeName.
+			"transform the namespace"
+			parentNamespace := aPPPHPTypeNode parentNamespace.
+			(parentNamespace notNil and: [ parentNamespace isSeparator not ])
+				ifTrue: [ (self createNamespace: parentNamespace) addType: stubType ].
 			stubType
 				stub: true;
 				yourself ]
+]
+
+{ #category : #'as yet unclassified' }
+MJPHPImporter >> defaultNamespace [
+	^ defaultNamespace
 ]
 
 { #category : #accessing }
@@ -179,7 +235,6 @@ MJPHPImporter >> ensureAMethod: aPPPHPMethodNode [
 { #category : #accessing }
 MJPHPImporter >> ensureANamespace: aPPPHPNamespaceNode [
 	"Recursively bubbles up the passed namespace and returns the representation of the passed node (linked to its parents)"
-
 	| scopeNode lastNode parentNode |
 	scopeNode := FAMIXNamespace new.
 	scopeNode name: aPPPHPNamespaceNode namespaceName.
@@ -207,10 +262,10 @@ MJPHPImporter >> ensureAParameter: aPPPHPParameterNode [
 MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	"this one expects the original node and the correct famix node"
 
-	| inheritance annotation nsnode |
-	aTypeNode name: aPPPHPTypeNode fullyQualifiedTypeName.
-	(aPPPHPTypeNode isFragment and: [ aTypeNode isStub ])
-		ifTrue: [ ^ aTypeNode ].	"(self createNamespace: aPPPHPTypeNode parentNamespace) addType: aTypeNode."
+	| inheritance annotation parentNamespace |
+	(aPPPHPTypeNode isFragment and: [ aTypeNode isStub ]) "break"
+		ifTrue: [ ^ aTypeNode ].
+
 	aPPPHPTypeNode superTypes
 		do: [ :superType |
 			"inheritances"
@@ -229,7 +284,7 @@ MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 							annotation := item accept: self phpVisitor.
 							annotation annotatedEntity: aTypeNode ] ] ].
 	aTypeNode isStub: false.
-	types at: aTypeNode name put: aTypeNode.
+	types at: aTypeNode fullName put: aTypeNode.
 	^ aTypeNode
 ]
 
@@ -292,7 +347,14 @@ MJPHPImporter >> initialize [
 	phpParser 			:= PPPHPCoreParser new.
 	annotationTypes 	:= Dictionary new.
 	types 				:= Dictionary new.
+	namespaces 		:= Dictionary new.
 	sourceLanguage 	:= FAMIXCustomSourceLanguage new name: 'PHP'.
+	defaultNamespace 	:= FAMIXNamespace new.
+]
+
+{ #category : #accessing }
+MJPHPImporter >> namespaces [
+	^ namespaces
 ]
 
 { #category : #accessing }
@@ -312,9 +374,16 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 		do: [ :entity | 
 			self targetModel silentlyAdd: entity.
 			(entity isKindOf: FAMIXFunction)
-				ifTrue: [ self targetModel silentlyAddAll: entity parameters ].
+				ifTrue: [ 
+					self targetModel silentlyAddAll: entity parameters.
+					entity parameters
+						do: [ :param | 
+							param declaredType notNil
+								ifTrue: [ 
+									self types at: param declaredType fullName ifAbsent: [ param declaredType isStub: true ].
+									self targetModel silentlyAdd: param declaredType ] ] ].
 			(entity isKindOf: FAMIXType)
-				ifTrue: [
+				ifTrue: [ 
 					self targetModel silentlyAddAll: entity superInheritances.
 					self targetModel silentlyAddAll: entity subInheritances.
 					self targetModel silentlyAddAll: entity comments.
@@ -335,8 +404,8 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 								do: [ :param | 
 									param declaredType notNil
 										ifTrue: [ 
-											"self targetModel silentlyAdd: param declaredType."
-											 ] ] ].
+											self types at: param declaredType fullName ifAbsent: [ param declaredType isStub: true ].
+											self targetModel silentlyAdd: param declaredType ] ] ].
 					entity attributes
 						do: [ :attribute | 
 							self targetModel add: attribute.
@@ -352,6 +421,7 @@ MJPHPImporter >> populateTargetModelFrom: aFileNode [
 MJPHPImporter >> populateTargetModelFromRootFolder: aFAMIXFolder [
 	"add all the annotation types"
 	self addAllAnnotations: annotationTypes.
+	self addAllNamespaces: namespaces.
 	"for each file track the content"
 	aFAMIXFolder files do: [ :file | self populateTargetModelFrom: file ].
 	"add remaining stubs"
