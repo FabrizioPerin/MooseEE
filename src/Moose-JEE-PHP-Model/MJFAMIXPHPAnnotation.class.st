@@ -1,9 +1,6 @@
 Class {
 	#name : #MJFAMIXPHPAnnotation,
-	#superclass : #FAMIXClass,
-	#instVars : [
-		'instances'
-	],
+	#superclass : #MJFAMIXPHPClass,
 	#category : #'Moose-JEE-PHP-Model'
 }
 
@@ -64,19 +61,28 @@ MJFAMIXPHPAnnotation >> instances: anAnnotationInstance [
 ]
 
 { #category : #'as yet unclassified' }
+MJFAMIXPHPAnnotation >> isAnnotation [
+	^ true
+]
+
+{ #category : #'as yet unclassified' }
 MJFAMIXPHPAnnotation >> mooseIcon [ 
 	^ MooseIcons famixAnnotationType
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXPHPAnnotation >> mooseNameOn: aStream [ 
+MJFAMIXPHPAnnotation >> mooseNameOn: aStream [
 	| parent |
 	parent := self container.
-	parent ifNotNil: 
-		[ 
+	parent
+		ifNotNil: [ 
 			parent mooseNameOn: aStream.
-			aStream
-				nextPut: $:;
-				nextPut: $: ].
-	self name ifNotNil: [aStream nextPutAll: self name]
+			aStream nextPut: $\ ].
+	self name ifNotNil: [ aStream nextPutAll: self name ]
+]
+
+{ #category : #'as yet unclassified' }
+MJFAMIXPHPAnnotation >> printOn: aStream [
+	self mooseNameOn: aStream.
+	aStream nextPutAll: ' (Annotation)'
 ]

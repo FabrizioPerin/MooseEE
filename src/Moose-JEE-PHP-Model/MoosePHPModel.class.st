@@ -21,12 +21,23 @@ MoosePHPModel >> allAttributes [
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allClasses [
-	^ self allWithSubTypesOf: FAMIXClass
+	^ (self allWithSubTypesOf: MJFAMIXPHPClass ofGroupClass: FAMIXClassGroup) select: [:entity | entity isAnnotation not or: [ entity isStub not]]
+]
+
+{ #category : #'as yet unclassified' }
+MoosePHPModel >> allInterfaces [
+	<navigation:'All interfaces'>
+	^ self allClasses select: [:item | item isInterface ]
 ]
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allMethods [
-	^ self allWithSubTypesOf: FAMIXMethod ofGroupClass:  FAMIXMethodGroup
+	^ self allWithSubTypesOf: MJFAMIXPHPMethod ofGroupClass:  FAMIXMethodGroup
+]
+
+{ #category : #'as yet unclassified' }
+MoosePHPModel >> allNamespaces [
+	^ self allWithType: MJFAMIXPHPNamespace ofGroupClass: FAMIXNamespaceGroup
 ]
 
 { #category : #'as yet unclassified' }
