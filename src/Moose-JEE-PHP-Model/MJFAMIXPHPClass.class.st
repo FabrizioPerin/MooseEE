@@ -15,6 +15,11 @@ MJFAMIXPHPClass class >> annotation [
 	^self
 ]
 
+{ #category : #'as yet unclassified' }
+MJFAMIXPHPClass >> annotationTypes [
+	^ super annotationTypes select: [:annotation | annotation isStub not ]
+]
+
 { #category : #accessing }
 MJFAMIXPHPClass >> fullName [
 	^ fullName
