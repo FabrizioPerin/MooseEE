@@ -49,48 +49,18 @@ ConfigurationOfMooseJEEPHP >> default: spec [
 	
 	spec for: #common do: [
 		spec blessing: #default.
-		"spec project: 'MooseJEE for MooseJEEPHP' with: [
-				spec
-					className: 'ConfigurationOfMooseJEE';
-					file: 'ConfigurationOfMooseJEE';
-					version: 'defaultAllProjects';
-					repository: 'http://www.squeaksource.com/Moose' ]."
+		spec repository: 'http://smalltalkhub.com/mc/FabrizioPerin/MooseEE/main'.
+		spec 
+			package: 'MooseJEE-PHP-Model';
+			package: 'MooseJEE-Importers-PHP' with: [spec requires:#('MooseJEE-PHP-Model' 'PPPHPParser for MooseJEEPHP')];
+			package: 'MooseJEE-Tests-Importers-PHP' with: [spec requires: #('MooseJEEImporters-PHP')].
 		
 		spec project: 'PHPParser for MooseJEEPHP' with: [
 				spec
 					className: 'ConfigurationOfPetitPHPParser';
 					file: 'ConfigurationOfPetitPHPParser';
 					version: 'default';
-					repository: 'http://www.squeaksource.com/PetitPHPParser' ].		
-			
-		spec 
-			"Models"
-			package: 'Moose-JEE-PHP-Model' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.];			
-			
-			"importers"
-			package: 'Moose-JEE-Importers-PHP' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('PHPParser for MooseJEEPHP')];
-	
-			"Tests"
-			package: 'Moose-JEE-Tests-Importers-PHP' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-Importers-PHP')].
-			"package: 'Moose-JEE-Tests-PHP' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-PHP-Model' 'Moose-JEE-Tests-PHP-Resources')];
-			package: 'Moose-JEE-Tests-Importers-PHP' with: [
-				spec repository: 'http://www.squeaksource.com/MooseJEE'.
-				spec requires: #('Moose-JEE-Importers-PHP' 'Moose-JEE-Tests-PHP-Resources')]."
-			
-		
-		"spec group: 'Tests' with: #( 
-			'Moose-JEE-Tests-PHP-Resources'
-			'Moose-JEE-Tests-PHP'
-			'Moose-JEE-Tests-Importers-PHP'
-			)."
-		
+					repository: 'http://smalltalkhub.com/mc/Moose/PetitParser/main' ]
 	]
 ]
 
