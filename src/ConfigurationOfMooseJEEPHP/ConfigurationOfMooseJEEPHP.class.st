@@ -26,15 +26,12 @@ ConfigurationOfMooseJEEPHP class >> isMetacelloConfig [
 
 { #category : #loading }
 ConfigurationOfMooseJEEPHP class >> loadDefault [
-	
-	"TranscriptWindow openWindow.
-	Transcript show: 'Loading Moose JEE configuration ...'; cr; show: '--------'; cr; cr."
-	
 	(self project version: 'default') load.
-	
-	Categorizer sortAllCategories.
-	"Transcript show: ''; cr; show: 'Moose JEE configuration loaded. Have fun!'; cr."
+]
 
+{ #category : #loading }
+ConfigurationOfMooseJEEPHP class >> loadDefaultWithoutPetit [
+	(self project version: 'defaultWithoutPetit') load.
 ]
 
 { #category : #accessing }
@@ -52,17 +49,40 @@ ConfigurationOfMooseJEEPHP >> default: spec [
 			spec blessing: #default.
 			spec repository: 'http://smalltalkhub.com/mc/FabrizioPerin/MooseEE/main'.
 			spec
-				package: 'Moose-JEE-PHP-Model' with: [ spec requires: #('Moose for MooseJEEPHP') ];
+				package: 'Moose-JEE-PHP-Model';
 				package: 'Moose-JEE-Importers-PHP' with: [ spec requires: #('Moose-JEE-PHP-Model' 'PPPHPParser for MooseJEEPHP') ];
 				package: 'Moose-JEE-Tests-Importers-PHP' with: [ spec requires: #('Moose-JEE-Importers-PHP') ].
-			spec
+			"spec
 				project: 'Moose for MooseJEEPHP'
 				with: [ 
 					spec
 						className: 'ConfigurationOfMoose';
 						file: 'ConfigurationOfMoose';
 						symbolicVersion: 'stable';
-						repository: 'http://smalltalkhub.com/mc/Moose/Moose/main' ].
+						repository: 'http://smalltalkhub.com/mc/Moose/Moose/main' ]."
+			spec
+				project: 'PPPHPParser for MooseJEEPHP'
+				with: [ 
+					spec
+						className: 'ConfigurationOfPetitPHPParser';
+						file: 'ConfigurationOfPetitPHPParser';
+						symbolicVersion: 'defaultWithoutPetit';
+						repository: 'http://smalltalkhub.com/mc/Moose/PetitPHPParser/main' ] ]
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEEPHP >> defaultWithoutPetit: spec [
+	<version: 'defaultWithoutPetit'>
+	spec
+		for: #common
+		do: [ 
+			spec blessing: #default.
+			spec repository: 'http://smalltalkhub.com/mc/FabrizioPerin/MooseEE/main'.
+			spec
+				package: 'Moose-JEE-PHP-Model';
+				package: 'Moose-JEE-Importers-PHP' with: [ spec requires: #('Moose-JEE-PHP-Model' 'PPPHPParser for MooseJEEPHP') ];
+				package: 'Moose-JEE-Tests-Importers-PHP' with: [ spec requires: #('Moose-JEE-Importers-PHP') ].
+				
 			spec
 				project: 'PPPHPParser for MooseJEEPHP'
 				with: [ 
