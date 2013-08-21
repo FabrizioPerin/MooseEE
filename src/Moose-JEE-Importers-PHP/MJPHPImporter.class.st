@@ -268,7 +268,7 @@ MJPHPImporter >> ensureAType: aTypeNode from: aPPPHPTypeNode [
 	| inheritance annotation parentNamespace |
 	(aPPPHPTypeNode isFragment and: [ aTypeNode isStub ]) "break"
 		ifTrue: [ ^ aTypeNode ].
-
+	aTypeNode isAbstract: aPPPHPTypeNode isAbstract.
 	aPPPHPTypeNode superTypes
 		do: [ :superType |
 			"inheritances"
