@@ -89,7 +89,7 @@ ConfigurationOfMooseJEEPHP >> defaultWithoutPetit: spec [
 					spec
 						className: 'ConfigurationOfPetitPHPParser';
 						file: 'ConfigurationOfPetitPHPParser';
-						symbolicVersion: 'defaultWithoutPetit';
+						version: 'defaultWithoutPetit';
 						repository: 'http://smalltalkhub.com/mc/Moose/PetitPHPParser/main' ] ]
 ]
 
