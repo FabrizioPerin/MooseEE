@@ -65,7 +65,7 @@ MJPHPImportCommand >> initialize [
 
 { #category : #'as yet unclassified' }
 MJPHPImportCommand >> label [
-	^ 'Import PHP sources from directory system.'
+	^ 'Import PHP sources from the file system.'
 ]
 
 { #category : #'as yet unclassified' }
