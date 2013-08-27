@@ -21,7 +21,8 @@ MoosePHPModel >> allAttributes [
 
 { #category : #'as yet unclassified' }
 MoosePHPModel >> allClasses [
-	^ (self allWithSubTypesOf: MJFAMIXPHPClass ofGroupClass: FAMIXClassGroup) select: [:entity | entity isAnnotation not or: [ entity isStub not]]
+	^ (self allWithSubTypesOf: MJFAMIXPHPClass ofGroupClass: FAMIXClassGroup)
+		select: [ :entity | entity isAnnotation not or: [ entity isStub not ] ]
 ]
 
 { #category : #'as yet unclassified' }
