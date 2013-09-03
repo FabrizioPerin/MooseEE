@@ -90,9 +90,9 @@ MooseModelMJExtensionTests >> testAllTransactionalMethods [
 	(root allElements select: [:each | each class = MJContainerTransactionElement]) do: [:each |
 		each populate: mooseModel].
 
-	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod')
 					hasEJBTransactionAttribute.
-	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod()')
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod')
 					hasEJBTransactionAttribute not.
 	self assert: ((mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
 					methods allSatisfy: #hasEJBTransactionAttribute).

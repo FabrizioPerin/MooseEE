@@ -245,9 +245,9 @@ FAMIXMethodMJExtensionTests >> testHasEJBTransactionAttribute [
 	(root allElements select: [:each | each class = MJContainerTransactionElement]) do: [:each |
 		each populate: mooseModel].
 
-	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod')
 					hasEJBTransactionAttribute.
-	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod()')
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod')
 					hasEJBTransactionAttribute not.
 
 	self assert: ((mooseModel allClasses entityNamed: #'aPackage::AStatefulSessionBean')
@@ -272,9 +272,9 @@ FAMIXMethodMJExtensionTests >> testHasEJBTransactionAttributeThatSupportTransact
 	
 	self assert: (mooseModel allClasses entityNamed: #'aPackage::AStatelessSessionBean')
 					methods size = 2.
-	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod()')
+	self assert: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.aMethod')
 					hasEJBTransactionAttributeThatSupportTransactions.
-	self deny: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod()')
+	self deny: (mooseModel allMethods entityNamed: #'aPackage::AStatelessSessionBean.anotherMethod')
 					hasEJBTransactionAttributeThatSupportTransactions.
 		
 ]
