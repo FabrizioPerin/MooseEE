@@ -13,50 +13,12 @@ MJFAMIXSessionBeanGroup class >> annotation [
 ]
 
 { #category : #'as yet unclassified' }
-MJFAMIXSessionBeanGroup >> umlShape: aString [
-
-	| builder |
-
-	builder := MOFormsBuilder new.
-	builder
-		column;
-		fill.
-	builder
-		row;
-		fill;
-		row;
-		fill.
-	builder 
-		x: 1
-		y: 1
-		add: MORectangleShape new.
-	builder 
-		x: 1
-		y: 1
-		add: (MOLabelShape new text: [:cls | aString]).
-	builder 
-		x: 1
-		y: 2
-		add: MORectangleShape new.
-	builder 
-		x: 1
-		y: 2
-		add: (MOLabelShape new text: 
-			[ :cls | 
-			cls methodDict keys 
-				inject: ''
-				into: [ :sum :el | sum , el , String cr ] ]).
-	^ builder shape
-
-]
-
-{ #category : #'as yet unclassified' }
 MJFAMIXSessionBeanGroup >> viewApplicationByLayers [
 	"<menuItem: 'Application by Layers' category: 'JEAs Visualizations'>"
 
-	| invoked view beans data logic map invocationsMap layerShape aBlock  myShape allModelClasse |
+	| invoked view beans data logic map invocationsMap  allModelClasse |
 
-	view := MOViewRenderer new.
+	view := ROMondrianViewBuilder new.
 	beans := self collect: #implementationClass.
 	allModelClasse := beans first mooseModel allClasses.
 	invoked := (beans flatCollect: #withDeepInvokedClasses) asSet asOrderedCollection reject: [:each | beans includes: each].
@@ -106,7 +68,7 @@ MJFAMIXSessionBeanGroup >> viewLayerOn: view [
 	view shape umlClass.
 	view interaction popupText.
 	view nodes: self entities.
-	view shape: MOOrthoVerticalLineShape new.
+	view shape: ROOrthoVerticalLineShape new.
 	view edgesFrom: #superclass.
 	view treeLayout
 ]
@@ -115,8 +77,8 @@ MJFAMIXSessionBeanGroup >> viewLayerOn: view [
 MJFAMIXSessionBeanGroup >> viewLayers [
 	"<menuItem: 'Layers' category: 'JEAs Visualizations'>"
 
-	| invoked view beans data logic map invocationsMap |
-	view := MOViewRenderer new.
+	| invoked view beans data logic map |
+	view := ROMondrianViewBuilder new.
 	beans := self collect: #implementationClass.
 	invoked := (beans flatCollect: #withDeepInvokedClasses) asSet asOrderedCollection reject: [:each | beans includes: each].
 	data := invoked select: #isADataLayerClass.
@@ -127,23 +89,21 @@ MJFAMIXSessionBeanGroup >> viewLayers [
 	logic do: [:each | map at: each mooseName put: 2].
 	beans do: [:each | map at: each mooseName put: 1].
 
-	invocationsMap := beans first mooseModel allClasses flatCollect: [:each | each invokedClasses collect: [:x | each -> x]]. 
-
-	"view shape: (view umlShape: 'Service Layer')."
+	"view shape: (view shape rectangle withText: 'Service Layer')."
 	view node: beans forIt: [
-		view nodes: beans using: ( MORectangleShape new width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
+		view nodes: beans using: ( view shape rectangle width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
 		view horizontalLineLayout.
 	].
-	view shape: (view umlShape: 'Logic Layer').
+	view shape: (view shape rectangle withText: 'Logic Layer').
 	view node: #logic forIt: [
-		view nodeShape: ( MORectangleShape new width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
+		view nodeShape: ( view shape rectangle width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
 		view nodes: logic.
 		view dominanceTreeLayout.
 	].
-	"view umlPackageShapeWithLabel: 'Data Layer'."
-	view shape: (self umlShape: 'Data Layer').
+	"view  shape rectangle withText: 'Data Layer'."
+	view shape: (view shape rectangle withText: 'Data Layer').
 	view node: #data forIt: [
-		view nodeShape: ( MORectangleShape new width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
+		view nodeShape: ( view shape rectangle width: #numberOfAttributes; height: #numberOfMethods; linearFillColor: #numberOfLinesOfCode within: beans first mooseModel allClasses; withBorder ).
 		view nodes: data.
 		view dominanceTreeLayout.
 	].
@@ -154,8 +114,6 @@ MJFAMIXSessionBeanGroup >> viewLayers [
 			ifTrue: [Color white] 
 			ifFalse: [	((map at: assoc key mooseName) - (map at: assoc value mooseName)) abs < 2 ifTrue: [Color blue] ifFalse: [Color orange]]
 	].
-	"view edges: invocationsMap from: #key to: #value.
-	view edges: beans first mooseModel allClasses from: #superclass to: #yourself.
-	view verticalLineLayout verticalGap: 40."
+
 	view open
 ]
