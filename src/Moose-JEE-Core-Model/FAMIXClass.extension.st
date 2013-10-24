@@ -424,3 +424,21 @@ FAMIXClass >> withDeepInvokingClasses [
 
 	^ result.
 ]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXClass >> withDeepInvokingClassesWithoutSubclasses [
+
+	| cursor result invokingClassesAndTheirSubclasses |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: self.
+	
+	[cursor <= result size] whileTrue: [
+		invokingClassesAndTheirSubclasses := (( result at: cursor ) invokingClasses reject: #isStub).
+		result addAll: ( invokingClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1.
+	].
+
+	^ result.
+]
