@@ -320,7 +320,7 @@ FAMIXClassGroup >> viewDerivedDependenciesConstellationOn: aView [
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 	
-	| interestingClasses allInterestingMethods internalInvocations otherMethods tables |
+	| interestingClasses tables |
 	
 	interestingClasses := self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ].
 	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
@@ -350,7 +350,7 @@ FAMIXClassGroup >> viewMethodsWithTransactionFlowForBrowserOn: view [
 "	view shape line color darker.
 	view edgesFrom: #superclass."
 	
-	view dominanceGrouppedTreeLayout.
+	view dominanceTreeLayout.
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
@@ -659,7 +659,7 @@ FAMIXClassGroup >> viewTransactionFlowByLayersWithAllMethods [
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXClassGroup >> viewTransactionFlowOn: view withAllMethods: aBoolean [
 
-	| interestingClasses allInterestingMethods otherMethods tables |
+	| interestingClasses tables |
 
 	interestingClasses := ( self select: [ :eachClass | eachClass methods anySatisfy: #isPartOfATransaction ] ).
 	(interestingClasses select: #hasImplementsABean) groupClassesConsiderInvokationHierarchy.
@@ -682,7 +682,7 @@ FAMIXClassGroup >> viewTransactionFlowOn: view withAllMethods: aBoolean [
 	view edges: self mooseModel allMaps from: #mapSource to: #mapTarget.
 	
 	"view dominanceTreeLayout."
-	view dominanceGrouppedTreeLayout.
+	view dominanceTreeLayout.
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
@@ -738,5 +738,5 @@ FAMIXClassGroup >> viewUnsafeQueriesOn: view [
 		from: #yourself
 		toAll: #invokedClasses.
 		
-	view dominanceGrouppedTreeLayout
+	view dominanceTreeLayout
 ]
