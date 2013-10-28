@@ -1,6 +1,19 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Core-Model' }
+MooseModel >> addModelFromMSE [
+	<menuItem: 'Import model from MSE' category: 'JEAs Importers'>
+
+	| stream |
+	stream := UITheme builder
+		fileOpen: 'Import model from MSE file' 
+		extensions: #('mse').
+	stream isNil ifFalse: [
+		self importFromMSEStream: stream.
+		stream close ]
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 MooseModel >> allDerivedDependencies [
 
 	^self allWithType: MJFAMIXDerivedDependency "asMetaDescription"
