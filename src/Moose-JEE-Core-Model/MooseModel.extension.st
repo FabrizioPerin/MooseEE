@@ -1,19 +1,6 @@
 Extension { #name : #MooseModel }
 
 { #category : #'*Moose-JEE-Core-Model' }
-MooseModel >> addModelFromMSE [
-	<menuItem: 'Import model from MSE' category: 'JEAs Importers'>
-
-	| stream |
-	stream := UITheme builder
-		fileOpen: 'Import model from MSE file' 
-		extensions: #('mse').
-	stream isNil ifFalse: [
-		self importFromMSEStream: stream.
-		stream close ]
-]
-
-{ #category : #'*Moose-JEE-Core-Model' }
 MooseModel >> allDerivedDependencies [
 
 	^self allWithType: MJFAMIXDerivedDependency "asMetaDescription"
@@ -109,4 +96,23 @@ MooseModel >> fixFileAnchorsFromGUI [
 	aFolder isNil
 		ifTrue: [DialogWindow new alert: 'Folder not found.']
 		ifFalse: [self fixFileAnchorsFrom: aFolder]
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+MooseModel >> importModelFromMSE [
+	<menuItem: 'Import model from MSE' category: 'JEAs Importers'>
+
+	| stream |
+	stream := UITheme builder
+		fileOpen: 'Import model from MSE file' 
+		extensions: #('mse').
+	stream isNil ifFalse: [
+		| tower importer |
+		tower := self class metaTower.
+		importer := MSEImporter new.
+		importer repository: tower model.
+		importer stream: stream.
+		importer run.
+		self silentlyAddAll: importer model elements.
+		stream close ]
 ]
