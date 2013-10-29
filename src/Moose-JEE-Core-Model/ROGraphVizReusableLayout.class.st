@@ -2,7 +2,9 @@ Class {
 	#name : #ROGraphVizReusableLayout,
 	#superclass : #ROGraphVizLayout,
 	#instVars : [
-		'existingLayout'
+		'existingLayout',
+		'forceNew',
+		'requiredNew'
 	],
 	#category : #'Moose-JEE-Core-Model'
 }
@@ -18,10 +20,16 @@ ROGraphVizReusableLayout >> existingLayout: anObject [
 ]
 
 { #category : #accessing }
+ROGraphVizReusableLayout >> forceNew [
+	requiredNew := true
+]
+
+{ #category : #accessing }
 ROGraphVizReusableLayout >> initialize [ 
 	super initialize.
 	
 	self existingLayout: nil.
+	self requiredNew: false.
 	
 	^self
 ]
@@ -33,7 +41,7 @@ ROGraphVizReusableLayout >> on: elements edges: edgeElements [
 	
 	self ids: (self createIdMapping: elements).
 	
-	self reuseExistingLayout
+	(self reuseExistingLayout and: [self requiredNew not])
 		ifFalse: [ 
 			self removeTemporaryFiles.
 
@@ -50,7 +58,7 @@ ROGraphVizReusableLayout >> on: elements edges: edgeElements [
 ROGraphVizReusableLayout >> readLayoutFile [
 	| dot positions element controlPoints point separator |
 
-	self reuseExistingLayout
+	(self reuseExistingLayout and: [self requiredNew not])
 		ifTrue: [ dot := FileStream readOnlyFileNamed: self existingLayout ]
 		ifFalse: [ dot := FileStream readOnlyFileNamed: 'mondrian_plain' ].
 
@@ -93,6 +101,16 @@ ROGraphVizReusableLayout >> readLayoutFile [
 		ifTrue: [ self saveLayout ].
 	
 	^ positions
+]
+
+{ #category : #accessing }
+ROGraphVizReusableLayout >> requiredNew [
+	^requiredNew
+]
+
+{ #category : #accessing }
+ROGraphVizReusableLayout >> requiredNew: aBoolean [ 
+	requiredNew := aBoolean
 ]
 
 { #category : #accessing }

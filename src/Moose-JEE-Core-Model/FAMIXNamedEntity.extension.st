@@ -74,7 +74,7 @@ FAMIXNamedEntity >> viewDerivedDependenciesConstellation [
 
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXNamedEntity >> viewDerivedDependenciesConstellationOn: aView [
-	| derivedConnections invoking allDirectedDependencies allNotDirectedDependencies |
+	| derivedConnections allDirectedDependencies allNotDirectedDependencies |
 
 	derivedConnections := OrderedCollection with: self.
 	derivedConnections addAll: (self derivedDependenciesDirection: #target on: self mooseModel allDerivedDependencies).
@@ -101,5 +101,5 @@ FAMIXNamedEntity >> viewDerivedDependenciesConstellationOn: aView [
 	aView shape line color: Color veryLightGray.
 	aView edges: allNotDirectedDependencies from: #target to: #source.
 
-	aView graphvizLayout fdp.
+	aView layout: ROGraphVizReusableLayout new fdp.
 ]

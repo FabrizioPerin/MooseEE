@@ -29,7 +29,7 @@ FAMIXClassGroup >> DTOsConstellationOn: aView [
 	"aView shape arrowedLine color: Color veryLightGray; arrowSize: 4."
 	aView shape line color: Color veryLightGray.
 	aView edges: self from: #yourself toAll: #clientClasses.
-	aView graphvizLayout neato.
+	aView layout: ROGraphVizReusableLayout neato.
 	
 aView shape line color: Color black; width: 2..
 	aView 
@@ -90,7 +90,7 @@ FAMIXClassGroup >> DTOsDuplicationsConstellationOn: aView [
 	aView shape line color: Color veryLightGray.
 	aView edges: self from: #yourself toAll: #clientClasses.
 	
-	aView graphvizLayout neato.
+	aView layout: ROGraphVizReusableLayout neato.
 	
 	aView shape line color: Color red.
 	aView 
@@ -286,7 +286,7 @@ FAMIXClassGroup >> viewDerivedDependenciesConstellation [
 
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXClassGroup >> viewDerivedDependenciesConstellationOn: aView [
-	| derivedConnections invoking allDirectedDependencies allNotDirectedDependencies |
+	| derivedConnections allDirectedDependencies allNotDirectedDependencies |
 
 	derivedConnections := OrderedCollection new.
 	derivedConnections := self select: [:el | el incomingDerivedDependency isEmpty not or: [el outgoingDerivedDependency isEmpty not] ].
@@ -314,7 +314,7 @@ FAMIXClassGroup >> viewDerivedDependenciesConstellationOn: aView [
 	aView shape line color: Color veryLightGray.
 	aView edges: allNotDirectedDependencies from: #target to: #source.
 	
-	aView graphvizLayout fdp "neato" "ids" "dot" "sfdp" "twopi" "circo".
+	aView layout: ROGraphVizReusableLayout fdp "neato" "ids" "dot" "sfdp" "twopi" "circo".
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
