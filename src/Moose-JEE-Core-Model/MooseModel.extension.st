@@ -33,6 +33,17 @@ MooseModel >> deleteAllDeriveDependencies [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
+MooseModel >> ensureJavaSourceLanguageOnClassesAndMethods [
+
+	"this cicle will be executed zero or one time"
+	(self allWithType: FAMIXJavaSourceLanguage) do: [ :sl |
+		self allModelClasses do: [ :each | each declaredSourceLanguage: sl].
+		self allModelMethods do: [ :each | each declaredSourceLanguage: sl ] ]
+
+
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 MooseModel >> exportDerivedAssociationsOnCSV [
 	| stream dependencies header block |
 	
