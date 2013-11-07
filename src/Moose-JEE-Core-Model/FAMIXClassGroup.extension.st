@@ -125,6 +125,16 @@ FAMIXClassGroup >> allClassesOfGroup: anInteger [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
+FAMIXClassGroup >> averageNumberOfInvokingClasses [
+	<MSEProperty: #averageNumberOfInvokingClasses type: #Number>
+	<MSEComment: 'Average number of invoking classes per class'>
+
+	^self
+		lookUpPropertyNamed: #averageNumberOfInvokingClasses
+		computedAs: [ ( self average: [:each | each invokingClasses size ] ) asFloat ]
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXClassGroup >> determinGroupStartingFrom: groupNum [
 	"This is the algorithm that assigne the group numbers to the elements.
 		anExistingGroups is an OrderedCollection containing an OrderedCollection for each group of classes."

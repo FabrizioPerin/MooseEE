@@ -1,6 +1,16 @@
 Extension { #name : #FAMIXMethodGroup }
 
 { #category : #'*Moose-JEE-Core-Model' }
+FAMIXMethodGroup >> averageNumberOfIncomingInvocations [
+	<MSEProperty: #averageNumberOfIncomingInvocations type: #Number>
+	<MSEComment: 'Average number of invoking classes per class'>
+
+	^self
+		lookUpPropertyNamed: #averageNumberOfIncomingInvocations
+		computedAs: [ ( self average: [:each | each incomingInvocations size ] ) asFloat ]
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXMethodGroup >> deepCalledMethods [
 	"This method starting from this group of method return an OrderedCollection with the method invocation chain that start with methods contained in this group"
 

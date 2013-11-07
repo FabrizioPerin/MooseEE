@@ -199,6 +199,24 @@ FAMIXMethod >> hasEJBTransactionAttributeThatSupportTransactions [
 ]
 
 { #category : #'*Moose-JEE-Core-Model' }
+FAMIXMethod >> invokingMethodsWithThreshold [
+	
+
+	^ self invokingBehaviours select: [ :each | each isMethod ]
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXMethod >> invokingMethodsWithThreshold: aNumber [
+	| invokers |
+	
+	invokers := self invokingBehaviours select: [ :each | each isMethod ].
+	
+	invokers size > aNumber
+		ifTrue: [ ^#() ]
+		ifFalse: [ ^invokers ].
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
 FAMIXMethod >> isADataLayerMethod [
 	
 	^ self doesInvokesMethodsBelongJavaSqlPackage or: [ self doesExecuteAQuery ].

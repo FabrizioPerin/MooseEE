@@ -419,6 +419,23 @@ FAMIXClass >> withDeepInvokingClasses [
 	[cursor <= result size] whileTrue: [
 		invokingClassesAndTheirSubclasses := (( result at: cursor ) invokingClasses reject: #isStub) flatCollect: [:each | each withSubclassHierarchy].
 		result addAll: ( invokingClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1 ].
+
+	^ result.
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXClass >> withDeepInvokingClassesWithThreshold: aNumber [
+
+	| cursor result invokingClassesAndTheirSubclasses |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: self.
+	
+	[cursor <= result size] whileTrue: [
+		invokingClassesAndTheirSubclasses := ( ( ( result at: cursor ) invokingClassesWithThreshold: aNumber ) reject: #isStub ) flatCollect: [ :each | each withSubclassHierarchy ].
+		result addAll: ( invokingClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
 		cursor := cursor + 1.
 	].
 
@@ -428,17 +445,57 @@ FAMIXClass >> withDeepInvokingClasses [
 { #category : #'*Moose-JEE-Core-Model' }
 FAMIXClass >> withDeepInvokingClassesWithoutSubclasses [
 
-	| cursor result invokingClassesAndTheirSubclasses |
+	| cursor result invokingClasses |
 
 	cursor := 1.
 	result := OrderedCollection new.
 	result add: self.
-	
-	[cursor <= result size] whileTrue: [
-		invokingClassesAndTheirSubclasses := (( result at: cursor ) invokingClasses reject: #isStub).
-		result addAll: ( invokingClassesAndTheirSubclasses reject: [ :each | result includes: each ] ).
-		cursor := cursor + 1.
-	].
 
+	[ cursor <= result size ] whileTrue: [
+		invokingClasses := ( ( result at: cursor ) invokingClasses reject: #isStub ).
+		result addAll: ( invokingClasses reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1 ].
+
+	^ result.
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXClass >> withDeepInvokingClassesWithoutSubclassesWithThreshold: aNumber [
+
+	| cursor result invokingClasses |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: self.
+
+	[ cursor <= result size ] whileTrue: [
+		invokingClasses := ( ( result at: cursor ) invokingClassesWithThreshold: aNumber )  reject: #isStub.
+		result addAll: ( invokingClasses reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1 ].
+
+	^ result.
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXClass >> withInvokingClassesWithoutSubclasses [
+
+	| result |
+
+	result := OrderedCollection new.
+	result add: self.
+	result addAll: (self invokingClasses reject: #isStub).
+	
+	^ result asSet asMooseGroup
+]
+
+{ #category : #'*Moose-JEE-Core-Model' }
+FAMIXClass >> withInvokingClassesWithoutSubclassesWithThreshold: aNumber [
+
+	| result |
+
+	result := OrderedCollection new.
+	result add: self.
+	result addAll:  ( ( self invokingClassesWithThreshold: aNumber ) reject: #isStub ).
+	
 	^ result.
 ]
