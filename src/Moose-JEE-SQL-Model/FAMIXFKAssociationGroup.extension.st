@@ -14,7 +14,7 @@ FAMIXFKAssociationGroup >> exportListOfFKsAsCSVFile [
 { #category : #'*moose-jee-sql-model' }
 FAMIXFKAssociationGroup >> exportListOfFKsAsCSVFileNamed: aString [
 	| stream |
-	
+
 	stream := MultiByteFileStream forceNewFileNamed: aString , '.csv'.
 	stream nextPutAll: ('REFERENCED TABLE' , ';' , 'REFERENCED TABLE COLUMN' , ';' , 'REFERENCING TABLE' , ';' , 'REFERENCING TABLE COLUMN' , String cr).
 	self do: [:fkAssoc |
