@@ -708,6 +708,91 @@ ConfigurationOfMooseJEE >> baseline21: spec [
 ]
 
 { #category : #baselines }
+ConfigurationOfMooseJEE >> baseline30: spec [ 
+        <version: '3.0-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.smalltalkhub.com/mc/FabrizioPerin/MooseEE/main'.
+		
+		spec  project: 'FAMIX SQL for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfFamixSQL';
+				file: 'ConfigurationOfFamixSQL';
+				"version: 'development';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/MooseSQL/main' ].
+
+		spec  project: 'PetitJSPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitJSPParser';
+				file: 'ConfigurationOfPetitJSPParser';
+				"version: 'development';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/PetitJSPParser/main' ].
+		
+		spec  project: 'PetitPHPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitPHPParser';
+				file: 'ConfigurationOfPetitPHPParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/PetitPHPParser/main'].
+				
+		spec  project: 'Maze for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMaze';
+				file: 'ConfigurationOfMaze';
+				"version: 'default';"
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Maze/main' ].
+
+		spec  project: 'Carrack for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfCarrack';
+				file: 'ConfigurationOfCarrack';
+				"version: 'default';"
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Carrack/main' ].
+			
+		spec 
+			"Extra Projects"
+			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
+			package: 'RoassalGraphVizLayout' with: [spec repository: 'http://smalltalkhub.com/mc/ObjectProfile/Roassal/main/']; 
+		
+			"Models"
+			package: 'Moose-JEE-Core-Model';
+			package: 'Moose-JEE-SQL-Model';
+			package: 'Moose-JEE-JSP-Model';
+			package: 'Moose-JEE-EJB-Model';
+			package: 'Moose-JEE-Tiers-Model';
+			package: 'Moose-JEE-Architecture-Model';
+						
+			"importers"
+			package: 'Moose-JEE-Importers-SQL' with: [spec requires: 'FAMIX SQL for MooseJEE'];
+			package: 'Moose-JEE-Importers-JSP' with: [spec requires: 'PetitJSPParser for MooseJEE'];
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-EJBDraftObjs';
+			package: 'Moose-JEE-Browsers' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-Algos';
+			package: 'Moose-JEE-Wizard';" with: [spec requires: 'Merlin'];"
+			package: 'Moose-JEE-Help';
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources';
+			package: 'Moose-JEE-Tests-Core' with: [spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Algos' with: [spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec requires: #('Moose-JEE-EJBDraftObjs' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL' with: [spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-JSP' with: [spec requires: #('Moose-JEE-JSP-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJB' with: [spec requires: #('Moose-JEE-EJB-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Extensions' with: [spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Tiers' with: [spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Architecture-Model' with: [spec requires: #('Moose-JEE-Architecture-Model')].
+			
+	].
+]
+
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> default: spec [ 
 	<version: 'default'>
 	
@@ -1145,7 +1230,8 @@ ConfigurationOfMooseJEE >> development: spec [
 	<symbolicVersion: #development>
 
 	spec for: #'pharo1.4.x' version: '1.6-baseline'.
-	spec for: #'pharo2.x' version: '2.1-baseline'.
+	spec for: #'pharo2.x' version: '2.1'.
+	spec for: #'pharo3.x' version: '3.0-baseline'.
 
 ]
 
@@ -1570,6 +1656,76 @@ ConfigurationOfMooseJEE >> version16: spec [
 			package: 'Moose-JEE-Tests-EJB' with: 'Moose-JEE-Tests-EJB-FabrizioPerin.5';
 			package: 'Moose-JEE-Tests-Extensions' with: 'Moose-JEE-Tests-Extensions-FabrizioPerin.8';
 			package: 'Moose-JEE-Tests-Tiers' with: 'Moose-JEE-Tests-Tiers-FabrizioPerin.3';
+			package: 'Moose-JEE-Tests-Architecture-Model' with: 'Moose-JEE-Tests-Architecture-Model-FabrizioPerin.1'.
+			
+		
+		spec group: 'Tests' with: #( 
+			'Moose-JEE-Tests-Core'
+			'Moose-JEE-Tests-SQL'
+			'Moose-JEE-Tests-JSP'
+			'Moose-JEE-Tests-EJB'
+			'Moose-JEE-Tests-Tiers'
+			'Moose-JEE-Tests-Extensions'
+			'Moose-JEE-Tests-Importers-SQL'
+			'Moose-JEE-Tests-Importers-JSP'
+			'Moose-JEE-Tests-EJBDraftObjs'
+			'Moose-JEE-Tests-Algos'
+			'Moose-JEE-Tests-Architecture-Model').			
+		].
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> version21: spec [
+	<version: '2.1' imports: #('2.1-baseline')>
+
+	spec for: #common do: [
+		spec blessing: #release.
+		spec author: 'FabrizioPerin'.
+		spec description: 'release 2.1 for Moose 4.9 on pharo 2.0'.
+		spec timestamp: '04/03/2014 11:00'.
+		
+		spec  project: 'PetitSQLParser for MooseJEE' with: '2.0'.
+		spec  project: 'FAMIX SQL for MooseJEE' with: '2.1'.
+		spec  project: 'PetitJSPParser for MooseJEE' with: '1.1'.
+		spec  project: 'PetitPHPParser for MooseJEE' with: '1.1'.
+		spec  project: 'Maze for MooseJEE' with: '2.0'.
+		
+		spec
+			package: 'Merlin' with: 'Merlin-AlexandreBergel.141';
+			package: 'pagerank' with: 'PageRank-lr.6';
+			
+			"Models"
+			package: 'Moose-JEE-Core-Model' with: 'Moose-JEE-Core-Model-FabrizioPerin.38';
+			package: 'Moose-JEE-SQL-Model' with: 'Moose-JEE-SQL-Model-FabrizioPerin.14';			
+			package: 'Moose-JEE-JSP-Model' with: 'Moose-JEE-JSP-Model-FabrizioPerin.5';			
+			package: 'Moose-JEE-EJB-Model' with: 'Moose-JEE-EJB-Model-FabrizioPerin.10';
+			package: 'Moose-JEE-Tiers-Model' with: 'Moose-JEE-Tiers-Model-FabrizioPerin.18';
+			package: 'Moose-JEE-Architecture-Model' with: 'Moose-JEE-Architecture-Model-FabrizioPerin.5';
+						
+			"importers"
+			package: 'Moose-JEE-Importers-SQL' with: 'Moose-JEE-Importers-SQL-FabrizioPerin.44';			
+			package: 'Moose-JEE-Importers-JSP' with: 'Moose-JEE-Importers-JSP-FabrizioPerin.4';
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: 'Moose-JEE-Reports-FabrizioPerin.15';			
+			package: 'Moose-JEE-EJBDraftObjs' with: 'Moose-JEE-EJBDraftObjs-FabrizioPerin.2';
+			package: 'Moose-JEE-Browsers' with: 'Moose-JEE-Browsers-FabrizioPerin.5';
+			package: 'Moose-JEE-Algos' with: 'Moose-JEE-Algos-FabrizioPerin.7';
+			package: 'Moose-JEE-Wizard' with: 'Moose-JEE-Wizard-FabrizioPerin.42';
+			package: 'Moose-JEE-Help' with: 'Moose-JEE-Help-FabrizioPerin.2';			
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources' with: 'Moose-JEE-Tests-Resources-FabrizioPerin.9';
+			package: 'Moose-JEE-Tests-Core' with: 'Moose-JEE-Tests-Core-FabrizioPerin.6';
+			package: 'Moose-JEE-Tests-Algos' with: 'Moose-JEE-Tests-Algos-FabrizioPerin.8';
+			package: 'Moose-JEE-Tests-Importers-JSP' with: 'Moose-JEE-Tests-Importers-JSP-FabrizioPerin.1';
+			package: 'Moose-JEE-Tests-Importers-SQL' with: 'Moose-JEE-Tests-Importers-SQL-FabrizioPerin.7';
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: 'Moose-JEE-Tests-EJBDraftObjs-FabrizioPerin.1';
+			package: 'Moose-JEE-Tests-SQL' with: 'Moose-JEE-Tests-SQL-FabrizioPerin.17';			
+			package: 'Moose-JEE-Tests-JSP' with: 'Moose-JEE-Tests-JSP-FabrizioPerin.2';
+			package: 'Moose-JEE-Tests-EJB' with: 'Moose-JEE-Tests-EJB-FabrizioPerin.5';
+			package: 'Moose-JEE-Tests-Extensions' with: 'Moose-JEE-Tests-Extensions-FabrizioPerin.11';
+			package: 'Moose-JEE-Tests-Tiers' with: 'Moose-JEE-Tests-Tiers-FabrizioPerin.7';
 			package: 'Moose-JEE-Tests-Architecture-Model' with: 'Moose-JEE-Tests-Architecture-Model-FabrizioPerin.1'.
 			
 		
