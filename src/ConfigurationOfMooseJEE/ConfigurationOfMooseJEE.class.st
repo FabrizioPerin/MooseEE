@@ -78,7 +78,7 @@ ConfigurationOfMooseJEE class >> loadDefaultSQLWithoutTests [
 
 { #category : #loading }
 ConfigurationOfMooseJEE class >> loadDevelopment [
-	^(self project version: 'development') load
+	^(self project version: #development) load
 ]
 
 { #category : #loading }
@@ -1312,7 +1312,7 @@ ConfigurationOfMooseJEE >> defaultSQLWithoutTests: spec [
 
 { #category : #baselines }
 ConfigurationOfMooseJEE >> development: spec [
-	<symbolicVersion: 'development'>
+	<symbolicVersion: #development>
 
 	spec for: #'pharo1.4.x' version: '1.6-baseline'.
 	spec for: #'pharo2.x' version: '2.1'.
