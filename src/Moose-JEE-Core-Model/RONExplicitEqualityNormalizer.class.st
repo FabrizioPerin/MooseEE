@@ -1,6 +1,6 @@
 Class {
 	#name : #RONExplicitEqualityNormalizer,
-	#superclass : #RONExplicitIdentityNormalizer,
+	#superclass : #RTMultiLinearColor,
 	#category : #'Moose-JEE-Core-Model'
 }
 
