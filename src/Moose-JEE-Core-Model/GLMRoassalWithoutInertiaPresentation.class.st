@@ -1,6 +1,6 @@
 Class {
 	#name : #GLMRoassalWithoutInertiaPresentation,
-	#superclass : #GLMRoassalPresentation,
+	#superclass : #GLMRoassal2Presentation,
 	#category : #'Moose-JEE-Core-Model'
 }
 
@@ -8,7 +8,7 @@ Class {
 GLMRoassalWithoutInertiaPresentation >> view [
 	^ view ifNil: [
 		| rawView |
-		rawView := ROView new.
-		rawView @ RODraggable.
-		view := ROMondrianViewBuilder initializedView: rawView ]
+		rawView := RTView new.
+		rawView @ RTDraggable.
+		view := RTMondrian initializedView: rawView ]
 ]
