@@ -1,3 +1,41 @@
+"
+GraphViz is a well know library to layout graphs.
+In order to use ROGraphVizLayout, you need to install on your machine GraphViz:
+http://www.graphviz.org/Download..php
+
+A Mondrian example for the layout:
+-=-=-=-=
+view shape rectangle size: #yourself.
+view nodes: (1 to: 100).
+view edgesFrom: [ :x | x // 5 ].
+view layout: (ROGraphVizLayout new).
+-=-=-=-=
+
+A RTGraphVizLayout is xxxxxxxxx.
+
+Instance Variables
+	extent:		<Object>
+	ids:		<Object>
+	layout:		<Object>
+	root:		<Object>
+	useSplines:		<Object>
+
+extent
+	- xxxxx
+
+ids
+	- xxxxx
+
+layout
+	- xxxxx
+
+root
+	- xxxxx
+
+useSplines
+	- xxxxx
+
+"
 Class {
 	#name : #RTGraphVizLayout,
 	#superclass : #RTLayout,
