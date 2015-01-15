@@ -1,6 +1,6 @@
 Class {
 	#name : #ROGraphVizReusableLayout,
-	#superclass : #ROGraphVizLayout,
+	#superclass : #RTGraphVizLayout,
 	#instVars : [
 		'existingLayout',
 		'forceNew',
