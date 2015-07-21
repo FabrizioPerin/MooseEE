@@ -12,7 +12,7 @@ MapTablesOnInterfacesByName >> buildMapsOn: aTargetModel [
 	tables := aTargetModel allTables sorted: [:a :b | a name > b name].
 	counter :=  1.
 
-	UIManager default
+	UIManager
 	displayProgress: 'Building relations among DB and Classes'
 		at: Sensor cursorPoint
 		from: counter

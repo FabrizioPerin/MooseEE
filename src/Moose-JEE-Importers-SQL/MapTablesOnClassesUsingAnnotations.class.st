@@ -6,7 +6,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MapTablesOnClassesUsingAnnotations >> buildMapsOn: aTargetModel [
-	| tables tableEntities counter annotationTypeTable ejbVer |
+	| tables tableEntities counter  ejbVer |
 
 	aTargetModel ejbVersion isNil 
 				ifTrue: [
@@ -20,7 +20,7 @@ MapTablesOnClassesUsingAnnotations >> buildMapsOn: aTargetModel [
 		tables := aTargetModel allTables.
 		counter :=  1.
 
-		UIManager default
+		UIManager
 			displayProgress: 'Building relations among Tables and Classes'
 			at: Sensor cursorPoint
 			from: counter
@@ -45,7 +45,7 @@ MapTablesOnClassesUsingAnnotations >> buildMapsOn: aTargetModel [
 		tables := aTargetModel allTables.
 		counter :=  1.
 
-		UIManager default
+		UIManager 
 			displayProgress: 'Building relations among DB and Classes'
 			at: Sensor cursorPoint
 			from: counter
