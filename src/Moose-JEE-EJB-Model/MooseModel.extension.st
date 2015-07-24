@@ -179,7 +179,6 @@ MooseModel >> importEjbJarFromFolder: aString [
 	counter := 1.			
 	UIManager default
 		displayProgress: 'Importing From ejb-jar files'
-		at: Sensor cursorPoint
 		from: 1 
 		to: directoryEntries size
 		during: [ :bar | 
