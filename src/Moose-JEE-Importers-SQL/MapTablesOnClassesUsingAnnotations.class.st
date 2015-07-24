@@ -20,9 +20,8 @@ MapTablesOnClassesUsingAnnotations >> buildMapsOn: aTargetModel [
 		tables := aTargetModel allTables.
 		counter :=  1.
 
-		UIManager
+		UIManager default
 			displayProgress: 'Building relations among Tables and Classes'
-			at: Sensor cursorPoint
 			from: counter
 			to: (tableEntities size * tables size)
 			during: [ :bar |
@@ -45,9 +44,8 @@ MapTablesOnClassesUsingAnnotations >> buildMapsOn: aTargetModel [
 		tables := aTargetModel allTables.
 		counter :=  1.
 
-		UIManager 
+		UIManager default
 			displayProgress: 'Building relations among DB and Classes'
-			at: Sensor cursorPoint
 			from: counter
 			to: (tableEntities size * tables size)
 			during: [ :bar |
