@@ -137,7 +137,6 @@ MJImportInformationForEJB21 >> performTerminateButtonAction [
 	"^self subclassResponsibility"
 	UIManager default
 		displayProgress: 'Processing'
-		at: Sensor cursorPoint
 		from: 1 
 		to: 11
 		during: [ :bar | 

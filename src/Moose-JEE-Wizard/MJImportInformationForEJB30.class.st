@@ -151,7 +151,6 @@ MJImportInformationForEJB30 >> performTerminateButtonAction [
 	"^self subclassResponsibility"
 	UIManager default
 		displayProgress: 'Importing'
-		at: Sensor cursorPoint
 		from: 1 
 		to: 14
 		during: [ :bar |

@@ -452,7 +452,6 @@ MooseJEEScripts class >> print: aCollectionOfElements asCSVOn: aStream with: aHe
 	
 	UIManager default
 		displayProgress: 'Exporting in CSV'
-		at: Sensor cursorPoint
 		from: 1 
 		to: aCollectionOfElements size
 		during: [ :bar | 
