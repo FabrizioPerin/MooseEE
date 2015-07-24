@@ -35,7 +35,6 @@ MooseModel >> importJSPagesContainedInto: aFolderPath [
 	counter := 1.			
 	UIManager default
 		displayProgress: 'Importing From jsp files'
-		at: Sensor cursorPoint
 		from: 1 
 		to: fileEntries size
 		during: [ :bar | 
