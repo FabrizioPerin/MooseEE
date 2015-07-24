@@ -80,7 +80,6 @@ MooseModel >> fixFileAnchorsFrom: aFolder [
 	
 	UIManager default
 		displayProgress: 'Fixing'
-		at: Sensor cursorPoint
 		from: index
 		to: self allClasses size * javaFiles size
 		during: [:bar | 
