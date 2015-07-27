@@ -910,7 +910,6 @@ ConfigurationOfMooseJEE >> baseline50: spec [
 			spec
 				className: 'ConfigurationOfMaze';
 				file: 'ConfigurationOfMaze';
-				"version: 'default';"
 				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Maze/main' ].
 
 		spec  project: 'Carrack for MooseJEE' with: [
@@ -922,7 +921,7 @@ ConfigurationOfMooseJEE >> baseline50: spec [
 			
 		spec 
 			"Extra Projects"
-			package: 'PageRank' with: [spec repository: 'http://www.squeaksource.com/pagerank']; 
+			package: 'PageRank' with: [spec repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Pagerank/main']; 
 			package: 'Roassal2GraphVizLayout'; 
 		
 			"Models"
