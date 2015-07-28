@@ -1525,12 +1525,12 @@ ConfigurationOfMooseJEE >> version40: spec [
 	spec for: #common do: [
 		spec blessing: #release.
 		spec author: 'FabrizioPerin'.
-		spec description: 'release 2.1 for Moose 4.9 on pharo 2.0'.
-		spec timestamp: '14/07/2015 11:00'.
-		spec  project: 'FAMIX SQL for MooseJEE' with: '2.1'.
+		spec description: 'release 4.0 for Moose 6 on pharo 5.0'.
+		spec timestamp: '28/07/2015 11:00'.
+		spec  project: 'FAMIX SQL for MooseJEE' with: '4.1'.
 		spec  project: 'PetitJSPParser for MooseJEE' with: '1.1'.
 		spec  project: 'PetitPHPParser for MooseJEE' with: '1.1'.
-		spec  project: 'Maze for MooseJEE' with: '2.0'.
+		spec  project: 'Maze for MooseJEE' with: '3.0'.
 		
 		spec
 			package: 'Merlin' with: 'Merlin-AlexandreBergel.141';
