@@ -1,13 +1,13 @@
 Class {
 	#name : #MJFAMIXMessageDrivenBeanGroup,
-	#superclass : #MJAbstractGroup,
+	#superclass : #MEEAbstractGroup,
 	#category : #'Moose-JEE-EJB-Model'
 }
 
 { #category : #meta }
 MJFAMIXMessageDrivenBeanGroup class >> annotation [
 
-	<MSEClass: #MJFAMIXMessageDrivenBeanGroup super: #MJAbstractGroup>
+	<MSEClass: #MJFAMIXMessageDrivenBeanGroup super: #MEEAbstractGroup>
 	<package: #'Moose-JEE-Model'>
 ]
 
