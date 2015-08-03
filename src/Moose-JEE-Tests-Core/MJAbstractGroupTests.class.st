@@ -6,5 +6,5 @@ Class {
 
 { #category : #tests }
 MJAbstractGroupTests >> testAnnotation [
-	self assert: MJAbstractGroup annotation == MJAbstractGroup.
+	self assert: MEEAbstractGroup annotation == MEEAbstractGroup.
 ]

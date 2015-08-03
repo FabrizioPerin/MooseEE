@@ -6,5 +6,5 @@ Class {
 
 { #category : #tests }
 MJAssociationTests >> testAnnotation [
-	self assert: MJAssociation annotation == MJAssociation.
+	self assert: MEEAssociation annotation == MEEAssociation.
 ]
