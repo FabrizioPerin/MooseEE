@@ -10,7 +10,7 @@ Class {
 
 { #category : #'fame annotation' }
 MEEContainment class >> annotation [
-	<MSEClass: #MEEContainment super: #MJAssociation>
+	<MSEClass: #MEEContainment super: #MEEAssociation>
 	<package: #'Babel-Model'>
 	^self
 ]

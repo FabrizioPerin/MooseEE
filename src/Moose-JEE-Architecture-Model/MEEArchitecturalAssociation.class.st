@@ -1,5 +1,5 @@
 Class {
 	#name : #MEEArchitecturalAssociation,
-	#superclass : #MJAssociation,
+	#superclass : #MEEAssociation,
 	#category : #'Moose-JEE-Architecture-Model'
 }

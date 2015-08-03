@@ -14,7 +14,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MEEComponentAssociation class >> annotation [
-	<MSEClass: #MEEComponentAssociation super: #MJAssociation>
+	<MSEClass: #MEEComponentAssociation super: #MEEAssociation>
 	<package: #'Babel-Model'>
 	^self
 ]
