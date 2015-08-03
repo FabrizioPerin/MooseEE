@@ -1,6 +1,6 @@
 Class {
 	#name : #MJFAMIXJSPInvocation,
-	#superclass : #MJAssociation,
+	#superclass : #MEEAssociation,
 	#instVars : [
 		'invocationSource',
 		'invocationTarget'
@@ -10,7 +10,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXJSPInvocation class >> annotation [
-	<MSEClass: #MJFAMIXJSPInvocation super: #MJAssociation>
+	<MSEClass: #MJFAMIXJSPInvocation super: #MEEAssociation>
 	<package: #'Moose-JEE-JSP-Model'>
 ]
 
