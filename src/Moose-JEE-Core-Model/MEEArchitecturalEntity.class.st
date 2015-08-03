@@ -1,8 +1,7 @@
 Class {
 	#name : #MEEArchitecturalEntity,
-	#superclass : #FAMIXEntity,
+	#superclass : #MEEEntity,
 	#instVars : [
-		'name',
 		'outgoingComponentAssociations',
 		'incomingComponentAssociations'
 	],
@@ -40,19 +39,6 @@ MEEArchitecturalEntity >> initialize [
 	super initialize.
 	outgoingComponentAssociations := FMMultivalueLink on: self opposite: #source:.
 	incomingComponentAssociations := FMMultivalueLink on: self opposite: #target:.
-]
-
-{ #category : #accessing }
-MEEArchitecturalEntity >> name [
-	<MSEProperty: #name type: #String>
-	<MSEComment: 'Basic name of the entity, not full reference.'>
-	
-	^name
-]
-
-{ #category : #accessing }
-MEEArchitecturalEntity >> name: aString [
-	name := aString
 ]
 
 { #category : #accessing }

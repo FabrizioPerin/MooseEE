@@ -12,7 +12,7 @@ Instance Variables:
 "
 Class {
 	#name : #MJFAMIXDerivedDependency,
-	#superclass : #MJAssociation,
+	#superclass : #MEEAssociation,
 	#instVars : [
 		'source',
 		'target',
@@ -24,7 +24,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 MJFAMIXDerivedDependency class >> annotation [
-	<MSEClass: #MJFAMIXDerivedDependency super: #MJAssociation>
+	<MSEClass: #MJFAMIXDerivedDependency super: #MEEAssociation>
 	<package: #'Moose-JEE-Core-Model'>
 	
 	^self

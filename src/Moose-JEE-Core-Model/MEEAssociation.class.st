@@ -1,19 +1,19 @@
 Class {
-	#name : #MJAssociation,
+	#name : #MEEAssociation,
 	#superclass : #FAMIXAssociation,
 	#category : #'Moose-JEE-Core-Model'
 }
 
 { #category : #'as yet unclassified' }
-MJAssociation class >> annotation [
-	<MSEClass: #MJAssociation super: #FAMIXAssociation>
+MEEAssociation class >> annotation [
+	<MSEClass: #MEEAssociation super: #FAMIXAssociation>
 	<package: #'Moose-JEE-Core-Model'>
 	
 	^self
 ]
 
 { #category : #'as yet unclassified' }
-MJAssociation >> sourceAnchor [ 
+MEEAssociation >> sourceAnchor [ 
 
 	^nil
 ]
