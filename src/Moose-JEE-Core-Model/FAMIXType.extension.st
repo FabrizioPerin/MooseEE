@@ -22,8 +22,6 @@ FAMIXType >> invokingClasses [
 
 { #category : #'*moose-jee-core-model' }
 FAMIXType >> invokingClassesWithThreshold: aNumber [
-	<navigation: 'Invoking classes with threshold'>
-	
 	| classes |
 	
 	classes := ( self methods flatCollect: [ :each | each invokingMethodsWithThreshold: aNumber ] ) collect: #belongsTo.
