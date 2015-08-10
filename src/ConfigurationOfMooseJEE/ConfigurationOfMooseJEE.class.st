@@ -894,6 +894,7 @@ ConfigurationOfMooseJEE >> baseline50: spec [
 			spec
 				className: 'ConfigurationOfMaze';
 				file: 'ConfigurationOfMaze';
+				version: #development;
 				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Maze/main' ].
 
 		spec  project: 'Carrack for MooseJEE' with: [
