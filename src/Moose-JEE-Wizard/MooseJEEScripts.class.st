@@ -4,7 +4,7 @@ Class {
 	#category : #'Moose-JEE-Wizard'
 }
 
-{ #category : #'font-settings' }
+{ #category : #cleanup }
 MooseJEEScripts class >> cleanRepositories [
 	"self cleanRepositories"
 	
@@ -22,7 +22,7 @@ MooseJEEScripts class >> cleanUpAllTests [
 	Smalltalk garbageCollect.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #cleanup }
 MooseJEEScripts class >> cleanUpForRelease [
 	"self new cleanUpForRelease"
 
@@ -60,8 +60,8 @@ MooseJEEScripts class >> cleanUpForRelease [
 					sortCategories ]
 						value: class organization;
 						value: class class organization ].
-	PackageOrganizer default packages
-		do: [ :each | each methods ifEmpty: [ PackageOrganizer default unregisterPackage: each ] ]
+	RPackageOrganizer default packages
+		do: [ :each | each methods ifEmpty: [ RPackageOrganizer default unregisterPackage: each ] ]
 		displayingProgress: 'Cleaning Packages'.
 	Smalltalk organization sortCategories.
 	ChangeSet removeChangeSetsNamedSuchThat: [ :each | true ].
@@ -96,7 +96,7 @@ Deprecation raiseWarning: true.
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #cleanup }
 MooseJEEScripts class >> cleanUpMethods [
 	"Make sure that all methods in use are restarted"
 	"ScriptLoader new cleanUpMethods"
@@ -155,7 +155,7 @@ MooseJEEScripts class >> cleanUpMooseTests [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #cleanup }
 MooseJEEScripts class >> cleanUpPackageOrganizer [
 
 	PackageOrganizer default packages
@@ -223,6 +223,23 @@ MooseJEEScripts class >> deepCleanUp [
 	
 ]
 
+{ #category : #utils }
+MooseJEEScripts class >> deepRecursiveSearchOn: anObject using: aSelector [
+	| cursor result includedCobolLists |
+
+	cursor := 1.
+	result := OrderedCollection new.
+	result add: anObject.
+	
+	[cursor <= result size] whileTrue: [
+		includedCobolLists := ( result at: cursor ) perform: aSelector.
+		result addAll: ( includedCobolLists reject: [ :each | result includes: each ] ).
+		cursor := cursor + 1.
+	].
+
+	^ result.
+]
+
 { #category : #'font-settings' }
 MooseJEEScripts class >> defaultDejaVuFonts [
 	"StrikeFont installDejaVu."
@@ -237,35 +254,6 @@ MooseJEEScripts class >> defaultDejaVuFonts [
 	        (windowTitleFont: 'BitmapDejaVuBold' 12))
 ]
 
-{ #category : #'font-settings' }
-MooseJEEScripts class >> defaultFontsSetting [
-	| menuFont titleFont codeFont defaultFont |
-	FreeTypeFontProvider current updateFromSystem.
-	menuFont := LogicalFont 
-		familyName: 'Helvetica Neue' 
-		pointSize: 9 
-		stretchValue: (LogicalFont stretchCondensed) 
- 		weightValue: (LogicalFont weightBold) 
-		slantValue: (LogicalFont slantNormal).
-	titleFont := LogicalFont 
-		familyName: 'Helvetica Neue' 
-		pointSize: 14 
- 		stretchValue: (LogicalFont stretchCondensed) 
-		weightValue: (LogicalFont weightBold) 
-		slantValue: (LogicalFont slantNormal).
-	codeFont := LogicalFont familyName: 'Monaco' pointSize: 8.
-	defaultFont := LogicalFont familyName: 'Helvetica Neue' pointSize: 9.
-	Preferences setSystemFontTo: defaultFont.
-	Preferences setListFontTo: defaultFont.
-	Preferences setFlapsFontTo: menuFont.
-	Preferences setHaloLabelFontTo: defaultFont.
-	Preferences setMenuFontTo: menuFont.
-	Preferences setWindowTitleFontTo: titleFont.
-	Preferences setBalloonHelpFontTo: defaultFont.
-	Preferences setCodeFontTo: codeFont.
-	Preferences setButtonFontTo: defaultFont.
-]
-
 { #category : #icons }
 MooseJEEScripts class >> flush: aForm toBMPFile: named [ 
 	BMPReadWriter putForm: aForm onFileNamed: named
@@ -274,36 +262,6 @@ MooseJEEScripts class >> flush: aForm toBMPFile: named [
 { #category : #icons }
 MooseJEEScripts class >> flush: aForm toPNGFile: named [ 
 	PNGReadWriter putForm: aForm onFileNamed: named
-]
-
-{ #category : #'font-settings' }
-MooseJEEScripts class >> fontsSettingWindows [
-	| menuFont titleFont codeFont defaultFont |
-	FreeTypeFontProvider current updateFromSystem.
-	menuFont := LogicalFont 
-		familyName: 'Arial' 
-		pointSize: 10 
-		stretchValue: (LogicalFont stretchCondensed) 
- 		weightValue: (LogicalFont weightBold) 
-		slantValue: (LogicalFont slantNormal).
-	titleFont := LogicalFont 
-		familyName: 'Arial' 
-		pointSize: 14
- 		stretchValue: (LogicalFont stretchCondensed) 
-		weightValue: (LogicalFont weightBold) 
-		slantValue: (LogicalFont slantNormal).
-	codeFont := LogicalFont familyName: 'Arial' pointSize: 10.
-	defaultFont := LogicalFont familyName: 'Arial' pointSize: 10.
-	
-	Preferences setSystemFontTo: defaultFont.
-	Preferences setListFontTo: defaultFont.
-	Preferences setFlapsFontTo: menuFont.
-	Preferences setHaloLabelFontTo: defaultFont.
-	Preferences setMenuFontTo: menuFont.
-	Preferences setWindowTitleFontTo: titleFont.
-	Preferences setBalloonHelpFontTo: defaultFont.
-	Preferences setCodeFontTo: codeFont.
-	Preferences setButtonFontTo: defaultFont.
 ]
 
 { #category : #'font-settings' }
@@ -404,14 +362,14 @@ MoosePanel open'.}
 { #category : #cleanup }
 MooseJEEScripts class >> packageOrganizerCleanUp [
 
-	PackageOrganizer default packages
+	RPackageOrganizer default packages
 		do: [ :each | 
 			each methods isEmpty
-				ifTrue: [ PackageOrganizer default unregisterPackage: each ] ]
+				ifTrue: [ RPackageOrganizer default unregisterPackage: each ] ]
 		displayingProgress: 'Cleaning Packages'
 ]
 
-{ #category : #cleanup }
+{ #category : #utils }
 MooseJEEScripts class >> print: aCollectionOfElements asCSVOn: aStream with: aHeader using: aBlock [ 
 	
 	UIManager default
