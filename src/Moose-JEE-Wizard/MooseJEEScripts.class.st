@@ -390,6 +390,19 @@ MooseJEEScripts class >> print: aCollectionOfElements asCSVOn: aStream with: aHe
 	aStream close.  
 ]
 
+{ #category : #utils }
+MooseJEEScripts class >> readCSVFile [
+	"This method read CSV file from the file system and return is content as a list of lines"
+	
+	| fileStream |
+
+	fileStream := UITheme builder 
+		fileOpen: 'Import csv file' 
+		extensions: #('csv').
+
+	^ fileStream contentsOfEntireFile lines
+]
+
 { #category : #cleanup }
 MooseJEEScripts class >> resetAuthor [
 	Author reset.
