@@ -10,5 +10,5 @@ GLMRoassalWithoutInertiaPresentation >> view [
 		| rawView |
 		rawView := RTView new.
 		rawView @ RTDraggable.
-		view := RTMondrian initializedView: rawView ]
+		view := RTMondrian new view: rawView ]
 ]
