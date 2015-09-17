@@ -57,3 +57,8 @@ MEEArchitecturalComponent >> isGlobal [
 MEEArchitecturalComponent >> isLocal [
 	^false
 ]
+
+{ #category : #initialization }
+MEEArchitecturalComponent >> sourceText [
+	^ ''
+]
