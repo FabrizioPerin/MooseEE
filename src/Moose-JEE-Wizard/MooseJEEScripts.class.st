@@ -403,6 +403,22 @@ MooseJEEScripts class >> readCSVFile [
 	^ fileStream contentsOfEntireFile lines
 ]
 
+{ #category : #utils }
+MooseJEEScripts class >> readCSVFileWith: aMessage [
+	"This method read CSV file from the file system and return it if file is found"
+	
+	| file |
+
+	file := UITheme builder 
+		fileOpen: aMessage
+		extensions: #('csv').
+
+	file isNil
+		ifTrue: [ DialogWindow new alert: 'File not found.' ].
+
+	^ file
+]
+
 { #category : #cleanup }
 MooseJEEScripts class >> resetAuthor [
 	Author reset.
