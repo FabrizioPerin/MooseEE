@@ -11,6 +11,6 @@ MooseJEEMenuCustomizations class >> fullScreenEntryMenuCommandOn: aBuilder [
 		order: 6.0; 
 		parent: #System;
 		label: 'Fullscreen On/Off';
-		action: [Display fullScreen: (Display isFullScreen not) ];
+		action: [ Display toggleFullscreen ];
 		withSeparatorAfter
 ]
