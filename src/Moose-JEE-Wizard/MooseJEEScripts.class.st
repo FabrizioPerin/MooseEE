@@ -391,6 +391,22 @@ MooseJEEScripts class >> print: aCollectionOfElements asCSVOn: aStream with: aHe
 ]
 
 { #category : #utils }
+MooseJEEScripts class >> print: aCollectionOfElements asInsertStatmentOn: aStream on: aTableName using: aBlock [
+
+	MooseCustomTask
+		runWithProgress: [ :bar | 
+			bar increment.
+			aCollectionOfElements
+				do: [ :element | 
+					aStream nextPutAll: 'INSERT INTO ' , aTableName , ' values ('.
+					aStream nextPutAll: (aBlock value: element).
+					aStream nextPutAll: ');' , String lf.
+					bar increment ] ]
+		description: 'Exporting SQL insert statments'
+		length: aCollectionOfElements size + 1
+]
+
+{ #category : #utils }
 MooseJEEScripts class >> readCSVFile [
 	"This method read CSV file from the file system and return is content as a list of lines"
 	
