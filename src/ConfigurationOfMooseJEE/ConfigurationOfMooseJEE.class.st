@@ -776,7 +776,7 @@ ConfigurationOfMooseJEE >> baseline30: spec [
 	].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> baseline40: spec [ 
         <version: '4.0-baseline'>
         
@@ -861,9 +861,179 @@ ConfigurationOfMooseJEE >> baseline40: spec [
 	].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #baselines }
 ConfigurationOfMooseJEE >> baseline50: spec [ 
         <version: '5.0-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.smalltalkhub.com/mc/FabrizioPerin/MooseEE/main'.
+		
+		spec  project: 'FAMIX SQL for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfFamixSQL';
+				file: 'ConfigurationOfFamixSQL';
+				"version: 'development';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/MooseSQL/main'].
+
+		spec  project: 'PetitJSPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitJSPParser';
+				file: 'ConfigurationOfPetitJSPParser';
+				"version: 'development';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/PetitJSPParser/main' ].
+		
+		spec  project: 'PetitPHPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitPHPParser';
+				file: 'ConfigurationOfPetitPHPParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/PetitPHPParser/main'].
+				
+		spec  project: 'Maze for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMaze';
+				file: 'ConfigurationOfMaze';
+				version: #development;
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Maze/main' ].
+
+		spec  project: 'Carrack for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfCarrack';
+				file: 'ConfigurationOfCarrack';
+				"version: 'default';"
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Carrack/main' ].
+			
+		spec 
+			"Extra Projects"
+			package: 'PageRank' with: [spec repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Pagerank/main']; 
+			package: 'Roassal2GraphVizLayout'; 
+		
+			"Models"
+			package: 'Moose-JEE-Core-Model';
+			package: 'Moose-JEE-SQL-Model';
+			package: 'Moose-JEE-JSP-Model';
+			package: 'Moose-JEE-EJB-Model';
+			package: 'Moose-JEE-Tiers-Model';
+			package: 'Moose-JEE-Architecture-Model';
+						
+			"importers"
+			package: 'Moose-JEE-Importers-SQL' with: [spec requires: 'FAMIX SQL for MooseJEE'];
+			package: 'Moose-JEE-Importers-JSP' with: [spec requires: 'PetitJSPParser for MooseJEE'];
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-EJBDraftObjs';
+			package: 'Moose-JEE-Browsers' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-Algos';
+			package: 'Moose-JEE-Wizard';" with: [spec requires: 'Merlin'];"
+			package: 'Moose-JEE-Help';
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources';
+			package: 'Moose-JEE-Tests-Core' with: [spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Algos' with: [spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec requires: #('Moose-JEE-EJBDraftObjs' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL' with: [spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-JSP' with: [spec requires: #('Moose-JEE-JSP-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJB' with: [spec requires: #('Moose-JEE-EJB-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Extensions' with: [spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Tiers' with: [spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Architecture-Model' with: [spec requires: #('Moose-JEE-Architecture-Model')].
+			
+	].
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> baseline70: spec [ 
+        <version: '7.0-baseline'>
+        
+	spec for: #common do: [
+		spec blessing: #baseline.
+		spec repository:  'http://www.smalltalkhub.com/mc/FabrizioPerin/MooseEE/main'.
+		
+		spec  project: 'FAMIX SQL for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfFamixSQL';
+				file: 'ConfigurationOfFamixSQL';
+				"version: 'development';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/MooseSQL/main'].
+
+		spec  project: 'PetitJSPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitJSPParser';
+				file: 'ConfigurationOfPetitJSPParser';
+				"version: 'development';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/PetitJSPParser/main' ].
+		
+		spec  project: 'PetitPHPParser for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfPetitPHPParser';
+				file: 'ConfigurationOfPetitPHPParser';
+				"version: 'defaultWithoutPetit';"
+				repository: 'http://www.smalltalkhub.com/mc/Moose/PetitPHPParser/main'].
+				
+		spec  project: 'Maze for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfMaze';
+				file: 'ConfigurationOfMaze';
+				version: #development;
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Maze/main' ].
+
+		spec  project: 'Carrack for MooseJEE' with: [
+			spec
+				className: 'ConfigurationOfCarrack';
+				file: 'ConfigurationOfCarrack';
+				"version: 'default';"
+				repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Carrack/main' ].
+			
+		spec 
+			"Extra Projects"
+			package: 'PageRank' with: [spec repository: 'http://www.smalltalkhub.com/mc/FabrizioPerin/Pagerank/main']; 
+			package: 'Roassal2GraphVizLayout'; 
+		
+			"Models"
+			package: 'Moose-JEE-Core-Model';
+			package: 'Moose-JEE-SQL-Model';
+			package: 'Moose-JEE-JSP-Model';
+			package: 'Moose-JEE-EJB-Model';
+			package: 'Moose-JEE-Tiers-Model';
+			package: 'Moose-JEE-Architecture-Model';
+						
+			"importers"
+			package: 'Moose-JEE-Importers-SQL' with: [spec requires: 'FAMIX SQL for MooseJEE'];
+			package: 'Moose-JEE-Importers-JSP' with: [spec requires: 'PetitJSPParser for MooseJEE'];
+			
+			"Other utils"
+			package: 'Moose-JEE-Reports' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-EJBDraftObjs';
+			package: 'Moose-JEE-Browsers' with: [spec requires: 'Moose-JEE-Core-Model'];
+			package: 'Moose-JEE-Algos';
+			package: 'Moose-JEE-Wizard';" with: [spec requires: 'Merlin'];"
+			package: 'Moose-JEE-Help';
+			
+			"Tests"
+			package: 'Moose-JEE-Tests-Resources';
+			package: 'Moose-JEE-Tests-Core' with: [spec requires: #('Moose-JEE-Core-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Algos' with: [spec requires: #('Moose-JEE-Algos' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-JSP' with: [spec requires: #('Moose-JEE-Importers-JSP' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Importers-SQL' with: [spec requires: #('Moose-JEE-Importers-SQL' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJBDraftObjs' with: [spec requires: #('Moose-JEE-EJBDraftObjs' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-SQL' with: [spec requires: #('Moose-JEE-SQL-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-JSP' with: [spec requires: #('Moose-JEE-JSP-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-EJB' with: [spec requires: #('Moose-JEE-EJB-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Extensions' with: [spec requires: #('Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Tiers' with: [spec requires: #('Moose-JEE-Tiers-Model' 'Moose-JEE-Tests-Resources')];
+			package: 'Moose-JEE-Tests-Architecture-Model' with: [spec requires: #('Moose-JEE-Architecture-Model')].
+			
+	].
+]
+
+{ #category : #baselines }
+ConfigurationOfMooseJEE >> baseline80: spec [ 
+        <version: '8.0-baseline'>
         
 	spec for: #common do: [
 		spec blessing: #baseline.
@@ -1007,7 +1177,8 @@ ConfigurationOfMooseJEE >> development: spec [
 	spec for: #'pharo3.x' version: '3.0-baseline'.
 	spec for: #'pharo4.x' version: '5.0-baseline'.
 	spec for: #'pharo5.x' version: '5.0-baseline'.
-
+	spec for: #'pharo7.x' version: '7.0-baseline'.
+	spec for: #'pharo8.x' version: '8.0-baseline'.
 ]
 
 { #category : #accessing }
